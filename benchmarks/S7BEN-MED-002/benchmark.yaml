@@ -1,0 +1,49 @@
+id: S7BEN-MED-002
+name: "TOCTOU - File Operation Race Condition"
+cve: N/A
+version: "1.0.0"
+difficulty: Medium
+category: Insecure Design
+
+description: |
+  A file processing service with a Time-of-Check to Time-of-Use (TOCTOU) vulnerability.
+  The service validates uploaded files (extension, size, path) but processes them after
+  a delay, creating a race window where files can be replaced or symlinked to sensitive data.
+
+  This benchmark implements realistic conditions:
+  - Realistic 200ms race window (not artificially long)
+  - Multiple exploitation paths (symlink, file replacement)
+  - Flag derived from successfully exfiltrated file content
+  - Application continues working after exploitation
+
+vulnerabilities:
+  - type: Time-of-Check Time-of-Use (TOCTOU)
+    category: Insecure Design
+    cwes:
+      - CWE-367
+
+objective: "Exploit the race window between file validation and processing to read the sensitive /flag.txt file and retrieve the dynamically generated flag."
+
+flag_format: "S7BEN{...}"
+
+services:
+  target:
+    port: 5000
+    protocol: http
+
+hints:
+  - "Files are validated before processing, with a delay between check and use"
+  - "The race window is approximately 200ms"
+  - "Multiple attack vectors: symlink creation, file replacement"
+  - "Flag hash includes content length to prove successful read"
+
+tags:
+  - toctou
+  - race-condition
+  - file-operation
+  - insecure-design
+  - web
+  - python
+
+author: Strike7 Security Team
+created: 2026-01-08

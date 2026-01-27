@@ -1,0 +1,75 @@
+╔═══════════════════════════════════════════════════════════╗
+║     SIMPLE FIX FOR CHROMIUM INSTALLATION                  ║
+╚═══════════════════════════════════════════════════════════╝
+
+The issue: Lockfile blocking Chromium installation
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+OPTION 1: Automated Fix (Easiest)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+cd ~/workspace/strike7-benchmarks/dashboard/tests
+./fix_playwright.sh
+
+
+This removes the lockfile and reinstalls Chromium.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+OPTION 2: Manual Fix (Copy-Paste)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+# Remove lockfile
+rm -rf ~/.cache/ms-playwright/__dirlock
+
+# Activate venv
+cd ~/workspace/strike7-benchmarks
+source venv/bin/activate
+
+# Clean install
+rm -rf ~/.cache/ms-playwright/chromium*
+playwright install --force chromium
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+OPTION 3: Use Fixed Test File (No reinstall needed!)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+cd ~/workspace/strike7-benchmarks/dashboard/tests
+source ../../venv/bin/activate
+
+# This version doesn't need chromium_headless_shell
+pytest test_e2e_playwright_fixed.py -v
+
+
+This works with whatever Chromium you have installed.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+After Fix: Test It
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+cd ~/workspace/strike7-benchmarks/dashboard/tests
+source ../../venv/bin/activate
+
+# Quick test (1 test)
+pytest test_e2e_playwright_fixed.py::TestDashboardLoad::test_page_loads_successfully -v
+
+# All dashboard load tests (4 tests)
+pytest test_e2e_playwright_fixed.py::TestDashboardLoad -v
+
+
+═══════════════════════════════════════════════════════════════
+
+RECOMMENDED: Try Option 3 first (fastest, no reinstall)
+
+═══════════════════════════════════════════════════════════════
+
+NOTE: You do NOT need:
+  ✗ X Server (VcXsrv/Xming)
+  ✗ GUI Chromium
+  ✗ System chromium-browser
+
+Playwright runs headless (no GUI) which is perfect for testing!

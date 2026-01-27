@@ -1,0 +1,33 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+dist/
+build/
+
+# Virtual environments
+venv/
+env/
+ENV/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Docker
+.env
+
+# Temporary files
+/tmp/
+*.tmp
+*.log
+
+# Exploit scripts (if generated locally)
+generate_payload.py
+cache_poison.py
+celery_exploit.py

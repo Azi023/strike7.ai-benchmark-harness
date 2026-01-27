@@ -1,0 +1,24 @@
+
+services:
+  app:
+    build:
+      context: ./app
+      dockerfile: Dockerfile
+    ports:
+      - "5000:5000"
+    environment:
+      - FLAG_SECRET=strike7-error-t2-secret-key
+      - FLASK_ENV=production
+      - SESSION_SECRET=UltraS3cur3K3y_F0rS3ss10ns!
+    volumes:
+      - app_data:/app/data
+    restart: unless-stopped
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:5000/health" ]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+
+volumes:
+  app_data:

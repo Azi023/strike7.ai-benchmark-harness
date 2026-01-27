@@ -1,0 +1,129 @@
+# LDIF file to create domain users and structure
+# Domain: CORP.LOCAL
+
+# Create organizational units
+dn: ou=Users,dc=corp,dc=local
+objectClass: organizationalUnit
+ou: Users
+
+dn: ou=Groups,dc=corp,dc=local
+objectClass: organizationalUnit
+ou: Groups
+
+dn: ou=Computers,dc=corp,dc=local
+objectClass: organizationalUnit
+ou: Computers
+
+# Create Groups
+dn: cn=Domain Admins,ou=Groups,dc=corp,dc=local
+objectClass: groupOfNames
+cn: Domain Admins
+member: cn=Administrator,ou=Users,dc=corp,dc=local
+
+dn: cn=Domain Users,ou=Groups,dc=corp,dc=local
+objectClass: groupOfNames
+cn: Domain Users
+member: cn=alice,ou=Users,dc=corp,dc=local
+member: cn=bob,ou=Users,dc=corp,dc=local
+
+dn: cn=Service Accounts,ou=Groups,dc=corp,dc=local
+objectClass: groupOfNames
+cn: Service Accounts
+member: cn=svc_web,ou=Users,dc=corp,dc=local
+member: cn=svc_sql,ou=Users,dc=corp,dc=local
+
+# Create Users
+# Administrator (Domain Admin)
+dn: cn=Administrator,ou=Users,dc=corp,dc=local
+objectClass: inetOrgPerson
+objectClass: posixAccount
+objectClass: shadowAccount
+cn: Administrator
+sn: Admin
+uid: Administrator
+uidNumber: 10000
+gidNumber: 10000
+homeDirectory: /home/Administrator
+userPassword: {SSHA}P@ssw0rd123!
+description: Domain Administrator
+
+# alice (Regular user)
+dn: cn=alice,ou=Users,dc=corp,dc=local
+objectClass: inetOrgPerson
+objectClass: posixAccount
+objectClass: shadowAccount
+cn: alice
+sn: Smith
+uid: alice
+uidNumber: 10001
+gidNumber: 10001
+homeDirectory: /home/alice
+userPassword: {SSHA}Alice123!
+description: Regular domain user
+mail: alice@corp.local
+
+# bob (Regular user, NO PREAUTH - vulnerable to AS-REP roasting)
+dn: cn=bob,ou=Users,dc=corp,dc=local
+objectClass: inetOrgPerson
+objectClass: posixAccount
+objectClass: shadowAccount
+cn: bob
+sn: Johnson
+uid: bob
+uidNumber: 10002
+gidNumber: 10002
+homeDirectory: /home/bob
+userPassword: {SSHA}BobPassword1
+description: User with pre-auth disabled
+mail: bob@corp.local
+
+# svc_web (Service account - VULNERABLE to Kerberoasting)
+dn: cn=svc_web,ou=Users,dc=corp,dc=local
+objectClass: inetOrgPerson
+objectClass: posixAccount
+objectClass: shadowAccount
+cn: svc_web
+sn: WebService
+uid: svc_web
+uidNumber: 10003
+gidNumber: 10003
+homeDirectory: /home/svc_web
+userPassword: {SSHA}ServiceWeb123
+description: Web application service account
+mail: svc_web@corp.local
+
+# svc_sql (Service account - VULNERABLE to Kerberoasting)
+dn: cn=svc_sql,ou=Users,dc=corp,dc=local
+objectClass: inetOrgPerson
+objectClass: posixAccount
+objectClass: shadowAccount
+cn: svc_sql
+sn: SQLService
+uid: svc_sql
+uidNumber: 10004
+gidNumber: 10004
+homeDirectory: /home/svc_sql
+userPassword: {SSHA}SQLService456
+description: SQL Server service account
+mail: svc_sql@corp.local
+
+# Create Computers
+dn: cn=WEBAPP,ou=Computers,dc=corp,dc=local
+objectClass: device
+cn: WEBAPP
+description: Web Application Server
+
+dn: cn=FILESERVER,ou=Computers,dc=corp,dc=local
+objectClass: device
+cn: FILESERVER
+description: File Server
+
+dn: cn=DBSERVER,ou=Computers,dc=corp,dc=local
+objectClass: device
+cn: DBSERVER
+description: Database Server
+
+dn: cn=WS01,ou=Computers,dc=corp,dc=local
+objectClass: device
+cn: WS01
+description: Workstation 01

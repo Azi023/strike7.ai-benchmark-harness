@@ -1,0 +1,44 @@
+id: S7BEN-MED-010
+name: Server-Side Request Forgery (SSRF) with Partial Filtering
+difficulty: Hard
+category: Server-Side Request Forgery
+owasp: A10:2021 - Server-Side Request Forgery (SSRF)
+vulnerabilities:
+  - type: SSRF with Bypass Techniques
+    cwes:
+      - CWE-918  # Server-Side Request Forgery (SSRF)
+      - CWE-441  # Unintended Proxy or Intermediary
+    description: |
+      Application fetches external URLs but implements weak filtering that can be bypassed.
+      Attacker can access internal services (metadata endpoints, internal APIs) by using
+      bypass techniques like DNS rebinding, IPv6, URL encoding, and redirects.
+
+objective: |
+  Bypass SSRF filters to access internal metadata service and retrieve flag:
+  1. Discover URL fetcher endpoint
+  2. Test SSRF filters (localhost, 127.0.0.1, internal IPs blocked)
+  3. Identify bypass techniques (redirects, DNS rebinding, IPv6, octal encoding)
+  4. Access internal metadata service at http://metadata.internal:8080
+  5. Retrieve admin token from metadata endpoint
+  6. Use admin token to access flag endpoint
+
+technical_details:
+  vulnerable_endpoint: /api/fetch-url
+  internal_service: http://metadata.internal:8080/latest/meta-data/
+  attack_vectors:
+    - HTTP redirects (301/302)
+    - DNS rebinding
+    - IPv6 localhost (::1)
+    - Octal/hex IP encoding
+    - CRLF injection
+  proof_mechanism: Metadata token retrieval + dynamic flag
+
+flag_format: "S7BEN{ssrf_metadata_bypass_<32_hex_chars>}"
+
+services:
+  - name: flask-app
+    port: 5000
+  - name: metadata-service
+    port: 8080
+
+estimated_time: 40 minutes

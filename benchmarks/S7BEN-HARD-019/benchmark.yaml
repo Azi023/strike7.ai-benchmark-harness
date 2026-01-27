@@ -1,0 +1,5 @@
+id: S7BEN-HARD-019
+name: Docker Socket Exposure  
+category: hard
+difficulty: 8  
+phase: 6

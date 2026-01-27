@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NoSQL Injection Demo - SBEN-NOSQL-01</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 800px;
+            width: 100%;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .subtitle {
+            color: #666;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .warning {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 30px;
+            color: #856404;
+        }
+
+        .warning strong {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .status {
+            background: #e3f2fd;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+
+        .status h3 {
+            color: #1976d2;
+            margin-bottom: 15px;
+        }
+
+        .status-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .status-item:last-child {
+            border-bottom: none;
+        }
+
+        .status-label {
+            font-weight: 600;
+            color: #555;
+        }
+
+        .status-value {
+            color: #333;
+        }
+
+        .flag-box {
+            background: #d4edda;
+            border: 2px solid #28a745;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .flag-box h3 {
+            color: #155724;
+            margin-bottom: 10px;
+        }
+
+        .flag-value {
+            font-family: 'Courier New', monospace;
+            font-size: 18px;
+            font-weight: bold;
+            color: #28a745;
+            background: white;
+            padding: 10px;
+            border-radius: 5px;
+            word-break: break-all;
+        }
+
+        .endpoints {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .endpoints h3 {
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .endpoint {
+            background: white;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            border-left: 4px solid #667eea;
+        }
+
+        .endpoint:last-child {
+            margin-bottom: 0;
+        }
+
+        .method {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 3px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+
+        .method.post {
+            background: #28a745;
+            color: white;
+        }
+
+        .method.get {
+            background: #007bff;
+            color: white;
+        }
+
+        .endpoint-path {
+            font-family: 'Courier New', monospace;
+            color: #333;
+            font-weight: 600;
+        }
+
+        .endpoint-desc {
+            color: #666;
+            font-size: 14px;
+            margin-top: 5px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 30px;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c82333;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(220, 53, 69, 0.4);
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 2px solid #eee;
+            color: #666;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>MongoDB NoSQL Injection</h1>
+        <p class="subtitle">SBEN-NOSQL-01: Authentication Bypass & Data Exfiltration</p>
+
+        <div class="warning">
+            <strong>⚠️ Security Warning</strong>
+            This application contains intentional NoSQL injection vulnerabilities for educational purposes.
+            DO NOT deploy in production environments.
+        </div>
+
+        <% if (user) { %>
+            <div class="status">
+                <h3>✅ Authentication Status</h3>
+                <div class="status-item">
+                    <span class="status-label">Logged in as:</span>
+                    <span class="status-value"><%= user.username %></span>
+                </div>
+                <div class="status-item">
+                    <span class="status-label">Role:</span>
+                    <span class="status-value"><%= user.role %></span>
+                </div>
+                <div class="status-item">
+                    <span class="status-label">Email:</span>
+                    <span class="status-value"><%= user.email %></span>
+                </div>
+            </div>
+
+            <% if (flag) { %>
+                <div class="flag-box">
+                    <h3>🚩 Flag Retrieved</h3>
+                    <div class="flag-value"><%= flag %></div>
+                </div>
+            <% } %>
+        <% } else { %>
+            <div class="status">
+                <h3>🔒 Authentication Required</h3>
+                <p style="color: #666; margin-top: 10px;">Please login to access the application.</p>
+            </div>
+        <% } %>
+
+        <div class="endpoints">
+            <h3>API Endpoints</h3>
+
+            <div class="endpoint">
+                <span class="method post">POST</span>
+                <span class="endpoint-path">/api/login</span>
+                <div class="endpoint-desc">Authentication endpoint (vulnerable to $ne operator injection)</div>
+            </div>
+
+            <div class="endpoint">
+                <span class="method post">POST</span>
+                <span class="endpoint-path">/api/search</span>
+                <div class="endpoint-desc">User search (vulnerable to $regex injection)</div>
+            </div>
+
+            <div class="endpoint">
+                <span class="method post">POST</span>
+                <span class="endpoint-path">/api/query</span>
+                <div class="endpoint-desc">Advanced query (vulnerable to $where JavaScript injection)</div>
+            </div>
+
+            <div class="endpoint">
+                <span class="method post">POST</span>
+                <span class="endpoint-path">/api/advanced-search</span>
+                <div class="endpoint-desc">Secret search (vulnerable to $where clause)</div>
+            </div>
+
+            <div class="endpoint">
+                <span class="method get">GET</span>
+                <span class="endpoint-path">/api/users</span>
+                <div class="endpoint-desc">List all users</div>
+            </div>
+        </div>
+
+        <div class="button-group">
+            <% if (!user) { %>
+                <a href="/login" class="btn btn-primary">Login</a>
+            <% } else { %>
+                <a href="/logout" class="btn btn-danger">Logout</a>
+            <% } %>
+        </div>
+
+        <div class="footer">
+            Strike7 Security Benchmarks | SBEN-NOSQL-01<br>
+            MongoDB NoSQL Injection Chain
+        </div>
+    </div>
+</body>
+</html>

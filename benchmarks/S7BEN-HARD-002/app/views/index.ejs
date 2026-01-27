@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SBEN-HARD-02 - Comment Board</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Strike7 Comment Board</h1>
+        <p class="subtitle">Share your thoughts securely!</p>
+
+        <div class="security-notice">
+            <h3>🔒 Security Features Enabled</h3>
+            <ul>
+                <li>Custom Input Blacklist Filter</li>
+                <li>DOMPurify Sanitization</li>
+                <li>XSS Protection Active</li>
+            </ul>
+        </div>
+
+        <div class="comment-form">
+            <h2>Post a Comment</h2>
+            <form id="commentForm">
+                <input type="text" id="username" placeholder="Your name" required>
+                <textarea id="message" placeholder="Your comment..." rows="4" required></textarea>
+                <button type="submit">Post Comment</button>
+            </form>
+            <div id="status"></div>
+        </div>
+
+        <div class="comments-section">
+            <h2>Recent Comments (<span id="commentCount"><%= comments.length %></span>)</h2>
+            <div id="commentsList">
+                <% comments.forEach(comment => { %>
+                    <div class="comment">
+                        <div class="comment-header">
+                            <strong><%= comment.username %></strong>
+                            <span class="timestamp"><%= new Date(comment.timestamp).toLocaleString() %></span>
+                        </div>
+                        <div class="comment-body">
+                            <%- comment.message %>
+                        </div>
+                    </div>
+                <% }); %>
+            </div>
+        </div>
+
+        <div class="hints">
+            <h3>💡 Hints</h3>
+            <ul>
+                <li>Try posting different types of HTML content</li>
+                <li>The application uses multiple sanitization layers</li>
+                <li>Some HTML tags might work differently than others</li>
+                <li>Look for the admin panel...</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        const form = document.getElementById('commentForm');
+        const status = document.getElementById('status');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const username = document.getElementById('username').value;
+            const message = document.getElementById('message').value;
+
+            try {
+                const response = await fetch('/comment', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, message })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    status.textContent = '✓ Comment posted successfully!';
+                    status.className = 'success';
+                    setTimeout(() => location.reload(), 1000);
+                } else {
+                    status.textContent = '✗ Error: ' + (data.error || 'Unknown error');
+                    status.className = 'error';
+                }
+            } catch (err) {
+                status.textContent = '✗ Network error';
+                status.className = 'error';
+            }
+        });
+    </script>
+</body>
+</html>

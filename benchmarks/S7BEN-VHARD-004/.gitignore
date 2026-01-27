@@ -1,0 +1,26 @@
+# Build artifacts
+web-app/target/
+internal-api/*.class
+*.jar
+!ysoserial-all.jar
+
+# IDE files
+.idea/
+*.iml
+.vscode/
+.settings/
+.classpath
+.project
+
+# Docker
+.dockerignore
+
+# Exploit artifacts
+payload*.b64
+cookies.txt
+*.log
+
+# Temp files
+*.tmp
+*.bak
+*~

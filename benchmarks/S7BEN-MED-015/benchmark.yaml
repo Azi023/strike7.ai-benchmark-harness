@@ -1,0 +1,6 @@
+id: S7BEN-MED-015
+name: Flask Debug Mode in Production
+category: med
+difficulty: 5
+phase: 6
+services: {app: {port: 8103}}

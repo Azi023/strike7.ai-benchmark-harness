@@ -1,0 +1,68 @@
+
+services:
+  web-app:
+    build: ./web-app
+    container_name: lfi-webapp
+    hostname: web-app
+    ports:
+      - "8080:80"
+    environment:
+      - FLAG_LFI=${FLAG_LFI:-S7BEN{lfi_path_traversal_file_read_a1b2c3}}
+      - FLAG_SESSION=${FLAG_SESSION:-S7BEN{php_session_poisoning_rce_g7h8i9}}
+    volumes:
+      - lfi-logs:/var/log/apache2
+    networks:
+      lfi-net:
+        ipv4_address: 172.28.0.10
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/health.php"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  file-server:
+    build: ./file-server
+    container_name: lfi-fileserver
+    hostname: file-server
+    ports:
+      - "8081:80"
+    environment:
+      - FLAG_INTERNAL=${FLAG_INTERNAL:-S7BEN{internal_file_server_access_j1k2l3}}
+    networks:
+      lfi-net:
+        ipv4_address: 172.28.0.20
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  log-server:
+    build: ./log-server
+    container_name: lfi-logserver
+    hostname: log-server
+    environment:
+      - FLAG_LOG=${FLAG_LOG:-S7BEN{apache_log_poisoning_rce_d4e5f6}}
+    volumes:
+      - lfi-logs:/var/log/apache2
+    networks:
+      lfi-net:
+        ipv4_address: 172.28.0.30
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/health.php"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+networks:
+  lfi-net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.28.0.0/16
+
+volumes:
+  lfi-logs:

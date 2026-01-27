@@ -1,0 +1,10 @@
+id: S7BEN-HARD-017
+name: "Client-Side Price Manipulation"
+category: hard
+difficulty: 7
+phase: 6
+vulnerabilities: [{type: Client-Side Trust, cwes: [CWE-602]}]
+owasp_2025: [A04:2025]
+flag_format: "S7BEN{pr1ce_man1p_[dynamic]}"
+flag_dynamic: true
+services: {app: {port: 8099}}

@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Strike7 JWT Demo - Algorithm Confusion</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gradient-to-br from-gray-50 to-indigo-100 min-h-screen">
+    <div class="container mx-auto px-4 py-12">
+        <div class="max-w-3xl mx-auto">
+            <!-- Header -->
+            <div class="text-center mb-8">
+                <h1 class="text-4xl font-bold text-gray-800 mb-2">Strike7 JWT Authentication</h1>
+                <p class="text-gray-600">JSON Web Token Demo Application</p>
+            </div>
+
+            <!-- Vulnerability Warning -->
+            <div class="bg-red-50 border-l-4 border-red-400 p-4 mb-6">
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-sm text-red-700">
+                            <strong>Vulnerability:</strong> This application accepts both RS256 and HS256 JWT algorithms.
+                            The RSA public key is exposed, allowing algorithm confusion attacks.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Card -->
+            <div class="bg-white rounded-lg shadow-xl p-8 mb-6">
+                <h2 class="text-2xl font-semibold text-gray-800 mb-4">Welcome</h2>
+
+                <div class="space-y-4">
+                    <a href="/login" class="block w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-3 px-4 rounded-lg text-center transition duration-200">
+                        Login
+                    </a>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <a href="/api/public-key" class="block w-full bg-gray-600 hover:bg-gray-700 text-white font-medium py-3 px-4 rounded-lg text-center transition duration-200">
+                            View Public Key
+                        </a>
+                        <a href="/.well-known/jwks.json" class="block w-full bg-gray-600 hover:bg-gray-700 text-white font-medium py-3 px-4 rounded-lg text-center transition duration-200">
+                            View JWKS
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Test Accounts -->
+                <div class="mt-6 p-4 bg-gray-50 rounded-lg">
+                    <h3 class="font-semibold text-gray-800 mb-2">Test Accounts:</h3>
+                    <ul class="text-sm text-gray-600 space-y-1">
+                        <li>• <strong>user</strong> / user123 (role: user)</li>
+                        <li>• <strong>admin</strong> / Admin!2025$Secure (role: admin)</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- JWT Information -->
+            <div class="bg-white rounded-lg shadow-xl p-6 mb-6">
+                <h3 class="text-lg font-semibold text-gray-800 mb-4">About JWT Authentication</h3>
+                <div class="space-y-3 text-sm text-gray-700">
+                    <p>
+                        This application uses <strong>JSON Web Tokens (JWT)</strong> for authentication.
+                        JWTs are signed using cryptographic algorithms to ensure integrity.
+                    </p>
+                    <div class="bg-blue-50 p-3 rounded">
+                        <strong>RS256 (Asymmetric):</strong> Uses RSA private key to sign, public key to verify
+                    </div>
+                    <div class="bg-purple-50 p-3 rounded">
+                        <strong>HS256 (Symmetric):</strong> Uses shared secret for both signing and verification
+                    </div>
+                </div>
+            </div>
+
+            <!-- Exploitation Hint -->
+            <div class="bg-white rounded-lg shadow-xl p-6">
+                <h3 class="text-lg font-semibold text-gray-800 mb-4">🎯 Exploitation Strategy</h3>
+                <div class="space-y-3 text-sm text-gray-700">
+                    <div class="bg-yellow-50 p-3 rounded">
+                        <strong>Step 1:</strong> Login as regular user and obtain JWT token
+                    </div>
+                    <div class="bg-blue-50 p-3 rounded">
+                        <strong>Step 2:</strong> Download RSA public key from /api/public-key
+                    </div>
+                    <div class="bg-green-50 p-3 rounded">
+                        <strong>Step 3:</strong> Forge new JWT using HS256 with public key as secret
+                    </div>
+                    <div class="bg-purple-50 p-3 rounded">
+                        <strong>Step 4:</strong> Change role claim from 'user' to 'admin'
+                    </div>
+                    <div class="bg-red-50 p-3 rounded">
+                        <strong>Step 5:</strong> Access /api/admin/flag with forged token
+                    </div>
+                </div>
+
+                <div class="mt-4 p-3 bg-gray-100 rounded text-xs font-mono">
+                    <strong>Key Insight:</strong> When algorithm is switched from RS256 to HS256,
+                    the public key (normally used for verification) becomes the HMAC secret!
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

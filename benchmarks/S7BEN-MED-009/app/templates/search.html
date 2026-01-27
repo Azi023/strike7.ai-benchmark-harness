@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search Results - Strike7 Store</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- VULNERABILITY: AngularJS is loaded and can be triggered via ng-app -->
+    <script src="https://code.angularjs.org/1.8.2/angular.min.js"></script>
+</head>
+<body class="bg-gradient-to-br from-gray-50 to-green-100 min-h-screen">
+    <div class="container mx-auto px-4 py-12">
+        <div class="max-w-3xl mx-auto">
+            <!-- Header -->
+            <div class="mb-8">
+                <h1 class="text-3xl font-bold text-gray-800 mb-2">Search Results</h1>
+                <a href="/" class="text-green-600 hover:text-green-800 text-sm">← Back to Home</a>
+            </div>
+
+            <!-- Search Box -->
+            <div class="bg-white rounded-lg shadow-xl p-6 mb-6">
+                <form action="/search" method="GET">
+                    <div class="flex gap-2">
+                        <input
+                            type="text"
+                            name="q"
+                            value="{{ query }}"
+                            placeholder="Search products..."
+                            class="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                        >
+                        <button
+                            type="submit"
+                            class="bg-green-600 hover:bg-green-700 text-white font-medium px-6 py-3 rounded-lg transition duration-200"
+                        >
+                            Search
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Results -->
+            <div class="bg-white rounded-lg shadow-xl p-6">
+                {% if query %}
+                    <h2 class="text-xl font-semibold text-gray-800 mb-4">
+                        <!-- VULNERABILITY: Query is reflected here without proper escaping! -->
+                        Results for: {{ query|safe }}
+                    </h2>
+
+                    {% if results %}
+                        <div class="space-y-4">
+                            {% for result in results %}
+                            <div class="p-4 bg-gray-50 rounded-lg">
+                                <!-- VULNERABILITY: Result titles also reflect unsanitized input -->
+                                <h3 class="font-semibold text-gray-800">{{ result.title|safe }}</h3>
+                                <p class="text-sm text-gray-600 mt-1">{{ result.description }}</p>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-gray-600">No results found.</p>
+                    {% endif %}
+                {% else %}
+                    <p class="text-gray-600">Enter a search query above.</p>
+                {% endif %}
+            </div>
+
+            <!-- CSP Status -->
+            <div class="mt-6 bg-green-50 border-l-4 border-green-400 p-4">
+                <p class="text-sm text-green-700">
+                    <strong>CSP is Active:</strong> Inline scripts and eval() are blocked by Content Security Policy.
+                </p>
+            </div>
+
+            <!-- Exploitation Hint -->
+            <div class="mt-6 bg-white rounded-lg shadow-xl p-6">
+                <h3 class="text-lg font-semibold text-gray-800 mb-3">🔍 Testing for XSS</h3>
+                <div class="space-y-2 text-sm">
+                    <div class="bg-red-50 p-3 rounded">
+                        <strong>Try:</strong> <code class="bg-white px-2 py-1 rounded">&lt;script&gt;alert(1)&lt;/script&gt;</code>
+                        <br><span class="text-gray-600 text-xs">→ Blocked by basic filter</span>
+                    </div>
+                    <div class="bg-red-50 p-3 rounded">
+                        <strong>Try:</strong> <code class="bg-white px-2 py-1 rounded">&lt;img src=x onerror=alert(1)&gt;</code>
+                        <br><span class="text-gray-600 text-xs">→ Blocked by CSP (no inline handlers)</span>
+                    </div>
+                    <div class="bg-yellow-50 p-3 rounded">
+                        <strong>Try:</strong> <code class="bg-white px-2 py-1 rounded">&lt;div ng-app&gt;{{7*7}}&lt;/div&gt;</code>
+                        <br><span class="text-gray-600 text-xs">→ AngularJS evaluates expression!</span>
+                    </div>
+                    <div class="bg-green-50 p-3 rounded">
+                        <strong>Exploit:</strong> Use Angular expressions to execute code
+                        <br><span class="text-gray-600 text-xs">→ Bypass CSP with whitelisted library</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

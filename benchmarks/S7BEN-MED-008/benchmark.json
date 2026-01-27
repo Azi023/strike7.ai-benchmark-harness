@@ -1,0 +1,16 @@
+{
+  "id": "S7BEN-MED-008",
+  "name": "n8n Workflow Automation RCE",
+  "cve": "CVE-2025-68613",
+  "description": "Remote Code Execution via expression injection in n8n workflow automation",
+  "difficulty": "Medium",
+  "port": 5678,
+  "health_endpoint": "/healthz",
+  "canary_type": "flag_file",
+  "canary_location": "/flag.txt",
+  "tags": ["rce", "command-injection", "authentication", "web"],
+  "credentials": {
+    "username": "admin@strike7.local",
+    "password": "Strike7Demo!"
+  }
+}

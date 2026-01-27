@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50">
+    <nav class="bg-white shadow-sm border-b">
+        <div class="max-w-7xl mx-auto px-4 h-16 flex justify-between items-center">
+            <div class="flex items-center space-x-3"><div class="p-2 bg-indigo-100 rounded-lg"><svg class="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg></div><div><h1 class="text-xl font-bold">Admin Dashboard</h1><p class="text-xs text-gray-500">Audit System</p></div></div>
+            <div class="flex items-center space-x-4"><span class="px-3 py-1 text-xs font-semibold rounded-full bg-indigo-100 text-indigo-800">ADMIN</span><span class="text-sm">{{ username }}</span><button onclick="logout()" class="px-4 py-2 bg-red-600 text-white rounded">Logout</button></div>
+        </div>
+    </nav>
+    <div class="max-w-7xl mx-auto px-4 py-8">
+        <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+            <h2 class="text-xl font-bold mb-4">Quick Actions</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <button onclick="viewLogs()" class="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50"><div class="flex items-center"><svg class="w-6 h-6 text-indigo-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg><span class="font-medium">View Audit Logs</span></div></button>
+                <button onclick="restoreSession()" class="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50"><div class="flex items-center"><svg class="w-6 h-6 text-green-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg><span class="font-medium">Restore Admin Session</span></div></button>
+            </div>
+        </div>
+        <div id="logsContainer" class="hidden bg-white rounded-lg shadow-md p-6"><h3 class="text-lg font-bold mb-4">Audit Logs</h3><pre id="logsContent" class="bg-gray-50 p-4 rounded border text-xs overflow-auto" style="max-height:400px"></pre></div>
+        <div class="mt-6 bg-yellow-50 border border-yellow-200 rounded-lg p-4"><p class="text-sm text-yellow-800"><strong>Log Integrity:</strong> All audit logs are monitored for tampering attempts.</p></div>
+    </div>
+    <script>
+        async function viewLogs() {
+            try {
+                const response = await fetch('/api/logs');
+                const data = await response.json();
+                document.getElementById('logsContent').textContent = data.logs.join('\n');
+                document.getElementById('logsContainer').classList.remove('hidden');
+            } catch (error) {
+                alert('Error loading logs');
+            }
+        }
+        async function restoreSession() {
+            const username = prompt('Enter username to restore (leave blank for any):');
+            try {
+                const response = await fetch('/api/admin/restore-session', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({username: username || ''})
+                });
+                const data = await response.json();
+                if (data.status === 'success') {
+                    alert('Session restored: ' + data.message);
+                    location.reload();
+                } else {
+                    alert('Error: ' + (data.error || data.message));
+                }
+            } catch (error) {
+                alert('Error restoring session');
+            }
+        }
+        async function logout() {
+            const response = await fetch('/logout');
+            const data = await response.json();
+            window.location.href = data.redirect;
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,22 @@
+services:
+  app:
+    build:
+      context: ./app
+      args:
+        - FLAG_SECRET
+    ports:
+      - "5000:5000"
+    environment:
+      - FLAG_SECRET=${FLAG_SECRET:-strike7-partial-authz-t3-secret}
+    volumes:
+      - app_data:/app/data
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:5000/health" ]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+    restart: unless-stopped
+
+volumes:
+  app_data:

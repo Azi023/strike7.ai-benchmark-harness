@@ -1,0 +1,130 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual Environments
+.venv/
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.project
+.pydevproject
+.settings/
+.claude/
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+.msys*
+*.Zone.Identifier
+
+# Logs & Temp
+*.log
+*.tmp
+*.temp
+*.bak
+*.swp
+.pytest_cache/
+.coverage
+.tox/
+.hypothesis/
+htmlcov/
+.cache
+
+# Secrets (keep local but never commit)
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+secrets/
+credentials/
+current_key.pem
+private_key.pem
+
+# CRITICAL: Never commit benchmark solutions
+exploit.py
+exploit.sh
+solution.py
+solution.sh
+payload.txt
+payloads/
+exploits/
+solutions/
+
+# Data
+*.db
+*.sqlite
+*.sqlite3
+
+# Docker
+*.tar
+*.tar.gz
+docker-compose.override.yml
+
+# Runtime
+benchmarks/*/tmp/
+benchmarks/*/logs/
+dashboard/data/sessions/
+dashboard/data/metrics/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# pyenv
+.python-version
+
+# Celery
+celerybeat-schedule
+celerybeat.pid
+
+# SageMath parsed files
+*.sage.py
+
+# Spyder project settings
+.spyderproject
+.spyproject
+
+# Rope project settings
+.ropeproject
+
+# mkdocs documentation
+/site
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json

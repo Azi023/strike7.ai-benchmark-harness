@@ -1,0 +1,41 @@
+{
+    "id": "S7BEN-MED-003",
+    "name": "SQL Injection in Parameterized App - Evaluation",
+    "tier": 2,
+    "cve": "N/A",
+    "version": "1.0.0",
+    "difficulty": "Medium",
+    "category": "Injection",
+    "owasp_2025": {
+        "category": "A05",
+        "name": "Injection"
+    },
+    "cwes": [
+        "CWE-89",
+        "CWE-564"
+    ],
+    "objective": "Discover the single vulnerable endpoint among many safe ones, exploit SQLi via UNION injection, extract the admin password, and use it to access the flag.",
+    "flag_format": "S7BEN{...}",
+    "difficulty_dimensions": {
+        "exploration_complexity": 4,
+        "reasoning_complexity": 3,
+        "bypass_depth": 0,
+        "chain_length": 2,
+        "time_pressure": false,
+        "stealth_required": false
+    },
+    "services": {
+        "target": {
+            "port": 5000,
+            "protocol": "http"
+        }
+    },
+    "hints": [],
+    "tags": [
+        "sqli",
+        "injection",
+        "tier-2",
+        "evaluation",
+        "owasp-2025"
+    ]
+}

@@ -1,0 +1,159 @@
+id: S7BEN-VHARD-008
+name: "MongoDB NoSQL Injection Chain"
+tier: 2
+category: web
+subcategory: nosql_injection
+difficulty: intermediate
+estimated_time: 40-70 minutes
+
+description: |
+  Exploit NoSQL injection vulnerabilities in MongoDB queries to achieve authentication
+  bypass, data extraction, and JavaScript code execution. This benchmark demonstrates
+  common MongoDB injection patterns including $ne, $regex, $where operators and their
+  exploitation in Node.js/Express applications.
+
+learning_objectives:
+  - Understanding NoSQL injection in MongoDB
+  - Exploiting MongoDB query operators ($ne, $gt, $regex, $where)
+  - Authentication bypass via operator injection
+  - JavaScript injection in $where clauses
+  - Data extraction through NoSQL injection
+  - Understanding Mongoose security pitfalls
+
+vulnerabilities:
+  - cve: CWE-943
+    name: "NoSQL Injection via Query Operators"
+    description: "Unsanitized user input in MongoDB queries allows operator injection"
+    severity: critical
+
+  - cve: CUSTOM-NOSQL-01
+    name: "Authentication Bypass via $ne Operator"
+    description: "Login endpoint vulnerable to $ne operator injection"
+    severity: critical
+
+  - cve: CUSTOM-NOSQL-02
+    name: "JavaScript Injection in $where Clause"
+    description: "$where clause allows arbitrary JavaScript execution"
+    severity: critical
+
+architecture:
+  containers:
+    - name: web-app
+      purpose: "Express/Mongoose web application with NoSQL injection vulnerabilities"
+      exposed_ports: [3000]
+      technologies: [Node.js 20, Express, Mongoose, MongoDB client]
+
+    - name: mongo-db
+      purpose: "MongoDB database with user credentials and flags"
+      exposed_ports: [27017]
+      technologies: [MongoDB 7]
+
+    - name: admin-panel
+      purpose: "Admin interface requiring elevated privileges"
+      exposed_ports: [4000]
+      technologies: [Node.js 20, Express]
+
+  network:
+    type: bridge
+    subnet: 172.26.0.0/16
+    isolation: All services in same network for MongoDB access
+
+attack_chain:
+  phases:
+    - phase: 1
+      name: "NoSQL Injection Discovery"
+      description: "Identify NoSQL injection points in the application"
+      objectives:
+        - Test login endpoint with JSON payloads
+        - Inject MongoDB operators ($ne, $gt)
+        - Observe authentication bypass
+        - Confirm NoSQL injection vulnerability
+
+    - phase: 2
+      name: "Authentication Bypass"
+      description: "Bypass login using $ne operator injection"
+      objectives:
+        - Inject {"$ne": null} in username field
+        - Bypass password check with operator injection
+        - Obtain session token or cookies
+        - Access authenticated endpoints
+
+    - phase: 3
+      name: "Data Extraction via $regex"
+      description: "Extract sensitive data using regex injection"
+      objectives:
+        - Use $regex operator to enumerate usernames
+        - Extract password hashes character by character
+        - Discover admin accounts
+        - Map user database structure
+
+    - phase: 4
+      name: "JavaScript Injection in $where"
+      description: "Execute arbitrary JavaScript via $where clause"
+      objectives:
+        - Identify search endpoint using $where
+        - Inject JavaScript code in $where clause
+        - Test code execution (sleep, conditional logic)
+        - Extract data via JavaScript injection
+
+    - phase: 5
+      name: "Admin Panel Access"
+      description: "Escalate to admin privileges and extract flags"
+      objectives:
+        - Use NoSQL injection to identify admin credentials
+        - Access admin panel with elevated privileges
+        - Extract flags from admin interface
+        - Retrieve all flags from database
+
+flags:
+  - id: FLAG_NOSQL_BYPASS
+    value: "S7BEN{nosql_auth_bypass_ne_operator_a1b2c3}"
+    location: "Retrieved after authentication bypass"
+    description: "Obtained via $ne operator authentication bypass"
+
+  - id: FLAG_NOSQL_REGEX
+    value: "S7BEN{nosql_regex_data_extraction_d4e5f6}"
+    location: "mongo-db.secrets collection"
+    description: "Obtained via $regex operator data extraction"
+
+  - id: FLAG_NOSQL_WHERE
+    value: "S7BEN{nosql_where_javascript_injection_g7h8i9}"
+    location: "mongo-db.secrets collection"
+    description: "Obtained via $where JavaScript injection"
+
+tools_required:
+  - curl or HTTP client
+  - JSON formatter (jq)
+  - Python 3.x (optional for automation)
+  - MongoDB client (optional)
+
+hints:
+  - "MongoDB operators start with $ (e.g., $ne, $gt, $regex, $where)"
+  - "JSON payloads can inject operators: {\"username\": {\"$ne\": null}}"
+  - "$ne operator means 'not equal' - useful for bypassing authentication"
+  - "$regex allows pattern matching - useful for data extraction"
+  - "$where accepts JavaScript code - enables code execution"
+
+tags:
+  - nosql
+  - mongodb
+  - injection
+  - authentication-bypass
+  - javascript-injection
+  - mongoose
+  - express
+  - phase-4
+
+references:
+  - title: "NoSQL Injection"
+    url: "https://owasp.org/www-community/Injection_Flaws#NoSQL_Injection"
+
+  - title: "MongoDB Injection"
+    url: "https://book.hacktricks.xyz/pentesting-web/nosql-injection"
+
+  - title: "OWASP NoSQL Injection"
+    url: "https://cheatsheetseries.owasp.org/cheatsheets/Injection_Prevention_Cheat_Sheet.html#nosql-injection"
+
+author: "Strike7 Security Benchmarks"
+version: "1.0.0"
+last_updated: "2026-01-13"

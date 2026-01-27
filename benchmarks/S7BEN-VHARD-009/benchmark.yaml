@@ -1,0 +1,171 @@
+id: S7BEN-VHARD-009
+name: Server-Side Template Injection Chain
+category: web
+tier: 2
+difficulty: intermediate
+estimated_time: 60-90 minutes
+
+description: |
+  Multi-language Server-Side Template Injection (SSTI) benchmark demonstrating
+  template injection vulnerabilities across three different template engines:
+  Python/Jinja2, Node.js/Nunjucks, and PHP/Twig. Participants will exploit
+  template injection to achieve Remote Code Execution (RCE) and extract flags
+  from each application.
+
+learning_objectives:
+  - Understanding Server-Side Template Injection (SSTI) vulnerabilities
+  - Identifying template injection in different languages and frameworks
+  - Exploiting Jinja2 template injection for Python RCE
+  - Exploiting Nunjucks template injection for Node.js RCE
+  - Exploiting Twig template injection for PHP RCE
+  - Polyglot SSTI payload development
+  - Template engine fingerprinting and detection
+
+vulnerabilities:
+  - id: CWE-94
+    name: Code Injection
+    severity: critical
+    description: User input directly embedded in template rendering without sanitization
+
+  - id: CUSTOM-SSTI-01
+    name: Jinja2 Template Injection
+    severity: critical
+    description: Python Flask application with Jinja2 SSTI leading to RCE
+
+  - id: CUSTOM-SSTI-02
+    name: Nunjucks Template Injection
+    severity: critical
+    description: Node.js Express application with Nunjucks SSTI leading to RCE
+
+  - id: CUSTOM-SSTI-03
+    name: Twig Template Injection
+    severity: critical
+    description: PHP application with Twig SSTI leading to RCE
+
+architecture:
+  containers:
+    - name: jinja2-app
+      image: python:3.11-slim
+      purpose: Flask application with Jinja2 template injection
+      ports:
+        - "5000:5000"
+      networks:
+        - ssti-net
+
+    - name: nunjucks-app
+      image: node:20-alpine
+      purpose: Express application with Nunjucks template injection
+      ports:
+        - "3000:3000"
+      networks:
+        - ssti-net
+
+    - name: twig-app
+      image: php:8.2-apache
+      purpose: PHP application with Twig template injection
+      ports:
+        - "8080:80"
+      networks:
+        - ssti-net
+
+  networks:
+    - name: ssti-net
+      type: bridge
+      subnet: 172.27.0.0/16
+      purpose: Isolated network for SSTI applications
+
+attack_chain:
+  phases:
+    - phase: 1
+      name: Template Injection Discovery
+      description: Identify SSTI vulnerabilities by injecting template syntax
+      tasks:
+        - Test mathematical expressions in template contexts
+        - Identify template engine through error messages
+        - Confirm template injection with basic payloads
+
+    - phase: 2
+      name: Jinja2 Template Injection
+      description: Exploit Python Flask/Jinja2 SSTI for RCE
+      tasks:
+        - Inject Jinja2 syntax to access built-in objects
+        - Use MRO (Method Resolution Order) to access object classes
+        - Execute Python code to read flags
+        - Achieve Remote Code Execution
+
+    - phase: 3
+      name: Nunjucks Template Injection
+      description: Exploit Node.js/Nunjucks SSTI for RCE
+      tasks:
+        - Inject Nunjucks syntax to access globals
+        - Use range filter to access constructor
+        - Execute JavaScript code via Function constructor
+        - Read flags from filesystem
+
+    - phase: 4
+      name: Twig Template Injection
+      description: Exploit PHP/Twig SSTI for RCE
+      tasks:
+        - Inject Twig syntax to access functions
+        - Use filter map to execute PHP functions
+        - Execute system commands
+        - Extract flags from environment variables
+
+    - phase: 5
+      name: Cross-Engine Polyglot Payloads
+      description: Develop universal SSTI payloads that work across engines
+      tasks:
+        - Identify common syntax patterns
+        - Test polyglot payloads across all three engines
+        - Extract all flags using unified approach
+
+flags:
+  - id: FLAG_JINJA2
+    value: S7BEN{jinja2_ssti_python_rce_a1b2c3d4}
+    location: jinja2-app
+    extraction: Exploit Jinja2 template injection to read /app/flag.txt
+
+  - id: FLAG_NUNJUCKS
+    value: S7BEN{nunjucks_ssti_nodejs_rce_e5f6g7h8}
+    location: nunjucks-app
+    extraction: Exploit Nunjucks template injection to read /app/flag.txt
+
+  - id: FLAG_TWIG
+    value: S7BEN{twig_ssti_php_rce_i9j0k1l2}
+    location: twig-app
+    extraction: Exploit Twig template injection to read /var/www/html/flag.txt
+
+tools_required:
+  - curl or HTTP client
+  - Burp Suite (optional)
+  - Python 3.x (optional for automation)
+
+hints:
+  - Template engines often have special syntax: {{ }}, {% %}, {# #}
+  - Mathematical expressions like {{7*7}} help identify SSTI
+  - Jinja2: Use {{config}} or {{request}} to access Python objects
+  - Nunjucks: Use range filter to access global objects
+  - Twig: Use _self.env to access Twig environment
+  - Error messages often reveal the template engine being used
+
+references:
+  - https://portswigger.net/research/server-side-template-injection
+  - https://book.hacktricks.xyz/pentesting-web/ssti-server-side-template-injection
+  - https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Server%20Side%20Template%20Injection
+  - https://owasp.org/www-project-web-security-testing-guide/latest/4-Web_Application_Security_Testing/07-Input_Validation_Testing/18-Testing_for_Server-side_Template_Injection
+
+tags:
+  - ssti
+  - template-injection
+  - jinja2
+  - nunjucks
+  - twig
+  - rce
+  - python
+  - nodejs
+  - php
+  - phase-4
+
+author: Strike7 Security Benchmarks
+version: 1.0.0
+last_updated: 2026-01-14

@@ -1,0 +1,79 @@
+
+services:
+  web-app:
+    build: ./web-app
+    container_name: nosql-webapp
+    hostname: webapp
+    ports:
+      - "3000:3000"
+    networks:
+      nosql-net:
+        ipv4_address: 172.26.0.10
+    environment:
+      - NODE_ENV=production
+      - MONGODB_URI=mongodb://mongo-db:27017/nosqldb
+      - SESSION_SECRET=nosql-secret-key-change-me
+      - FLAG_BYPASS=${FLAG_BYPASS:-S7BEN{nosql_auth_bypass_ne_operator_a1b2c3}}
+    depends_on:
+      mongo-db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+    restart: unless-stopped
+
+  mongo-db:
+    image: mongo:7
+    container_name: nosql-db
+    hostname: mongo-db
+    networks:
+      nosql-net:
+        ipv4_address: 172.26.0.20
+    environment:
+      - MONGO_INITDB_DATABASE=nosqldb
+    volumes:
+      - ./mongo-db/init.js:/docker-entrypoint-initdb.d/init.js:ro
+      - mongo-data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped
+
+  admin-panel:
+    build: ./admin-panel
+    container_name: nosql-admin
+    hostname: admin-panel
+    ports:
+      - "4000:4000"
+    networks:
+      nosql-net:
+        ipv4_address: 172.26.0.30
+    environment:
+      - MONGODB_URI=mongodb://mongo-db:27017/nosqldb
+      - FLAG_ADMIN=${FLAG_ADMIN:-S7BEN{nosql_admin_panel_access_j1k2l3}}
+    depends_on:
+      mongo-db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    restart: unless-stopped
+
+networks:
+  nosql-net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.26.0.0/16
+
+volumes:
+  mongo-data:

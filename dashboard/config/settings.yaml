@@ -1,0 +1,33 @@
+# Strike7 Dashboard Configuration
+# Safety settings and container management policies
+
+container_management:
+  max_concurrent: 1              # Only 1 benchmark container at a time
+  auto_stop_on_new: true         # Stop current when starting new
+  timeout_minutes: 30            # Auto-stop after 30 min
+  memory_limit_mb: 512           # Per container memory limit
+  cpu_limit: 0.5                 # 50% of one CPU core
+
+safety:
+  enable_auto_cleanup: true      # Clean up orphaned containers on startup
+  health_check_interval: 30      # Check container health every 30s
+  max_memory_total_mb: 2048      # Stop new containers if system memory low
+  enable_timeout_daemon: true    # Enable background timeout checking
+
+notifications:
+  on_container_start: false
+  on_container_stop: false
+  on_flag_capture: true
+  on_timeout: true
+
+# Rate limiting for flag submissions
+rate_limiting:
+  max_attempts_per_minute: 10
+  max_attempts_per_benchmark: 50
+  cooldown_seconds: 5
+
+# Session defaults
+session:
+  default_timeout_per_benchmark: 600  # 10 minutes
+  max_concurrent_sessions: 10
+  session_expiry_hours: 24

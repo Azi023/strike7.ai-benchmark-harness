@@ -1,0 +1,78 @@
+
+services:
+  web-app:
+    build: ./web-app
+    container_name: ssrf-web-app
+    ports:
+      - "80:5000"
+    networks:
+      - frontend-net
+      - backend-net
+    extra_hosts:
+      # Map cloud metadata IPs to our simulated metadata service
+      - "169.254.169.254:172.20.0.10"
+      - "metadata.internal:172.20.0.10"
+    environment:
+      - FLAG_SECRET=${FLAG_SECRET:-strike7-ssrf-secret-key}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    restart: unless-stopped
+
+  internal-api:
+    build: ./internal-api
+    container_name: ssrf-internal-api
+    networks:
+      - backend-net
+    environment:
+      - NODE_ENV=production
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    restart: unless-stopped
+
+  metadata-service:
+    build: ./metadata-service
+    container_name: ssrf-metadata
+    networks:
+      backend-net:
+        ipv4_address: 172.20.0.10
+    environment:
+      - AWS_ACCESS_KEY_ID=AKIAIOSFODNN7EXAMPLE
+      - AWS_SECRET_ACCESS_KEY=wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
+      - AWS_SESSION_TOKEN=FwoGZXIvYXdzEBcaDKj7Example...
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:80/latest/meta-data/"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    restart: unless-stopped
+
+  admin-panel:
+    build: ./admin-panel
+    container_name: ssrf-admin-panel
+    networks:
+      - backend-net
+    environment:
+      - ADMIN_SECRET=${ADMIN_SECRET:-admin-supersecret-2024}
+      - FLAG=${FLAG:-S7BEN{admin_access_via_ssrf_credentials}}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    restart: unless-stopped
+
+networks:
+  frontend-net:
+    driver: bridge
+  backend-net:
+    driver: bridge
+    internal: true
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16

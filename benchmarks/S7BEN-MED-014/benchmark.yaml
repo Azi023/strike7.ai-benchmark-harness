@@ -1,0 +1,10 @@
+id: S7BEN-MED-014
+name: "Coupon Code Reuse"
+category: med
+difficulty: 5
+phase: 6
+vulnerabilities: [{type: Coupon Abuse, cwes: [CWE-841]}]
+owasp_2025: [A04:2025]
+flag_format: "S7BEN{c0up0n_reuse_[dynamic]}"
+flag_dynamic: true
+services: {app: {port: 8100}}

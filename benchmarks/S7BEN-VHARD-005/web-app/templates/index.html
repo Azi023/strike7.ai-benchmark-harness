@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SBEN-DESER-02: Python Pickle Deserialization</title>
+    <style>
+        body {
+            font-family: 'Courier New', monospace;
+            max-width: 1000px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #1e1e1e;
+            color: #00ff00;
+        }
+        h1 { color: #ff6b6b; }
+        h2 { color: #4ecdc4; }
+        .endpoint {
+            background: #2d2d2d;
+            border-left: 4px solid #ffa500;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        .method {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 3px;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        .get { background: #4caf50; color: white; }
+        .post { background: #2196f3; color: white; }
+        code {
+            background: #3d3d3d;
+            padding: 2px 6px;
+            border-radius: 3px;
+            color: #ffa500;
+        }
+        .warning {
+            background: #ff6b6b;
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔓 SBEN-DESER-02: Python Pickle Deserialization Chain</h1>
+
+    <div class="warning">
+        <strong>⚠️ WARNING:</strong> This application contains intentional security vulnerabilities.
+        DO NOT expose to untrusted networks. For educational purposes only.
+    </div>
+
+    <h2>Available Endpoints</h2>
+
+    <div class="endpoint">
+        <span class="method get">GET</span>
+        <strong>/health</strong>
+        <p>Health check endpoint</p>
+    </div>
+
+    <div class="endpoint">
+        <span class="method post">POST</span>
+        <strong>/api/login</strong>
+        <p>Login and receive pickled session cookie</p>
+        <code>{"username": "user", "password": "pass"}</code>
+    </div>
+
+    <div class="endpoint">
+        <span class="method get">GET</span>
+        <strong>/api/profile</strong>
+        <p>View profile (deserializes session cookie) 🔴 VULNERABLE</p>
+    </div>
+
+    <div class="endpoint">
+        <span class="method post">POST</span>
+        <strong>/api/cache/set</strong>
+        <p>Store data in Redis cache (pickled) 🔴 VULNERABLE</p>
+        <code>{"key": "mykey", "value": "myvalue", "ttl": 3600}</code>
+    </div>
+
+    <div class="endpoint">
+        <span class="method get">GET</span>
+        <strong>/api/cache/get/&lt;key&gt;</strong>
+        <p>Retrieve cached data (deserializes pickle) 🔴 VULNERABLE</p>
+    </div>
+
+    <div class="endpoint">
+        <span class="method post">POST</span>
+        <strong>/api/task/submit</strong>
+        <p>Submit Celery task to worker queue 🔴 VULNERABLE</p>
+        <code>{"task_name": "process_data", "args": ["arg1", "arg2"]}</code>
+    </div>
+
+    <div class="endpoint">
+        <span class="method get">GET</span>
+        <strong>/api/session/example</strong>
+        <p>Get example pickled session structure</p>
+    </div>
+
+    <div class="endpoint">
+        <span class="method get">GET</span>
+        <strong>/api/flag</strong>
+        <p>Flag location hint</p>
+    </div>
+
+    <div class="endpoint">
+        <span class="method get">GET</span>
+        <strong>/api/debug/redis</strong>
+        <p>List Redis cache keys (reconnaissance)</p>
+    </div>
+
+    <h2>Vulnerabilities</h2>
+    <ul>
+        <li><strong>CUSTOM-PICKLE-01:</strong> Session cookies use insecure pickle deserialization</li>
+        <li><strong>CUSTOM-PICKLE-02:</strong> Redis cache stores untrusted pickled objects</li>
+        <li><strong>CUSTOM-PICKLE-03:</strong> Celery worker deserializes task payloads</li>
+    </ul>
+
+    <h2>Flags</h2>
+    <ul>
+        <li><code>/app/flag.txt</code> - Web application flag</li>
+        <li><code>/data/cache_flag.txt</code> - Redis cache flag</li>
+        <li><code>/worker/secret_flag.txt</code> - Celery worker flag</li>
+    </ul>
+
+    <p style="text-align: center; margin-top: 50px; color: #888;">
+        Strike7 Security Benchmarks - Phase 4
+    </p>
+</body>
+</html>

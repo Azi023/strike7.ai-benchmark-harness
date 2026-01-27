@@ -1,0 +1,199 @@
+id: S7BEN-VHARD-003
+name: "Active Directory Kerberos Exploitation"
+tier: 3
+difficulty: hard
+
+description: >
+  Advanced Active Directory exploitation benchmark featuring Kerberos attacks,
+  including Kerberoasting, AS-REP Roasting, Pass-the-Ticket, and Golden Ticket
+  attacks. Simulates a realistic enterprise AD environment with OpenLDAP and
+  MIT Kerberos.
+
+category: infrastructure
+subcategory: active_directory
+
+architecture:
+  type: enterprise
+  container_count: 5
+  services:
+    - name: domain-controller
+      language: python
+      port: 88, 389, 636
+      description: "Simulated DC with LDAP and Kerberos KDC"
+      vulnerabilities:
+        - weak_service_account_passwords
+        - kerberos_pre_authentication_disabled
+        - unconstrained_delegation
+    - name: file-server
+      language: python
+      port: 445
+      description: "SMB file server with stored credentials"
+      vulnerabilities:
+        - smb_anonymous_access
+        - credential_exposure
+    - name: web-app
+      language: nodejs
+      port: 80
+      description: "Web application with AD authentication"
+      vulnerabilities:
+        - ldap_injection
+        - credential_disclosure
+    - name: database-server
+      language: postgres
+      port: 5432
+      description: "Database with AD-integrated auth"
+      vulnerabilities:
+        - weak_database_credentials
+    - name: workstation
+      language: python
+      port: 3389
+      description: "Simulated Windows workstation"
+      vulnerabilities:
+        - cached_credentials
+        - privilege_escalation
+
+domain_info:
+  domain: "CORP.LOCAL"
+  realm: "CORP.LOCAL"
+  netbios: "CORP"
+  users:
+    - username: "alice"
+      role: "Domain User"
+      spn: null
+    - username: "bob"
+      role: "Domain User"
+      spn: null
+    - username: "svc_web"
+      role: "Service Account"
+      spn: "HTTP/web-app.corp.local"
+    - username: "svc_sql"
+      role: "Service Account"
+      spn: "MSSQLSvc/db.corp.local:1433"
+    - username: "Administrator"
+      role: "Domain Admin"
+      spn: null
+
+vulnerabilities:
+  primary:
+    - type: kerberoasting
+      cwe: CWE-521
+      severity: high
+      description: "Service accounts with weak passwords can be kerberoasted"
+
+    - type: asrep_roasting
+      cwe: CWE-294
+      severity: high
+      description: "Accounts with pre-auth disabled can be AS-REP roasted"
+
+    - type: unconstrained_delegation
+      cwe: CWE-269
+      severity: critical
+      description: "Servers with unconstrained delegation can impersonate any user"
+
+  secondary:
+    - type: ldap_injection
+      cwe: CWE-90
+      severity: medium
+      description: "LDAP queries vulnerable to injection attacks"
+
+    - type: credential_exposure
+      cwe: CWE-522
+      severity: high
+      description: "Credentials stored in accessible locations"
+
+exploitation:
+  phases:
+    - phase: 1
+      name: "Initial Access & Reconnaissance"
+      objective: "Gain initial foothold and enumerate domain"
+      techniques:
+        - ldap_anonymous_bind
+        - user_enumeration
+        - spn_discovery
+
+    - phase: 2
+      name: "Kerberoasting"
+      objective: "Extract and crack service account tickets"
+      techniques:
+        - request_tgs_for_spn
+        - offline_password_cracking
+        - hashcat_ntlm_cracking
+
+    - phase: 3
+      name: "AS-REP Roasting"
+      objective: "Extract tickets for users without pre-auth"
+      techniques:
+        - enumerate_no_preauth_users
+        - request_as_rep_ticket
+        - crack_as_rep_hash
+
+    - phase: 4
+      name: "Lateral Movement"
+      objective: "Move laterally with compromised credentials"
+      techniques:
+        - pass_the_ticket
+        - overpass_the_hash
+        - psexec_smb_exec
+
+    - phase: 5
+      name: "Privilege Escalation"
+      objective: "Escalate to Domain Admin"
+      techniques:
+        - unconstrained_delegation_abuse
+        - golden_ticket_creation
+        - dcsync_attack
+
+flags:
+  primary:
+    name: "Kerberoasting Flag"
+    location: "svc_web account password"
+    format: "S7BEN{kerberoast_service_account_[a-z0-9]{16}}"
+    retrieval: "Crack Kerberos TGS ticket for svc_web"
+
+  secondary:
+    name: "AS-REP Roasting Flag"
+    location: "User account without pre-auth"
+    format: "S7BEN{asrep_roast_no_preauth_[a-z0-9]{16}}"
+    retrieval: "Crack AS-REP hash for vulnerable user"
+
+  tertiary:
+    name: "Domain Admin Flag"
+    location: "Domain Controller NTDS.dit"
+    format: "S7BEN{domain_admin_golden_ticket_[a-z0-9]{16}}"
+    retrieval: "Create golden ticket and access DC"
+
+learning_objectives:
+  - "Understand Kerberos authentication protocol"
+  - "Master Kerberoasting attack techniques"
+  - "Practice AS-REP roasting exploitation"
+  - "Learn Pass-the-Ticket lateral movement"
+  - "Understand Golden Ticket attacks"
+  - "Practice LDAP enumeration and exploitation"
+
+tools_required:
+  - impacket (GetNPUsers.py, GetUserSPNs.py, secretsdump.py)
+  - hashcat or john
+  - ldapsearch
+  - kinit
+  - klist
+  - python3
+
+estimated_time: "120-180 minutes"
+
+hints:
+  - "Start with anonymous LDAP bind to enumerate users"
+  - "Look for service accounts with SPNs"
+  - "Check for users with DONT_REQ_PREAUTH flag"
+  - "Service account passwords are weak and crackable"
+  - "Use Impacket tools for Kerberos attacks"
+  - "Golden tickets require the krbtgt hash"
+
+references:
+  - "https://attack.mitre.org/techniques/T1558/003/"
+  - "https://www.hackingarticles.in/deep-dive-into-kerberoasting-attack/"
+  - "https://adsecurity.org/?p=2011"
+  - "https://book.hacktricks.xyz/windows-hardening/active-directory-methodology"
+
+author: "Strike7 Security Benchmarks"
+version: "1.0.0"
+created: "2026-01-12"

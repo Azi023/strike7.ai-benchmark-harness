@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - Strike7 Store</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://code.angularjs.org/1.8.2/angular.min.js"></script>
+</head>
+<body class="bg-gradient-to-br from-gray-50 to-purple-100 min-h-screen">
+    <div class="container mx-auto px-4 py-12">
+        <div class="max-w-2xl mx-auto">
+            <!-- Header -->
+            <div class="text-center mb-8">
+                <h1 class="text-3xl font-bold text-gray-800 mb-2">Admin Panel</h1>
+                <p class="text-gray-600">Logged in as Administrator</p>
+            </div>
+
+            <!-- Admin Badge -->
+            <div class="bg-purple-50 border-l-4 border-purple-400 p-4 mb-6">
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        <svg class="h-5 w-5 text-purple-400" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-sm text-purple-700">
+                            <strong>Admin Access:</strong> You are logged in with administrator privileges.
+                            Your session is stored in cookies.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Scenario Explanation -->
+            <div class="bg-white rounded-lg shadow-xl p-6 mb-6">
+                <h2 class="text-xl font-semibold text-gray-800 mb-4">Exploitation Scenario</h2>
+                <div class="space-y-3 text-sm text-gray-700">
+                    <p>
+                        <strong>You are the victim (admin user).</strong> An attacker has sent you a malicious
+                        link that exploits a CSP bypass vulnerability.
+                    </p>
+                    <p>
+                        The goal is to craft a search URL that:
+                    </p>
+                    <ol class="list-decimal list-inside space-y-1 ml-4">
+                        <li>Bypasses CSP using AngularJS script gadgets</li>
+                        <li>Executes JavaScript in your browser context</li>
+                        <li>Steals your admin session cookie</li>
+                        <li>Exfiltrates it to the attacker's endpoint</li>
+                    </ol>
+                </div>
+            </div>
+
+            <!-- Session Info -->
+            <div class="bg-white rounded-lg shadow-xl p-6 mb-6">
+                <h2 class="text-xl font-semibold text-gray-800 mb-4">Your Session Info</h2>
+                <button
+                    onclick="viewSession()"
+                    class="w-full bg-purple-600 hover:bg-purple-700 text-white font-medium py-3 px-4 rounded-lg transition duration-200"
+                >
+                    View My Session
+                </button>
+            </div>
+
+            <!-- Example Malicious Links -->
+            <div class="bg-white rounded-lg shadow-xl p-6">
+                <h2 class="text-xl font-semibold text-gray-800 mb-4">Test Malicious Links</h2>
+                <p class="text-sm text-gray-600 mb-4">
+                    Click these links to simulate an attacker sending you a malicious URL:
+                </p>
+
+                <div class="space-y-3">
+                    <div class="bg-yellow-50 p-3 rounded">
+                        <p class="text-xs text-gray-700 mb-2"><strong>Basic XSS (Blocked by CSP):</strong></p>
+                        <a
+                            href="/search?q=<img src=x onerror=alert(document.cookie)>"
+                            class="text-xs text-blue-600 hover:text-blue-800 break-all"
+                        >
+                            /search?q=&lt;img src=x onerror=alert(1)&gt;
+                        </a>
+                    </div>
+
+                    <div class="bg-green-50 p-3 rounded">
+                        <p class="text-xs text-gray-700 mb-2"><strong>CSP Bypass with AngularJS:</strong></p>
+                        <a
+                            href="/search?q=<div ng-app>{{7*7}}</div>"
+                            class="text-xs text-blue-600 hover:text-blue-800 break-all"
+                        >
+                            /search?q=&lt;div ng-app&gt;{{7*7}}&lt;/div&gt;
+                        </a>
+                    </div>
+
+                    <div class="bg-red-50 p-3 rounded">
+                        <p class="text-xs text-gray-700 mb-2"><strong>Session Theft Payload:</strong></p>
+                        <p class="text-xs text-gray-600 font-mono break-all">
+                            See TESTING.md for complete exploit payload
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Back Link -->
+            <div class="mt-6 text-center">
+                <a href="/" class="text-sm text-gray-600 hover:text-gray-800">← Back to Store</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Result Modal -->
+    <div id="resultModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[80vh] overflow-y-auto">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xl font-semibold text-gray-800">Session Information</h3>
+                    <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+                <div id="resultContent" class="text-sm"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function viewSession() {
+            try {
+                const response = await fetch('/admin/session');
+                const data = await response.json();
+
+                if (data.status === 'success') {
+                    showModal(`
+                        <div class="space-y-3">
+                            <div class="bg-purple-50 p-4 rounded">
+                                <strong class="text-purple-800">Administrator Session</strong>
+                            </div>
+                            <div class="p-3 bg-gray-50 rounded">
+                                <strong>Username:</strong> ${data.username}
+                            </div>
+                            <div class="p-3 bg-gray-50 rounded">
+                                <strong>Role:</strong> ${data.role}
+                            </div>
+                            <div class="p-3 bg-gray-50 rounded break-all">
+                                <strong>Session ID:</strong><br>
+                                <code class="text-xs">${data.session_id}</code>
+                            </div>
+                            <div class="p-3 bg-yellow-50 rounded text-xs">
+                                <strong>Note:</strong> ${data.note}
+                            </div>
+                        </div>
+                    `);
+                } else {
+                    showModal(`<div class="bg-red-50 p-4 rounded text-red-800">${data.message}</div>`);
+                }
+            } catch (error) {
+                showModal(`<div class="bg-red-50 p-4 rounded text-red-800">Error: ${error.message}</div>`);
+            }
+        }
+
+        function showModal(content) {
+            document.getElementById('resultContent').innerHTML = content;
+            document.getElementById('resultModal').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('resultModal').classList.add('hidden');
+        }
+    </script>
+</body>
+</html>

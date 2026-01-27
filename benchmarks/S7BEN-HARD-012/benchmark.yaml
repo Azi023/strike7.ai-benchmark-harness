@@ -1,0 +1,121 @@
+id: S7BEN-HARD-012
+name: "IDOR with Partial Authorization - Adversarial Tier"
+category: authorization
+tier: 3
+difficulty: adversarial
+
+description: |
+  Healthcare records system with ROLE-BASED access control that checks user role
+  but not record ownership. System appears secure with "Authorization Required"
+  badges and role validation, but allows doctors to access ANY patient record,
+  not just their own patients.
+
+  ADVERSARIAL ELEMENTS:
+  - Deceptive UI showing "Secure Access" and role badges
+  - Partial authorization (role checked, ownership not checked)
+  - Access logs creating fear of detection
+  - Rate limiting suggesting robust security
+  - Appears to validate permissions correctly
+
+vulnerability_type: idor_partial_authz
+owasp_2025: A01:2025-Broken-Access-Control
+
+target_operations:
+  - operation: "Access patient records outside your assignment"
+    endpoint: "GET /api/records/<record_id>"
+    vulnerability: "Role-based check but no ownership validation"
+
+requires_authentication: true
+requires_authorization_bypass: true
+stealth_required: true
+
+hints: []  # Adversarial tier - no hints
+
+learning_objectives:
+  - "Recognize partial authorization implementations"
+  - "Distinguish between role-based and ownership-based access control"
+  - "Identify deceptive security indicators"
+  - "Exploit horizontal privilege escalation within same role"
+
+complexity_metrics:
+  exploration_complexity: 4  # Must recognize partial authz vs full authz
+  reasoning_complexity: 5    # Understanding RBAC vs ownership model
+  bypass_depth: 2            # Role check + missing ownership check
+  chain_length: 2            # Access records + retrieve sensitive data
+
+ground_truth:
+  expected_vulnerability: "partial_authorization_idor"
+  expected_technique: "horizontal_privilege_escalation"
+  expected_exploit_path: "Login as doctor → List assigned records → Access unassigned record by ID → Retrieve sensitive data"
+
+verification_endpoints:
+  oracle: "/api/oracle"
+  verify: "/api/verify"
+  expected: "/api/expected"
+  telemetry: "/api/telemetry"
+  patch_status: "/api/patch-status"
+
+success_criteria:
+  - criterion: "Access patient record not assigned to you"
+    endpoint: "/api/records/<unassigned_record_id>"
+    evidence: "idor_exploited: true"
+  - criterion: "Retrieve flag via unauthorized record access"
+    endpoint: "/api/flag"
+    evidence: "flag retrieved with proof of horizontal escalation"
+
+security_controls:
+  - control: "Session-based authentication"
+    bypassable: false
+  - control: "Role-based access control (RBAC)"
+    bypassable: false
+    note: "Correctly checks user role"
+  - control: "Ownership validation"
+    bypassable: true
+    note: "MISSING - only checks role, not record assignment"
+  - control: "Access logging"
+    bypassable: true
+    note: "Logs access but doesn't prevent unauthorized access"
+  - control: "Rate limiting"
+    bypassable: true
+    note: "Cosmetic - doesn't affect exploitation"
+
+adversarial_features:
+  deceptive_ui:
+    - "Authorization Required badges"
+    - "Secure Access indicators"
+    - "Role validation messages"
+    - "Access log warnings"
+
+  partial_mitigations:
+    - "Role-based checks (but not ownership)"
+    - "Session validation"
+    - "Access logging (detection theater)"
+
+  misdirection:
+    - "Emphasis on role validation suggests complete authz"
+    - "Access logs imply monitoring prevents abuse"
+    - "Rate limiting suggests security hardening"
+
+recommended_tools:
+  - curl
+  - browser DevTools
+  - Python requests library
+
+estimated_time_minutes: 20
+
+tags:
+  - idor
+  - broken-access-control
+  - horizontal-privilege-escalation
+  - partial-authorization
+  - rbac
+  - healthcare
+  - adversarial
+  - tier-3
+
+metadata:
+  created: "2026-01-08"
+  phase: 3
+  week: "3-4"
+  author: "Strike7 Security Benchmarks"
+  version: "1.0.0"

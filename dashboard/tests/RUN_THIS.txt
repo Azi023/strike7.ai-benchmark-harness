@@ -1,0 +1,28 @@
+╔══════════════════════════════════════════════════════════╗
+║  COPY AND PASTE THESE COMMANDS (In Order)               ║
+╚══════════════════════════════════════════════════════════╝
+
+STEP 1: Install Missing Libraries
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+sudo apt update && sudo apt install -y libnss3 libnspr4 libatk1.0-0 libatk-bridge2.0-0 libcups2 libdrm2 libdbus-1-3 libxkbcommon0 libxcomposite1 libxdamage1 libxfixes3 libxrandr2 libgbm1 libasound2 libpango-1.0-0 libcairo2
+
+
+STEP 2: Run Tests
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+cd ~/workspace/strike7-benchmarks/dashboard/tests
+source ../../venv/bin/activate
+pytest test_e2e_playwright_fixed.py::TestDashboardLoad -v
+
+
+THAT'S IT!
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+After Step 1, you'll be prompted for your password (this is normal).
+After Step 2, tests should run and PASS! ✅
+
+
+PROBLEM: Missing libnspr4.so (system library)
+SOLUTION: Install it with apt
+TIME: ~2 minutes

@@ -1,0 +1,13 @@
+id: S7BEN-HARD-015
+name: "Session Fixation via Cookie Injection"
+category: hard
+difficulty: 7
+phase: 6
+description: Session ID accepted from URL parameter, not rotated after login
+vulnerabilities: [{type: Session Fixation, cwes: [CWE-384]}]
+owasp_2025: [A07:2025]
+flag_format: "S7BEN{sess10n_f1xat10n_[dynamic]}"
+flag_dynamic: true
+services: {app: {port: 8094}}
+telemetry: {enabled: true}
+author: Strike7 Security Team

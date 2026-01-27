@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inventory Pro - Business Management</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-slate-100 min-h-screen">
+    <header class="bg-white shadow">
+        <div class="container mx-auto px-6 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-emerald-600 rounded-lg flex items-center justify-center">
+                        <span class="text-white text-xl">📦</span>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold text-gray-800">Inventory Pro</h1>
+                        <p class="text-sm text-gray-500">Business Inventory Management</p>
+                    </div>
+                </div>
+                <nav class="flex items-center space-x-6">
+                    <a href="#" onclick="loadProducts()" class="text-gray-600 hover:text-gray-900">Products</a>
+                    <a href="#" onclick="loadCategories()" class="text-gray-600 hover:text-gray-900">Categories</a>
+                    <a href="#" onclick="loadOrders()" class="text-gray-600 hover:text-gray-900">Orders</a>
+                    <a href="#" onclick="showSearch()" class="text-gray-600 hover:text-gray-900">Search</a>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-6 py-8">
+        <!-- Search Bar -->
+        <div class="mb-8 bg-white rounded-lg shadow p-6">
+            <h2 class="text-lg font-semibold mb-4">Inventory Search</h2>
+            <div class="flex space-x-4">
+                <input type="text" id="search-input" placeholder="Search products by name or SKU..."
+                    class="flex-1 px-4 py-2 border rounded-lg focus:ring-2 focus:ring-emerald-500">
+                <button onclick="searchProducts()"
+                    class="px-6 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-500">
+                    Search
+                </button>
+            </div>
+        </div>
+
+        <!-- Data Display -->
+        <div class="bg-white rounded-lg shadow p-6">
+            <h2 id="data-title" class="text-lg font-semibold mb-4">Products</h2>
+            <pre id="data-output" class="bg-gray-50 rounded p-4 overflow-auto max-h-96 text-sm">
+Loading...</pre>
+        </div>
+    </main>
+
+    <script>
+        const API = '';
+
+        async function loadProducts() {
+            document.getElementById('data-title').textContent = 'Products';
+            const res = await fetch('/api/products');
+            const data = await res.json();
+            document.getElementById('data-output').textContent = JSON.stringify(data, null, 2);
+        }
+
+        async function loadCategories() {
+            document.getElementById('data-title').textContent = 'Categories';
+            const res = await fetch('/api/categories');
+            const data = await res.json();
+            document.getElementById('data-output').textContent = JSON.stringify(data, null, 2);
+        }
+
+        async function loadOrders() {
+            document.getElementById('data-title').textContent = 'Orders';
+            const res = await fetch('/api/orders');
+            const data = await res.json();
+            document.getElementById('data-output').textContent = JSON.stringify(data, null, 2);
+        }
+
+        async function searchProducts() {
+            const query = document.getElementById('search-input').value;
+            document.getElementById('data-title').textContent = 'Search Results';
+            const res = await fetch(`/api/inventory/search?q=${encodeURIComponent(query)}`);
+            const data = await res.json();
+            document.getElementById('data-output').textContent = JSON.stringify(data, null, 2);
+        }
+
+        function showSearch() {
+            document.getElementById('search-input').focus();
+        }
+
+        // Load products on page load
+        loadProducts();
+    </script>
+</body>
+
+</html>

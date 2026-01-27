@@ -1,0 +1,45 @@
+id: S7BEN-MED-008
+name: "n8n Workflow Automation RCE"
+cve: CVE-2025-68613
+version: "1.0.0"
+difficulty: Medium
+category: Remote Code Execution
+
+description: |
+  n8n is an open-source workflow automation platform. CVE-2025-68613 allows 
+  authenticated users with workflow creation privileges to execute arbitrary 
+  code on the server via expression injection in workflow definitions.
+
+vulnerabilities:
+  - type: Remote Code Execution
+    category: Code Injection
+    cwes:
+      - CWE-94
+      - CWE-913
+
+objective: "Retrieve the flag from /flag.txt by exploiting the expression injection vulnerability"
+
+flag_format: "S7BEN{...}"
+
+services:
+  target:
+    port: 5678
+    protocol: http
+    credentials:
+      username: admin@strike7.local
+      password: Strike7Demo!
+
+hints:
+  - "n8n expressions are evaluated using {{ }}"
+  - "Look for ways to access Node.js runtime from expressions"
+  - "The process object might be accessible"
+
+tags:
+  - rce
+  - command-injection
+  - authentication
+  - web
+  - workflow
+
+author: Strike7 Security Team
+created: 2025-01-06

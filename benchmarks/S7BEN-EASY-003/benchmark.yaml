@@ -1,0 +1,40 @@
+id: S7BEN-EASY-003
+name: "Race Condition - Balance Bypass"
+cve: N/A
+version: "1.0.0"
+difficulty: Easy
+category: Insecure Design
+
+description: |
+  A simple banking application vulnerable to a race condition.
+  The withdrawal logic suffers from a time-of-check to time-of-use (TOCTOU) flaw due to an artificial delay.
+  Attackers can simulate simultaneous requests to withdraw more money than available.
+
+vulnerabilities:
+  - type: Race Condition
+    category: Insecure Design
+    cwes:
+      - CWE-362
+
+objective: "Withdraw more money than your initial balance to drive the account into the negative and retrieve the flag."
+
+flag_format: "S7BEN{...}"
+
+services:
+  target:
+    port: 5000
+    protocol: http
+
+hints:
+  - "The application checks your balance, waits, then effectively sets your new balance."
+  - "What happens if two requests check the balance at the exact same time?"
+  - "Try sending multiple requests in parallel using multithreading."
+
+tags:
+  - race-condition
+  - logic-flaw
+  - web
+  - python
+
+author: Strike7 Security Team
+created: 2026-01-07

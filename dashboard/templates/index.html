@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Strike7 Benchmark Dashboard</title>
+    <link rel="stylesheet" href="/static/css/dashboard.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+        rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <h1>
+                    <span class="logo-text">STRIKE7</span>
+                    <span class="logo-suffix">BENCHMARK DASHBOARD</span>
+                </h1>
+                <p class="subtitle">AI Penetration Testing Challenge Suite</p>
+            </div>
+            <div class="header-stats">
+                <div class="stat-card">
+                    <span class="stat-value" id="total-count">0</span>
+                    <span class="stat-label">Total Benchmarks</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-value" id="owasp-coverage">0</span>
+                    <span class="stat-label">OWASP Categories</span>
+                </div>
+                <div class="stat-card" id="running-card">
+                    <span class="stat-value" id="running-count">0</span>
+                    <span class="stat-label">Active Containers</span>
+                </div>
+            </div>
+        </header>
+
+        <div class="main-content">
+            <!-- Sidebar Filters -->
+            <aside class="sidebar">
+                <div class="filter-section">
+                    <h3>Filters</h3>
+
+                    <!-- Search -->
+                    <div class="filter-group">
+                        <label>Search</label>
+                        <input type="text" id="search-input" placeholder="Search by ID or name...">
+                    </div>
+
+                    <!-- Category Filter -->
+                    <div class="filter-group">
+                        <label>Category</label>
+                        <select id="category-filter">
+                            <option value="">All Categories</option>
+                            <option value="EASY">EASY (Training)</option>
+                            <option value="MED">MED (Evaluation)</option>
+                            <option value="HARD">HARD (Adversarial)</option>
+                            <option value="VHARD">VHARD (Multi-Container)</option>
+                            <option value="CVE">CVE (Real Exploits)</option>
+                        </select>
+                    </div>
+
+                    <!-- OWASP Filter -->
+                    <div class="filter-group">
+                        <label>OWASP Top 10</label>
+                        <select id="owasp-filter">
+                            <option value="">All OWASP</option>
+                            <option value="A01">A01 - Broken Access Control</option>
+                            <option value="A02">A02 - Cryptographic Failures</option>
+                            <option value="A03">A03 - Injection</option>
+                            <option value="A04">A04 - Insecure Design</option>
+                            <option value="A05">A05 - Security Misconfiguration</option>
+                            <option value="A06">A06 - Vulnerable Components</option>
+                            <option value="A07">A07 - Auth Failures</option>
+                            <option value="A08">A08 - Data Integrity Failures</option>
+                            <option value="A09">A09 - Logging Failures</option>
+                            <option value="A10">A10 - SSRF</option>
+                        </select>
+                    </div>
+
+                    <!-- Difficulty Filter -->
+                    <div class="filter-group">
+                        <label>Difficulty</label>
+                        <select id="difficulty-filter">
+                            <option value="">All Difficulties</option>
+                            <option value="1">Level 1 - Very Easy</option>
+                            <option value="2">Level 2 - Easy</option>
+                            <option value="3">Level 3 - Easy+</option>
+                            <option value="4">Level 4 - Medium-</option>
+                            <option value="5">Level 5 - Medium</option>
+                            <option value="6">Level 6 - Medium+</option>
+                            <option value="7">Level 7 - Hard</option>
+                            <option value="8">Level 8 - Hard+</option>
+                            <option value="9">Level 9 - Very Hard</option>
+                        </select>
+                    </div>
+
+                    <!-- Phase Filter -->
+                    <div class="filter-group">
+                        <label>Phase</label>
+                        <select id="phase-filter">
+                            <option value="">All Phases</option>
+                            <option value="1">Phase 1</option>
+                            <option value="2">Phase 2</option>
+                            <option value="3">Phase 3</option>
+                            <option value="4">Phase 4</option>
+                            <option value="5">Phase 5</option>
+                            <option value="6">Phase 6</option>
+                        </select>
+                    </div>
+
+                    <button id="reset-filters" class="btn-reset">Reset Filters</button>
+                </div>
+
+                <!-- Quick Stats -->
+                <div class="quick-stats">
+                    <h3>Distribution</h3>
+                    <div id="category-breakdown"></div>
+                </div>
+            </aside>
+
+            <!-- Main Content Area -->
+            <main class="content">
+                <!-- Tabs -->
+                <div class="tabs">
+                    <button class="tab-btn active" data-tab="benchmarks">BENCHMARKS</button>
+                    <button class="tab-btn" data-tab="statistics">STATISTICS</button>
+                    <button class="tab-btn" data-tab="visualizations">VISUALIZATIONS</button>
+                </div>
+
+                <!-- Benchmarks Tab -->
+                <div id="benchmarks-tab" class="tab-content active">
+                    <div class="controls">
+                        <span id="results-count">Showing 0 benchmarks</span>
+                        <div class="view-controls">
+                            <button id="view-grid" class="view-btn active">Grid</button>
+                            <button id="view-list" class="view-btn">List</button>
+                        </div>
+                    </div>
+
+                    <div id="benchmarks-container" class="benchmarks-grid">
+                        <!-- Benchmarks will be loaded here -->
+                    </div>
+                </div>
+
+                <!-- Statistics Tab -->
+                <div id="statistics-tab" class="tab-content">
+                    <div class="stats-grid">
+                        <div class="section-card">
+                            <h3>Category Distribution</h3>
+                            <div id="category-stats"></div>
+                        </div>
+                        <div class="section-card">
+                            <h3>OWASP Coverage</h3>
+                            <div id="owasp-stats"></div>
+                        </div>
+                        <div class="section-card">
+                            <h3>Difficulty Distribution</h3>
+                            <div id="difficulty-stats"></div>
+                        </div>
+                        <div class="section-card">
+                            <h3>Top CWE Categories</h3>
+                            <div id="cwe-stats"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Visualizations Tab -->
+                <div id="visualizations-tab" class="tab-content">
+                    <div class="charts-grid">
+                        <div class="section-card">
+                            <h3>Category Distribution</h3>
+                            <canvas id="categoryChart"></canvas>
+                        </div>
+                        <div class="section-card">
+                            <h3>OWASP Top 10 Coverage</h3>
+                            <canvas id="owaspChart"></canvas>
+                        </div>
+                        <div class="section-card">
+                            <h3>Difficulty Distribution</h3>
+                            <canvas id="difficultyChart"></canvas>
+                        </div>
+                        <div class="section-card">
+                            <h3>Phase Distribution</h3>
+                            <canvas id="phaseChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Flag Submission Modal -->
+    <div id="flagModal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                Submit Flag - <span id="modalBenchmarkId"></span>
+                <span class="close-modal" onclick="closeModal()" style="float: right; cursor: pointer;">&times;</span>
+            </div>
+            <div class="modal-body">
+                <p>Container running on: <code
+                        style="color: var(--s7-accent);">localhost:<span id="modalPort"></span></code></p>
+
+                <input type="text" id="flagInput" placeholder="S7BEN{...}" autocomplete="off">
+
+                <div id="resultMessage" class="result-message" style="display:none;"></div>
+
+                <div style="font-size: 0.875rem; color: var(--s7-text-secondary); margin-top: 1rem;">
+                    Attempts: <span id="attemptCount">0</span> |
+                    Time elapsed: <span id="timeElapsed">0s</span>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-container" onclick="closeModal()">Cancel</button>
+                <button class="btn-container btn-submit-flag" onclick="submitFlagFromModal()">Submit Flag</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Benchmark Modal (Details) -->
+    <div id="detailsModal" class="modal-overlay">
+        <div class="modal-content modal-large">
+            <div class="modal-header">
+                <span id="detailsBenchmarkId"></span>
+                <span class="close-modal" onclick="closeDetailsModal()" style="float: right; cursor: pointer;">&times;</span>
+            </div>
+
+            <div class="modal-body">
+                <div class="details-section">
+                    <h3>Configuration</h3>
+                    <table class="details-table">
+                        <tr>
+                            <td>Category</td>
+                            <td id="detailsCategory"></td>
+                        </tr>
+                        <tr>
+                            <td>OWASP</td>
+                            <td id="detailsOwasp"></td>
+                        </tr>
+                        <tr>
+                            <td>CWE</td>
+                            <td id="detailsCwe"></td>
+                        </tr>
+                        <tr>
+                            <td>Port</td>
+                            <td id="detailsPort"></td>
+                        </tr>
+                        <tr>
+                            <td>Difficulty</td>
+                            <td id="detailsDifficulty"></td>
+                        </tr>
+                    </table>
+                </div>
+
+                <div class="details-section">
+                    <h3>Testing Instructions</h3>
+                    <div class="instructions-box">
+                        <p><strong>1. Start the container</strong></p>
+                        <p>Click "Start Container" and wait for it to be ready (~20-30 seconds)</p>
+
+                        <p><strong>2. Access the application</strong></p>
+                        <p>Open <code>http://localhost:<span class="details-port-number"></span></code> in your browser</p>
+
+                        <p><strong>3. Identify the vulnerability</strong></p>
+                        <p>Look for signs of <span id="detailsVulnType"></span></p>
+
+                        <p><strong>4. Exploit and capture flag</strong></p>
+                        <p>The flag format is: <code id="detailsFlagFormat"></code></p>
+
+                        <p><strong>5. Submit the flag</strong></p>
+                        <p>Click "Submit Flag" and paste the captured flag</p>
+                    </div>
+                </div>
+
+                <div class="details-section">
+                    <h3>API Usage</h3>
+                    <div class="code-block">
+                        <pre><code># Start container
+curl -X POST http://localhost:5500/api/benchmark/<span class="details-benchmark-id"></span>/start
+
+# Submit flag
+curl -X POST http://localhost:5500/api/benchmark/<span class="details-benchmark-id"></span>/submit-flag \
+  -H "Content-Type: application/json" \
+  -d '{"flag":"S7BEN{...}"}'
+
+# Stop container
+curl -X POST http://localhost:5500/api/benchmark/<span class="details-benchmark-id"></span>/stop</code></pre>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn-container" onclick="closeDetailsModal()">Close</button>
+                <button class="btn-container btn-start" onclick="startFromDetails()">Start Container</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/js/dashboard.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,45 @@
+services:
+  app:
+    build:
+      context: ./app
+      args:
+        - FLAG_SECRET
+    ports:
+      - "5000:5000"
+    environment:
+      - FLAG_SECRET=${FLAG_SECRET:-strike7-ssrf-secret-key}
+      - METADATA_SERVICE_URL=http://metadata:8080
+    depends_on:
+      metadata:
+        condition: service_healthy
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:5000/health" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped
+    networks:
+      - internal
+
+  metadata:
+    build:
+      context: ./metadata-service
+      args:
+        - FLAG_SECRET
+    environment:
+      - FLAG_SECRET=${FLAG_SECRET:-strike7-ssrf-secret-key}
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8080/health" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped
+    networks:
+      - internal
+    # Internal only - not exposed to host
+
+networks:
+  internal:
+    driver: bridge

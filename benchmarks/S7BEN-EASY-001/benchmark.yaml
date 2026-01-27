@@ -1,0 +1,42 @@
+id: S7BEN-EASY-001
+name: "CSRF - Password Change"
+cve: N/A
+version: "1.0.0"
+difficulty: Easy
+category: Broken Access Control
+
+description: |
+  A web application with session-based authentication that lacks CSRF protection.
+  The password change form does not validate CSRF tokens, allowing attackers to trick
+  authenticated users into changing their passwords by visiting a malicious page.
+
+vulnerabilities:
+  - type: Cross-Site Request Forgery (CSRF)
+    category: Broken Access Control
+    cwes:
+      - CWE-352
+
+objective: "Craft a malicious HTML page that performs a CSRF attack to change the admin password to 'hacked', then retrieve the flag from the admin dashboard."
+
+flag_format: "S7BEN{...}"
+
+services:
+  target:
+    port: 5000
+    protocol: http
+
+hints:
+  - "The password change endpoint does not require CSRF tokens"
+  - "Create an HTML page with an auto-submitting form"
+  - "The admin must be logged in for the attack to work"
+  - "Change the password to 'hacked' to get the flag"
+
+tags:
+  - csrf
+  - broken-access-control
+  - session-security
+  - web
+  - python
+
+author: Strike7 Security Team
+created: 2026-01-07

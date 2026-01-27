@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Strike7 URL Fetcher - SSRF Demo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gradient-to-br from-gray-50 to-blue-100 min-h-screen">
+    <div class="container mx-auto px-4 py-12">
+        <div class="max-w-4xl mx-auto">
+            <!-- Header -->
+            <div class="text-center mb-8">
+                <h1 class="text-4xl font-bold text-gray-800 mb-2">Strike7 URL Fetcher</h1>
+                <p class="text-gray-600">Fetch and Preview External URLs</p>
+            </div>
+
+            <!-- Security Badge -->
+            <div class="bg-green-50 border-l-4 border-green-400 p-4 mb-6">
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        <svg class="h-5 w-5 text-green-400" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-sm text-green-700">
+                            <strong>Protected by SSRF Filter:</strong> This service validates URLs to prevent
+                            Server-Side Request Forgery attacks against internal services.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Vulnerability Warning -->
+            <div class="bg-red-50 border-l-4 border-red-400 p-4 mb-6">
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-sm text-red-700">
+                            <strong>Vulnerability:</strong> Despite SSRF protection, the filter can be bypassed using
+                            redirects, DNS rebinding, IPv6, or alternative encodings to access internal services.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- URL Fetcher -->
+            <div class="bg-white rounded-lg shadow-xl p-8 mb-6">
+                <h2 class="text-2xl font-semibold text-gray-800 mb-6">Fetch URL</h2>
+
+                <div class="space-y-4">
+                    <div>
+                        <label for="url" class="block text-sm font-medium text-gray-700 mb-2">
+                            Enter URL to fetch:
+                        </label>
+                        <input
+                            type="text"
+                            id="url"
+                            placeholder="https://example.com"
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        >
+                    </div>
+
+                    <div class="flex gap-2">
+                        <button
+                            onclick="fetchURL()"
+                            class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-6 rounded-lg transition duration-200"
+                        >
+                            Fetch URL
+                        </button>
+                        <button
+                            onclick="checkURL()"
+                            class="bg-gray-600 hover:bg-gray-700 text-white font-medium py-3 px-6 rounded-lg transition duration-200"
+                        >
+                            Check Filter
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Example URLs -->
+                <div class="mt-6 p-4 bg-gray-50 rounded-lg">
+                    <h3 class="font-semibold text-gray-800 mb-2">Try these URLs:</h3>
+                    <div class="space-y-2 text-sm">
+                        <div class="flex justify-between items-center">
+                            <code class="bg-white px-2 py-1 rounded">https://example.com</code>
+                            <button onclick="document.getElementById('url').value='https://example.com'" class="text-blue-600 hover:text-blue-800 text-xs">Use</button>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <code class="bg-white px-2 py-1 rounded">http://localhost:5000/health</code>
+                            <button onclick="document.getElementById('url').value='http://localhost:5000/health'" class="text-blue-600 hover:text-blue-800 text-xs">Use</button>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <code class="bg-white px-2 py-1 rounded">http://127.0.0.1:8080</code>
+                            <button onclick="document.getElementById('url').value='http://127.0.0.1:8080'" class="text-blue-600 hover:text-blue-800 text-xs">Use</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SSRF Filter Info -->
+            <div class="bg-white rounded-lg shadow-xl p-6 mb-6">
+                <h3 class="text-lg font-semibold text-gray-800 mb-4">SSRF Protection Details</h3>
+                <div class="space-y-2 text-sm text-gray-700">
+                    <p class="font-semibold mb-2">Blocked patterns:</p>
+                    <ul class="list-disc list-inside space-y-1 text-gray-600 ml-4">
+                        <li><code>localhost</code>, <code>127.0.0.1</code>, <code>0.0.0.0</code></li>
+                        <li><code>169.254.169.254</code> (AWS metadata)</li>
+                        <li>Keywords: <code>metadata</code>, <code>internal</code></li>
+                        <li>Private IP ranges: <code>10.x.x.x</code>, <code>172.16-31.x.x</code>, <code>192.168.x.x</code></li>
+                    </ul>
+                    <p class="mt-4 p-3 bg-yellow-50 rounded text-xs">
+                        <strong>Note:</strong> The filter may have bypass opportunities. Can you find them?
+                    </p>
+                </div>
+            </div>
+
+            <!-- Exploitation Hint -->
+            <div class="bg-white rounded-lg shadow-xl p-6">
+                <h3 class="text-lg font-semibold text-gray-800 mb-4">🎯 Exploitation Strategy</h3>
+                <div class="space-y-3 text-sm text-gray-700">
+                    <div class="bg-yellow-50 p-3 rounded">
+                        <strong>Step 1:</strong> Test SSRF filter with blocked URLs (localhost, 127.0.0.1)
+                    </div>
+                    <div class="bg-blue-50 p-3 rounded">
+                        <strong>Step 2:</strong> Identify filter bypass techniques (see TESTING.md)
+                    </div>
+                    <div class="bg-green-50 p-3 rounded">
+                        <strong>Step 3:</strong> Access internal metadata service at http://metadata:8080
+                    </div>
+                    <div class="bg-purple-50 p-3 rounded">
+                        <strong>Step 4:</strong> Retrieve admin token from /latest/meta-data/admin-token
+                    </div>
+                    <div class="bg-red-50 p-3 rounded">
+                        <strong>Step 5:</strong> Submit token to /api/verify-metadata to get flag
+                    </div>
+                </div>
+
+                <div class="mt-4 p-3 bg-gray-100 rounded text-xs">
+                    <strong>Hint:</strong> Try HTTP redirects, IPv6 localhost (::1), or the /redirect endpoint!
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Result Modal -->
+    <div id="resultModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[80vh] overflow-y-auto">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xl font-semibold text-gray-800">Response</h3>
+                    <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+                <div id="resultContent" class="text-sm"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function fetchURL() {
+            const url = document.getElementById('url').value.trim();
+
+            if (!url) {
+                alert('Please enter a URL');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/fetch-url', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({url: url})
+                });
+
+                const data = await response.json();
+
+                if (data.status === 'success') {
+                    let html = `
+                        <div class="space-y-3">
+                            <div class="bg-green-50 p-4 rounded">
+                                <strong class="text-green-800">✅ URL fetched successfully!</strong>
+                            </div>
+                            <div class="p-3 bg-gray-50 rounded"><strong>Original URL:</strong> ${data.url}</div>
+                            <div class="p-3 bg-gray-50 rounded"><strong>Final URL:</strong> ${data.final_url}</div>
+                            <div class="p-3 bg-gray-50 rounded"><strong>Status Code:</strong> ${data.status_code}</div>
+                            <div class="p-3 bg-gray-50 rounded"><strong>Content-Type:</strong> ${data.content_type}</div>
+                            ${data.redirected ? '<div class="p-3 bg-yellow-50 rounded"><strong>⚠️ Redirected:</strong> Yes</div>' : ''}
+                            <div class="p-3 bg-gray-50 rounded">
+                                <strong>Content:</strong>
+                                <pre class="mt-2 p-2 bg-white rounded text-xs overflow-x-auto">${escapeHtml(data.content)}</pre>
+                            </div>
+                        </div>
+                    `;
+                    showModal(html);
+                } else {
+                    showModal(`
+                        <div class="bg-red-50 border-l-4 border-red-400 p-4">
+                            <strong class="text-red-800">❌ Error</strong>
+                            <p class="mt-2 text-sm text-red-700">${data.message}</p>
+                        </div>
+                    `);
+                }
+            } catch (error) {
+                showModal(`
+                    <div class="bg-red-50 p-4 rounded text-red-800">
+                        Error: ${error.message}
+                    </div>
+                `);
+            }
+        }
+
+        async function checkURL() {
+            const url = document.getElementById('url').value.trim();
+
+            if (!url) {
+                alert('Please enter a URL');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/check-url', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({url: url})
+                });
+
+                const data = await response.json();
+
+                const statusColor = data.blocked ? 'red' : 'green';
+                const statusIcon = data.blocked ? '❌' : '✅';
+
+                showModal(`
+                    <div class="space-y-3">
+                        <div class="bg-${statusColor}-50 p-4 rounded">
+                            <strong class="text-${statusColor}-800">${statusIcon} ${data.blocked ? 'BLOCKED' : 'ALLOWED'}</strong>
+                        </div>
+                        <div class="p-3 bg-gray-50 rounded"><strong>URL:</strong> ${data.url}</div>
+                        <div class="p-3 bg-gray-50 rounded"><strong>Reason:</strong> ${data.reason}</div>
+                        <div class="p-3 bg-blue-50 rounded text-xs">${data.note}</div>
+                    </div>
+                `);
+            } catch (error) {
+                showModal(`<div class="bg-red-50 p-4 rounded text-red-800">Error: ${error.message}</div>`);
+            }
+        }
+
+        function showModal(content) {
+            document.getElementById('resultContent').innerHTML = content;
+            document.getElementById('resultModal').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('resultModal').classList.add('hidden');
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+    </script>
+</body>
+</html>

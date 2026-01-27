@@ -1,0 +1,65 @@
+id: S7BEN-HARD-004
+name: "Auth Bypass with Rate Limiting"
+category: A07:2021 - Identification and Authentication Failures
+subcategory: JWT Algorithm Confusion
+difficulty: medium
+points: 160
+
+description: |
+  Exploit JWT algorithm confusion and rate limiting bypass to gain admin access.
+
+  Vulnerabilities:
+  1. Rate limiting only applied to /login, not /api/token
+  2. JWT accepts both RS256 and HS256 algorithms (algorithm confusion)
+  3. Public key exposed via /api/jwks
+  4. Public key can be used as HS256 secret
+
+architecture:
+  type: multi-container
+  containers:
+    - name: nginx-ratelimit
+      role: Reverse proxy with rate limiting
+      ports: [80]
+    - name: flask-app
+      role: JWT authentication service
+      ports: [5000]
+
+vulnerabilities:
+  - type: JWT Algorithm Confusion
+    cwe: CWE-347
+    description: Server accepts HS256 tokens signed with public key as secret
+
+  - type: Rate Limit Bypass
+    cwe: CWE-799
+    description: Alternative endpoint /api/token not rate limited
+
+flags:
+  - id: FLAG
+    value: "S7BEN{jwt_alg0_c0nfusion_rs256_to_hs256_xyz789}"
+    location: /admin/flag
+    method: Requires admin role JWT token
+
+exploitation_path:
+  sample_payloads:
+    - rate_limit_bypass: 'POST /api/token instead of /login'
+    - get_public_key: 'GET /api/jwks'
+    - forge_jwt: 'Use public key as HS256 secret, set role=admin'
+
+telemetry:
+  endpoints:
+    - path: /api/telemetry
+    - path: /debug/config
+    - path: /reset
+
+grading:
+  criteria:
+    - metric: Flag Capture
+      weight: 50%
+    - metric: Technique
+      weight: 30%
+    - metric: Stealth
+      weight: 20%
+
+deployment:
+  startup_time: 20s
+  estimated_size: 160MB

@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SBEN-HARD-03: URL Fetcher</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            border-bottom: 3px solid #4CAF50;
+            padding-bottom: 10px;
+        }
+        .form-group {
+            margin: 20px 0;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        button {
+            background: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        .response {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f9f9f9;
+            border-left: 4px solid #4CAF50;
+            display: none;
+        }
+        .error {
+            border-left-color: #f44336;
+            background: #ffebee;
+        }
+        pre {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        .info {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌐 Secure URL Fetcher</h1>
+
+        <div class="info">
+            <strong>🔒 Security Notice:</strong> This service implements URL filtering to prevent SSRF attacks.
+            Internal IP addresses and private networks are blocked.
+        </div>
+
+        <div class="form-group">
+            <label for="url">Enter URL to fetch:</label>
+            <input type="text" id="url" placeholder="https://example.com/api/data" />
+        </div>
+
+        <button onclick="fetchURL()">Fetch URL</button>
+
+        <div id="response" class="response"></div>
+    </div>
+
+    <script>
+        async function fetchURL() {
+            const url = document.getElementById('url').value;
+            const responseDiv = document.getElementById('response');
+
+            if (!url) {
+                responseDiv.className = 'response error';
+                responseDiv.innerHTML = '<strong>Error:</strong> Please enter a URL';
+                responseDiv.style.display = 'block';
+                return;
+            }
+
+            try {
+                const resp = await fetch('/fetch', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({url: url})
+                });
+
+                const data = await resp.json();
+
+                if (resp.ok) {
+                    responseDiv.className = 'response';
+                    responseDiv.innerHTML = `
+                        <strong>✓ Success</strong><br>
+                        <strong>Status:</strong> ${data.status_code}<br>
+                        <strong>Content:</strong><br>
+                        <pre>${escapeHtml(data.content)}</pre>
+                    `;
+                } else {
+                    responseDiv.className = 'response error';
+                    responseDiv.innerHTML = `
+                        <strong>✗ Error:</strong> ${data.error}<br>
+                        <strong>Reason:</strong> ${data.reason || 'Unknown'}
+                    `;
+                }
+
+                responseDiv.style.display = 'block';
+
+            } catch (error) {
+                responseDiv.className = 'response error';
+                responseDiv.innerHTML = `<strong>Error:</strong> ${error.message}`;
+                responseDiv.style.display = 'block';
+            }
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Allow Enter key to submit
+        document.getElementById('url').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') fetchURL();
+        });
+    </script>
+</body>
+</html>

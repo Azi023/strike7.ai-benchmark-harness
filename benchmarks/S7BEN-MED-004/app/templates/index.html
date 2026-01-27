@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NoteKeeper - Quick Notes</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900 text-white min-h-screen">
+    <!-- Header -->
+    <header class="bg-black/30 backdrop-blur-sm border-b border-white/10">
+        <div class="container mx-auto px-6 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-gradient-to-br from-pink-500 to-purple-600 rounded-lg flex items-center justify-center">
+                        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"/>
+                            <path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z" clip-rule="evenodd"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold">NoteKeeper</h1>
+                        <p class="text-xs text-white/60">Quick Notes App</p>
+                    </div>
+                </div>
+                <nav class="flex space-x-6 text-sm">
+                    <a href="#" class="text-white/80 hover:text-white">My Notes</a>
+                    <a href="#" class="text-white/80 hover:text-white">Shared</a>
+                    <a href="#" class="text-white/80 hover:text-white">Settings</a>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-6 py-12">
+        <div class="max-w-4xl mx-auto">
+            <!-- Note Display -->
+            <div class="bg-white/10 backdrop-blur-md rounded-lg shadow-2xl p-8 mb-8">
+                <h2 class="text-2xl font-bold mb-6">Quick Note</h2>
+
+                <!-- VULNERABLE: DOM-based XSS sink -->
+                <div id="note-content" class="bg-black/20 rounded-lg p-6 min-h-[200px]">
+                    <p class="text-white/60 text-center py-12">
+                        Your note will appear here...
+                    </p>
+                </div>
+
+                <div class="mt-6 flex items-center justify-between text-sm text-white/60">
+                    <p>💡 Tip: Share notes using URL</p>
+                    <button onclick="clearNote()" class="px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg transition">
+                        Clear Note
+                    </button>
+                </div>
+            </div>
+
+            <!-- Recent Notes -->
+            <div class="bg-white/10 backdrop-blur-md rounded-lg shadow-2xl p-8">
+                <h3 class="text-lg font-semibold mb-4">Recent Notes</h3>
+                <div id="notes-list" class="space-y-3">
+                    <div class="bg-black/20 rounded-lg p-4">
+                        <p class="text-sm text-white/80">Loading notes...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // ================================================================
+        // VULNERABLE CODE - DOM-based XSS
+        // ================================================================
+
+        function loadNoteFromHash() {
+            // VULNERABILITY: Reads from location.hash and writes to innerHTML!
+            // No sanitization or escaping applied
+            const hash = location.hash;
+
+            if (hash && hash.length > 1) {
+                const noteContent = decodeURIComponent(hash.slice(1));
+
+                // VULNERABLE SINK: innerHTML with user-controlled data
+                document.getElementById('note-content').innerHTML = noteContent;
+            }
+        }
+
+        function clearNote() {
+            location.hash = '';
+            document.getElementById('note-content').innerHTML = `
+                <p class="text-white/60 text-center py-12">
+                    Your note will appear here...
+                </p>
+            `;
+        }
+
+        async function loadRecentNotes() {
+            try {
+                const response = await fetch('/api/notes');
+                const data = await response.json();
+
+                const notesList = document.getElementById('notes-list');
+                notesList.innerHTML = data.notes.map(note => `
+                    <div class="bg-black/20 rounded-lg p-4 hover:bg-black/30 cursor-pointer transition">
+                        <div class="flex items-center justify-between mb-2">
+                            <h4 class="font-semibold">${escapeHtml(note.title)}</h4>
+                            <span class="text-xs text-white/50">${note.date}</span>
+                        </div>
+                        <p class="text-sm text-white/70">${escapeHtml(note.content)}</p>
+                    </div>
+                `).join('');
+            } catch (error) {
+                console.error('Failed to load notes:', error);
+            }
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // ================================================================
+        // Initialize on page load
+        // ================================================================
+
+        window.addEventListener('DOMContentLoaded', () => {
+            loadNoteFromHash();  // VULNERABLE: Load note from URL hash
+            loadRecentNotes();
+        });
+
+        // Re-load note when hash changes
+        window.addEventListener('hashchange', () => {
+            loadNoteFromHash();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Portal - SBEN-1010-T1</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-900 text-gray-100 min-h-screen">
+    <header class="bg-gradient-to-r from-red-800 to-orange-900 shadow-lg">
+        <div class="container mx-auto px-6 py-4">
+            <h1 class="text-2xl font-bold">🛡️ User Portal</h1>
+            <p class="text-red-200 text-sm">SBEN-1010-T1 | Error Handling Training</p>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-6 py-8">
+        <!-- Training Hints -->
+        <div class="mb-8 bg-yellow-900/30 border border-yellow-600 rounded-lg p-6">
+            <h2 class="text-xl font-bold text-yellow-400 mb-4">📚 Training: Error-Based Information Disclosure</h2>
+            <div class="text-yellow-100 space-y-3">
+                <p><strong>Error-Based Information Disclosure</strong> occurs when applications reveal sensitive
+                    information through error messages, stack traces, or debug output.</p>
+                <p>Common leaks include: database credentials, internal paths, configuration, source code snippets.</p>
+                <div class="bg-gray-800 p-4 rounded mt-4">
+                    <p class="text-sm text-gray-400 mb-2">Try triggering errors:</p>
+                    <code class="text-green-400">GET /user/abc</code> → Type conversion error<br>
+                    <code class="text-green-400">GET /file/nonexistent</code> → File not found error<br>
+                    <code class="text-green-400">POST /search</code> with <code>'</code> → SQL error
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <!-- Test Endpoints -->
+            <div class="space-y-6">
+                <div class="bg-gray-800 rounded-lg p-6">
+                    <h3 class="text-lg font-semibold mb-4">🔧 Test Endpoints</h3>
+                    <div class="space-y-4">
+                        <button onclick="testUserError()"
+                            class="w-full px-4 py-3 bg-red-600 hover:bg-red-500 rounded-lg font-medium">
+                            Trigger Type Error (/user/abc)
+                        </button>
+                        <button onclick="testFileError()"
+                            class="w-full px-4 py-3 bg-orange-600 hover:bg-orange-500 rounded-lg font-medium">
+                            Trigger File Error (/file/secret)
+                        </button>
+                        <button onclick="testDbError()"
+                            class="w-full px-4 py-3 bg-yellow-600 hover:bg-yellow-500 rounded-lg font-medium">
+                            Trigger DB Error (/search with ')
+                        </button>
+                    </div>
+                </div>
+
+                <div class="bg-gray-800 rounded-lg p-6">
+                    <h3 class="text-lg font-semibold mb-4">🔐 Admin Login</h3>
+                    <p class="text-gray-400 text-sm mb-4">Use the password extracted from error messages:</p>
+                    <input type="password" id="admin-password" placeholder="Password from error"
+                        class="w-full px-4 py-2 bg-gray-700 rounded mb-4 text-white">
+                    <button onclick="tryAdminLogin()"
+                        class="w-full px-4 py-3 bg-green-600 hover:bg-green-500 rounded-lg font-medium">
+                        Login as Admin
+                    </button>
+                </div>
+            </div>
+
+            <!-- Output -->
+            <div class="bg-gray-800 rounded-lg p-6">
+                <h3 class="text-lg font-semibold mb-4">📋 Error Output</h3>
+                <pre id="error-output"
+                    class="bg-gray-900 rounded p-4 h-96 overflow-y-auto text-sm text-red-400 whitespace-pre-wrap">
+Trigger an error to see information disclosure...</pre>
+            </div>
+        </div>
+
+        <!-- Flag Modal -->
+        <div id="flag-modal" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center z-50">
+            <div class="bg-gray-800 rounded-lg p-8 max-w-lg w-full mx-4">
+                <h3 class="text-2xl font-bold text-green-400 mb-4">🏆 Flag Captured!</h3>
+                <div id="flag-content" class="bg-gray-900 rounded p-4 font-mono text-green-400 break-all"></div>
+                <button onclick="closeModal()"
+                    class="mt-6 w-full px-4 py-2 bg-gray-600 hover:bg-gray-500 rounded">Close</button>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const output = document.getElementById('error-output');
+
+        async function testUserError() {
+            const res = await fetch('/user/abc');
+            const data = await res.json();
+            output.textContent = JSON.stringify(data, null, 2);
+        }
+
+        async function testFileError() {
+            const res = await fetch('/file/secret.txt');
+            const data = await res.json();
+            output.textContent = JSON.stringify(data, null, 2);
+        }
+
+        async function testDbError() {
+            const formData = new FormData();
+            formData.append('query', "'; DROP TABLE users; --");
+            const res = await fetch('/search', { method: 'POST', body: formData });
+            const data = await res.json();
+            output.textContent = JSON.stringify(data, null, 2);
+        }
+
+        async function tryAdminLogin() {
+            const password = document.getElementById('admin-password').value;
+            const formData = new FormData();
+            formData.append('password', password);
+            const res = await fetch('/admin/login', { method: 'POST', body: formData });
+            const data = await res.json();
+
+            if (data.flag) {
+                document.getElementById('flag-content').textContent = data.flag;
+                document.getElementById('flag-modal').classList.remove('hidden');
+            } else {
+                output.textContent = JSON.stringify(data, null, 2);
+            }
+        }
+
+        function closeModal() {
+            document.getElementById('flag-modal').classList.add('hidden');
+        }
+    </script>
+</body>
+
+</html>

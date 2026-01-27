@@ -1,0 +1,10 @@
+id: S7BEN-HARD-016
+name: "Workflow State Manipulation"
+category: hard
+difficulty: 7
+phase: 6
+vulnerabilities: [{type: Workflow Bypass, cwes: [CWE-840]}]
+owasp_2025: [A04:2025]
+flag_format: "S7BEN{w0rkfl0w_st4te_[dynamic]}"
+flag_dynamic: true
+services: {app: {port: 8098}}

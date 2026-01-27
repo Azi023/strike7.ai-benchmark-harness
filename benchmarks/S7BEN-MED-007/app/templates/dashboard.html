@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Strike7 JWT Demo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gradient-to-br from-gray-50 to-indigo-100 min-h-screen">
+    <div class="container mx-auto px-4 py-12">
+        <div class="max-w-2xl mx-auto">
+            <!-- Header -->
+            <div class="text-center mb-8">
+                <h1 class="text-3xl font-bold text-gray-800 mb-2">Dashboard</h1>
+                <p class="text-gray-600">Welcome, <strong>{{ username }}</strong>!</p>
+            </div>
+
+            <!-- User Info Card -->
+            <div class="bg-white rounded-lg shadow-xl p-8 mb-6">
+                <h2 class="text-xl font-semibold text-gray-800 mb-4">Your Profile</h2>
+
+                <div class="space-y-3">
+                    <div class="flex justify-between items-center p-3 bg-gray-50 rounded">
+                        <span class="text-gray-600">Username:</span>
+                        <span class="font-medium text-gray-800">{{ username }}</span>
+                    </div>
+                    <div class="flex justify-between items-center p-3 bg-gray-50 rounded">
+                        <span class="text-gray-600">Role:</span>
+                        <span class="font-medium">
+                            {% if role == 'admin' %}
+                                <span class="px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-sm">Admin</span>
+                            {% else %}
+                                <span class="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">User</span>
+                            {% endif %}
+                        </span>
+                    </div>
+                </div>
+
+                <button
+                    onclick="viewProfile()"
+                    class="mt-4 w-full bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-4 rounded-lg transition duration-200"
+                >
+                    View JWT Details
+                </button>
+            </div>
+
+            <!-- Admin Panel -->
+            {% if role == 'admin' %}
+            <div class="bg-purple-50 border-l-4 border-purple-400 p-6 mb-6 rounded">
+                <h3 class="font-semibold text-purple-800 mb-3">Admin Access Granted</h3>
+                <p class="text-sm text-purple-700 mb-4">
+                    You have administrator privileges. You can access the flag endpoint.
+                </p>
+                <button
+                    onclick="getFlag()"
+                    class="bg-purple-600 hover:bg-purple-700 text-white font-medium py-2 px-4 rounded-lg transition duration-200"
+                >
+                    Get Flag
+                </button>
+            </div>
+            {% else %}
+            <div class="bg-yellow-50 border-l-4 border-yellow-400 p-6 mb-6 rounded">
+                <h3 class="font-semibold text-yellow-800 mb-3">Limited Access</h3>
+                <p class="text-sm text-yellow-700">
+                    You are logged in as a regular user. Only administrators can access the flag endpoint.
+                </p>
+            </div>
+            {% endif %}
+
+            <!-- Exploitation Tools -->
+            <div class="bg-white rounded-lg shadow-xl p-6">
+                <h3 class="text-lg font-semibold text-gray-800 mb-4">JWT Tools</h3>
+
+                <div class="space-y-3">
+                    <a
+                        href="/api/public-key"
+                        target="_blank"
+                        class="block w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded-lg text-center transition duration-200"
+                    >
+                        Download RSA Public Key
+                    </a>
+
+                    <a
+                        href="/.well-known/jwks.json"
+                        target="_blank"
+                        class="block w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded-lg text-center transition duration-200"
+                    >
+                        View JWKS Endpoint
+                    </a>
+                </div>
+
+                <div class="mt-4 p-3 bg-gray-50 rounded text-xs">
+                    <strong>Hint:</strong> The application accepts both RS256 and HS256 algorithms.
+                    What happens if you sign a token with HS256 using the public key as the secret?
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Result Modal -->
+    <div id="resultModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[80vh] overflow-y-auto">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xl font-semibold text-gray-800">Result</h3>
+                    <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+                <div id="resultContent" class="text-sm"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function viewProfile() {
+            try {
+                const response = await fetch('/api/profile');
+                const data = await response.json();
+
+                if (data.status === 'success') {
+                    showModal(`
+                        <div class="space-y-3">
+                            <div class="bg-green-50 p-4 rounded">
+                                <strong class="text-green-800">JWT Profile Information</strong>
+                            </div>
+                            <div class="p-3 bg-gray-50 rounded">
+                                <strong>Username:</strong> ${data.username}
+                            </div>
+                            <div class="p-3 bg-gray-50 rounded">
+                                <strong>Role:</strong> ${data.role}
+                            </div>
+                            <div class="p-3 bg-gray-50 rounded">
+                                <strong>Issued At:</strong> ${new Date(data.issued_at * 1000).toLocaleString()}
+                            </div>
+                            <div class="p-3 bg-gray-50 rounded">
+                                <strong>Expires At:</strong> ${new Date(data.expires_at * 1000).toLocaleString()}
+                            </div>
+                        </div>
+                    `);
+                } else {
+                    showModal(`<div class="bg-red-50 p-4 rounded text-red-800">${data.message}</div>`);
+                }
+            } catch (error) {
+                showModal(`<div class="bg-red-50 p-4 rounded text-red-800">Error: ${error.message}</div>`);
+            }
+        }
+
+        async function getFlag() {
+            try {
+                const response = await fetch('/api/admin/flag');
+                const data = await response.json();
+
+                if (data.status === 'success') {
+                    let content = `<div class="space-y-3">`;
+
+                    if (data.flag) {
+                        content += `
+                            <div class="bg-green-50 border-l-4 border-green-400 p-4">
+                                <strong class="text-green-800">🎉 Exploitation Successful!</strong>
+                            </div>
+                            <div class="p-4 bg-yellow-50 rounded">
+                                <strong>Flag:</strong><br>
+                                <code class="text-lg font-mono">${data.flag}</code>
+                            </div>
+                            <div class="p-3 bg-gray-50 rounded">
+                                <strong>Original Role:</strong> ${data.original_role}
+                            </div>
+                            <div class="p-3 bg-gray-50 rounded">
+                                <strong>Escalated Role:</strong> ${data.escalated_role}
+                            </div>
+                            <div class="p-3 bg-gray-50 rounded">
+                                <strong>Algorithm Used:</strong> ${data.algorithm_used}
+                            </div>
+                            <div class="p-3 bg-gray-50 rounded">
+                                <strong>Proof:</strong> ${data.proof}
+                            </div>
+                        `;
+                    } else {
+                        content += `
+                            <div class="bg-blue-50 p-4 rounded">
+                                <strong class="text-blue-800">${data.message}</strong>
+                            </div>
+                            <div class="p-3 bg-yellow-50 rounded text-sm">
+                                ${data.note}
+                            </div>
+                        `;
+                    }
+
+                    content += `</div>`;
+                    showModal(content);
+                } else {
+                    showModal(`
+                        <div class="bg-red-50 border-l-4 border-red-400 p-4">
+                            <strong class="text-red-800">Access Denied</strong>
+                            <p class="mt-2 text-sm text-red-700">${data.message}</p>
+                            ${data.current_role ? `<p class="mt-2 text-sm text-red-700">Your current role: ${data.current_role}</p>` : ''}
+                        </div>
+                    `);
+                }
+            } catch (error) {
+                showModal(`<div class="bg-red-50 p-4 rounded text-red-800">Error: ${error.message}</div>`);
+            }
+        }
+
+        function showModal(content) {
+            document.getElementById('resultContent').innerHTML = content;
+            document.getElementById('resultModal').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('resultModal').classList.add('hidden');
+        }
+    </script>
+</body>
+</html>

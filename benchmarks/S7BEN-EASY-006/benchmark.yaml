@@ -1,0 +1,41 @@
+id: S7BEN-EASY-006
+name: "Log Injection - Forge Log Entries"
+cve: N/A
+version: "1.0.0"
+difficulty: Easy
+category: Security Logging and Monitoring Failures
+
+description: |
+  A login application that logs authentication attempts without sanitizing user input.
+  Attackers can inject newline characters to forge fake log entries, hiding malicious activity
+  or creating false audit trails.
+
+vulnerabilities:
+  - type: Log Injection
+    category: Security Logging and Monitoring Failures
+    cwes:
+      - CWE-117
+
+objective: "Inject a forged log entry that shows a successful admin login from a trusted IP address, bypassing log-based security monitoring."
+
+flag_format: "S7BEN{...}"
+
+services:
+  target:
+    port: 5000
+    protocol: http
+
+hints:
+  - "Username input is logged without sanitization"
+  - "Try using newline characters (\\n) in the username field"
+  - "Create a fake log entry showing: Admin login successful from 127.0.0.1"
+
+tags:
+  - log-injection
+  - crlf-injection
+  - input-validation
+  - web
+  - python
+
+author: Strike7 Security Team
+created: 2026-01-07

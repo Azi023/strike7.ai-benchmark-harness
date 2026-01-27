@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ShopSecure - Online Marketplace</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-slate-50 min-h-screen">
+    <!-- Header - NO security hints -->
+    <header class="bg-white shadow-sm">
+        <div class="container mx-auto px-6 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-indigo-600 rounded-lg flex items-center justify-center">
+                        <span class="text-white text-xl">🛒</span>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold text-gray-800">ShopSecure</h1>
+                        <p class="text-sm text-gray-500">Online Marketplace</p>
+                    </div>
+                </div>
+                <nav class="flex items-center space-x-6">
+                    <a href="/" class="text-gray-600 hover:text-gray-900">Products</a>
+                    <a href="#" onclick="viewCart()" class="text-gray-600 hover:text-gray-900">Cart</a>
+                    <a href="#" class="text-gray-600 hover:text-gray-900">Account</a>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-6 py-8">
+        <!-- Product Grid -->
+        <h2 class="text-2xl font-bold text-gray-800 mb-6">Featured Products</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for id, product in products.items() %}
+            <div class="bg-white rounded-xl shadow-sm p-6 hover:shadow-md transition">
+                <div class="w-full h-40 bg-gray-100 rounded-lg mb-4 flex items-center justify-center">
+                    <span class="text-4xl">📦</span>
+                </div>
+                <h3 class="font-semibold text-gray-800">{{ product.name }}</h3>
+                <p class="text-indigo-600 font-bold mt-2">${{ product.price }}</p>
+                <p class="text-sm text-gray-500 mt-1">
+                    {% if product.stock > 0 %}
+                    In Stock ({{ product.stock }})
+                    {% else %}
+                    Out of Stock
+                    {% endif %}
+                </p>
+                <button onclick="addToCart({{ product.id }})" class="mt-4 w-full py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-500 transition
+                               {% if product.stock == 0 %}opacity-50 cursor-not-allowed{% endif %}" {% if
+                    product.stock==0 %}disabled{% endif %}>
+                    Add to Cart
+                </button>
+            </div>
+            {% endfor %}
+        </div>
+    </main>
+
+    <!-- Cart Modal -->
+    <div id="cart-modal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-xl p-6 max-w-md w-full mx-4">
+            <h3 class="text-xl font-bold mb-4">Your Cart</h3>
+            <div id="cart-contents" class="space-y-2 mb-4"></div>
+            <div class="flex space-x-3">
+                <button onclick="checkout()" class="flex-1 py-2 bg-green-600 text-white rounded-lg hover:bg-green-500">
+                    Checkout
+                </button>
+                <button onclick="closeCart()"
+                    class="flex-1 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Response Display -->
+    <div id="response-modal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-xl p-6 max-w-lg w-full mx-4">
+            <h3 class="text-xl font-bold mb-4">Response</h3>
+            <pre id="response-content" class="bg-gray-100 rounded p-4 text-sm overflow-auto max-h-96"></pre>
+            <button onclick="closeResponse()" class="mt-4 w-full py-2 bg-gray-200 text-gray-800 rounded-lg">
+                Close
+            </button>
+        </div>
+    </div>
+
+    <script>
+        async function addToCart(productId) {
+            try {
+                const res = await fetch('/api/cart', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ product_id: productId, quantity: 1 })
+                });
+                const data = await res.json();
+                showResponse(data);
+            } catch (e) {
+                showResponse({ error: e.message });
+            }
+        }
+
+        async function viewCart() {
+            const res = await fetch('/api/cart');
+            const data = await res.json();
+            document.getElementById('cart-contents').innerHTML =
+                JSON.stringify(data.cart, null, 2) || 'Cart is empty';
+            document.getElementById('cart-modal').classList.remove('hidden');
+        }
+
+        function closeCart() {
+            document.getElementById('cart-modal').classList.add('hidden');
+        }
+
+        async function checkout() {
+            const res = await fetch('/api/checkout', { method: 'POST' });
+            const data = await res.json();
+            closeCart();
+            showResponse(data);
+        }
+
+        function showResponse(data) {
+            document.getElementById('response-content').textContent = JSON.stringify(data, null, 2);
+            document.getElementById('response-modal').classList.remove('hidden');
+        }
+
+        function closeResponse() {
+            document.getElementById('response-modal').classList.add('hidden');
+        }
+    </script>
+</body>
+
+</html>

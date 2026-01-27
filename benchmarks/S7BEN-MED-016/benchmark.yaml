@@ -1,0 +1,6 @@
+id: S7BEN-MED-016
+name: Default Credentials  
+category: med
+difficulty: 4
+phase: 6
+services: {app: {port: 8104}}

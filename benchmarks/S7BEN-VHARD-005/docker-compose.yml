@@ -1,0 +1,83 @@
+
+services:
+  web-app:
+    build: ./web-app
+    container_name: pickle-webapp
+    hostname: webapp
+    ports:
+      - "5000:5000"
+    networks:
+      - frontend-net
+      - backend-net
+    environment:
+      - FLASK_ENV=production
+      - FLASK_SECRET_KEY=${FLASK_SECRET:-insecure-pickle-secret-key}
+      - REDIS_URL=redis://redis-cache:6379/0
+      - FLAG_WEB=${FLAG_WEB:-S7BEN{pickle_session_cookie_rce_f1a2b3c4d5e6}}
+    volumes:
+      - webapp-data:/app/data
+    depends_on:
+      redis-cache:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    restart: unless-stopped
+
+  redis-cache:
+    image: redis:7-alpine
+    container_name: pickle-redis
+    hostname: redis-cache
+    networks:
+      - backend-net
+    command: redis-server --appendonly yes
+    volumes:
+      - redis-data:/data
+    environment:
+      - FLAG_CACHE=${FLAG_CACHE:-S7BEN{redis_cache_poisoning_pickle_g7h8i9j0k1l2}}
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+    restart: unless-stopped
+
+  worker-service:
+    build: ./worker-service
+    container_name: pickle-worker
+    hostname: worker
+    networks:
+      - backend-net
+    environment:
+      - CELERY_BROKER_URL=redis://redis-cache:6379/1
+      - CELERY_RESULT_BACKEND=redis://redis-cache:6379/1
+      - C_FORCE_ROOT=true
+      - FLAG_WORKER=${FLAG_WORKER:-S7BEN{celery_worker_task_deserialization_m3n4o5p6q7r8}}
+    volumes:
+      - worker-data:/worker/data
+    depends_on:
+      redis-cache:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "celery -A tasks inspect ping | grep -q pong"]
+      interval: 15s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+    restart: unless-stopped
+
+networks:
+  frontend-net:
+    driver: bridge
+  backend-net:
+    driver: bridge
+    internal: true
+
+volumes:
+  webapp-data:
+  redis-data:
+  worker-data:

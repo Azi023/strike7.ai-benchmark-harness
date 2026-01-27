@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - Comment Moderation</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>🔐 Admin Panel</h1>
+        <p class="subtitle">Comment Moderation Dashboard</p>
+
+        <div class="flag-display">
+            <h3>🚩 System Flag</h3>
+            <code><%= FLAG %></code>
+        </div>
+
+        <div class="admin-info">
+            <p><strong>Logged in as:</strong> Administrator</p>
+            <p><strong>Session Cookie:</strong> <span id="sessionCookie"></span></p>
+            <p><strong>Total Comments:</strong> <%= comments.length %></p>
+        </div>
+
+        <div class="comments-section">
+            <h2>All Comments (Auto-rendered)</h2>
+            <div class="admin-notice">
+                ⚠️ All comments are automatically rendered for moderation purposes
+            </div>
+            <div id="commentsList">
+                <% comments.forEach((comment, index) => { %>
+                    <div class="comment admin-comment">
+                        <div class="comment-header">
+                            <strong>#<%= index + 1 %> - <%= comment.username %></strong>
+                            <span class="timestamp"><%= new Date(comment.timestamp).toLocaleString() %></span>
+                        </div>
+                        <div class="comment-body">
+                            <!-- VULNERABLE: Renders sanitized HTML but DOMPurify config allows SVG + event handlers -->
+                            <%- comment.message %>
+                        </div>
+                    </div>
+                <% }); %>
+            </div>
+        </div>
+
+        <div class="admin-actions">
+            <button onclick="refreshComments()">🔄 Refresh Comments</button>
+            <button onclick="clearAll()">🗑️ Clear All Comments</button>
+            <button onclick="window.location.href='/'">← Back to Comment Board</button>
+        </div>
+    </div>
+
+    <script>
+        // Display session cookie for debugging
+        document.getElementById('sessionCookie').textContent = document.cookie || 'None';
+
+        function refreshComments() {
+            location.reload();
+        }
+
+        async function clearAll() {
+            if (confirm('Clear all comments?')) {
+                await fetch('/reset', { method: 'POST' });
+                location.reload();
+            }
+        }
+
+        // Log page load (for exploitation verification)
+        console.log('[ADMIN] Admin panel loaded');
+        console.log('[ADMIN] Cookies:', document.cookie);
+    </script>
+</body>
+</html>

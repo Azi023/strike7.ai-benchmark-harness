@@ -1,0 +1,58 @@
+
+services:
+  graphql-api:
+    build: ./graphql-api
+    container_name: gql-api
+    hostname: graphql-api
+    ports:
+      - "4000:4000"
+    networks:
+      gql-net:
+        ipv4_address: 172.24.0.10
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=postgresql://gqluser:${DB_PASSWORD:-GraphQLPass123!}@postgres-db:5432/gqldb
+      - FLAG_INTROSPECTION=${FLAG_INTROSPECTION:-S7BEN{graphql_introspection_schema_exposed_a1b2c3}}
+      - FLAG_SQLI=${FLAG_SQLI:-S7BEN{graphql_resolver_sql_injection_d4e5f6}}
+    depends_on:
+      postgres-db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    restart: unless-stopped
+
+  postgres-db:
+    image: postgres:15-alpine
+    container_name: gql-db
+    hostname: postgres-db
+    networks:
+      gql-net:
+        ipv4_address: 172.24.0.20
+    environment:
+      - POSTGRES_USER=gqluser
+      - POSTGRES_PASSWORD=${DB_PASSWORD:-GraphQLPass123!}
+      - POSTGRES_DB=gqldb
+    volumes:
+      - ./postgres-db/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U gqluser -d gqldb"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped
+
+networks:
+  gql-net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.24.0.0/16
+
+volumes:
+  db_data:

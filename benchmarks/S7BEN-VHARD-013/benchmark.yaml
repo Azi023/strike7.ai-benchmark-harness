@@ -1,0 +1,12 @@
+id: S7BEN-VHARD-013
+name: "Race Condition Double Spend Attack"
+category: vhard
+difficulty: 9
+phase: 6
+description: TOCTOU vulnerability in checkout - send concurrent requests to buy multiple items with insufficient balance
+vulnerabilities: [{type: Race Condition, cwes: [CWE-362, CWE-367]}]
+owasp_2025: [A04:2025]
+flag_format: "S7BEN{r4ce_c0nd1t10n_d0uble_spend_[dynamic]}"
+flag_dynamic: true
+services: {app: {port: 8096}}
+telemetry: {enabled: true}

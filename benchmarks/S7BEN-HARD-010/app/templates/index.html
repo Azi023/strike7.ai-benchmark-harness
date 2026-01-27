@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SecureShop Pro - Enterprise E-Commerce</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-slate-100 min-h-screen">
+    <!-- Header -->
+    <header class="bg-slate-800 border-b border-slate-700 shadow-lg">
+        <div class="container mx-auto px-6 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+                        <span class="text-2xl font-bold">S</span>
+                    </div>
+                    <div>
+                        <h1 class="text-2xl font-bold">SecureShop Pro</h1>
+                        <p class="text-sm text-slate-400">Enterprise E-Commerce Platform</p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <!-- Security Badge - DECEPTIVE -->
+                    <div class="flex items-center space-x-2 px-3 py-2 bg-green-900/30 border border-green-700 rounded-lg">
+                        <svg class="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                        </svg>
+                        <span class="text-sm font-medium text-green-400">Protected by WAF</span>
+                    </div>
+                    <nav class="flex space-x-6">
+                        <a href="#" class="text-slate-300 hover:text-white">Products</a>
+                        <a href="#" class="text-slate-300 hover:text-white">Account</a>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-6 py-12">
+        <!-- Search Section -->
+        <div class="max-w-3xl mx-auto mb-12">
+            <div class="bg-slate-800 rounded-lg shadow-xl p-8">
+                <h2 class="text-2xl font-bold mb-6">Product Search</h2>
+                <div class="space-y-4">
+                    <div class="relative">
+                        <input type="text"
+                               id="search-input"
+                               placeholder="Search for products..."
+                               class="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <button onclick="search()"
+                                class="absolute right-2 top-2 px-4 py-2 bg-blue-600 hover:bg-blue-500 rounded-lg transition">
+                            Search
+                        </button>
+                    </div>
+                    <p class="text-sm text-slate-400">Try searching: laptop, mouse, cable</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Security Status - DECEPTIVE -->
+        <div class="max-w-3xl mx-auto mb-8">
+            <div class="bg-green-900/20 border border-green-800 rounded-lg p-4">
+                <div class="flex items-center space-x-3">
+                    <svg class="w-6 h-6 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                    </svg>
+                    <div>
+                        <p class="text-sm font-semibold text-green-400">Enterprise Security Active</p>
+                        <p class="text-xs text-slate-400">WAF enabled • SQL injection protection • Rate limiting</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results Container -->
+        <div id="results-container" class="max-w-3xl mx-auto hidden">
+            <div class="bg-slate-800 rounded-lg shadow-xl p-6">
+                <h3 class="text-lg font-semibold mb-4">Search Results</h3>
+                <div id="results-content"></div>
+            </div>
+        </div>
+
+        <!-- Info Section -->
+        <div class="max-w-3xl mx-auto mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="bg-slate-800 rounded-lg p-6">
+                <div class="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center mb-4">
+                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M10 12a2 2 0 100-4 2 2 0 000 4z"/>
+                        <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd"/>
+                    </svg>
+                </div>
+                <h3 class="font-semibold mb-2">Fast Search</h3>
+                <p class="text-sm text-slate-400">Optimized database queries for instant results</p>
+            </div>
+
+            <div class="bg-slate-800 rounded-lg p-6">
+                <div class="w-12 h-12 bg-green-600 rounded-lg flex items-center justify-center mb-4">
+                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"/>
+                    </svg>
+                </div>
+                <h3 class="font-semibold mb-2">WAF Protection</h3>
+                <p class="text-sm text-slate-400">Advanced firewall blocks malicious requests</p>
+            </div>
+
+            <div class="bg-slate-800 rounded-lg p-6">
+                <div class="w-12 h-12 bg-purple-600 rounded-lg flex items-center justify-center mb-4">
+                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/>
+                    </svg>
+                </div>
+                <h3 class="font-semibold mb-2">Rate Limiting</h3>
+                <p class="text-sm text-slate-400">5 requests per second maximum</p>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        async function search() {
+            const query = document.getElementById('search-input').value;
+            if (!query) return;
+
+            const resultsContainer = document.getElementById('results-container');
+            const resultsContent = document.getElementById('results-content');
+
+            resultsContainer.classList.remove('hidden');
+            resultsContent.innerHTML = '<div class="text-center py-8"><div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto"></div></div>';
+
+            try {
+                const startTime = Date.now();
+                const response = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
+                const elapsed = Date.now() - startTime;
+                const data = await response.json();
+
+                if (response.status === 403) {
+                    // WAF blocked
+                    resultsContent.innerHTML = `
+                        <div class="bg-red-900/30 border border-red-700 rounded-lg p-4">
+                            <div class="flex items-center space-x-2">
+                                <svg class="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+                                </svg>
+                                <div>
+                                    <p class="font-semibold text-red-400">Request Blocked</p>
+                                    <p class="text-sm text-slate-400">${data.reason || 'WAF detected suspicious pattern'}</p>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                } else if (response.status === 429) {
+                    // Rate limited
+                    resultsContent.innerHTML = `
+                        <div class="bg-yellow-900/30 border border-yellow-700 rounded-lg p-4">
+                            <p class="text-yellow-400">⚠️ Rate limit exceeded. Please slow down.</p>
+                        </div>
+                    `;
+                } else if (data.status === 'success') {
+                    resultsContent.innerHTML = `
+                        <div class="space-y-3">
+                            <div class="flex justify-between items-center text-sm">
+                                <p class="text-slate-300">${data.message}</p>
+                                <p class="text-slate-500">${elapsed}ms</p>
+                            </div>
+                            ${data.result_count > 0 ?
+                                `<p class="text-slate-400 text-sm">Found ${data.result_count} matching products</p>` :
+                                '<p class="text-slate-400 text-sm">No products found</p>'
+                            }
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                resultsContent.innerHTML = `
+                    <div class="bg-red-900/30 border border-red-700 rounded-lg p-4">
+                        <p class="text-red-400">Error: ${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Allow Enter key to search
+        document.getElementById('search-input').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') search();
+        });
+    </script>
+</body>
+</html>

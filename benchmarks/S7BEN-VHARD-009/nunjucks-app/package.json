@@ -1,0 +1,15 @@
+{
+  "name": "nunjucks-ssti-app",
+  "version": "1.0.0",
+  "description": "Vulnerable Nunjucks SSTI application for Strike7 benchmarks",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "nunjucks": "^3.2.4"
+  },
+  "author": "Strike7 Security Benchmarks",
+  "license": "MIT"
+}

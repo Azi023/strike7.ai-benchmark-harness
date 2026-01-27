@@ -1,0 +1,195 @@
+#!/usr/bin/env python3
+"""
+S7BEN-HARD-003: SSRF with URL Filtering
+Vulnerable URL fetcher with multiple filter bypasses
+"""
+
+from flask import Flask, request, jsonify, render_template
+import requests
+import socket
+import ipaddress
+from urllib.parse import urlparse
+import time
+import os
+
+app = Flask(__name__)
+
+# Telemetry
+request_counter = 0
+ssrf_attempts = 0
+filter_blocks = 0
+internal_access_count = 0
+start_time = time.time()
+accessed_urls = []
+
+# Security filters (intentionally bypassable)
+BLOCKED_IPS = ['127.0.0.1', 'localhost', '0.0.0.0']
+BLOCKED_RANGES = ['10.', '172.16.', '192.168.', '169.254.']
+ALLOWED_SCHEMES = ['http', 'https']
+
+FLAG = os.getenv('FLAG', 'S7BEN{ssrf_internal_acc3ss_dns_rebind_789abc}')
+
+def is_safe_url(url):
+    """
+    URL validation function with multiple bypassable filters
+    Vulnerabilities:
+    - Only checks initial DNS resolution (DNS rebinding)
+    - Doesn't handle IPv6 addresses
+    - Doesn't check decimal/octal IP representations
+    - Vulnerable to URL parser confusion
+    - Doesn't follow redirects before checking
+    """
+    global filter_blocks
+
+    try:
+        parsed = urlparse(url)
+
+        # Check scheme
+        if parsed.scheme not in ALLOWED_SCHEMES:
+            filter_blocks += 1
+            return False, "Invalid URL scheme"
+
+        # Check for obvious localhost references
+        hostname = parsed.hostname or parsed.netloc
+        if not hostname:
+            filter_blocks += 1
+            return False, "Invalid hostname"
+
+        # Check blocked hostnames
+        if hostname.lower() in BLOCKED_IPS:
+            filter_blocks += 1
+            return False, "Blocked hostname"
+
+        # DNS resolution check (vulnerable to DNS rebinding)
+        try:
+            ip = socket.gethostbyname(hostname)
+        except socket.gaierror:
+            filter_blocks += 1
+            return False, "Cannot resolve hostname"
+
+        # Check if IP is in blocked ranges
+        if ip in BLOCKED_IPS:
+            filter_blocks += 1
+            return False, "Blocked IP address"
+
+        # Check private IP ranges (only checks common patterns)
+        for blocked_range in BLOCKED_RANGES:
+            if ip.startswith(blocked_range):
+                filter_blocks += 1
+                return False, "Private IP address not allowed"
+
+        return True, "URL passed validation"
+
+    except Exception as e:
+        filter_blocks += 1
+        return False, f"Validation error: {str(e)}"
+
+@app.route('/')
+def index():
+    return render_template('index.html')
+
+@app.route('/health')
+def health():
+    return jsonify({"status": "healthy"}), 200
+
+@app.route('/fetch', methods=['POST'])
+def fetch_url():
+    """
+    Fetch URL endpoint - vulnerable to SSRF
+    """
+    global request_counter, ssrf_attempts, internal_access_count, accessed_urls
+    request_counter += 1
+
+    data = request.get_json()
+    if not data or 'url' not in data:
+        return jsonify({"error": "Missing 'url' parameter"}), 400
+
+    target_url = data['url']
+    ssrf_attempts += 1
+
+    # Check URL safety
+    safe, message = is_safe_url(target_url)
+
+    if not safe:
+        return jsonify({
+            "error": "URL blocked by security filter",
+            "reason": message,
+            "debug": {
+                "url": target_url,
+                "blocked": True
+            }
+        }), 403
+
+    # Fetch the URL
+    try:
+        # Vulnerable: Doesn't re-check after DNS resolution
+        # Allows DNS rebinding attacks
+        resp = requests.get(
+            target_url,
+            timeout=5,
+            allow_redirects=True  # Vulnerable: follows redirects
+        )
+
+        accessed_urls.append(target_url)
+
+        # Check if accessing internal services
+        if 'internal-api' in target_url or 'metadata-service' in target_url:
+            internal_access_count += 1
+
+        return jsonify({
+            "success": True,
+            "status_code": resp.status_code,
+            "content": resp.text[:1000],  # Limit response size
+            "headers": dict(resp.headers),
+            "url": target_url
+        })
+
+    except requests.RequestException as e:
+        return jsonify({
+            "error": "Failed to fetch URL",
+            "details": str(e)
+        }), 500
+
+@app.route('/api/telemetry')
+def telemetry():
+    """Telemetry endpoint for monitoring"""
+    return jsonify({
+        "benchmark_id": "S7BEN-HARD-003",
+        "request_count": request_counter,
+        "ssrf_attempts": ssrf_attempts,
+        "filter_blocks": filter_blocks,
+        "internal_access_count": internal_access_count,
+        "accessed_urls": accessed_urls[-10:],  # Last 10 URLs
+        "uptime_seconds": int(time.time() - start_time)
+    })
+
+@app.route('/reset', methods=['POST'])
+def reset():
+    """Reset telemetry counters"""
+    global request_counter, ssrf_attempts, filter_blocks, internal_access_count, accessed_urls
+    request_counter = 0
+    ssrf_attempts = 0
+    filter_blocks = 0
+    internal_access_count = 0
+    accessed_urls = []
+    return jsonify({"status": "reset_complete"})
+
+@app.route('/debug/filters')
+def debug_filters():
+    """Debug endpoint showing filter configuration"""
+    return jsonify({
+        "blocked_ips": BLOCKED_IPS,
+        "blocked_ranges": BLOCKED_RANGES,
+        "allowed_schemes": ALLOWED_SCHEMES,
+        "filter_type": "DNS resolution check",
+        "vulnerabilities": [
+            "DNS rebinding possible",
+            "IPv6 not properly filtered",
+            "Decimal IP notation not checked",
+            "URL parser confusion possible",
+            "Redirect chain not validated"
+        ]
+    })
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=5000, debug=True)

@@ -1,0 +1,140 @@
+
+services:
+  nginx-gateway:
+    build: ./nginx-gateway
+    container_name: sben-chain01-nginx
+    ports:
+      - "80:80"
+    networks:
+      - frontend-net
+      - backend-net
+    depends_on:
+      auth-service:
+        condition: service_healthy
+      api-service:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    restart: unless-stopped
+
+  auth-service:
+    build: ./auth-service
+    container_name: sben-chain01-auth
+    networks:
+      - backend-net
+    volumes:
+      - auth-keys:/app/keys
+    environment:
+      - JWT_SECRET=${JWT_SECRET:-default-jwt-secret-change-me}
+      - FLAG_SECRET=${FLAG_SECRET:-strike7-chain01-secret}
+      - NODE_ENV=production
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    restart: unless-stopped
+
+  api-service:
+    build: ./api-service
+    container_name: sben-chain01-api
+    networks:
+      - backend-net
+      - db-net
+    environment:
+      - DATABASE_URL=postgresql://apiuser:${DB_PASSWORD:-SecureDBPass12345!}@postgres-db:5432/apidb
+      - FLAG_SECRET=${FLAG_SECRET:-strike7-chain01-secret}
+      - REDIS_URL=redis://redis-telemetry:6379
+      - AUTH_SERVICE_URL=http://auth-service:3000
+    depends_on:
+      postgres-db:
+        condition: service_healthy
+      redis-telemetry:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+    restart: unless-stopped
+
+  worker-service:
+    build: ./worker-service
+    container_name: sben-chain01-worker
+    networks:
+      - backend-net
+      - db-net
+    environment:
+      - DATABASE_URL=postgresql://workeruser:${DB_PASSWORD:-SecureDBPass12345!}@postgres-db:5432/apidb
+      - DEBUG_MODE=true
+      - REDIS_URL=redis://redis-telemetry:6379
+    depends_on:
+      postgres-db:
+        condition: service_healthy
+      redis-telemetry:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8080/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+    restart: unless-stopped
+
+  postgres-db:
+    image: postgres:15-alpine
+    container_name: sben-chain01-db
+    networks:
+      - db-net
+    environment:
+      - POSTGRES_USER=apiuser
+      - POSTGRES_PASSWORD=${DB_PASSWORD:-SecureDBPass12345!}
+      - POSTGRES_DB=apidb
+    volumes:
+      - ./postgres-db/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U apiuser -d apidb"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped
+
+  redis-telemetry:
+    image: redis:7-alpine
+    container_name: sben-chain01-redis
+    networks:
+      - backend-net
+      - db-net
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+    restart: unless-stopped
+
+networks:
+  frontend-net:
+    driver: bridge
+  backend-net:
+    driver: bridge
+    internal: true
+  db-net:
+    driver: bridge
+    internal: true
+
+volumes:
+  db_data:
+  redis_data:
+  auth-keys:

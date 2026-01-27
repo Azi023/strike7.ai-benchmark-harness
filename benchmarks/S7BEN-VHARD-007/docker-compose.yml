@@ -1,0 +1,74 @@
+
+services:
+  web-app:
+    build: ./web-app
+    container_name: xxe-webapp
+    hostname: webapp
+    ports:
+      - "8080:8080"
+    networks:
+      - frontend-net
+      - backend-net
+    environment:
+      - SPRING_PROFILES_ACTIVE=production
+      - FLAG_WEB=${FLAG_WEB:-S7BEN{xxe_external_entity_file_read_a1b2c3}}
+      - FLAG_OOB=${FLAG_OOB:-S7BEN{xxe_out_of_band_exfiltration_g7h8i9}}
+    volumes:
+      - webapp-data:/app/data
+    depends_on:
+      - internal-api
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    restart: unless-stopped
+
+  internal-api:
+    build: ./internal-api
+    container_name: xxe-internal
+    hostname: internal-api
+    networks:
+      - backend-net
+    environment:
+      - FLAG_INTERNAL=${FLAG_INTERNAL:-S7BEN{xxe_internal_api_access_d4e5f6}}
+    volumes:
+      - internal-data:/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    restart: unless-stopped
+
+  dtd-server:
+    build: ./dtd-server
+    container_name: xxe-dtd
+    hostname: dtd-server
+    ports:
+      - "8888:8888"
+    networks:
+      - frontend-net
+    volumes:
+      - dtd-logs:/logs
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8888/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+    restart: unless-stopped
+
+networks:
+  frontend-net:
+    driver: bridge
+  backend-net:
+    driver: bridge
+    internal: true
+
+volumes:
+  webapp-data:
+  internal-data:
+  dtd-logs:

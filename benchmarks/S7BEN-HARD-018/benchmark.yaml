@@ -1,0 +1,11 @@
+id: S7BEN-HARD-018
+name: "Kubernetes RBAC Privilege Escalation"
+category: hard
+difficulty: 8
+phase: 6
+description: Over-privileged service account allows secret access
+vulnerabilities: [{type: Excessive Permissions, cwes: [CWE-269]}]
+owasp_2025: [A05:2025]
+flag_format: "S7BEN{k8s_rb4c_esc4lat10n_[dynamic]}"
+flag_dynamic: true
+services: {webapp: {port: 8101}, k8s-api: {port: 6443}}

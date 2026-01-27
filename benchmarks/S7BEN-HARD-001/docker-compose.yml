@@ -1,0 +1,80 @@
+services:
+  nginx-modsec:
+    build: ./nginx-modsec
+    container_name: hard01-nginx
+    hostname: nginx
+    ports:
+      - "80:8080"
+    networks:
+      - frontend-net
+      - backend-net
+    depends_on:
+      flask-app:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+    restart: unless-stopped
+
+  flask-app:
+    build:
+      context: ./app
+      args:
+        - FLAG=${FLAG:-S7BEN{waf_bypass_sql_1nj3ct10n_abc123def456}}
+    container_name: hard01-flask
+    hostname: webapp
+    expose:
+      - "5000"
+    networks:
+      - backend-net
+    environment:
+      - FLAG=${FLAG:-S7BEN{waf_bypass_sql_1nj3ct10n_abc123def456}}
+      - DB_HOST=mysql-db
+      - DB_USER=appuser
+      - DB_PASS=apppass123
+      - DB_NAME=ecommerce
+    depends_on:
+      mysql-db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    restart: unless-stopped
+
+  mysql-db:
+    image: mysql:8.0
+    container_name: hard01-mysql
+    hostname: mysql
+    networks:
+      - backend-net
+    environment:
+      - MYSQL_ROOT_PASSWORD=rootpass123
+      - MYSQL_DATABASE=ecommerce
+      - MYSQL_USER=appuser
+      - MYSQL_PASSWORD=apppass123
+    volumes:
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-prootpass123"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    restart: unless-stopped
+
+networks:
+  frontend-net:
+    driver: bridge
+  backend-net:
+    driver: bridge
+    internal: true
+
+volumes:
+  mysql-data:

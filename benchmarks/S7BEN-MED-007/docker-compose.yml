@@ -1,0 +1,17 @@
+services:
+  app:
+    build:
+      context: ./app
+      args:
+        - FLAG_SECRET
+    ports:
+      - "5000:5000"
+    environment:
+      - FLAG_SECRET=${FLAG_SECRET:-strike7-jwt-secret-key}
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:5000/health" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped

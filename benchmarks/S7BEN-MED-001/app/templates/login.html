@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Strike7 Portal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen">
+    <div class="container mx-auto px-4 py-12">
+        <div class="max-w-md mx-auto">
+            <div class="text-center mb-8">
+                <h1 class="text-3xl font-bold text-gray-800">Login</h1>
+                <p class="text-gray-600 mt-2">Sign in to your account</p>
+            </div>
+
+            <div class="bg-white rounded-lg shadow-xl p-8">
+                {% if sid %}
+                <!-- Session Fixation Warning -->
+                <div class="bg-red-50 border-l-4 border-red-400 p-4 mb-6">
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                            </svg>
+                        </div>
+                        <div class="ml-3">
+                            <p class="text-sm text-red-700">
+                                <strong>Vulnerability Active!</strong> Session ID provided via URL parameter.
+                            </p>
+                            <p class="text-xs text-red-600 mt-1">
+                                Session ID: <code class="bg-red-100 px-1 rounded">{{ sid }}</code>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if error %}
+                <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+                    {{ error }}
+                </div>
+                {% endif %}
+
+                <form method="POST" action="/login{% if sid %}?sid={{ sid }}{% endif %}">
+                    <div class="mb-4">
+                        <label for="username" class="block text-gray-700 text-sm font-bold mb-2">
+                            Username
+                        </label>
+                        <input type="text"
+                               id="username"
+                               name="username"
+                               required
+                               class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500"
+                               placeholder="Enter username">
+                    </div>
+
+                    <div class="mb-6">
+                        <label for="password" class="block text-gray-700 text-sm font-bold mb-2">
+                            Password
+                        </label>
+                        <input type="password"
+                               id="password"
+                               name="password"
+                               required
+                               class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500"
+                               placeholder="Enter password">
+                    </div>
+
+                    <button type="submit"
+                            class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded focus:outline-none focus:shadow-outline transition duration-200">
+                        Sign In
+                    </button>
+                </form>
+
+                <div class="mt-6 p-4 bg-gray-50 rounded-lg">
+                    <p class="text-xs text-gray-600 font-semibold mb-2">Test Accounts:</p>
+                    <ul class="text-xs text-gray-500 space-y-1">
+                        <li>• alice / password123</li>
+                        <li>• bob / secretpass</li>
+                        <li>• charlie / admin2025</li>
+                    </ul>
+                </div>
+
+                <div class="mt-4 text-center">
+                    <a href="/" class="text-sm text-blue-600 hover:text-blue-800">
+                        ← Back to Home
+                    </a>
+                </div>
+            </div>
+
+            {% if sid %}
+            <!-- Exploitation Info -->
+            <div class="mt-6 bg-white rounded-lg shadow-xl p-6">
+                <h3 class="font-semibold text-gray-800 mb-3">🎯 Exploitation Steps:</h3>
+                <ol class="text-sm text-gray-600 space-y-2 list-decimal list-inside">
+                    <li>Attacker sends this URL to victim: <code class="bg-gray-100 px-2 py-1 rounded text-xs">/login?sid={{ sid }}</code></li>
+                    <li>Victim logs in with their credentials</li>
+                    <li>Attacker uses the same session ID to access victim's session</li>
+                    <li>Call <code class="bg-gray-100 px-2 py-1 rounded text-xs">POST /api/verify-hijack</code> to prove exploitation and get flag</li>
+                </ol>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>

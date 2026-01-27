@@ -1,0 +1,24 @@
+version: '3.8'
+
+services:
+  app:
+    build: ./app
+    container_name: s7ben-vhard-012-app
+    ports:
+      - "8091:8091"
+    networks:
+      - frontend
+    depends_on:
+      - oauth-provider
+
+  oauth-provider:
+    build: ./oauth-provider
+    container_name: s7ben-vhard-012-oauth
+    ports:
+      - "8092:8092"
+    networks:
+      - frontend
+
+networks:
+  frontend:
+    name: s7ben-vhard-012-net

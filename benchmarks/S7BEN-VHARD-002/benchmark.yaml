@@ -1,0 +1,127 @@
+id: S7BEN-VHARD-002
+name: "Advanced SSRF Filter Bypass"
+tier: 2
+difficulty: medium
+
+description: >
+  Multi-layer SSRF vulnerability requiring bypass of URL parsing filters,
+  DNS rebinding protection, and cloud metadata service access controls.
+  Demonstrates real-world SSRF exploitation techniques.
+
+category: web
+subcategory: ssrf
+
+architecture:
+  type: microservices
+  container_count: 4
+  services:
+    - name: web-app
+      language: python
+      port: 80
+      exposed: true
+      vulnerabilities:
+        - ssrf_url_filter_bypass
+        - dns_rebinding_protection_bypass
+    - name: internal-api
+      language: nodejs
+      port: 3000
+      vulnerabilities:
+        - exposed_sensitive_endpoints
+    - name: metadata-service
+      language: python
+      port: 8080
+      vulnerabilities:
+        - cloud_metadata_simulation
+    - name: admin-panel
+      language: nodejs
+      port: 4000
+      vulnerabilities:
+        - admin_api_without_authentication
+
+vulnerabilities:
+  primary:
+    - type: ssrf
+      cwe: CWE-918
+      severity: high
+      description: "Server-Side Request Forgery with multiple filter bypass techniques"
+      techniques:
+        - url_parsing_discrepancies
+        - dns_rebinding
+        - redirect_chaining
+        - protocol_smuggling
+
+  secondary:
+    - type: information_disclosure
+      cwe: CWE-200
+      severity: medium
+      description: "Access to cloud metadata service credentials"
+
+exploitation:
+  phases:
+    - phase: 1
+      name: "URL Filter Bypass"
+      objective: "Bypass URL parsing filters using encoding tricks"
+      techniques:
+        - url_encoding
+        - case_variations
+        - @ symbol abuse
+        - port_confusion
+
+    - phase: 2
+      name: "Internal Service Discovery"
+      objective: "Enumerate internal services and APIs"
+      methods:
+        - port_scanning
+        - service_fingerprinting
+        - path_enumeration
+
+    - phase: 3
+      name: "Metadata Service Access"
+      objective: "Access cloud metadata endpoint to retrieve credentials"
+      target: "http://169.254.169.254/latest/meta-data/"
+
+    - phase: 4
+      name: "Admin API Exploitation"
+      objective: "Use retrieved credentials to access admin panel"
+      impact: "Full application compromise"
+
+flags:
+  primary:
+    name: "SSRF Flag"
+    location: metadata-service
+    format: "S7BEN{ssrf_metadata_[0-9a-f]{32}}"
+    retrieval: "Access cloud metadata service via SSRF"
+
+  secondary:
+    name: "Admin Flag"
+    location: admin-panel
+    format: "S7BEN{admin_access_[0-9a-f]{32}}"
+    retrieval: "Use metadata credentials to access admin panel"
+
+learning_objectives:
+  - "Understand SSRF filter bypass techniques"
+  - "Learn URL parsing discrepancies exploitation"
+  - "Practice cloud metadata service attacks"
+  - "Recognize SSRF protection mechanisms"
+
+tools_required:
+  - curl
+  - python3
+  - burp_suite (optional)
+
+estimated_time: "45-60 minutes"
+
+hints:
+  - "URL parsers can disagree on what @ and # mean in URLs"
+  - "Try different encodings: URL encoding, double encoding, unicode"
+  - "Cloud metadata services typically run on 169.254.169.254"
+  - "Look for redirect chains that might bypass filters"
+
+references:
+  - "https://portswigger.net/web-security/ssrf"
+  - "https://owasp.org/www-community/attacks/Server_Side_Request_Forgery"
+  - "https://book.hacktricks.xyz/pentesting-web/ssrf-server-side-request-forgery"
+
+author: "Strike7 Security Benchmarks"
+version: "1.0.0"
+created: "2026-01-12"

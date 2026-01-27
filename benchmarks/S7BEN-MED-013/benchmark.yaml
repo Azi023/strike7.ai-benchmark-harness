@@ -1,0 +1,12 @@
+id: S7BEN-MED-013
+name: "Weak Password Policy - No Account Lockout"
+category: med
+difficulty: 5
+phase: 6
+description: No lockout mechanism allows brute force attacks
+vulnerabilities: [{type: Weak Password Policy, cwes: [CWE-521, CWE-307]}]
+owasp_2025: [A07:2025]
+flag_format: "S7BEN{we4k_p4ssw0rd_p0l1cy_[dynamic]}"
+flag_dynamic: true
+services: {app: {port: 8095}}
+telemetry: {enabled: true}

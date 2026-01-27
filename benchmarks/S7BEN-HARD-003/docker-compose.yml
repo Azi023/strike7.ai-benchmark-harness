@@ -1,0 +1,65 @@
+
+services:
+  web-app:
+    build: ./app
+    container_name: ssrf-web-app
+    ports:
+      - "5000:5000"
+    environment:
+      - FLASK_ENV=development
+      - FLAG=${FLAG:-S7BEN{ssrf_internal_acc3ss_dns_rebind_789abc}}
+      - INTERNAL_API_URL=http://internal-api:8080
+    networks:
+      - frontend-net
+      - backend-net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+    restart: unless-stopped
+
+  internal-api:
+    build: ./internal
+    container_name: ssrf-internal-api
+    expose:
+      - "8080"
+    networks:
+      - backend-net
+    environment:
+      - FLAG=${FLAG_INTERNAL:-S7BEN{ssrf_internal_acc3ss_dns_rebind_789abc}}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    restart: unless-stopped
+
+  metadata-service:
+    build: ./metadata
+    container_name: ssrf-metadata
+    expose:
+      - "8000"
+    networks:
+      - backend-net
+    environment:
+      - SECRET_DATA=admin-api-key-12345
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    restart: unless-stopped
+
+networks:
+  frontend-net:
+    driver: bridge
+  backend-net:
+    driver: bridge
+    internal: true
+
+volumes:
+  app-data:

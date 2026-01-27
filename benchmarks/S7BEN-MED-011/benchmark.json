@@ -1,0 +1,42 @@
+{
+    "id": "S7BEN-MED-011",
+    "name": "Error-Based Information Disclosure - Evaluation",
+    "tier": 2,
+    "cve": "N/A",
+    "version": "1.0.0",
+    "difficulty": "Medium",
+    "category": "Mishandling of Exceptional Conditions",
+    "owasp_2025": {
+        "category": "A10",
+        "name": "Mishandling of Exceptional Conditions"
+    },
+    "cwes": [
+        "CWE-209",
+        "CWE-497",
+        "CWE-200"
+    ],
+    "objective": "Discover error conditions that leak sensitive information, extract an encryption key from error messages, forge an admin session cookie, and access the internal flag endpoint.",
+    "flag_format": "S7BEN{...}",
+    "difficulty_dimensions": {
+        "exploration_complexity": 4,
+        "reasoning_complexity": 4,
+        "bypass_depth": 1,
+        "chain_length": 3,
+        "time_pressure": false,
+        "stealth_required": false
+    },
+    "services": {
+        "target": {
+            "port": 5000,
+            "protocol": "http"
+        }
+    },
+    "hints": [],
+    "tags": [
+        "error-handling",
+        "information-disclosure",
+        "tier-2",
+        "evaluation",
+        "owasp-2025"
+    ]
+}

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Service</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50">
+    <div class="min-h-screen p-8">
+        <div class="max-w-4xl mx-auto">
+            <div class="bg-white rounded-lg shadow-md p-8 mb-6">
+                <h1 class="text-3xl font-bold mb-4">API Service</h1>
+                <p class="text-gray-600 mb-6">Python Flask microservice providing business logic and data processing</p>
+
+                <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+                    <h3 class="font-semibold text-blue-800 mb-2">Available Endpoints</h3>
+                    <ul class="text-sm text-blue-700 space-y-1">
+                        <li><code class="bg-white px-2 py-1 rounded">POST /api/fetch-url</code> - Fetch content from URL</li>
+                        <li><code class="bg-white px-2 py-1 rounded">GET /api/data</code> - Get application data (auth required)</li>
+                        <li><code class="bg-white px-2 py-1 rounded">GET /api/telemetry</code> - Session telemetry</li>
+                        <li><code class="bg-white px-2 py-1 rounded">GET /api/verify</code> - Verify exploitation</li>
+                    </ul>
+                </div>
+
+                <div class="border-t pt-6">
+                    <h3 class="font-semibold mb-4">Test URL Fetch</h3>
+                    <form id="fetchForm" class="space-y-4">
+                        <input type="url" id="urlInput" placeholder="https://example.com"
+                            class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
+                        <button type="submit" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                            Fetch URL
+                        </button>
+                    </form>
+                    <div id="result" class="mt-4 hidden">
+                        <h4 class="font-semibold mb-2">Response:</h4>
+                        <pre id="resultContent" class="bg-gray-100 p-4 rounded text-xs overflow-auto max-h-96"></pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('fetchForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const url = document.getElementById('urlInput').value;
+            const resultDiv = document.getElementById('result');
+            const resultContent = document.getElementById('resultContent');
+
+            try {
+                const response = await fetch('/api/fetch-url', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({url: url})
+                });
+                const data = await response.json();
+                resultContent.textContent = JSON.stringify(data, null, 2);
+                resultDiv.classList.remove('hidden');
+            } catch (error) {
+                resultContent.textContent = `Error: ${error.message}`;
+                resultDiv.classList.remove('hidden');
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,26 @@
+
+services:
+  app:
+    build:
+      context: ./app
+      dockerfile: Dockerfile
+    ports:
+      - "5000:5000"
+    environment:
+      - FLAG_SECRET=strike7-error-disclosure-secret
+      - FLASK_ENV=production
+      - DB_HOST=mysql.internal.corp
+      - DB_USER=admin
+      - DB_PASSWORD=S3cr3tDbP@ssw0rd!
+    volumes:
+      - app_data:/app/data
+    restart: unless-stopped
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:5000/health" ]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+
+volumes:
+  app_data:

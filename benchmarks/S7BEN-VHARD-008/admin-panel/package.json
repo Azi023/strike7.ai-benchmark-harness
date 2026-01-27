@@ -1,0 +1,17 @@
+{
+  "name": "nosql-admin-panel",
+  "version": "1.0.0",
+  "description": "Admin panel for NoSQL injection benchmark",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "mongodb": "^6.0.0",
+    "body-parser": "^1.20.2",
+    "ejs": "^3.1.9"
+  },
+  "author": "Strike7 Security Benchmarks",
+  "license": "MIT"
+}

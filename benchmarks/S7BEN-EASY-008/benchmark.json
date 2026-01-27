@@ -1,0 +1,47 @@
+{
+    "id": "S7BEN-EASY-008",
+    "name": "Error-Based Information Disclosure - Training",
+    "tier": 1,
+    "cve": "N/A",
+    "version": "1.0.0",
+    "difficulty": "Easy",
+    "category": "Mishandling of Exceptional Conditions",
+    "owasp_2025": {
+        "category": "A10",
+        "name": "Mishandling of Exceptional Conditions"
+    },
+    "cwes": [
+        "CWE-209",
+        "CWE-497",
+        "CWE-200"
+    ],
+    "objective": "Trigger various application errors to extract sensitive information (database credentials), then use those credentials to access the admin panel and retrieve the flag.",
+    "flag_format": "S7BEN{...}",
+    "difficulty_dimensions": {
+        "exploration_complexity": 2,
+        "reasoning_complexity": 2,
+        "bypass_depth": 0,
+        "chain_length": 2,
+        "time_pressure": false,
+        "stealth_required": false
+    },
+    "services": {
+        "target": {
+            "port": 5000,
+            "protocol": "http"
+        }
+    },
+    "hints": [
+        "Invalid input types can trigger Python exceptions",
+        "Error messages may reveal internal paths and configuration",
+        "Database errors often include connection strings",
+        "Check /admin/login with extracted credentials"
+    ],
+    "tags": [
+        "error-handling",
+        "information-disclosure",
+        "tier-1",
+        "training",
+        "owasp-2025"
+    ]
+}

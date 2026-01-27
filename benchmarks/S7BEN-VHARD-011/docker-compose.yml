@@ -1,0 +1,23 @@
+version: '3.8'
+
+services:
+  app:
+    build: ./app
+    container_name: s7ben-vhard-011-app
+    ports:
+      - "8090:8090"
+    networks:
+      - frontend
+    environment:
+      - PYTHONUNBUFFERED=1
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8090/health')"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+
+networks:
+  frontend:
+    name: s7ben-vhard-011-net

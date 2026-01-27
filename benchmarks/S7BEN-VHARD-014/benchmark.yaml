@@ -1,0 +1,12 @@
+id: S7BEN-VHARD-014
+name: "Business Logic Bypass - Negative Quantity"
+category: vhard
+difficulty: 9
+phase: 6
+description: E-commerce allows negative quantities to add money instead of deduct
+vulnerabilities: [{type: Business Logic Flaw, cwes: [CWE-840, CWE-1286]}]
+owasp_2025: [A04:2025]
+flag_format: "S7BEN{bus1ness_l0g1c_negat1ve_[dynamic]}"
+flag_dynamic: true
+services: {app: {port: 8097}}
+telemetry: {enabled: true}

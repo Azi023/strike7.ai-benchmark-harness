@@ -1,0 +1,30 @@
+# Logs
+*.log
+logs/
+
+# Session files
+sessions/
+
+# Cookies
+*.txt
+
+# Environment
+.env
+.env.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Docker
+.dockerignore
+
+# OS
+.DS_Store
+Thumbs.db
+
+# PHP
+vendor/
+composer.lock

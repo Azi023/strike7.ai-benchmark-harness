@@ -1,0 +1,13 @@
+{
+    "name": "strike7/twig-ssti-app",
+    "description": "Vulnerable Twig SSTI application for Strike7 benchmarks",
+    "type": "project",
+    "require": {
+        "twig/twig": "^3.8"
+    },
+    "authors": [
+        {
+            "name": "Strike7 Security Benchmarks"
+        }
+    ]
+}

@@ -1,0 +1,17 @@
+services:
+  app:
+    build:
+      context: ./app
+      args:
+        - FLAG
+    ports:
+      - "5000:5000"
+    environment:
+      - FLAG=${FLAG:-S7BEN{H4RDC0D3D_S3CR3TS_4R3_B4D}}
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:5000/health" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped

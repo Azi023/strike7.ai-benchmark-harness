@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Strike7 File Processor - TOCTOU Demo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gradient-to-br from-purple-50 to-blue-100 min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <div class="max-w-4xl mx-auto">
+            <!-- Header -->
+            <div class="text-center mb-8">
+                <h1 class="text-4xl font-bold text-gray-800 mb-2">Strike7 File Processor</h1>
+                <p class="text-gray-600">Secure File Validation & Processing System</p>
+            </div>
+
+            <!-- Warning Box -->
+            <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6">
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        <svg class="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-sm text-yellow-700">
+                            <strong>TOCTOU Vulnerability:</strong> This system validates files before processing,
+                            but there's a race window between validation and processing (~200ms).
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Upload Section -->
+            <div class="bg-white rounded-lg shadow-xl p-8 mb-6">
+                <h2 class="text-2xl font-semibold text-gray-800 mb-4">Upload File</h2>
+
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-bold mb-2">
+                        Select File (Allowed: .txt, .log, .csv | Max: 1KB)
+                    </label>
+                    <input type="file"
+                           id="fileInput"
+                           accept=".txt,.log,.csv"
+                           class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-purple-500">
+                </div>
+
+                <button onclick="uploadFile()"
+                        class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-4 rounded transition duration-200">
+                    Upload File
+                </button>
+
+                <div id="uploadResult" class="mt-4 hidden"></div>
+            </div>
+
+            <!-- Processing Section -->
+            <div class="bg-white rounded-lg shadow-xl p-8 mb-6">
+                <h2 class="text-2xl font-semibold text-gray-800 mb-4">Process File</h2>
+
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-bold mb-2">
+                        File ID
+                    </label>
+                    <input type="text"
+                           id="fileId"
+                           placeholder="Enter file ID from upload"
+                           class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-purple-500">
+                </div>
+
+                <div class="flex gap-3">
+                    <button onclick="validateFile()"
+                            class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded transition duration-200">
+                        1. Validate
+                    </button>
+
+                    <button onclick="processFile()"
+                            class="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded transition duration-200">
+                        2. Process
+                    </button>
+                </div>
+
+                <div id="processResult" class="mt-4 hidden"></div>
+            </div>
+
+            <!-- Vulnerability Info -->
+            <div class="bg-white rounded-lg shadow-xl p-6 mb-6">
+                <h3 class="text-lg font-semibold text-gray-800 mb-4">🎯 Exploitation Strategy</h3>
+                <div class="space-y-3 text-sm text-gray-700">
+                    <div class="bg-purple-50 p-3 rounded">
+                        <strong>Race Window:</strong> ~200ms between validation and processing
+                    </div>
+                    <div class="bg-blue-50 p-3 rounded">
+                        <strong>Attack Vector 1:</strong> Upload valid file → Validate → Replace with symlink to /flag.txt → Process
+                    </div>
+                    <div class="bg-green-50 p-3 rounded">
+                        <strong>Attack Vector 2:</strong> Upload valid file → Validate → Replace file content → Process
+                    </div>
+                    <div class="bg-yellow-50 p-3 rounded">
+                        <strong>Goal:</strong> Read /flag.txt to get dynamic flag
+                    </div>
+                </div>
+            </div>
+
+            <!-- API Documentation -->
+            <div class="bg-white rounded-lg shadow-xl p-6">
+                <h3 class="text-lg font-semibold text-gray-800 mb-4">API Endpoints</h3>
+                <div class="space-y-2 text-sm">
+                    <div class="flex items-center justify-between p-2 bg-gray-50 rounded">
+                        <code class="text-gray-700">POST /upload</code>
+                        <span class="text-gray-500">Upload a file</span>
+                    </div>
+                    <div class="flex items-center justify-between p-2 bg-gray-50 rounded">
+                        <code class="text-gray-700">POST /validate/&lt;file_id&gt;</code>
+                        <span class="text-gray-500">Validate file (TIME OF CHECK)</span>
+                    </div>
+                    <div class="flex items-center justify-between p-2 bg-gray-50 rounded">
+                        <code class="text-gray-700">POST /process/&lt;file_id&gt;</code>
+                        <span class="text-gray-500">Process file (TIME OF USE)</span>
+                    </div>
+                    <div class="flex items-center justify-between p-2 bg-gray-50 rounded">
+                        <code class="text-gray-700">GET /api/files</code>
+                        <span class="text-gray-500">List all files</span>
+                    </div>
+                    <div class="flex items-center justify-between p-2 bg-gray-50 rounded">
+                        <code class="text-gray-700">GET /api/status/&lt;file_id&gt;</code>
+                        <span class="text-gray-500">File metadata</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentValidationToken = null;
+
+        async function uploadFile() {
+            const fileInput = document.getElementById('fileInput');
+            const resultDiv = document.getElementById('uploadResult');
+
+            if (!fileInput.files[0]) {
+                showResult(resultDiv, 'error', 'Please select a file');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+
+            try {
+                const response = await fetch('/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (data.status === 'success') {
+                    document.getElementById('fileId').value = data.file_id;
+                    showResult(resultDiv, 'success', `
+                        <strong>Upload Successful!</strong><br>
+                        File ID: <code class="bg-green-100 px-2 py-1 rounded">${data.file_id}</code><br>
+                        <span class="text-sm">${data.next_step}</span>
+                    `);
+                } else {
+                    showResult(resultDiv, 'error', data.message);
+                }
+            } catch (error) {
+                showResult(resultDiv, 'error', error.message);
+            }
+        }
+
+        async function validateFile() {
+            const fileId = document.getElementById('fileId').value;
+            const resultDiv = document.getElementById('processResult');
+
+            if (!fileId) {
+                showResult(resultDiv, 'error', 'Please enter a file ID');
+                return;
+            }
+
+            try {
+                const response = await fetch(`/validate/${fileId}`, {
+                    method: 'POST'
+                });
+
+                const data = await response.json();
+
+                if (data.status === 'validation_passed') {
+                    currentValidationToken = data.validation_token;
+                    showResult(resultDiv, 'success', `
+                        <strong>✅ Validation Passed!</strong><br>
+                        ${data.message}<br>
+                        <span class="text-sm mt-2 block">Token stored. Click "Process" within race window (200ms).</span>
+                    `);
+                } else {
+                    showResult(resultDiv, 'error', data.message);
+                }
+            } catch (error) {
+                showResult(resultDiv, 'error', error.message);
+            }
+        }
+
+        async function processFile() {
+            const fileId = document.getElementById('fileId').value;
+            const resultDiv = document.getElementById('processResult');
+
+            if (!fileId) {
+                showResult(resultDiv, 'error', 'Please enter a file ID');
+                return;
+            }
+
+            if (!currentValidationToken) {
+                showResult(resultDiv, 'error', 'Please validate the file first');
+                return;
+            }
+
+            try {
+                const response = await fetch(`/process/${fileId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        validation_token: currentValidationToken
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.exploitation_detected) {
+                    showResult(resultDiv, 'exploit', `
+                        <h4 class="text-lg font-bold text-green-800 mb-2">🎉 TOCTOU EXPLOITATION SUCCESSFUL!</h4>
+                        <p class="text-sm text-green-700 mb-3">${data.message}</p>
+                        <div class="bg-green-100 p-3 rounded mb-3">
+                            <strong>FLAG:</strong> <code class="text-lg">${data.flag}</code>
+                        </div>
+                        <div class="text-xs text-gray-600">
+                            <p><strong>Content Hash:</strong> ${data.content_hash}</p>
+                            <p><strong>Content Length:</strong> ${data.content_length}</p>
+                            <p><strong>Real Path:</strong> ${data.real_path}</p>
+                        </div>
+                    `);
+                } else if (data.status === 'success') {
+                    showResult(resultDiv, 'info', `
+                        <strong>File Processed</strong><br>
+                        Content Preview: <code>${data.content_preview}</code><br>
+                        Hash: <code class="text-xs">${data.content_hash}</code>
+                    `);
+                } else {
+                    showResult(resultDiv, 'error', data.message || 'Processing failed');
+                }
+            } catch (error) {
+                showResult(resultDiv, 'error', error.message);
+            }
+        }
+
+        function showResult(div, type, message) {
+            const colors = {
+                success: 'bg-green-100 border-green-400 text-green-700',
+                error: 'bg-red-100 border-red-400 text-red-700',
+                info: 'bg-blue-100 border-blue-400 text-blue-700',
+                exploit: 'bg-green-50 border-green-500 text-green-800'
+            };
+
+            div.className = `mt-4 p-4 border-l-4 rounded ${colors[type] || colors.info}`;
+            div.innerHTML = message;
+            div.classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>

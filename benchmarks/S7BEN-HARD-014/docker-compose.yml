@@ -1,0 +1,9 @@
+version: '3.8'
+services:
+  app:
+    build: ./app
+    container_name: s7ben-hard-014
+    ports: ["8093:8093"]
+    networks: [frontend]
+networks:
+  frontend:

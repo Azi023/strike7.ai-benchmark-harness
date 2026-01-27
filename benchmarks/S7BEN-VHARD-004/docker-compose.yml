@@ -1,0 +1,67 @@
+services:
+  web-app:
+    build: ./web-app
+    container_name: deser-webapp
+    hostname: webapp
+    ports:
+      - "8080:8080"
+    networks:
+      deser-net:
+        ipv4_address: 172.25.0.10
+    environment:
+      - FLAG_WEB=${FLAG_WEB:-S7BEN{java_deserialize_web_rce_a1b2c3d4e5f6}}
+      - INTERNAL_API_URL=http://internal-api:8081
+    volumes:
+      - webapp-data:/app/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    restart: unless-stopped
+
+  internal-api:
+    build: ./internal-api
+    container_name: deser-internal
+    hostname: internal-api
+    networks:
+      deser-net:
+        ipv4_address: 172.25.0.20
+    environment:
+      - FLAG_INTERNAL=${FLAG_INTERNAL:-S7BEN{internal_api_deserialization_g7h8i9j0k1l2}}
+      - VICTIM_APP_URL=http://victim-app:8082
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8081/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    restart: unless-stopped
+
+  victim-app:
+    build: ./victim-app
+    container_name: deser-victim
+    hostname: victim-app
+    networks:
+      deser-net:
+        ipv4_address: 172.25.0.30
+    environment:
+      - FLAG_VICTIM=${FLAG_VICTIM:-S7BEN{victim_app_full_compromise_m3n4o5p6q7r8}}
+    volumes:
+      - victim-data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "test -f /data/admin_flag.txt"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    restart: unless-stopped
+
+networks:
+  deser-net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.25.0.0/16
+
+volumes:
+  webapp-data:
+  victim-data:

@@ -1,0 +1,103 @@
+╔════════════════════════════════════════════════════════════════╗
+║          PLAYWRIGHT E2E TESTS - QUICK START (WSL)              ║
+╚════════════════════════════════════════════════════════════════╝
+
+📦 INSTALLATION (One-time setup)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+cd ~/workspace/strike7-benchmarks/dashboard/tests
+./install_playwright_wsl.sh
+
+OR manually:
+  cd ~/workspace/strike7-benchmarks
+  source venv/bin/activate
+  pip install pytest pytest-playwright
+  playwright install chromium
+
+
+🚀 RUNNING TESTS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+IMPORTANT: Always activate venv first!
+  cd ~/workspace/strike7-benchmarks
+  source venv/bin/activate
+
+Start dashboard (in another terminal):
+  cd ~/workspace/strike7-benchmarks/dashboard
+  source ../venv/bin/activate
+  python app.py
+
+Quick test (4 tests):
+  cd dashboard/tests
+  ./quick_test.sh
+
+Full suite (27 tests):
+  cd dashboard/tests
+  ./run_tests.sh
+
+Specific test:
+  pytest test_e2e_playwright.py::TestSearchFunctionality -v
+
+
+🔧 COMMON ISSUES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+❌ "No module named pytest"
+   → source venv/bin/activate
+   → pip install pytest pytest-playwright
+
+❌ "Executable doesn't exist at .../chromium..."
+   → playwright install chromium
+
+❌ "Permission denied"
+   → chmod +x *.sh
+
+❌ "Connection refused to localhost:5500"
+   → Start dashboard: cd dashboard && python app.py
+
+
+📋 VERIFICATION CHECKLIST
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+□ Virtual environment activated?
+  → source venv/bin/activate
+
+□ Playwright installed?
+  → playwright --version
+
+□ Dashboard running?
+  → curl http://localhost:5500
+
+□ Tests executable?
+  → ls -l *.sh (should show -rwx)
+
+
+📚 DOCUMENTATION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+README.md           - Full documentation
+INSTALL_WSL.md      - WSL-specific install guide
+PLAYWRIGHT_WSL_GUIDE.md (root) - Comprehensive guide
+pytest.ini          - Test configuration
+
+
+💡 PRO TIPS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+# Watch tests run (slower)
+pytest test_e2e_playwright.py --headed --slowmo=1000 -v
+
+# Run with output
+pytest test_e2e_playwright.py -v -s
+
+# Run specific test class
+pytest test_e2e_playwright.py::TestContainerManagement -v
+
+# Generate HTML report
+pip install pytest-html
+pytest test_e2e_playwright.py --html=report.html --self-contained-html
+
+
+═══════════════════════════════════════════════════════════════════
+
+Ready to go! Start with: ./install_playwright_wsl.sh

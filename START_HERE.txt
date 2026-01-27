@@ -1,0 +1,75 @@
+╔═══════════════════════════════════════════════════════╗
+║  Strike7 Phase 5 - Quick Start Commands              ║
+╚═══════════════════════════════════════════════════════╝
+
+✅ All issues have been fixed!
+📝 See ALL_FIXES_COMPLETE.md for full details
+
+STEP 1: Build Base Images (15-25 minutes)
+──────────────────────────────────────────
+cd docker-base-images
+./build-all-bases.sh
+cd ..
+
+STEP 2: Verify Base Images Built
+──────────────────────────────────────────
+docker images | grep strike7/base-
+
+You should see 5 images:
+  - strike7/base-db
+  - strike7/base-modsec-waf
+  - strike7/base-web-app
+  - strike7/base-exploit-server
+  - strike7/base-java-vuln
+
+STEP 3: Build & Test Individual Benchmarks
+──────────────────────────────────────────
+
+# SBEN-HARD-02 (XSS + Sanitization)
+./manage-containers.sh build SBEN-HARD-02
+./manage-containers.sh up SBEN-HARD-02
+./manage-containers.sh test SBEN-HARD-02
+curl http://localhost:3000
+./manage-containers.sh down SBEN-HARD-02
+
+# SBEN-CVE-02 (Text4Shell) - Now fixed!
+cd benchmarks/SBEN-CVE-02
+make build
+make up
+make test
+python3 exploit.py
+make down
+cd ../..
+
+# SBEN-CVE-03 (Log4Shell) - HTTP server now healthy!
+cd benchmarks/SBEN-CVE-03
+make build
+make up
+make test
+bash exploit.sh
+make down
+cd ../..
+
+# SBEN-CVE-04 (Spring4Shell) - exploit.sh now works!
+cd benchmarks/SBEN-CVE-04
+make build
+make up
+make test
+bash exploit.sh
+make down
+cd ../..
+
+HELPFUL COMMANDS:
+──────────────────────────────────────────
+./manage-containers.sh list       # List all benchmarks
+./manage-containers.sh status     # Show running containers
+./manage-containers.sh stop-all   # Stop everything
+
+READ MORE:
+──────────────────────────────────────────
+- ALL_FIXES_COMPLETE.md      - Full guide with all fixes
+- ISSUES_FIXED_SUMMARY.md    - Detailed issue breakdown
+- PHASE5_SETUP_COMMANDS.md   - Complete build instructions
+- manage-containers.sh help  - All available commands
+
+You're ready to go! 🚀

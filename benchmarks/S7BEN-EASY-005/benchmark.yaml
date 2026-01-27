@@ -1,0 +1,41 @@
+id: S7BEN-EASY-005
+name: "Insufficient Logging - Brute Force Undetected"
+cve: N/A
+version: "1.0.0"
+difficulty: Easy
+category: Security Logging and Monitoring Failures
+
+description: |
+  A login application that fails to properly log authentication attempts.
+  Failed login attempts are not logged, allowing attackers to brute force credentials without detection.
+  The admin uses a weak password that can be easily guessed.
+
+vulnerabilities:
+  - type: Insufficient Logging
+    category: Security Logging and Monitoring Failures
+    cwes:
+      - CWE-778
+
+objective: "Brute force the admin password without triggering any logged alerts, then access the admin panel to retrieve the flag."
+
+flag_format: "S7BEN{...}"
+
+services:
+  target:
+    port: 5000
+    protocol: http
+
+hints:
+  - "The admin password is weak and commonly found in password lists."
+  - "Failed login attempts generate no logs - you can brute force freely."
+  - "Try common passwords like 'password', 'admin123', 'letmein', etc."
+
+tags:
+  - insufficient-logging
+  - brute-force
+  - authentication
+  - web
+  - python
+
+author: Strike7 Security Team
+created: 2026-01-07

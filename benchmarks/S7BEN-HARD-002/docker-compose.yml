@@ -1,0 +1,48 @@
+
+services:
+  node-app:
+    build: ./app
+    container_name: xss-node-app
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - FLAG=${FLAG_WEB:-S7BEN{xss_sanitizer_byp4ss_svg_onload_def456}}
+      - CALLBACK_URL=http://callback-server:8080
+    networks:
+      - frontend-net
+      - backend-net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+    restart: unless-stopped
+
+  callback-server:
+    build: ./callback
+    container_name: xss-callback-server
+    expose:
+      - "8080"
+    networks:
+      - backend-net
+    environment:
+      - NODE_ENV=development
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    restart: unless-stopped
+
+networks:
+  frontend-net:
+    driver: bridge
+  backend-net:
+    driver: bridge
+    internal: true
+
+volumes:
+  app-data:

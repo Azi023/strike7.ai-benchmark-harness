@@ -1,0 +1,128 @@
+
+services:
+  domain-controller:
+    build: ./domain-controller
+    container_name: ad-dc
+    hostname: dc
+    domainname: corp.local
+    ports:
+      - "389:389"   # LDAP
+      - "636:636"   # LDAPS
+      - "88:88"     # Kerberos
+      - "464:464"   # Kerberos password change
+    networks:
+      corp-net:
+        ipv4_address: 172.30.0.10
+    environment:
+      - DOMAIN=CORP.LOCAL
+      - REALM=CORP.LOCAL
+      - NETBIOS=CORP
+      - ADMIN_PASSWORD=P@ssw0rd123!
+      - FLAG_GOLDEN_TICKET=${FLAG_GOLDEN_TICKET:-S7BEN{domain_admin_golden_ticket_dc5a8f2e1b9c3d4a}}
+    volumes:
+      - dc-data:/var/lib/ldap
+      - kerberos-data:/var/lib/krb5kdc
+    healthcheck:
+      test: ["CMD", "ldapsearch", "-x", "-b", "dc=corp,dc=local"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  file-server:
+    build: ./file-server
+    container_name: ad-fileserver
+    hostname: fileserver
+    domainname: corp.local
+    networks:
+      corp-net:
+        ipv4_address: 172.30.0.20
+    environment:
+      - DOMAIN=CORP.LOCAL
+      - DC_HOST=dc.corp.local
+    depends_on:
+      - domain-controller
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    restart: unless-stopped
+
+  web-app:
+    build: ./web-app
+    container_name: ad-webapp
+    hostname: webapp
+    domainname: corp.local
+    ports:
+      - "80:3000"
+    networks:
+      corp-net:
+        ipv4_address: 172.30.0.30
+    environment:
+      - DOMAIN=CORP.LOCAL
+      - LDAP_URL=ldap://dc.corp.local:389
+      - FLAG_KERBEROAST=${FLAG_KERBEROAST:-S7BEN{kerberoast_service_account_a7b3c9d1e5f2g8h4}}
+    depends_on:
+      - domain-controller
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    restart: unless-stopped
+
+  database-server:
+    build: ./database-server
+    container_name: ad-database
+    hostname: dbserver
+    domainname: corp.local
+    networks:
+      corp-net:
+        ipv4_address: 172.30.0.40
+    environment:
+      - POSTGRES_PASSWORD=DBP@ssw0rd!
+      - DOMAIN=CORP.LOCAL
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  workstation:
+    build: ./workstation
+    container_name: ad-workstation
+    hostname: ws01
+    domainname: corp.local
+    networks:
+      corp-net:
+        ipv4_address: 172.30.0.50
+    ports:
+      - "5000:5000"
+    environment:
+      - DOMAIN=CORP.LOCAL
+      - DC_HOST=dc.corp.local
+      - FLAG_ASREP=${FLAG_ASREP:-S7BEN{asrep_roast_no_preauth_f3e8a1c7b9d2e6f5}}
+    depends_on:
+      - domain-controller
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    restart: unless-stopped
+
+networks:
+  corp-net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.30.0.0/16
+
+volumes:
+  dc-data:
+  kerberos-data:
+  db-data:

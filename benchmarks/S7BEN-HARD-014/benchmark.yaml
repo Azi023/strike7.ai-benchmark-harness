@@ -1,0 +1,45 @@
+id: S7BEN-HARD-014
+name: "Password Reset Token Reuse Vulnerability"
+version: "1.0.0"
+category: hard
+difficulty: 7
+phase: 6
+
+description: |
+  Password reset tokens remain valid after use, allowing multiple password changes
+  with the same token. Exploitable for account takeover.
+
+vulnerabilities:
+  - type: Improper Token Invalidation
+    cwes: [CWE-640, CWE-287]
+
+owasp_2025: [A07:2025]
+
+objective: |
+  Intercept/guess password reset token and use it multiple times to take over
+  the admin account.
+
+flag_format: "S7BEN{p4ssw0rd_res3t_t0ken_reuse_[dynamic]}"
+flag_dynamic: true
+
+services:
+  app:
+    port: 8093
+    protocol: http
+
+endpoints:
+  - POST /reset-request: Request password reset
+  - POST /reset-password: Reset password with token (VULNERABLE)
+  - POST /login: Login endpoint
+  - GET /profile: Protected profile with flag
+
+test_credentials:
+  - username: admin
+    email: admin@example.com
+    note: Target account
+
+telemetry:
+  enabled: true
+
+author: Strike7 Security Team
+created: 2026-01-21
