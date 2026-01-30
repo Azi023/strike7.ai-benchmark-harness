@@ -64,6 +64,9 @@ Thumbs.db
 htmlcov/
 .cache
 
+# Claude temporary files
+tmpclaude-*
+
 # Secrets (keep local but never commit)
 .env
 .env.*
@@ -98,8 +101,12 @@ docker-compose.override.yml
 # Runtime
 benchmarks/*/tmp/
 benchmarks/*/logs/
+
+# Dashboard runtime data (but keep benchmarks.json tracked)
 dashboard/data/sessions/
 dashboard/data/metrics/
+dashboard/data/*.db
+!dashboard/data/benchmarks.json
 
 # Jupyter Notebook
 .ipynb_checkpoints
