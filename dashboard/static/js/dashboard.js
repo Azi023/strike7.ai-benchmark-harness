@@ -456,15 +456,21 @@ async function handleStartClick(benchmarkId) {
         const result = await startBenchmark(benchmarkId);
 
         if (result.status === 'success') {
-            // Update UI handled by polling/updateContainerUI
+            // Update UI handled by polling/updateContainerUI - don't reset button
             showNotification('success', `${benchmarkId} started successfully`);
+            // Button visibility will be handled by updateContainerUI when polling detects running container
         } else {
             showNotification('error', result.message || 'Failed to start container');
+            // Only reset button on failure
+            if (button) {
+                button.disabled = false;
+                button.innerHTML = '▶ Start';
+            }
         }
     } catch (error) {
         const message = handleApiError(error, 'start');
         showNotification('error', message);
-    } finally {
+        // Reset button on error
         if (button) {
             button.disabled = false;
             button.innerHTML = '▶ Start';

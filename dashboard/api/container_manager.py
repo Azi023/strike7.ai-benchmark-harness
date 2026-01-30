@@ -376,10 +376,11 @@ class ContainerManager:
 
     def _benchmark_id_from_container_name(self, container_name: str) -> Optional[str]:
         """Extract benchmark ID from container name"""
-        # Convert s7ben-easy-001-app-1 to S7BEN-EASY-001
+        # Convert s7ben-easy-001_app_1 or s7ben-easy-001-app-1 to S7BEN-EASY-001
         if container_name.startswith('s7ben-'):
-            # Remove the -app-1 suffix
-            parts = container_name.replace('-app-1', '').upper().split('-')
+            # Remove the _app_1 or -app-1 suffix (docker-compose uses underscore)
+            cleaned = container_name.replace('_app_1', '').replace('-app-1', '')
+            parts = cleaned.upper().split('-')
             if len(parts) >= 3:
                 return '-'.join(parts[:3])
         return None
