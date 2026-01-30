@@ -4,7 +4,7 @@ services:
     build: ./app
     container_name: ssrf-web-app
     ports:
-      - "5000:5000"
+      - "5032:5000"
     environment:
       - FLASK_ENV=development
       - FLAG=${FLAG:-S7BEN{ssrf_internal_acc3ss_dns_rebind_789abc}}

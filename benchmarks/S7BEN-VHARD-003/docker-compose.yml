@@ -101,7 +101,7 @@ services:
       corp-net:
         ipv4_address: 172.30.0.50
     ports:
-      - "5000:5000"
+      - "5052:5000"
     environment:
       - DOMAIN=CORP.LOCAL
       - DC_HOST=dc.corp.local

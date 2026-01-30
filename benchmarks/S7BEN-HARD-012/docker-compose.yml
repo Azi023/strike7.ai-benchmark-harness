@@ -5,7 +5,7 @@ services:
       args:
         - FLAG_SECRET
     ports:
-      - "5000:5000"
+      - "5036:5000"
     environment:
       - FLAG_SECRET=${FLAG_SECRET:-strike7-partial-authz-t3-secret}
     volumes:

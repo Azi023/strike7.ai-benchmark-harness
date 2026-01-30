@@ -5,7 +5,7 @@ services:
       args:
         - FLAG
     ports:
-      - "5000:5000"
+      - "5001:5000"
     environment:
       - FLAG=${FLAG:-S7BEN{CSRF_ATT4CK_SUCC3SSFUL}}
     healthcheck:
