@@ -23,18 +23,32 @@ app = Flask(__name__, static_folder='static', template_folder='templates')
 CORS(app)  # Enable CORS for API access
 
 # Configuration
-BENCHMARKS_FILE = os.path.join(os.path.dirname(__file__), 'config', 'benchmarks.yaml')
+BENCHMARKS_JSON_FILE = os.path.join(os.path.dirname(__file__), 'data', 'benchmarks.json')
+BENCHMARKS_YAML_FILE = os.path.join(os.path.dirname(__file__), 'config', 'benchmarks.yaml')
 BENCHMARKS_DIR = os.path.join(os.path.dirname(__file__), '..', 'benchmarks')
 
-# Load benchmarks from YAML
+# Load benchmarks from JSON (preferred) or fallback to YAML
 def load_benchmarks():
-    """Load all benchmarks from the registry YAML file"""
+    """Load all benchmarks from JSON file (or fallback to YAML)"""
+    # Try loading from JSON first (generated file with correct ports)
     try:
-        with open(BENCHMARKS_FILE, 'r') as f:
-            data = yaml.safe_load(f)
-            return data.get('benchmarks', [])
+        if os.path.exists(BENCHMARKS_JSON_FILE):
+            with open(BENCHMARKS_JSON_FILE, 'r') as f:
+                benchmarks = json.load(f)
+                print(f"✅ Loaded {len(benchmarks)} benchmarks from JSON")
+                return benchmarks
     except Exception as e:
-        print(f"Error loading benchmarks: {e}")
+        print(f"⚠️ Error loading benchmarks.json: {e}")
+
+    # Fallback to YAML if JSON doesn't exist
+    try:
+        with open(BENCHMARKS_YAML_FILE, 'r') as f:
+            data = yaml.safe_load(f)
+            benchmarks = data.get('benchmarks', [])
+            print(f"⚠️ Loaded {len(benchmarks)} benchmarks from YAML (fallback)")
+            return benchmarks
+    except Exception as e:
+        print(f"❌ Error loading benchmarks from YAML: {e}")
         return []
 
 # Cache benchmarks in memory
