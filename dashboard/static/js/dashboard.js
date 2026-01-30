@@ -1,6 +1,9 @@
 // Strike7 Dashboard JavaScript - SOC Theme
 
-const API_BASE = 'http://localhost:5500/api';
+// Detect API base URL (use current host or fallback to localhost)
+const API_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+    ? 'http://localhost:5500/api'
+    : `${window.location.protocol}//${window.location.hostname}:5500/api`;
 
 // SOC Color Palette
 const COLORS = {
