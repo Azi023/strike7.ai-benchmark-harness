@@ -86,7 +86,7 @@ def get_benchmarks():
 
     owasp = request.args.get('owasp')
     if owasp:
-        benchmarks = [b for b in benchmarks if owasp.upper() in b.get('owasp', '')]
+        benchmarks = [b for b in benchmarks if owasp.upper() in b.get('owasp_category', b.get('owasp', ''))]
 
     difficulty = request.args.get('difficulty')
     if difficulty:
@@ -139,7 +139,7 @@ def get_statistics():
     # Count by OWASP
     owasp_counts = Counter()
     for b in benchmarks:
-        owasp = b.get('owasp', '')
+        owasp = b.get('owasp_category', b.get('owasp', ''))
         # Extract A01, A02, etc.
         if owasp:
             owasp_code = owasp.split(':')[0].split('-')[0].strip()
@@ -197,7 +197,8 @@ def get_owasp_coverage():
 
     coverage = {}
     for code, name in owasp_mapping.items():
-        count = sum(1 for b in benchmarks if code in b.get('owasp', ''))
+        # Check both 'owasp' and 'owasp_category' fields for compatibility
+        count = sum(1 for b in benchmarks if code in b.get('owasp_category', b.get('owasp', '')))
         coverage[code] = {
             'name': name,
             'count': count,
