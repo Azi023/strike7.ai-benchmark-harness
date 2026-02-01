@@ -362,11 +362,15 @@ class ContainerManager:
             }
 
     def _get_benchmark_directory(self, benchmark_id: str) -> str:
-        """Get the directory path for a benchmark"""
-        # Convert S7BEN-HARD-018 to benchmarks/S7BEN-HARD-018
+        """Get the absolute directory path for a benchmark"""
+        # Convert S7BEN-HARD-018 to /absolute/path/benchmarks/S7BEN-HARD-018
         import os
-        base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-        return os.path.join(base_dir, '..', 'benchmarks', benchmark_id)
+        # Get absolute path to dashboard directory (dashboard/)
+        dashboard_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        # Go up one level to project root, then into benchmarks
+        project_root = os.path.dirname(dashboard_dir)
+        benchmark_dir = os.path.join(project_root, 'benchmarks', benchmark_id)
+        return os.path.abspath(benchmark_dir)  # Ensure absolute path
 
     def _get_container_name(self, benchmark_id: str) -> str:
         """Get standard container name for a benchmark"""

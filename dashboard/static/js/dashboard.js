@@ -261,6 +261,14 @@ async function stopBenchmark(benchmarkId) {
 
     const data = await response.json();
 
+    // Check for HTTP errors
+    if (!response.ok) {
+        const error = new Error(data.message || data.error || 'Failed to stop container');
+        error.status = response.status;
+        error.data = data;
+        throw error;
+    }
+
     // Trigger immediate status update
     await getContainerStatus().then(updateContainerUI);
 
