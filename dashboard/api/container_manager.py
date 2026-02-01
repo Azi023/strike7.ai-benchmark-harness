@@ -374,9 +374,9 @@ class ContainerManager:
 
     def _get_container_name(self, benchmark_id: str) -> str:
         """Get standard container name for a benchmark"""
-        # Docker-compose names containers as: <directory>-<service>-<number>
-        # For S7BEN-EASY-001, this becomes: s7ben-easy-001-app-1
-        return f"{benchmark_id.lower()}-app-1"
+        # Docker-compose names containers as: <directory>_<service>_<number>
+        # For S7BEN-EASY-001, this becomes: s7ben-easy-001_app_1 (note underscore before app)
+        return f"{benchmark_id.lower()}_app_1"
 
     def _benchmark_id_from_container_name(self, container_name: str) -> Optional[str]:
         """Extract benchmark ID from container name"""
