@@ -32,6 +32,7 @@ let statistics = {};
 let activeCharts = {};
 let statusPollInterval = null;
 let currentModalBenchmark = null;
+const startTimeouts = new Map(); // Track startup timeouts per benchmark
 
 // Initialize dashboard
 document.addEventListener('DOMContentLoaded', async () => {
@@ -340,15 +341,38 @@ function updateContainerUI(status) {
         const containerInfo = status.containers.find(c => c.benchmark_id === benchmarkId);
         const isRunning = runningIds.has(benchmarkId);
 
-        updateButtonVisibility(card, isRunning);
+        // Check if container is healthy (or has no health check)
+        const isHealthy = containerInfo &&
+            (containerInfo.health_status === 'healthy' || containerInfo.health_status === 'none');
+        const isStarting = containerInfo && containerInfo.health_status === 'starting';
+        const isUnhealthy = containerInfo && containerInfo.health_status === 'unhealthy';
 
+        // Only show as "running" if healthy or no health check configured
+        // Keep "Starting..." if health status is "starting"
+        const shouldShowRunning = isRunning && (isHealthy || !containerInfo.health_status);
+
+        updateButtonVisibility(card, shouldShowRunning);
+
+        // Clear timeout if container is now healthy
+        if (shouldShowRunning && startTimeouts.has(benchmarkId)) {
+            clearTimeout(startTimeouts.get(benchmarkId));
+            startTimeouts.delete(benchmarkId);
+        }
+
+        // Update status indicator with health info
         if (isRunning && containerInfo) {
             updateBenchmarkCardRunning(card, containerInfo);
-            // Update status indicator text as well
             const statusEl = card.querySelector('.status-indicator');
-            if (statusEl) statusEl.textContent = '● Running';
+            if (statusEl) {
+                if (isHealthy) {
+                    statusEl.textContent = '● Running';
+                } else if (isStarting) {
+                    statusEl.textContent = '🔄 Starting (health checks)';
+                } else if (isUnhealthy) {
+                    statusEl.textContent = '⚠️ Unhealthy';
+                }
+            }
         } else {
-            // Ensure runtime counter is stopped if not running
             const statusEl = card.querySelector('.status-indicator');
             if (statusEl) statusEl.textContent = '○ Not Running';
         }
@@ -464,12 +488,18 @@ async function handleStartClick(benchmarkId) {
         const result = await startBenchmark(benchmarkId);
 
         if (result.status === 'success') {
-            // Update UI handled by polling/updateContainerUI - don't reset button
             showNotification('success', `${benchmarkId} started successfully`);
-            // Button visibility will be handled by updateContainerUI when polling detects running container
+
+            // Set timeout for startup (90 seconds for complex multi-container benchmarks)
+            const timeoutId = setTimeout(() => {
+                checkStartupTimeout(benchmarkId, button);
+            }, 90000);  // 90 seconds
+
+            startTimeouts.set(benchmarkId, timeoutId);
+
+            // Button visibility will be handled by updateContainerUI when polling detects healthy container
         } else {
             showNotification('error', result.message || 'Failed to start container');
-            // Only reset button on failure
             if (button) {
                 button.disabled = false;
                 button.innerHTML = '▶ Start';
@@ -478,12 +508,44 @@ async function handleStartClick(benchmarkId) {
     } catch (error) {
         const message = handleApiError(error, 'start');
         showNotification('error', message);
-        // Reset button on error
         if (button) {
             button.disabled = false;
             button.innerHTML = '▶ Start';
         }
     }
+}
+
+function checkStartupTimeout(benchmarkId, button) {
+    // Check if container is still starting after timeout
+    getContainerStatus().then(status => {
+        const container = status.containers.find(c => c.benchmark_id === benchmarkId);
+
+        if (!container) {
+            // Container not found - startup failed
+            showNotification('error', `${benchmarkId} startup timeout - container not detected`);
+            if (button) {
+                button.disabled = false;
+                button.innerHTML = '▶ Start (Retry)';
+            }
+        } else if (container.health_status === 'unhealthy') {
+            // Container unhealthy
+            showNotification('warning', `${benchmarkId} health checks failing - check logs`);
+            // Keep button as "Starting..." but show warning
+            if (button) {
+                button.innerHTML = '<span class="spinner"></span> Unhealthy - Check Logs';
+            }
+        } else if (container.health_status === 'starting') {
+            // Still initializing - extend timeout
+            showNotification('info', `${benchmarkId} still initializing...`);
+            const timeoutId = setTimeout(() => {
+                checkStartupTimeout(benchmarkId, button);
+            }, 30000);  // Check again in 30 seconds
+            startTimeouts.set(benchmarkId, timeoutId);
+        }
+        // If healthy, button will be updated by normal polling
+    }).catch(error => {
+        console.error('Error checking startup timeout:', error);
+    });
 }
 
 async function handleStopClick(benchmarkId) {

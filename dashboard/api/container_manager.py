@@ -254,10 +254,15 @@ class ContainerManager:
                             # Get additional stats
                             stats = self._get_container_stats(container_name)
 
+                            # Parse health status from Status field
+                            status_text = container.get('Status', '')
+                            health_status = self._parse_health_status(status_text)
+
                             container_info = {
                                 'benchmark_id': benchmark_id,
                                 'container_name': container_name,
-                                'status': container.get('Status', ''),
+                                'status': status_text,
+                                'health_status': health_status,
                                 'port': self.benchmarks.get(benchmark_id, {}).get('port'),
                                 'memory_mb': stats.get('memory_mb', 0),
                                 'cpu_percent': stats.get('cpu_percent', 0)
@@ -400,6 +405,39 @@ class ContainerManager:
             return container_name in result.stdout
         except Exception:
             return False
+
+    def _parse_health_status(self, status_text: str) -> str:
+        """
+        Parse health status from Docker status string
+
+        Examples:
+            "Up 2 minutes (healthy)" -> "healthy"
+            "Up 2 minutes (unhealthy)" -> "unhealthy"
+            "Up 2 minutes" -> "none"  # No health check configured
+            "Up 39 seconds (health: starting)" -> "starting"
+
+        Returns:
+            One of: "healthy", "unhealthy", "starting", "none", "unknown"
+        """
+        import re
+
+        if not status_text:
+            return "unknown"
+
+        # Check for explicit health status in parentheses
+        health_match = re.search(r'\(([^)]*health[^)]*)\)', status_text, re.IGNORECASE)
+        if health_match:
+            health_text = health_match.group(1).lower()
+
+            if 'unhealthy' in health_text:
+                return "unhealthy"
+            elif 'starting' in health_text or 'health: starting' in health_text:
+                return "starting"
+            elif 'healthy' in health_text:
+                return "healthy"
+
+        # No health check configured or status not available
+        return "none"
 
     def _get_container_stats(self, container_name: str) -> Dict:
         """Get resource stats for a container"""
