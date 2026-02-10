@@ -22,6 +22,7 @@ class ContainerManager:
             config: Optional configuration dict with safety settings
         """
         self.benchmarks = {b['id']: b for b in benchmarks}
+        self.project_to_benchmark = {b['id'].lower(): b['id'] for b in benchmarks}
         self.config = config or self._default_config()
         self.running_containers = {}  # {benchmark_id: container_info}
 
@@ -72,17 +73,17 @@ class ContainerManager:
         else:
             stopped_ids = []
 
-        # Get benchmark directory and container name
+        # Get benchmark directory and compose project name
         benchmark_dir = self._get_benchmark_directory(benchmark_id)
-        container_name = self._get_container_name(benchmark_id)
+        compose_project = self._get_compose_project_name(benchmark_id)
 
-        # Check if container already running
-        if self._is_container_running(container_name):
+        # Check if benchmark already running (project-scoped, independent of service/container names)
+        if self._is_benchmark_running(benchmark_id):
             return {
                 'status': 'success',
                 'message': 'Container already running',
                 'benchmark_id': benchmark_id,
-                'container_name': container_name,
+                'container_name': compose_project,
                 'port': benchmark.get('port'),
                 'already_running': True
             }
@@ -112,7 +113,7 @@ class ContainerManager:
             # Track running container
             container_info = {
                 'benchmark_id': benchmark_id,
-                'container_name': container_name,
+                'container_name': compose_project,
                 'port': benchmark.get('port'),
                 'started_at': datetime.now().isoformat(),
                 'auto_stop_at': auto_stop_at.isoformat(),
@@ -123,7 +124,7 @@ class ContainerManager:
             return {
                 'status': 'success',
                 'benchmark_id': benchmark_id,
-                'container_name': container_name,
+                'container_name': compose_project,
                 'port': benchmark.get('port'),
                 'started_at': container_info['started_at'],
                 'auto_stop_at': container_info['auto_stop_at'],
@@ -161,11 +162,10 @@ class ContainerManager:
                 'benchmark_id': benchmark_id
             }
 
-        container_name = self._get_container_name(benchmark_id)
         benchmark_dir = self._get_benchmark_directory(benchmark_id)
 
-        # Check if container is running
-        if not self._is_container_running(container_name):
+        # Check if benchmark is running (project-scoped)
+        if not self._is_benchmark_running(benchmark_id):
             # Remove from tracking if it was there
             if benchmark_id in self.running_containers:
                 del self.running_containers[benchmark_id]
@@ -241,15 +241,22 @@ class ContainerManager:
             )
 
             if result.returncode == 0:
+                # Aggregate per benchmark (not per container)
+                by_benchmark = {}
+
                 for line in result.stdout.strip().split('\n'):
                     if not line:
                         continue
                     try:
                         container = json.loads(line)
                         container_name = container.get('Names', '')
+                        labels = container.get('Labels', '')
 
-                        # Check if this is a Strike7 benchmark container
-                        benchmark_id = self._benchmark_id_from_container_name(container_name)
+                        # First choice: compose project label; fallback to name parsing
+                        benchmark_id = self._benchmark_id_from_labels(labels)
+                        if not benchmark_id:
+                            benchmark_id = self._benchmark_id_from_container_name(container_name)
+
                         if benchmark_id:
                             # Get additional stats
                             stats = self._get_container_stats(container_name)
@@ -277,9 +284,27 @@ class ContainerManager:
                                     datetime.now() - started
                                 ).total_seconds()
 
-                            containers.append(container_info)
+                            # Keep one status object per benchmark. Prefer a container that
+                            # has the mapped benchmark port and a more stable health state.
+                            existing = by_benchmark.get(benchmark_id)
+                            if not existing:
+                                container_info['service_count'] = 1
+                                by_benchmark[benchmark_id] = container_info
+                            else:
+                                existing['service_count'] = existing.get('service_count', 1) + 1
+                                existing['memory_mb'] = round(existing.get('memory_mb', 0) + container_info.get('memory_mb', 0), 2)
+                                existing['cpu_percent'] = round(existing.get('cpu_percent', 0) + container_info.get('cpu_percent', 0), 2)
+
+                                merged_health = self._merge_health_status(
+                                    existing.get('health_status', 'unknown'),
+                                    container_info.get('health_status', 'unknown')
+                                )
+                                existing['health_status'] = merged_health
+
                     except json.JSONDecodeError:
                         continue
+
+                containers.extend(by_benchmark.values())
 
         except Exception as e:
             print(f"Error getting running containers: {e}")
@@ -383,6 +408,10 @@ class ContainerManager:
         # For S7BEN-EASY-001, this becomes: s7ben-easy-001_app_1 (note underscore before app)
         return f"{benchmark_id.lower()}_app_1"
 
+    def _get_compose_project_name(self, benchmark_id: str) -> str:
+        """Docker Compose default project name for a benchmark directory."""
+        return benchmark_id.lower()
+
     def _benchmark_id_from_container_name(self, container_name: str) -> Optional[str]:
         """Extract benchmark ID from container name"""
         # Convert s7ben-easy-001_app_1 or s7ben-easy-001-app-1 to S7BEN-EASY-001
@@ -391,8 +420,27 @@ class ContainerManager:
             cleaned = container_name.replace('_app_1', '').replace('-app-1', '')
             parts = cleaned.upper().split('-')
             if len(parts) >= 3:
-                return '-'.join(parts[:3])
+                candidate = '-'.join(parts[:3])
+                if candidate in self.benchmarks:
+                    return candidate
         return None
+
+    def _benchmark_id_from_labels(self, labels: str) -> Optional[str]:
+        """Extract benchmark ID from docker compose labels."""
+        if not labels:
+            return None
+
+        project = None
+        for label in labels.split(','):
+            label = label.strip()
+            if label.startswith('com.docker.compose.project='):
+                project = label.split('=', 1)[1]
+                break
+
+        if not project:
+            return None
+
+        return self.project_to_benchmark.get(project.lower())
 
     def _is_container_running(self, container_name: str) -> bool:
         """Check if a specific container is running"""
@@ -405,6 +453,30 @@ class ContainerManager:
             return container_name in result.stdout
         except Exception:
             return False
+
+    def _is_benchmark_running(self, benchmark_id: str) -> bool:
+        """Check whether any running container belongs to the benchmark compose project."""
+        project = self._get_compose_project_name(benchmark_id)
+        try:
+            result = subprocess.run(
+                ['docker', 'ps', '--filter', f'label=com.docker.compose.project={project}', '--format', '{{.Names}}'],
+                capture_output=True,
+                text=True
+            )
+            return bool(result.stdout.strip())
+        except Exception:
+            return False
+
+    def _merge_health_status(self, a: str, b: str) -> str:
+        """Merge health statuses across multiple service containers for one benchmark."""
+        rank = {
+            'unhealthy': 4,
+            'starting': 3,
+            'unknown': 2,
+            'none': 1,
+            'healthy': 0
+        }
+        return a if rank.get(a, 2) >= rank.get(b, 2) else b
 
     def _parse_health_status(self, status_text: str) -> str:
         """

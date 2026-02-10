@@ -230,25 +230,19 @@ def get_categories():
 def get_benchmark_status(benchmark_id):
     """Check if a benchmark container is running"""
     try:
-        # Get benchmark info
         benchmark = next((b for b in BENCHMARKS_CACHE if b.get('id') == benchmark_id), None)
         if not benchmark:
             return jsonify({'error': 'Benchmark not found'}), 404
 
-        # Check Docker container status
-        container_name = benchmark_id.lower().replace('_', '-')
-        result = subprocess.run(
-            ['docker', 'ps', '--filter', f'name={container_name}', '--format', '{{.Status}}'],
-            capture_output=True,
-            text=True
-        )
-
-        is_running = bool(result.stdout.strip())
+        running = container_manager.get_running_containers()
+        container = next((c for c in running if c.get('benchmark_id') == benchmark_id), None)
+        is_running = container is not None
 
         return jsonify({
             'benchmark_id': benchmark_id,
             'running': is_running,
-            'status': result.stdout.strip() if is_running else 'stopped',
+            'status': container.get('status', 'running') if is_running else 'stopped',
+            'health_status': container.get('health_status') if is_running else 'none',
             'port': benchmark.get('port')
         })
     except Exception as e:

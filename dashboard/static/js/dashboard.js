@@ -295,20 +295,18 @@ async function getContainerStatus() {
 function startStatusPolling() {
     if (statusPollInterval) return;
 
-    // Initial call
-    getContainerStatus().then(status => {
-        updateContainerUI(status);
-        if (status.running_count > 0) {
-            // Start interval if we have running containers
-            statusPollInterval = setInterval(async () => {
-                const status = await getContainerStatus();
-                updateContainerUI(status);
-                if (status.running_count === 0) {
-                    stopStatusPolling();
-                }
-            }, 5000); // Poll every 5 seconds
+    const poll = async () => {
+        try {
+            const status = await getContainerStatus();
+            updateContainerUI(status);
+        } catch (error) {
+            console.error('Status polling error:', error);
         }
-    });
+    };
+
+    // Initial call + continuous polling to avoid missing late-starting containers
+    poll();
+    statusPollInterval = setInterval(poll, 5000);
 }
 
 function stopStatusPolling() {
@@ -347,9 +345,9 @@ function updateContainerUI(status) {
         const isStarting = containerInfo && containerInfo.health_status === 'starting';
         const isUnhealthy = containerInfo && containerInfo.health_status === 'unhealthy';
 
-        // Only show as "running" if healthy or no health check configured
-        // Keep "Starting..." if health status is "starting"
-        const shouldShowRunning = isRunning && (isHealthy || !containerInfo.health_status);
+        // Show running controls whenever a benchmark container is detected.
+        // Health text still reflects healthy/starting/unhealthy.
+        const shouldShowRunning = isRunning;
 
         updateButtonVisibility(card, shouldShowRunning);
 
@@ -378,8 +376,8 @@ function updateContainerUI(status) {
         }
     });
 
-    // If we have running containers but no interval, start it
-    if (status.running_count > 0 && !statusPollInterval) {
+    // Keep polling active to maintain frontend/backend sync.
+    if (!statusPollInterval) {
         startStatusPolling();
     }
 }
