@@ -3,3 +3,6 @@ services:
   app:
     build: ./app
     ports: ["8103:8103"]
+    environment:
+      - FLAG=${FLAG:-S7BEN{debug_m0de_placeholder}}
+      - WERKZEUG_DEBUG_PIN=off

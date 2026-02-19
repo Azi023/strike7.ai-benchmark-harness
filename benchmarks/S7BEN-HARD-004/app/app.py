@@ -8,6 +8,10 @@ from flask import Flask, request, jsonify
 import jwt
 import time
 import os
+import base64
+import hashlib
+import hmac as _hmac
+import json as _json
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.hazmat.backends import default_backend
@@ -155,37 +159,58 @@ def jwks():
         }]
     })
 
+def _b64url_decode(s):
+    """Base64url decode with automatic padding."""
+    s = s + '=' * (-len(s) % 4)
+    return base64.urlsafe_b64decode(s)
+
+
 def verify_token(token):
     """
-    Verify JWT token with ALGORITHM CONFUSION VULNERABILITY
-    Accepts both RS256 and HS256 (dangerous!)
+    Verify JWT token with ALGORITHM CONFUSION VULNERABILITY.
+
+    VULNERABLE: trusts the 'alg' header field without enforcing RS256.
+    When alg=HS256, manually verifies HMAC-SHA256 using the RSA public key
+    PEM bytes as the HMAC secret — the attacker can obtain the public key
+    from /api/jwks and forge admin tokens.
     """
     global jwt_verifications
     jwt_verifications += 1
 
+    # Legitimate path: RS256 verification via PyJWT
     try:
-        # VULNERABLE: Accepts algorithm from token header without validation
-        # Should use algorithms=['RS256'] to enforce specific algorithm
-        # Instead uses decode_complete to get header
-        decoded = jwt.decode(
-            token,
-            PUBLIC_KEY_PEM,
-            algorithms=['RS256', 'HS256']  # VULNERABLE: Accepts both!
-        )
+        decoded = jwt.decode(token, PUBLIC_KEY_PEM, algorithms=['RS256'])
         return decoded, None
     except jwt.ExpiredSignatureError:
         return None, "Token expired"
-    except jwt.InvalidTokenError as e:
-        # Try with secret key if RS256 fails (algorithm confusion)
-        try:
-            decoded = jwt.decode(
-                token,
-                JWT_SECRET,
-                algorithms=['HS256']
-            )
-            return decoded, None
-        except:
-            return None, str(e)
+    except jwt.InvalidTokenError:
+        pass
+
+    # Algorithm confusion path: manually verify HS256 signed with public key
+    # VULNERABLE: bypasses PyJWT's key-type guard; accepts attacker-forged tokens
+    try:
+        parts = token.split('.')
+        if len(parts) != 3:
+            return None, "Malformed token"
+
+        header = _json.loads(_b64url_decode(parts[0]))
+        if header.get('alg') != 'HS256':
+            return None, "Unsupported algorithm"
+
+        signing_input = f"{parts[0]}.{parts[1]}".encode()
+        expected_sig = _hmac.new(PUBLIC_KEY_PEM, signing_input, hashlib.sha256).digest()
+        actual_sig = _b64url_decode(parts[2])
+
+        if not _hmac.compare_digest(expected_sig, actual_sig):
+            return None, "Invalid signature"
+
+        payload = _json.loads(_b64url_decode(parts[1]))
+        if 'exp' in payload and payload['exp'] < int(time.time()):
+            return None, "Token expired"
+
+        return payload, None
+    except Exception as e:
+        return None, str(e)
 
 @app.route('/admin/flag')
 def admin_flag():
