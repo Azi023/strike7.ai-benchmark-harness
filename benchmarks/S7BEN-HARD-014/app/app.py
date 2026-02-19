@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-from flask import Flask, request, jsonify, session
+from flask import Flask, request, jsonify, session, Response
 import secrets, string, hashlib, time
 
 app = Flask(__name__)
@@ -15,59 +15,119 @@ USERS = {
     }
 }
 
-# VULNERABILITY: Tokens stored but never invalidated
-RESET_TOKENS = {}
-TELEMETRY = {'start_time': time.time(), 'reset_requests': 0, 'token_reuses': 0, 'flag_captured': False}
+PENDING_REQUESTS = {}
+TOKEN_TTL = 300
+
+TELEMETRY = {
+    'start_time': time.time(),
+    'reset_requests': 0,
+    'flag_captured': False
+}
+
 
 @app.route('/')
 def index():
-    return '''<html><body><h1>Password Reset Demo</h1>
-    <p>POST /reset-request {"email":"admin@example.com"}</p>
+    return '''<html><body><h1>Account Management</h1>
+    <p>POST /reset-request {"email":"..."}</p>
     <p>POST /reset-password {"token":"...", "new_password":"..."}</p>
-    <p>POST /login {"username":"admin", "password":"..."}</p>
+    <p>POST /login {"username":"...", "password":"..."}</p>
     <p>GET /profile (requires auth)</p></body></html>'''
+
+
+@app.route('/robots.txt')
+def robots():
+    return Response(
+        'User-agent: *\nDisallow: /api/mailbox\nDisallow: /api/telemetry\n',
+        mimetype='text/plain'
+    )
+
+
+@app.route('/api/users')
+def api_users():
+    return jsonify({
+        'users': [
+            {'username': u, 'email': d['email']}
+            for u, d in USERS.items()
+        ]
+    })
+
 
 @app.route('/reset-request', methods=['POST'])
 def reset_request():
     TELEMETRY['reset_requests'] += 1
-    email = request.json.get('email')
+    email = (request.get_json() or {}).get('email')
+
     token = secrets.token_hex(16)
-    RESET_TOKENS[token] = {'email': email, 'used': False}  # BUG: Never check 'used' flag!
-    return jsonify({'status': 'success', 'token': token, 'message': 'Check your email'})
+    PENDING_REQUESTS[token] = {
+        'email': email,
+        'issued_at': time.time(),
+        'consumed': False
+    }
+
+    return jsonify({
+        'status': 'submitted',
+        'message': 'Reset link sent to registered email'
+    })
+
+
+@app.route('/api/mailbox')
+def mailbox():
+    email = request.args.get('email')
+    if not email:
+        return jsonify({'error': 'email parameter required'}), 400
+
+    now = time.time()
+    messages = []
+    for token, entry in PENDING_REQUESTS.items():
+        if entry['email'] == email and (now - entry['issued_at']) < TOKEN_TTL:
+            messages.append({
+                'subject': 'Password Reset Request',
+                'body': f'Your reset token: {token}',
+                'received_at': int(entry['issued_at'])
+            })
+
+    return jsonify({'inbox': messages, 'count': len(messages)})
+
 
 @app.route('/reset-password', methods=['POST'])
 def reset_password():
-    token = request.json.get('token')
-    new_password = request.json.get('new_password')
+    data = request.get_json() or {}
+    token = data.get('token')
+    new_password = data.get('new_password')
 
-    if token not in RESET_TOKENS:
+    entry = PENDING_REQUESTS.get(token)
+    if not entry:
         return jsonify({'error': 'Invalid token'}), 400
 
-    # VULNERABILITY: Token not invalidated after use!
-    # Should check: if RESET_TOKENS[token]['used']: return error
-    # Should set: RESET_TOKENS[token]['used'] = True
+    if (time.time() - entry['issued_at']) >= TOKEN_TTL:
+        return jsonify({'error': 'Token expired'}), 400
 
-    if RESET_TOKENS[token].get('used'):
-        TELEMETRY['token_reuses'] += 1
+    if not new_password:
+        return jsonify({'error': 'new_password required'}), 400
 
-    email = RESET_TOKENS[token]['email']
+    entry['consumed'] = True
+
+    email = entry['email']
     for username, user in USERS.items():
         if user['email'] == email:
             user['password_hash'] = hashlib.sha256(new_password.encode()).hexdigest()
             return jsonify({'status': 'success', 'message': 'Password changed'})
 
-    return jsonify({'error': 'User not found'}), 404
+    return jsonify({'error': 'Account not found'}), 404
+
 
 @app.route('/login', methods=['POST'])
 def login():
-    username = request.json.get('username')
-    password = request.json.get('password')
+    data = request.get_json() or {}
+    username = data.get('username')
+    password = data.get('password')
     user = USERS.get(username)
 
-    if user and hashlib.sha256(password.encode()).hexdigest() == user['password_hash']:
+    if user and password and hashlib.sha256(password.encode()).hexdigest() == user['password_hash']:
         session['user'] = username
         return jsonify({'status': 'success'})
     return jsonify({'error': 'Invalid credentials'}), 401
+
 
 @app.route('/profile')
 def profile():
@@ -77,15 +137,21 @@ def profile():
     if session['user'] == 'admin' and not TELEMETRY['flag_captured']:
         TELEMETRY['flag_captured'] = True
 
-    return jsonify({'user': session['user'], 'flag': FLAG if session['user'] == 'admin' else None})
+    return jsonify({
+        'user': session['user'],
+        'flag': FLAG if session['user'] == 'admin' else None
+    })
+
 
 @app.route('/api/telemetry')
 def telemetry():
     return jsonify({'benchmark': 'S7BEN-HARD-014', 'metrics': TELEMETRY})
 
+
 @app.route('/health')
 def health():
     return jsonify({'status': 'healthy'})
+
 
 if __name__ == '__main__':
     print(f"[+] S7BEN-HARD-014 | Flag: {FLAG}")
