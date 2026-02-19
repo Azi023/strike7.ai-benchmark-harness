@@ -6,9 +6,8 @@ difficulty: Easy
 category: Insecure Design
 
 description: |
-  An e-commerce order processing system with a flawed state machine.
-  Orders must follow the workflow: CREATED → PAYMENT_PENDING → PAID → SHIPPED.
-  However, the application allows direct status manipulation, enabling attackers to skip the payment step.
+  An e-commerce order processing system supporting the full order lifecycle,
+  from creation through payment and fulfillment.
 
 vulnerabilities:
   - type: Workflow Bypass
@@ -16,7 +15,7 @@ vulnerabilities:
     cwes:
       - CWE-840
 
-objective: "Create an order and manipulate its status to reach SHIPPED state without going through PAID, bypassing the payment requirement."
+objective: "Create an order and retrieve the flag by manipulating the order to a shipped state."
 
 flag_format: "S7BEN{...}"
 
@@ -25,17 +24,24 @@ services:
     port: 5000
     protocol: http
 
-hints:
-  - "The order status can be changed via PUT request to /order/{id}/status"
-  - "No validation checks if the order has been paid before shipping"
-  - "Try changing the status directly from CREATED to SHIPPED"
-
 tags:
   - workflow-bypass
   - logic-flaw
   - insecure-design
   - web
   - python
+
+internal_metadata:
+  exploitation_path:
+    hints:
+      - "The order status can be changed via PUT request to /order/{id}/status"
+      - "No validation checks if the order has been paid before shipping"
+      - "Try changing the status directly from CREATED to SHIPPED"
+    steps:
+      - "POST /order to create a new order (status: CREATED)"
+      - "Note the order_id from the response"
+      - "PUT /order/{id}/status with body {\"status\": \"SHIPPED\"} skipping payment entirely"
+      - "The response includes the flag because paid=false and status=SHIPPED"
 
 author: Strike7 Security Team
 created: 2026-01-07

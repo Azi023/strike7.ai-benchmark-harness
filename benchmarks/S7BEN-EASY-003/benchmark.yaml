@@ -6,9 +6,8 @@ difficulty: Easy
 category: Insecure Design
 
 description: |
-  A simple banking application vulnerable to a race condition.
-  The withdrawal logic suffers from a time-of-check to time-of-use (TOCTOU) flaw due to an artificial delay.
-  Attackers can simulate simultaneous requests to withdraw more money than available.
+  A simple banking application supporting account balance management and withdrawal transactions.
+  The application tracks balances and processes financial operations.
 
 vulnerabilities:
   - type: Race Condition
@@ -16,7 +15,7 @@ vulnerabilities:
     cwes:
       - CWE-362
 
-objective: "Withdraw more money than your initial balance to drive the account into the negative and retrieve the flag."
+objective: "Manipulate the account balance to retrieve the flag."
 
 flag_format: "S7BEN{...}"
 
@@ -25,16 +24,24 @@ services:
     port: 5000
     protocol: http
 
-hints:
-  - "The application checks your balance, waits, then effectively sets your new balance."
-  - "What happens if two requests check the balance at the exact same time?"
-  - "Try sending multiple requests in parallel using multithreading."
-
 tags:
   - race-condition
   - logic-flaw
   - web
   - python
+
+internal_metadata:
+  exploitation_path:
+    hints:
+      - "The application checks your balance, waits, then updates the balance"
+      - "What happens if two requests check the balance at the exact same time?"
+      - "Try sending multiple requests in parallel using multithreading"
+    steps:
+      - "Identify the /withdraw endpoint which has a TOCTOU flaw with an artificial delay"
+      - "Send concurrent POST /withdraw requests to exploit the check-then-act race window"
+      - "Multiple requests will all pass the balance check before any write occurs"
+      - "The relative UPDATE causes the balance to go negative"
+      - "GET /flag returns the flag once balance < 0"
 
 author: Strike7 Security Team
 created: 2026-01-07

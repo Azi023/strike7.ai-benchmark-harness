@@ -6,9 +6,8 @@ difficulty: Easy
 category: Cryptographic Failures
 
 description: |
-  A web application that exposes an API key hardcoded in client-side JavaScript.
-  The API key is required to access a protected endpoint that reveals sensitive information.
-  This is a common mistake where developers embed secrets in frontend code thinking they are hidden.
+  A web application providing access to a data API with tiered public and protected endpoints.
+  Users can interact with the portal to retrieve various types of data.
 
 vulnerabilities:
   - type: Hardcoded Secrets
@@ -16,7 +15,7 @@ vulnerabilities:
     cwes:
       - CWE-798
 
-objective: "Find the hardcoded API key in the JavaScript source code and use it to access the protected endpoint to retrieve the flag."
+objective: "Access the protected API endpoint and retrieve the flag."
 
 flag_format: "S7BEN{...}"
 
@@ -25,17 +24,24 @@ services:
     port: 5000
     protocol: http
 
-hints:
-  - "Check the browser's developer tools - view the JavaScript source files."
-  - "Look for API keys or secrets in .js files served from /static."
-  - "The protected endpoint requires an X-API-Key header."
-
 tags:
   - hardcoded-secrets
   - information-disclosure
   - cryptographic-failures
   - web
   - python
+
+internal_metadata:
+  exploitation_path:
+    hints:
+      - "Check the browser's developer tools - view the JavaScript source files"
+      - "Look for API keys or secrets in .js files served from /static"
+      - "The protected endpoint requires an X-API-Key header"
+    steps:
+      - "Browse to the application and open developer tools"
+      - "Inspect /static/app.js to find the API_KEY constant"
+      - "Use the key in an X-API-Key header to call GET /api/secret"
+      - "The response contains the flag"
 
 author: Strike7 Security Team
 created: 2026-01-07

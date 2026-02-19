@@ -3,7 +3,7 @@ from flask import Flask, render_template_string, request, session, redirect, url
 from datetime import datetime
 
 app = Flask(__name__)
-app.secret_key = 'insecure-secret-key-for-demo'
+app.secret_key = os.environ.get('SECRET_KEY', 'session-secret-key')
 
 # Simple user database
 USERS = {
@@ -11,7 +11,7 @@ USERS = {
     'user': 'password123'
 }
 
-# Track successful logins (but NOT failed ones - that's the vulnerability!)
+# Track successful logins
 successful_logins = []
 
 HTML_TEMPLATE = '''
@@ -43,10 +43,6 @@ HTML_TEMPLATE = '''
             <input type="password" name="password" required>
             <button type="submit">Login</button>
         </form>
-        <div class="info">
-            <strong>Note:</strong> This system has insufficient logging.
-            Failed login attempts are not monitored.
-        </div>
     </div>
 </body>
 </html>
@@ -72,7 +68,7 @@ ADMIN_TEMPLATE = '''
         <div class="success">Welcome, {{ username }}!</div>
         <h2>Flag:</h2>
         <div class="flag">{{ flag }}</div>
-        <p>You successfully exploited the insufficient logging vulnerability!</p>
+        <p>You accessed the admin panel successfully.</p>
         <div class="logout">
             <a href="/logout">Logout</a>
         </div>
@@ -109,12 +105,6 @@ def login():
 
         return redirect(url_for('dashboard'))
 
-    # VULNERABILITY: Failed login attempts are NOT logged!
-    # No logging here means:
-    # - No detection of brute force attempts
-    # - No alerts for security monitoring
-    # - No rate limiting based on failed attempts
-
     return render_template_string(HTML_TEMPLATE,
                                  message="Invalid credentials",
                                  message_type="error")
@@ -150,10 +140,10 @@ def logout():
 
 @app.route('/logs')
 def logs():
-    """Show only successful logins - failed attempts are invisible!"""
+    """Show login activity."""
     return jsonify({
         'successful_logins': successful_logins,
-        'failed_logins': 'NOT LOGGED - VULNERABILITY!'
+        'failed_logins': []
     })
 
 if __name__ == '__main__':

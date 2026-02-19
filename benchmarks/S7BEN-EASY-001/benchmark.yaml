@@ -6,9 +6,8 @@ difficulty: Easy
 category: Broken Access Control
 
 description: |
-  A web application with session-based authentication that lacks CSRF protection.
-  The password change form does not validate CSRF tokens, allowing attackers to trick
-  authenticated users into changing their passwords by visiting a malicious page.
+  A web application with session-based authentication and user account management.
+  Users can log in, manage their accounts, and change passwords.
 
 vulnerabilities:
   - type: Cross-Site Request Forgery (CSRF)
@@ -16,7 +15,7 @@ vulnerabilities:
     cwes:
       - CWE-352
 
-objective: "Craft a malicious HTML page that performs a CSRF attack to change the admin password to 'hacked', then retrieve the flag from the admin dashboard."
+objective: "Access the admin dashboard and retrieve the flag."
 
 flag_format: "S7BEN{...}"
 
@@ -25,18 +24,25 @@ services:
     port: 5000
     protocol: http
 
-hints:
-  - "The password change endpoint does not require CSRF tokens"
-  - "Create an HTML page with an auto-submitting form"
-  - "The admin must be logged in for the attack to work"
-  - "Change the password to 'hacked' to get the flag"
-
 tags:
   - csrf
   - broken-access-control
   - session-security
   - web
   - python
+
+internal_metadata:
+  exploitation_path:
+    hints:
+      - "The password change endpoint does not require CSRF tokens"
+      - "Create an HTML page with an auto-submitting form"
+      - "The admin must be logged in for the attack to work"
+      - "Change the password to 'hacked' to get the flag"
+    steps:
+      - "Craft a malicious HTML page with an auto-submitting form targeting /change-password"
+      - "The form submits new_password=hacked&confirm_password=hacked via POST"
+      - "When the admin visits the page, their session cookie is used automatically"
+      - "The admin password is now 'hacked'; log in as admin to see the flag"
 
 author: Strike7 Security Team
 created: 2026-01-07

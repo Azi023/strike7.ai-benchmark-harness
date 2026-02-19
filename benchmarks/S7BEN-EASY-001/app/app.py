@@ -3,7 +3,7 @@ from flask import Flask, render_template_string, render_template, request, sessi
 from functools import wraps
 
 app = Flask(__name__)
-app.secret_key = 'insecure-secret-key-for-demo'
+app.secret_key = os.environ.get('SECRET_KEY', 'session-secret-key')
 
 # Simple user database with passwords
 USERS = {
@@ -162,8 +162,7 @@ DASHBOARD_TEMPLATE = '''
             <strong>FLAG:</strong> {{ flag }}
         </div>
         <div class="info">
-            <strong>Congratulations!</strong> You successfully exploited the CSRF vulnerability!
-            The admin password was changed to "hacked" through a CSRF attack.
+            <strong>Congratulations!</strong> You completed the challenge successfully.
         </div>
         {% else %}
         <div class="info">
@@ -264,12 +263,6 @@ CHANGE_PASSWORD_TEMPLATE = '''
         <div class="message {{ message_type }}">{{ message }}</div>
         {% endif %}
 
-        <div class="warning">
-            <strong>Security Warning:</strong> This form is vulnerable to CSRF attacks!
-            It does not use CSRF tokens for protection.
-        </div>
-
-        <!-- VULNERABILITY: No CSRF token! -->
         <form method="POST" action="/change-password">
             <label>New Password:</label>
             <input type="password" name="new_password" required minlength="6">
@@ -325,13 +318,7 @@ def dashboard():
 @app.route('/change-password', methods=['GET', 'POST'])
 @login_required
 def change_password():
-    """
-    VULNERABILITY: No CSRF token validation!
-
-    This endpoint accepts password changes without verifying that
-    the request originated from a trusted source. An attacker can
-    craft a malicious page that submits this form when visited.
-    """
+    """Handle password change requests."""
 
     if request.method == 'POST':
         new_password = request.form.get('new_password', '')
@@ -351,9 +338,6 @@ def change_password():
             return render_template_string(CHANGE_PASSWORD_TEMPLATE,
                                          message="Password must be at least 6 characters",
                                          message_type="error")
-
-        # VULNERABILITY: No CSRF token check here!
-        # Should check: if request.form.get('csrf_token') != session.get('csrf_token')
 
         # Change the password
         username = session['username']

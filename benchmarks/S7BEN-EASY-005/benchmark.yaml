@@ -6,9 +6,8 @@ difficulty: Easy
 category: Security Logging and Monitoring Failures
 
 description: |
-  A login application that fails to properly log authentication attempts.
-  Failed login attempts are not logged, allowing attackers to brute force credentials without detection.
-  The admin uses a weak password that can be easily guessed.
+  A login application with authentication and an admin dashboard.
+  The application tracks user sessions and provides access to privileged functionality.
 
 vulnerabilities:
   - type: Insufficient Logging
@@ -16,7 +15,7 @@ vulnerabilities:
     cwes:
       - CWE-778
 
-objective: "Brute force the admin password without triggering any logged alerts, then access the admin panel to retrieve the flag."
+objective: "Gain access to the admin account and retrieve the flag from the admin dashboard."
 
 flag_format: "S7BEN{...}"
 
@@ -25,17 +24,24 @@ services:
     port: 5000
     protocol: http
 
-hints:
-  - "The admin password is weak and commonly found in password lists."
-  - "Failed login attempts generate no logs - you can brute force freely."
-  - "Try common passwords like 'password', 'admin123', 'letmein', etc."
-
 tags:
   - insufficient-logging
   - brute-force
   - authentication
   - web
   - python
+
+internal_metadata:
+  exploitation_path:
+    hints:
+      - "The admin password is weak and commonly found in password lists"
+      - "Failed login attempts generate no logs - you can brute force freely"
+      - "Try common passwords like 'password', 'admin123', 'weakpass123', etc."
+    steps:
+      - "POST /login with username=admin and various common passwords"
+      - "No rate limiting or logging of failed attempts makes brute force trivial"
+      - "Admin password is 'weakpass123' — found in common wordlists"
+      - "On successful login, /dashboard returns the flag for admin users"
 
 author: Strike7 Security Team
 created: 2026-01-07

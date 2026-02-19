@@ -3,8 +3,7 @@ from flask import Flask, render_template_string, request, jsonify, send_from_dir
 
 app = Flask(__name__)
 
-# The "secret" API key that should be kept server-side only
-# But it's exposed in the JavaScript!
+# API key for protected endpoint authentication
 VALID_API_KEY = "EXAMPLE_API_KEY_REPLACE_WITH_ACTUAL"
 
 HTML_TEMPLATE = '''
@@ -82,7 +81,7 @@ HTML_TEMPLATE = '''
         <div id="result"></div>
     </div>
 
-    <!-- VULNERABILITY: Loading JavaScript with hardcoded API key -->
+    <!-- Client-side application -->
     <script src="/static/app.js"></script>
 </body>
 </html>
@@ -98,7 +97,7 @@ def health():
 
 @app.route('/static/<path:filename>')
 def static_files(filename):
-    """Serve static files including the vulnerable JavaScript"""
+    """Serve static files"""
     return send_from_directory('static', filename)
 
 @app.route('/api/public')

@@ -1,8 +1,6 @@
 // Strike7 Data Portal - Client Application
 // Version 1.0.0
 
-// VULNERABILITY: API Key hardcoded in client-side JavaScript!
-// This is a CRITICAL security flaw - API keys should NEVER be in frontend code!
 const API_KEY = "EXAMPLE_API_KEY_REPLACE_WITH_ACTUAL";
 
 const API_BASE_URL = window.location.origin;
@@ -15,7 +13,6 @@ function fetchSecretData() {
     resultDiv.style.display = 'block';
     resultDiv.innerHTML = '<p>Loading secret data...</p>';
 
-    // VULNERABILITY: Using the hardcoded API key in the request
     fetch(`${API_BASE_URL}/api/secret`, {
         method: 'GET',
         headers: {
@@ -69,7 +66,6 @@ function showPublicData() {
         });
 }
 
-// Development helpers (more information leakage!)
+// Application initialization
 console.log("Strike7 Data Portal initialized");
 console.log("API Base URL:", API_BASE_URL);
-console.log("API Key loaded:", API_KEY.substring(0, 10) + "...");

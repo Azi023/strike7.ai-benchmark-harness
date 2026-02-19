@@ -92,12 +92,9 @@ def withdraw():
     current_balance = row['balance']
 
     if current_balance >= amount:
-        # VULNERABILITY: Artificial delay to widen the race window
         time.sleep(random.uniform(0.1, 0.3))
-        
-        # 2. WRITE logic (Time of Use) - Relative update allowing negative balance
-        # VULNERABILITY: The check happened in Python (Step 1), but the update happens here.
-        # If multiple requests passed Step 1, they will ALL subtract from the balance here.
+
+        # 2. WRITE logic (Time of Use) - Relative update
         conn.execute('UPDATE accounts SET balance = balance - ? WHERE id = 1', (amount,))
         conn.commit()
         
@@ -116,19 +113,6 @@ def flag():
     cur = conn.execute('SELECT balance FROM accounts WHERE id = 1')
     row = cur.fetchone()
     conn.close()
-    
-    # Flag condition: If balance is effectively reset to 0 or negative through exploitation
-    # The user was confused why 0.0 didn't show flag. 
-    # In a race condition with absolute updates:
-    # T1 reads 100, waits.
-    # T2 reads 100, waits.
-    # T1 writes 0.
-    # T2 writes 0.
-    # Result: 0. The money is "gone" 2x, but DB says 0.
-    # To properly "demonstrate" theft, we should probably track "total withdrawn" separately or 
-    # imply success if they managed to hit the withdraw endpoint successfully multiple times.
-    # However, to stick to the user's "negative balance" request, we need RELATIVE updates.
-    # But for this specific "fix", I will implement RELATIVE updates so the race actually drives it negative.
     
     if row['balance'] < 0:
         return os.environ.get('FLAG', 'S7BEN{TEST_FLAG}')

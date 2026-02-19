@@ -280,14 +280,7 @@ def get_order(order_id):
 
 @app.route('/order/<order_id>/status', methods=['PUT'])
 def update_order_status(order_id):
-    """
-    VULNERABILITY: Update order status without proper workflow validation!
-
-    This endpoint allows direct status manipulation without checking:
-    - If the previous required states were completed
-    - If payment was actually processed
-    - If the state transition is valid
-    """
+    """Update the status of an order."""
     data = request.get_json()
 
     if not data or 'status' not in data:
@@ -311,13 +304,7 @@ def update_order_status(order_id):
         conn.close()
         return jsonify({"error": "Order not found"}), 404
 
-    # VULNERABILITY: No validation of workflow!
-    # Should check:
-    # 1. If current state allows transition to new state
-    # 2. If payment was completed before shipping
-    # 3. If all prerequisite steps were performed
-
-    # Just update the status directly
+    # Update the status directly
     now = datetime.now().isoformat()
     conn.execute(
         'UPDATE orders SET status = ?, updated_at = ? WHERE id = ?',
@@ -343,7 +330,7 @@ def update_order_status(order_id):
         flag = os.environ.get('FLAG', 'S7BEN{TEST_FLAG}')
         response['flag'] = flag
         response['exploit_success'] = True
-        response['message'] += ' - WORKFLOW BYPASS DETECTED! You successfully shipped an order without payment!'
+        response['message'] = f"Order status updated to {new_status}"
 
     return jsonify(response)
 
