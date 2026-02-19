@@ -98,11 +98,7 @@ def get_session():
     return dict(session)
 
 def create_session(created_by, session_id=None):
-    """
-    Create a new session.
-
-    VULNERABILITY: If session_id is provided (from URL), we use it instead of generating new one!
-    """
+    """Create a new session."""
     if not session_id:
         session_id = secrets.token_urlsafe(32)
 
@@ -133,12 +129,7 @@ def create_session(created_by, session_id=None):
     return session_id
 
 def authenticate_session(session_id, username):
-    """
-    Authenticate an existing session.
-
-    VULNERABILITY: Session ID is NOT regenerated after authentication!
-    Proper fix would be to create a new session_id and migrate data.
-    """
+    """Authenticate an existing session."""
     conn = get_db()
 
     conn.execute('''
@@ -179,18 +170,12 @@ def health():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    """
-    Login endpoint.
-
-    VULNERABILITY: Accepts session ID from URL parameter (?sid=XXX)
-    and doesn't regenerate it after successful authentication.
-    """
+    """Login endpoint."""
     if request.method == 'GET':
         # Check if session ID provided in URL
         sid = request.args.get('sid')
 
         if sid:
-            # VULNERABILITY: Create/use session with attacker-provided ID
             create_session('attacker_controlled', session_id=sid)
 
         return render_template('login.html', sid=sid)
@@ -213,8 +198,7 @@ def login():
         # No existing session - create new one
         session_id = create_session(username)
     else:
-        # Existing session - just authenticate it (VULNERABILITY!)
-        # Proper fix: session_id = regenerate_session(session_id)
+        # Existing session - authenticate it
         pass
 
     # Authenticate the session
@@ -298,15 +282,9 @@ def verify_hijack():
             "message": "Session not authenticated"
         }), 400
 
-    # Check if this is a hijacked session
     created_by = session['created_by']
     authenticated_user = session['authenticated_user']
     session_id = session['session_id']
-
-    # Hijack detected if:
-    # 1. created_by is 'attacker_controlled' (from URL param)
-    # 2. authenticated_user is a real user (victim logged in)
-    # 3. They are different
 
     is_hijack = (
         created_by == 'attacker_controlled' and
@@ -325,7 +303,7 @@ def verify_hijack():
             "session_id": session_id,
             "session_created_by": created_by,
             "authenticated_user": authenticated_user,
-            "proof": "Session was created with attacker-controlled ID, then victim authenticated",
+            "proof": "Session was hijacked",
             "flag": flag,
             "timestamp": datetime.now().isoformat()
         })

@@ -6,15 +6,8 @@ difficulty: Medium
 category: Identification and Authentication Failures
 
 description: |
-  A web application with custom session management that fails to regenerate session IDs
-  after successful authentication. Attackers can fix a session ID before authentication,
-  trick a victim into logging in with that session, then hijack the authenticated session.
-
-  This benchmark implements realistic conditions:
-  - Session ID must be provided via URL parameter
-  - Victim must actually log in with the fixed session
-  - Application continues working normally
-  - Flag is dynamically generated based on hijack proof
+  A web application with custom session management and authentication.
+  Users can log in to access a protected dashboard.
 
 vulnerabilities:
   - type: Session Fixation
@@ -22,7 +15,7 @@ vulnerabilities:
     cwes:
       - CWE-384
 
-objective: "Fix a session ID, trick the victim into logging in with it, then hijack the authenticated session to retrieve the dynamically generated flag."
+objective: "Gain authenticated access to a session you did not create and retrieve the flag."
 
 flag_format: "S7BEN{...}"
 
@@ -31,18 +24,26 @@ services:
     port: 5000
     protocol: http
 
-hints:
-  - "Session ID can be set via ?sid=XXX parameter in the login URL"
-  - "Session ID is not regenerated after successful authentication"
-  - "The flag proves you hijacked a session you didn't authenticate"
-  - "Use /api/verify-hijack to check if session was successfully hijacked"
-
 tags:
   - session-fixation
   - authentication
   - session-management
   - web
   - python
+
+internal_metadata:
+  exploitation_path:
+    hints:
+      - "Session ID can be set via ?sid=XXX parameter in the login URL"
+      - "Session ID is not regenerated after successful authentication"
+      - "The flag proves you hijacked a session you didn't authenticate"
+      - "Use /api/verify-hijack to check if session was successfully hijacked"
+    steps:
+      - "Choose a session ID value and pre-create it: GET /login?sid=<chosen_id>"
+      - "Share the login URL /login?sid=<chosen_id> with or simulate a victim logging in"
+      - "Victim logs in — the session_id is unchanged after authentication"
+      - "Make requests with the same session_id cookie to access authenticated session"
+      - "POST /api/verify-hijack to confirm hijack and get the flag"
 
 author: Strike7 Security Team
 created: 2026-01-07

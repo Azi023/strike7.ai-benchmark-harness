@@ -6,15 +6,8 @@ difficulty: Medium
 category: Insecure Design
 
 description: |
-  A file processing service with a Time-of-Check to Time-of-Use (TOCTOU) vulnerability.
-  The service validates uploaded files (extension, size, path) but processes them after
-  a delay, creating a race window where files can be replaced or symlinked to sensitive data.
-
-  This benchmark implements realistic conditions:
-  - Realistic 200ms race window (not artificially long)
-  - Multiple exploitation paths (symlink, file replacement)
-  - Flag derived from successfully exfiltrated file content
-  - Application continues working after exploitation
+  A file processing service that validates and processes uploaded files.
+  The service supports text, log, and CSV file formats.
 
 vulnerabilities:
   - type: Time-of-Check Time-of-Use (TOCTOU)
@@ -22,7 +15,7 @@ vulnerabilities:
     cwes:
       - CWE-367
 
-objective: "Exploit the race window between file validation and processing to read the sensitive /flag.txt file and retrieve the dynamically generated flag."
+objective: "Upload a file, manipulate the processing pipeline, and retrieve the flag."
 
 flag_format: "S7BEN{...}"
 
@@ -31,12 +24,6 @@ services:
     port: 5000
     protocol: http
 
-hints:
-  - "Files are validated before processing, with a delay between check and use"
-  - "The race window is approximately 200ms"
-  - "Multiple attack vectors: symlink creation, file replacement"
-  - "Flag hash includes content length to prove successful read"
-
 tags:
   - toctou
   - race-condition
@@ -44,6 +31,20 @@ tags:
   - insecure-design
   - web
   - python
+
+internal_metadata:
+  exploitation_path:
+    hints:
+      - "Files are validated before processing, with a delay between check and use"
+      - "The race window is approximately 200ms"
+      - "Multiple attack vectors: symlink creation, file replacement"
+      - "Flag hash includes content length to prove successful read"
+    steps:
+      - "Upload a valid .txt file via POST /upload to get a file_id"
+      - "POST /validate/<file_id> to validate the file (TIME OF CHECK)"
+      - "During the 200ms delay, replace the file with a symlink to /flag.txt"
+      - "POST /process/<file_id> with the validation_token — reads the now-symlinked file"
+      - "Response includes the flag because realpath differs from expected path"
 
 author: Strike7 Security Team
 created: 2026-01-08

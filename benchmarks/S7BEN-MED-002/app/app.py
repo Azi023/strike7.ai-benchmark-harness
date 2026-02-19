@@ -42,15 +42,7 @@ def allowed_file(filename):
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 def validate_file(filepath):
-    """
-    TIME OF CHECK - Validate file before processing.
-
-    Checks:
-    1. File extension is allowed
-    2. File size under limit
-    3. No path traversal
-    4. File exists and is a file (not symlink initially detected)
-    """
+    """Validate file before processing."""
     try:
         # Check if file exists
         if not os.path.exists(filepath):
@@ -81,11 +73,7 @@ def validate_file(filepath):
         return False, f"Validation error: {str(e)}"
 
 def process_file(filepath, file_id):
-    """
-    TIME OF USE - Process the file after validation.
-
-    VULNERABILITY: File can be replaced/symlinked between validation and this call!
-    """
+    """Process the file."""
     try:
         # Read file content
         with open(filepath, 'r') as f:
@@ -121,7 +109,7 @@ def process_file(filepath, file_id):
             result.update({
                 "exploitation_detected": True,
                 "toctou_proven": True,
-                "message": "TOCTOU vulnerability exploited! File was replaced/symlinked after validation.",
+                "message": "File content has changed since validation.",
                 "flag": flag,
                 "full_content": content  # Include full exfiltrated content
             })
@@ -185,11 +173,7 @@ def upload_file():
 
 @app.route('/validate/<file_id>', methods=['POST'])
 def validate_endpoint(file_id):
-    """
-    Validate uploaded file and return validation token.
-
-    This is the TIME OF CHECK phase.
-    """
+    """Validate uploaded file and return validation token."""
     try:
         file_dir = os.path.join(UPLOAD_FOLDER, file_id)
         if not os.path.exists(file_dir):
@@ -232,11 +216,7 @@ def validate_endpoint(file_id):
 
 @app.route('/process/<file_id>', methods=['POST'])
 def process_endpoint(file_id):
-    """
-    Process validated file.
-
-    VULNERABILITY: Race window between validation and processing!
-    """
+    """Process validated file."""
     try:
         # Verify validation token
         token = request.json.get('validation_token') if request.json else None
@@ -259,9 +239,7 @@ def process_endpoint(file_id):
 
         filepath = os.path.join(file_dir, files[0])
 
-        # VULNERABILITY: Realistic I/O delay simulation
-        # This represents real-world latency (DB lookup, network I/O, etc.)
-        # Creates a 200ms window for file replacement/symlinking
+        # Simulate I/O processing delay
         time.sleep(0.2)
 
         # TIME OF USE - Process the file
