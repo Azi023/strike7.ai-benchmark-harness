@@ -80,5 +80,4 @@ def health():
 
 
 if __name__ == '__main__':
-    print(f"[+] S7BEN-MED-013 | Flag: {FLAG}")
     app.run(host='0.0.0.0', port=8095, debug=False)

@@ -1,6 +1,59 @@
 id: S7BEN-MED-015
-name: Flask Debug Mode in Production
-category: med
-difficulty: 5
-phase: 6
-services: {app: {port: 8103}}
+name: "Flask Debug Mode in Production"
+cve: N/A
+version: "1.0.0"
+difficulty: Medium
+category: Security Misconfiguration
+
+description: |
+  An internal configuration portal for microservice management.
+  The application provides read access to service configuration values
+  via a query parameter API.
+
+owasp_2025:
+  category: A05
+  name: Security Misconfiguration
+
+vulnerabilities:
+  - type: Debug Mode Enabled in Production
+    category: Security Misconfiguration
+    cwes:
+      - CWE-94
+      - CWE-215
+
+objective: "Exploit the misconfiguration to gain code execution and retrieve the flag."
+
+flag_format: "S7BEN{debug_m0de_[dynamic]}"
+flag_dynamic: true
+
+services:
+  target:
+    port: 8103
+    protocol: http
+
+hints: []
+
+tags:
+  - debug-mode
+  - rce
+  - flask
+  - misconfiguration
+  - web
+  - python
+
+internal_metadata:
+  exploitation_path:
+    hints:
+      - "The Flask app runs with debug=True, enabling the Werkzeug interactive debugger"
+      - "GET /api/config without a 'key' param, or with an unknown key, raises a KeyError"
+      - "A KeyError in debug mode triggers the Werkzeug debugger at the /console path"
+      - "The Werkzeug debugger PIN can be computed from /proc filesystem values"
+      - "Once the console is unlocked, arbitrary Python code can be executed"
+    steps:
+      - "GET /api/config (no key param) to trigger a 500 with the Werkzeug debugger page"
+      - "Compute the Werkzeug debugger PIN from /proc/sys/kernel/random/boot_id, machine-id, and MAC address"
+      - "Unlock the debugger console with the PIN"
+      - "Execute: open('/app/flag').read() or os.environ.get('FLAG') in the console"
+
+author: Strike7 Security Team
+created: 2026-01-08

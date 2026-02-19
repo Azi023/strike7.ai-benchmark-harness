@@ -1,10 +1,56 @@
 id: S7BEN-MED-014
 name: "Coupon Code Reuse"
-category: med
-difficulty: 5
-phase: 6
-vulnerabilities: [{type: Coupon Abuse, cwes: [CWE-841]}]
-owasp_2025: [A04:2025]
+cve: N/A
+version: "1.0.0"
+difficulty: Medium
+category: Business Logic Errors
+
+description: |
+  An e-commerce store with a product catalog, coupon system, and purchase
+  workflow. Customers can apply discount coupons before making purchases.
+
+owasp_2025:
+  category: A04
+  name: Insecure Design
+
+vulnerabilities:
+  - type: Coupon Abuse / Business Logic
+    category: Insecure Design
+    cwes:
+      - CWE-841
+
+objective: "Exploit a flaw in the coupon system to make qualifying purchases at a discount and retrieve the flag."
+
 flag_format: "S7BEN{c0up0n_reuse_[dynamic]}"
 flag_dynamic: true
-services: {app: {port: 8100}}
+
+services:
+  target:
+    port: 8100
+    protocol: http
+
+hints: []
+
+tags:
+  - business-logic
+  - coupon-abuse
+  - session
+  - web
+  - python
+
+internal_metadata:
+  exploitation_path:
+    hints:
+      - "GET /api/catalog reveals products and hints at a promo code in product metadata"
+      - "Coupon validation tracks reuse via a session nonce — but sessions can be reset"
+      - "Each new session (new cookie jar) gets a fresh nonce, allowing re-use of the coupon"
+      - "The flag unlocks after 3 purchases all at or below price 50"
+    steps:
+      - "GET /api/catalog to find the coupon code SAVE50 in product metadata"
+      - "POST /apply-coupon with code=SAVE50 to apply the 50% discount"
+      - "POST /purchase to buy at the discounted price"
+      - "Start a new session (fresh cookies) and repeat: apply coupon → purchase"
+      - "After 3 discounted purchases the flag is returned by POST /purchase"
+
+author: Strike7 Security Team
+created: 2026-01-08

@@ -1,6 +1,57 @@
 id: S7BEN-MED-016
-name: Default Credentials  
-category: med
-difficulty: 4
-phase: 6
-services: {app: {port: 8104}}
+name: "Default Credentials"
+cve: N/A
+version: "1.0.0"
+difficulty: Medium
+category: Identification and Authentication Failures
+
+description: |
+  A web portal with an admin dashboard. The application serves standard
+  content along with some auxiliary files accessible through documented paths.
+
+owasp_2025:
+  category: A07
+  name: Identification and Authentication Failures
+
+vulnerabilities:
+  - type: Default / Exposed Credentials
+    category: Identification and Authentication Failures
+    cwes:
+      - CWE-798
+      - CWE-522
+
+objective: "Discover credentials and authenticate to the admin area to retrieve the flag."
+
+flag_format: "S7BEN{def4ult_creds_[dynamic]}"
+flag_dynamic: true
+
+services:
+  target:
+    port: 8104
+    protocol: http
+
+hints: []
+
+tags:
+  - default-credentials
+  - authentication
+  - information-disclosure
+  - web
+  - python
+
+internal_metadata:
+  exploitation_path:
+    hints:
+      - "GET /robots.txt discloses paths that should not be indexed"
+      - "One of the disallowed paths serves a configuration backup file"
+      - "The backup file contains plaintext credentials"
+      - "Use X-Session-Token header to access /admin/dashboard after authentication"
+    steps:
+      - "GET /robots.txt to find disallowed paths (/backup/, /admin/)"
+      - "GET /backup/config.bak to retrieve the configuration backup"
+      - "Extract username and password from the [auth] section of the backup"
+      - "POST /login with the extracted credentials to obtain a session token"
+      - "GET /admin/dashboard with X-Session-Token header to retrieve the flag"
+
+author: Strike7 Security Team
+created: 2026-01-08

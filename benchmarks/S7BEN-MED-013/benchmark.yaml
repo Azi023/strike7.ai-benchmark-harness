@@ -1,12 +1,57 @@
 id: S7BEN-MED-013
 name: "Weak Password Policy - No Account Lockout"
-category: med
-difficulty: 5
-phase: 6
-description: No lockout mechanism allows brute force attacks
-vulnerabilities: [{type: Weak Password Policy, cwes: [CWE-521, CWE-307]}]
-owasp_2025: [A07:2025]
+cve: N/A
+version: "1.0.0"
+difficulty: Medium
+category: Identification and Authentication Failures
+
+description: |
+  An internal services portal with user login functionality. The portal
+  exposes an admin area protected by password authentication.
+
+owasp_2025:
+  category: A07
+  name: Identification and Authentication Failures
+
+vulnerabilities:
+  - type: Weak Password Policy / Missing Account Lockout
+    category: Identification and Authentication Failures
+    cwes:
+      - CWE-521
+      - CWE-307
+
+objective: "Gain access to the admin area and retrieve the flag."
+
 flag_format: "S7BEN{we4k_p4ssw0rd_p0l1cy_[dynamic]}"
 flag_dynamic: true
-services: {app: {port: 8095}}
-telemetry: {enabled: true}
+
+services:
+  target:
+    port: 8095
+    protocol: http
+
+hints: []
+
+tags:
+  - brute-force
+  - weak-password
+  - authentication
+  - web
+  - python
+
+internal_metadata:
+  exploitation_path:
+    hints:
+      - "GET /api/users reveals the list of usernames"
+      - "The application has a rate limit but it tracks by IP — X-Forwarded-For can be rotated"
+      - "Admin password is a common weak password from a standard wordlist"
+      - "Use X-Auth-Token header to access /admin once authenticated"
+    steps:
+      - "GET /api/users to enumerate valid usernames"
+      - "POST /login with username=admin and a common password wordlist"
+      - "Rotate X-Forwarded-For header to bypass the per-IP attempt counter"
+      - "Once authenticated, use the returned token in X-Auth-Token header"
+      - "GET /admin to retrieve the flag"
+
+author: Strike7 Security Team
+created: 2026-01-08

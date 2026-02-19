@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Strike7 Internal Configuration Portal - Development Build"""
+"""Strike7 internal configuration portal."""
 
 from flask import Flask, request, jsonify
 import os
@@ -38,13 +38,9 @@ def index():
 
 @app.route("/api/config")
 def api_config():
-    """Returns a service configuration value by key.
-
-    Raises KeyError (→ 500) when 'key' param is absent or not in SERVICE_CONFIG.
-    In debug mode, this exposes the Werkzeug interactive debugger.
-    """
+    """Returns a service configuration value."""
     key = request.args.get("key")
-    value = SERVICE_CONFIG[key]   # KeyError triggers Werkzeug debugger when debug=True
+    value = SERVICE_CONFIG[key]
     return jsonify({"key": key, "value": value})
 
 
