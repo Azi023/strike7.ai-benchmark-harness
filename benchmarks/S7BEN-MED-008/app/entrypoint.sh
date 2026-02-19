@@ -3,7 +3,6 @@ set -e
 
 echo "[*] Starting S7BEN-MED-008: n8n RCE Benchmark"
 echo "[*] n8n version: $(n8n --version 2>/dev/null || echo 'unknown')"
-echo "[*] Flag location: /flag.txt"
 
 # Start n8n in background
 n8n start &

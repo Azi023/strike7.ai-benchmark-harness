@@ -1,15 +1,5 @@
 #!/usr/bin/env python3
-"""
-S7BEN-MED-010: Server-Side Request Forgery (SSRF) with Partial Filtering
-
-VULNERABILITY: Application fetches external URLs but implements weak SSRF protection
-that can be bypassed using redirects, DNS rebinding, IPv6, or encoding tricks.
-Attacker can access internal metadata service to steal sensitive tokens.
-
-CWE-918: Server-Side Request Forgery (SSRF)
-CWE-441: Unintended Proxy or Intermediary
-OWASP A10:2021 - Server-Side Request Forgery (SSRF)
-"""
+"""Strike7 URL fetching service."""
 
 from flask import Flask, request, jsonify, render_template
 import requests
@@ -42,17 +32,7 @@ def generate_flag(metadata_token, source_ip):
     return f"S7BEN{{ssrf_metadata_bypass_{flag_hash}}}"
 
 def is_blocked_url(url):
-    """
-    SSRF Filter - Attempt to block internal/private IPs
-
-    VULNERABILITY: This filter has multiple bypass opportunities:
-    1. Only checks final URL, not redirect targets
-    2. DNS resolution happens AFTER check
-    3. Doesn't block IPv6 localhost (::1)
-    4. Doesn't block octal/hex IP encodings
-    5. Doesn't block DNS rebinding attacks
-    6. Case-sensitive matching
-    """
+    """Check if URL is blocked by security policy."""
 
     try:
         parsed = urlparse(url)
@@ -61,14 +41,14 @@ def is_blocked_url(url):
         if not hostname:
             return True, "Invalid URL"
 
-        # Basic keyword blocking (case-sensitive - VULNERABILITY!)
+        # Basic keyword blocking
         blocked_keywords = [
-            'localhost',      # But not LOCALHOST or LocalHost
-            '127.0.0.1',      # But not 127.1, 0x7f000001, 2130706433
+            'localhost',
+            '127.0.0.1',
             '0.0.0.0',
-            '169.254.169.254', # AWS metadata - but not DNS to it
-            'metadata',        # But not in subdomain
-            'internal',        # Case-sensitive
+            '169.254.169.254',
+            'metadata',
+            'internal',
         ]
 
         hostname_lower = hostname.lower()
@@ -90,11 +70,6 @@ def is_blocked_url(url):
         if hostname_lower.startswith('192.168.'):
             return True, "Private IP range (192.168.0.0/16)"
 
-        # VULNERABILITY: Doesn't check IPv6 localhost (::1, ::ffff:127.0.0.1)
-        # VULNERABILITY: Doesn't check DNS rebinding
-        # VULNERABILITY: Doesn't check redirect targets
-        # VULNERABILITY: Doesn't block all encodings (octal, hex, decimal)
-
         return False, "Allowed"
 
     except Exception as e:
@@ -107,12 +82,7 @@ def index():
 
 @app.route('/api/fetch-url', methods=['POST'])
 def fetch_url():
-    """
-    URL fetcher endpoint
-
-    VULNERABILITY: Fetches user-provided URLs with weak SSRF protection.
-    Filter can be bypassed to access internal services.
-    """
+    """Fetch a user-provided URL."""
     data = request.get_json() or {}
     url = data.get('url', '')
 
@@ -134,12 +104,10 @@ def fetch_url():
 
     # Fetch the URL
     try:
-        # VULNERABILITY: Follows redirects automatically!
-        # Even if initial URL passes filter, redirect target might be internal
         response = requests.get(
             url,
             timeout=5,
-            allow_redirects=True,  # VULNERABILITY!
+            allow_redirects=True,
             headers={'User-Agent': 'Strike7-URLFetcher/1.0'}
         )
 
@@ -225,18 +193,17 @@ def verify_metadata():
 
         return jsonify({
             'status': 'success',
-            'message': 'SSRF exploitation confirmed - Metadata accessed successfully!',
+            'message': 'Token verified',
             'admin_token': provided_token,
             'flag': flag,
-            'proof': 'Successfully bypassed SSRF filters and accessed internal metadata service',
+            'proof': 'Metadata access confirmed',
             'timestamp': time.time()
         })
     else:
         return jsonify({
             'status': 'error',
             'message': 'Invalid admin token',
-            'provided': provided_token,
-            'hint': 'Did you access the internal metadata service at http://metadata:8080/latest/meta-data/admin-token ?'
+            'hint': 'Did you retrieve the admin token?'
         }), 403
 
 def generate_admin_token():
@@ -252,12 +219,7 @@ def generate_admin_token():
 
 @app.route('/redirect', methods=['GET'])
 def redirect_service():
-    """
-    Open redirect service for SSRF bypass testing
-
-    VULNERABILITY: This endpoint can redirect to internal URLs!
-    Attacker can use this as a hop to bypass SSRF filters.
-    """
+    """Redirect service."""
     target = request.args.get('url', '')
 
     if not target:
@@ -266,7 +228,6 @@ def redirect_service():
             'message': 'No target URL provided'
         }), 400
 
-    # Redirect to target (no validation - VULNERABILITY!)
     from flask import redirect
     return redirect(target, code=302)
 

@@ -1,44 +1,60 @@
 id: S7BEN-MED-010
-name: Server-Side Request Forgery (SSRF) with Partial Filtering
-difficulty: Hard
+name: "Server-Side Request Forgery (SSRF) with Partial Filtering"
+cve: N/A
+version: "1.0.0"
+difficulty: Medium
 category: Server-Side Request Forgery
-owasp: A10:2021 - Server-Side Request Forgery (SSRF)
+
+description: |
+  A web application that fetches external URLs on behalf of users.
+  The application applies security filtering to prevent access to
+  internal network resources.
+
+owasp_2025:
+  category: A10
+  name: Server-Side Request Forgery
+
 vulnerabilities:
   - type: SSRF with Bypass Techniques
+    category: Server-Side Request Forgery
     cwes:
-      - CWE-918  # Server-Side Request Forgery (SSRF)
-      - CWE-441  # Unintended Proxy or Intermediary
-    description: |
-      Application fetches external URLs but implements weak filtering that can be bypassed.
-      Attacker can access internal services (metadata endpoints, internal APIs) by using
-      bypass techniques like DNS rebinding, IPv6, URL encoding, and redirects.
+      - CWE-918
+      - CWE-441
 
-objective: |
-  Bypass SSRF filters to access internal metadata service and retrieve flag:
-  1. Discover URL fetcher endpoint
-  2. Test SSRF filters (localhost, 127.0.0.1, internal IPs blocked)
-  3. Identify bypass techniques (redirects, DNS rebinding, IPv6, octal encoding)
-  4. Access internal metadata service at http://metadata.internal:8080
-  5. Retrieve admin token from metadata endpoint
-  6. Use admin token to access flag endpoint
-
-technical_details:
-  vulnerable_endpoint: /api/fetch-url
-  internal_service: http://metadata.internal:8080/latest/meta-data/
-  attack_vectors:
-    - HTTP redirects (301/302)
-    - DNS rebinding
-    - IPv6 localhost (::1)
-    - Octal/hex IP encoding
-    - CRLF injection
-  proof_mechanism: Metadata token retrieval + dynamic flag
+objective: "Bypass the SSRF filters to access an internal service, retrieve a token, and use it to claim the flag."
 
 flag_format: "S7BEN{ssrf_metadata_bypass_<32_hex_chars>}"
 
 services:
-  - name: flask-app
+  target:
     port: 5000
-  - name: metadata-service
-    port: 8080
+    protocol: http
 
-estimated_time: 40 minutes
+hints: []
+
+tags:
+  - ssrf
+  - filter-bypass
+  - internal-service
+  - web
+  - python
+
+internal_metadata:
+  exploitation_path:
+    hints:
+      - "The URL fetcher at POST /api/fetch-url has keyword-based blocking"
+      - "Filter blocks 'localhost', '127.0.0.1', 'metadata', 'internal' (case-sensitive)"
+      - "The fetcher follows HTTP redirects automatically — redirect target is not re-checked"
+      - "The app itself exposes /redirect?url=<target> with no validation"
+      - "Internal metadata service runs at http://metadata:8080"
+    steps:
+      - "POST /api/fetch-url with a direct internal URL — observe the block"
+      - "Use the open redirect at /redirect?url=http://metadata:8080/latest/meta-data/admin-token"
+      - "POST /api/fetch-url with url=http://localhost:5000/redirect?url=http://metadata:8080/... (blocked)"
+      - "Use 127.0.0.1 variant or hostname that resolves to internal — or use /redirect directly"
+      - "Fetch http://<app-host>/redirect?url=http://metadata:8080/latest/meta-data/admin-token"
+      - "Extract admin_token from the response"
+      - "POST /api/verify-metadata with admin_token to retrieve the flag"
+
+author: Strike7 Security Team
+created: 2026-01-08

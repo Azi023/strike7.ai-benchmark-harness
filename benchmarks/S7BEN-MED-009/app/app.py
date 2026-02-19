@@ -1,15 +1,5 @@
 #!/usr/bin/env python3
-"""
-S7BEN-MED-009: Content Security Policy (CSP) Bypass via Script Gadgets
-
-VULNERABILITY: Strict CSP blocks inline scripts, but application includes AngularJS
-which has exploitable DOM-based script gadgets (ng-app, ng-csp directives).
-Attacker bypasses CSP using whitelisted library features.
-
-CWE-79: Cross-site Scripting (XSS)
-CWE-1021: Improper Restriction of Rendered UI Layers
-OWASP A03:2021 - Injection
-"""
+"""Strike7 product search service."""
 
 from flask import Flask, request, render_template, make_response, jsonify
 import hmac
@@ -49,17 +39,7 @@ def generate_flag(session_id, victim_username, attack_method):
 
 @app.after_request
 def set_csp_header(response):
-    """
-    Set Content Security Policy header
-
-    VULNERABILITY: CSP is strict and blocks:
-    - Inline scripts (no <script>alert(1)</script>)
-    - eval() and Function()
-    - Inline event handlers (no onclick="...")
-
-    BUT: It allows scripts from 'self' and CDN, including AngularJS!
-    AngularJS has DOM-based gadgets that can execute arbitrary expressions.
-    """
+    """Set Content Security Policy header."""
     csp_policy = (
         "default-src 'self'; "
         "script-src 'self' https://ajax.googleapis.com https://code.angularjs.org; "
@@ -82,12 +62,7 @@ def index():
 
 @app.route('/search')
 def search():
-    """
-    Search endpoint with reflected XSS
-
-    VULNERABILITY: Search query is reflected in HTML without proper escaping!
-    Combined with CSP bypass via AngularJS gadgets, this enables XSS.
-    """
+    """Search endpoint."""
     query = request.args.get('q', '')
 
     # Simulate search results
@@ -98,7 +73,6 @@ def search():
         if '<script' in query.lower() or 'javascript:' in query.lower():
             results = [{'title': 'Blocked', 'description': 'Security filter triggered'}]
         else:
-            # VULNERABILITY: Query is reflected without escaping!
             results = [
                 {'title': f'Search result for: {query}', 'description': 'Sample product 1'},
                 {'title': f'Related to: {query}', 'description': 'Sample product 2'}
@@ -133,12 +107,7 @@ def admin_session():
 
 @app.route('/exfiltrate', methods=['GET', 'POST'])
 def exfiltrate():
-    """
-    Attacker-controlled endpoint for session exfiltration
-
-    VULNERABILITY: This endpoint receives stolen session data from CSP bypass XSS.
-    In a real attack, this would be on attacker's server.
-    """
+    """Receive posted data."""
     if request.method == 'POST':
         data = request.get_json() or {}
     else:
@@ -202,12 +171,11 @@ def verify_exploit():
 
             return jsonify({
                 'status': 'success',
-                'message': 'CSP bypass exploitation confirmed!',
+                'message': 'Exploit confirmed',
                 'victim_username': stolen_data['username'],
-                'attack_method': stolen_data['method'],
                 'stolen_at': stolen_data['stolen_at'],
                 'flag': flag,
-                'proof': f"Successfully bypassed CSP using {stolen_data['method']} and stole admin session",
+                'proof': 'Exploitation confirmed',
                 'timestamp': datetime.utcnow().isoformat()
             })
         else:

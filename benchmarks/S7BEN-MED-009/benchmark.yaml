@@ -1,37 +1,60 @@
 id: S7BEN-MED-009
-name: CSP Bypass via Script Gadgets
-difficulty: Hard
+name: "CSP Bypass via Script Gadgets"
+cve: N/A
+version: "1.0.0"
+difficulty: Medium
 category: Client-Side Injection
-owasp: A03:2021 - Injection
+
+description: |
+  A product search web application with a Content Security Policy
+  that includes third-party JavaScript libraries from a CDN.
+
+owasp_2025:
+  category: A03
+  name: Injection
+
 vulnerabilities:
   - type: Content Security Policy Bypass
+    category: Client-Side Injection
     cwes:
-      - CWE-79   # Cross-site Scripting (XSS)
-      - CWE-1021 # Improper Restriction of Rendered UI Layers
-    description: |
-      Application implements strict Content Security Policy (CSP) but includes vulnerable
-      JavaScript libraries with exploitable DOM-based script gadgets. Attacker can bypass
-      CSP using existing whitelisted scripts to achieve XSS.
+      - CWE-79
+      - CWE-1021
 
-objective: |
-  Bypass Content Security Policy to achieve XSS and steal admin session:
-  1. Discover reflected XSS point in search parameter
-  2. Identify CSP blocks inline scripts and eval()
-  3. Find vulnerable JavaScript library (AngularJS, jQuery, etc.)
-  4. Craft payload using script gadgets to bypass CSP
-  5. Inject malicious HTML that executes via whitelisted library
-  6. Steal admin session token to retrieve flag
-
-technical_details:
-  vulnerable_endpoint: /search
-  attack_vector: DOM-based XSS via script gadgets
-  whitelisted_library: AngularJS 1.8.2 (has ng-* gadgets)
-  proof_mechanism: Session token exfiltration + dynamic flag
+objective: "Bypass the Content Security Policy to achieve XSS, steal the admin session, and retrieve the flag."
 
 flag_format: "S7BEN{csp_bypass_gadget_<32_hex_chars>}"
 
 services:
-  - name: flask-app
+  target:
     port: 5000
+    protocol: http
 
-estimated_time: 30 minutes
+hints: []
+
+tags:
+  - xss
+  - csp-bypass
+  - script-gadgets
+  - client-side
+  - session-theft
+  - web
+
+internal_metadata:
+  exploitation_path:
+    hints:
+      - "The search parameter is reflected in page content without escaping"
+      - "CSP blocks inline scripts and eval() but allows scripts from CDN"
+      - "Inspect which JavaScript libraries are loaded from the CDN whitelist"
+      - "AngularJS 1.x has ng-* directive gadgets that execute expressions without eval()"
+      - "Admin cookie is not HttpOnly — accessible from JavaScript"
+    steps:
+      - "GET /search?q=test and inspect the CSP header and included scripts"
+      - "Identify AngularJS is loaded from whitelisted CDN"
+      - "Craft a payload using ng-app and ng-csp directives with an Angular expression"
+      - "Example payload: ?q=<div ng-app ng-csp><a ng-click=$event.view.alert(1)>click</a></div>"
+      - "GET /victim to simulate admin visiting the malicious search URL"
+      - "XSS executes, exfiltrate admin_session cookie to /exfiltrate"
+      - "POST /api/verify-exploit with stolen session_id to retrieve the flag"
+
+author: Strike7 Security Team
+created: 2026-01-08

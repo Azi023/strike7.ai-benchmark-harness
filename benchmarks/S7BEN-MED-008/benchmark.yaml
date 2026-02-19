@@ -6,9 +6,9 @@ difficulty: Medium
 category: Remote Code Execution
 
 description: |
-  n8n is an open-source workflow automation platform. CVE-2025-68613 allows 
-  authenticated users with workflow creation privileges to execute arbitrary 
-  code on the server via expression injection in workflow definitions.
+  n8n is an open-source workflow automation platform. This benchmark
+  exercises a code execution vulnerability affecting authenticated users
+  with workflow creation privileges.
 
 vulnerabilities:
   - type: Remote Code Execution
@@ -17,7 +17,7 @@ vulnerabilities:
       - CWE-94
       - CWE-913
 
-objective: "Retrieve the flag from /flag.txt by exploiting the expression injection vulnerability"
+objective: "Retrieve the flag from the server by exploiting the vulnerability in n8n."
 
 flag_format: "S7BEN{...}"
 
@@ -29,10 +29,7 @@ services:
       username: admin@strike7.local
       password: Strike7Demo!
 
-hints:
-  - "n8n expressions are evaluated using {{ }}"
-  - "Look for ways to access Node.js runtime from expressions"
-  - "The process object might be accessible"
+hints: []
 
 tags:
   - rce
@@ -40,6 +37,19 @@ tags:
   - authentication
   - web
   - workflow
+
+internal_metadata:
+  exploitation_path:
+    hints:
+      - "n8n expressions are evaluated using {{ }} syntax"
+      - "Look for ways to access the Node.js runtime from within expressions"
+      - "The process object may be accessible from expression context"
+      - "Flag is stored at /flag.txt on the server"
+    steps:
+      - "Login with provided credentials (admin@strike7.local / Strike7Demo!)"
+      - "Create a new workflow with a Code or Expression node"
+      - "Inject a Node.js expression that executes a shell command: {{ $process.mainModule.require('child_process').execSync('cat /flag.txt').toString() }}"
+      - "Execute the workflow and retrieve the flag from the output"
 
 author: Strike7 Security Team
 created: 2025-01-06

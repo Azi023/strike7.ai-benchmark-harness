@@ -1,34 +1,57 @@
 id: S7BEN-MED-007
-name: JWT Algorithm Confusion Attack
+name: "JWT Algorithm Confusion Attack"
+cve: N/A
+version: "1.0.0"
 difficulty: Medium
 category: Broken Authentication
-owasp: A07:2021 - Identification and Authentication Failures
+
+description: |
+  A web application using JWT tokens for authentication. The application
+  supports multiple signing algorithms and exposes a public key endpoint.
+
+owasp_2025:
+  category: A07
+  name: Identification and Authentication Failures
+
 vulnerabilities:
   - type: JWT Algorithm Confusion
+    category: Broken Authentication
     cwes:
-      - CWE-347  # Improper Verification of Cryptographic Signature
-      - CWE-327  # Use of a Broken or Risky Cryptographic Algorithm
-    description: |
-      Application accepts both RS256 (asymmetric) and HS256 (symmetric) JWT algorithms.
-      Attacker can download the RSA public key and use it as HMAC secret to forge admin tokens.
+      - CWE-347
+      - CWE-327
 
-objective: |
-  Exploit JWT algorithm confusion vulnerability to escalate from regular user to admin:
-  1. Authenticate as regular user and obtain JWT
-  2. Discover JWKS endpoint exposing RSA public key
-  3. Craft new JWT using HS256 with public key as secret
-  4. Change role claim from 'user' to 'admin'
-  5. Access admin-only endpoint to retrieve dynamic flag
-
-technical_details:
-  vulnerable_endpoint: /api/admin/flag
-  attack_vector: Algorithm confusion (RS256 -> HS256)
-  proof_mechanism: Dynamic HMAC-based flag generation
+objective: "Exploit the authentication mechanism to gain admin access and retrieve the flag."
 
 flag_format: "S7BEN{jwt_alg_confusion_<32_hex_chars>}"
 
 services:
-  - name: flask-app
+  target:
     port: 5000
+    protocol: http
 
-estimated_time: 20 minutes
+hints: []
+
+tags:
+  - jwt
+  - authentication
+  - cryptography
+  - privilege-escalation
+  - web
+
+internal_metadata:
+  exploitation_path:
+    hints:
+      - "Application accepts both RS256 and HS256 JWT algorithms"
+      - "The algorithm is read from the token header — an untrusted value"
+      - "RSA public key is available at /.well-known/jwks.json and /api/public-key"
+      - "When HS256 is used, the server verifies with the public key as the HMAC secret"
+      - "An attacker can download the public key and use it to sign a forged HS256 token"
+    steps:
+      - "Login as user (user/user123) to obtain an RS256 JWT"
+      - "GET /api/public-key or /.well-known/jwks.json to download the RSA public key"
+      - "Craft a new JWT with alg=HS256, role=admin, signed with the public key as HMAC secret"
+      - "Send forged token in Authorization header or jwt_token cookie"
+      - "GET /api/admin/flag — server verifies with public key as HMAC secret, token passes"
+
+author: Strike7 Security Team
+created: 2026-01-08

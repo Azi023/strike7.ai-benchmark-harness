@@ -1,14 +1,5 @@
 #!/usr/bin/env python3
-"""
-S7BEN-MED-007: JWT Algorithm Confusion Attack
-
-VULNERABILITY: Application accepts both RS256 (asymmetric) and HS256 (symmetric) algorithms.
-Attacker can download RSA public key and use it as HMAC secret to forge admin tokens.
-
-CWE-347: Improper Verification of Cryptographic Signature
-CWE-327: Use of a Broken or Risky Cryptographic Algorithm
-OWASP A07:2021 - Identification and Authentication Failures
-"""
+"""Strike7 JWT authentication service."""
 
 from flask import Flask, request, jsonify, render_template, make_response
 import jwt
@@ -67,13 +58,7 @@ def generate_flag(username, original_role, escalated_role, method):
     return f"S7BEN{{jwt_alg_confusion_{flag_hash}}}"
 
 def create_token(username, role, algorithm='RS256'):
-    """
-    Create JWT token
-
-    VULNERABILITY: Supports both RS256 and HS256 algorithms!
-    - RS256: Uses RSA private key to sign, public key to verify
-    - HS256: Uses shared secret for both signing and verification
-    """
+    """Create JWT token."""
     payload = {
         'sub': username,
         'role': role,
@@ -84,8 +69,6 @@ def create_token(username, role, algorithm='RS256'):
     if algorithm == 'RS256':
         token = jwt.encode(payload, PRIVATE_KEY_PEM, algorithm='RS256')
     elif algorithm == 'HS256':
-        # In production this would use a strong secret
-        # But attacker can use public key as secret!
         token = jwt.encode(payload, PUBLIC_KEY_PEM, algorithm='HS256')
     else:
         raise ValueError(f"Unsupported algorithm: {algorithm}")
@@ -93,28 +76,17 @@ def create_token(username, role, algorithm='RS256'):
     return token
 
 def verify_token(token):
-    """
-    Verify JWT token
-
-    VULNERABILITY: Accepts BOTH RS256 and HS256 algorithms!
-    - Extracts algorithm from token header (untrusted input!)
-    - Uses corresponding verification method
-    - Attacker can switch from RS256 to HS256 and sign with public key!
-    """
+    """Verify JWT token."""
     try:
         # Decode header to check algorithm
         unverified_header = jwt.get_unverified_header(token)
         algorithm = unverified_header.get('alg', 'RS256')
 
-        # VULNERABILITY: Trust the algorithm from token header!
         if algorithm == 'RS256':
             payload = jwt.decode(token, PUBLIC_KEY_PEM, algorithms=['RS256'])
         elif algorithm == 'HS256':
-            # VULNERABILITY: Using public key as HMAC secret!
-            # This is what makes the attack possible
             payload = jwt.decode(token, PUBLIC_KEY_PEM, algorithms=['HS256'])
         elif algorithm == 'none':
-            # VULNERABILITY: Some implementations accept 'none' algorithm
             payload = jwt.decode(token, options={"verify_signature": False}, algorithms=['none'])
         else:
             return None, f"Unsupported algorithm: {algorithm}"
@@ -185,12 +157,7 @@ def profile():
 
 @app.route('/api/admin/flag')
 def admin_flag():
-    """
-    Admin-only endpoint that returns the flag
-
-    VULNERABILITY: Only checks role claim in JWT
-    Attacker can forge JWT with role='admin' using algorithm confusion
-    """
+    """Admin-only flag endpoint."""
     token = request.cookies.get('jwt_token') or request.headers.get('Authorization', '').replace('Bearer ', '')
 
     if not token:
@@ -232,13 +199,13 @@ def admin_flag():
 
         return jsonify({
             'status': 'success',
-            'message': 'Admin access granted - Privilege escalation detected!',
+            'message': 'Admin access granted',
             'username': username,
             'original_role': original_role,
             'escalated_role': role,
             'algorithm_used': algorithm,
             'flag': flag,
-            'proof': f'Successfully escalated from {original_role} to {role} using {algorithm} algorithm',
+            'proof': 'Privilege escalation confirmed',
             'timestamp': datetime.utcnow().isoformat()
         })
     else:
@@ -253,13 +220,7 @@ def admin_flag():
 
 @app.route('/.well-known/jwks.json')
 def jwks():
-    """
-    VULNERABILITY: Exposes RSA public key in JWKS format!
-
-    This is actually a standard practice for JWT verification,
-    but becomes a vulnerability when combined with algorithm confusion.
-    Attacker downloads this public key and uses it as HMAC secret.
-    """
+    """JWKS endpoint."""
     # Export public key components
     public_numbers = PUBLIC_KEY.public_numbers()
 
@@ -288,17 +249,12 @@ def jwks():
 
 @app.route('/api/public-key')
 def public_key():
-    """
-    VULNERABILITY: Exposes RSA public key in PEM format!
-
-    Convenient endpoint for attackers to download the public key.
-    """
+    """Public key endpoint."""
     return jsonify({
         'status': 'success',
         'public_key': PUBLIC_KEY_PEM.decode('utf-8'),
         'format': 'PEM',
-        'algorithm': 'RS256',
-        'note': 'This public key is used to verify RS256 JWT signatures'
+        'algorithm': 'RS256'
     })
 
 @app.route('/dashboard')
