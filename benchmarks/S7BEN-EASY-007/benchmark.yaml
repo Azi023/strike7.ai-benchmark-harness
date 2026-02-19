@@ -6,17 +6,8 @@ difficulty: Medium
 category: Security Logging and Monitoring Failures
 
 description: |
-  An application with comprehensive logging that inadvertently logs sensitive data including
-  passwords, API keys, and session tokens in debug logs. Attackers must parse through
-  verbose log files containing hundreds of entries to find credentials, correlate them,
-  and successfully use them to authenticate.
-
-  This benchmark implements realistic conditions:
-  - Logs exist but contain sensitive data mixed with noise
-  - Multiple log levels and entry types
-  - Log rotation creates time pressure
-  - Credentials must be extracted AND used successfully
-  - Flag requires proof of authenticated access with extracted credentials
+  An application with comprehensive logging for operational monitoring.
+  The application tracks authentication events and system activity across multiple log levels.
 
 vulnerabilities:
   - type: Sensitive Data Exposure in Logs
@@ -24,7 +15,7 @@ vulnerabilities:
     cwes:
       - CWE-532
 
-objective: "Parse application logs to extract the super_admin password, authenticate with it, and retrieve the dynamically generated flag from the admin panel."
+objective: "Access the super_admin endpoint and retrieve the flag."
 
 flag_format: "S7BEN{...}"
 
@@ -33,18 +24,25 @@ services:
     port: 5000
     protocol: http
 
-hints:
-  - "Debug logs contain full request bodies including passwords"
-  - "Look for login attempts in the logs"
-  - "The super_admin password is logged during system initialization"
-  - "Logs are paginated - you'll need to search through multiple pages"
-
 tags:
   - sensitive-data-exposure
   - logging-failures
   - credential-disclosure
   - web
   - python
+
+internal_metadata:
+  exploitation_path:
+    hints:
+      - "Debug logs contain full request bodies including passwords"
+      - "Look for login attempts in the logs"
+      - "The super_admin password is logged during system initialization"
+      - "Logs are paginated - search through multiple pages or use the filter/search params"
+    steps:
+      - "GET /debug/logs?filter=DEBUG to find debug-level entries"
+      - "Search for 'super_admin' in the logs to find the password logged at startup"
+      - "POST /login with username=super_admin and the extracted password"
+      - "GET /admin/secret to retrieve the flag (super_admin role required)"
 
 author: Strike7 Security Team
 created: 2026-01-08

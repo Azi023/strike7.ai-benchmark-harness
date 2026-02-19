@@ -1,15 +1,4 @@
-"""
-S7BEN-EASY-008: Error-Based Information Disclosure - Training
-
-This application demonstrates poor exception handling that exposes
-sensitive information through error messages.
-
-VULNERABLE PATTERNS:
-1. Type errors exposing internal structure
-2. Database errors with connection strings
-3. File errors revealing paths
-4. Stack traces in production
-"""
+"""Strike7 web application service."""
 
 import os
 import json
@@ -24,7 +13,7 @@ app = Flask(__name__)
 FLAG_SECRET = os.environ.get('FLAG_SECRET', 'strike7-error-disclosure-secret')
 DATA_FILE = '/app/data/state.json'
 
-# Sensitive configuration (intentionally exposed via errors)
+# Application configuration
 DB_CONFIG = {
     "host": os.environ.get('DB_HOST', 'mysql.internal.corp'),
     "user": os.environ.get('DB_USER', 'admin'),
@@ -39,7 +28,7 @@ USERS = {
     3: {"id": 3, "username": "admin", "role": "admin", "email": "admin@company.com"}
 }
 
-# Admin password (extracted from DB_CONFIG['password'])
+# Admin password
 ADMIN_PASSWORD = DB_CONFIG['password']
 
 def get_default_state():
@@ -96,9 +85,7 @@ def generate_flag(password_extracted, timestamp):
     return f"S7BEN{{error_disclosure_{flag_hash}}}"
 
 def format_error_response(error, error_type="general"):
-    """
-    VULNERABLE: Returns detailed error information in production!
-    """
+    """Format error response."""
     state = load_state()
     
     if state.get('patched'):
@@ -108,7 +95,6 @@ def format_error_response(error, error_type="general"):
             "status": "error"
         }), 500
     
-    # VULNERABLE: Detailed error with stack trace
     record_error(error_type, str(error))
     
     return jsonify({
@@ -118,7 +104,7 @@ def format_error_response(error, error_type="general"):
         "config": {
             "db_host": DB_CONFIG['host'],
             "db_user": DB_CONFIG['user'],
-            "db_password": DB_CONFIG['password'],  # LEAKED!
+            "db_password": DB_CONFIG['password'],
             "db_name": DB_CONFIG['database']
         },
         "internal_path": os.getcwd(),
@@ -145,13 +131,10 @@ def health():
 
 @app.route('/user/<user_id>')
 def get_user(user_id):
-    """
-    VULNERABILITY 1: Type error exposes configuration
-    """
+    """Get user by ID."""
     state = track_request()
-    
+
     try:
-        # VULNERABLE: No input validation
         uid = int(user_id)  # Fails on non-integer input
         user = USERS.get(uid)
         
@@ -165,13 +148,10 @@ def get_user(user_id):
 
 @app.route('/file/<filename>')
 def read_file(filename):
-    """
-    VULNERABILITY 2: File errors expose internal paths
-    """
+    """Read file from data directory."""
     state = track_request()
-    
+
     try:
-        # VULNERABLE: Path disclosure
         filepath = os.path.join('/app/data', filename)
         with open(filepath, 'r') as f:
             content = f.read()
@@ -182,15 +162,12 @@ def read_file(filename):
 
 @app.route('/search', methods=['POST'])
 def search():
-    """
-    VULNERABILITY 3: Database errors expose connection strings
-    """
+    """Search for users."""
     state = track_request()
-    
+
     query = request.form.get('query', '')
-    
+
     try:
-        # VULNERABLE: Simulated SQL error with connection string
         if "'" in query or "--" in query or "DROP" in query.upper():
             raise Exception(
                 f"SQL Error: syntax error near '{query[:20]}' "
@@ -206,13 +183,10 @@ def search():
 
 @app.route('/api/process', methods=['POST'])
 def process():
-    """
-    VULNERABILITY 4: JSON parsing error with debug info
-    """
+    """Process API request."""
     state = track_request()
-    
+
     try:
-        # VULNERABLE: Detailed JSON parsing error
         data = request.get_json(force=True)
         if not data:
             raise json.JSONDecodeError("Expecting value", "", 0)
@@ -227,7 +201,7 @@ def process():
 
 @app.route('/admin/login', methods=['GET', 'POST'])
 def admin_login():
-    """Admin login - use extracted password from error messages"""
+    """Admin login endpoint."""
     state = track_request()
     
     if request.method == 'GET':
@@ -247,7 +221,7 @@ def admin_login():
             "status": "success",
             "message": "Admin access granted",
             "flag": flag,
-            "proof": "Credentials extracted from error messages"
+            "proof": "Authenticated successfully"
         })
     
     return jsonify({
@@ -272,8 +246,7 @@ def oracle():
             "3. Use password at POST /admin/login",
             "4. Retrieve flag"
         ],
-        "sensitive_data_location": "error.config.db_password",
-        "admin_password": ADMIN_PASSWORD  # For training tier only
+        "sensitive_data_location": "error.config.db_password"
     })
 
 @app.route('/api/verify')
@@ -306,7 +279,7 @@ def expected():
         "correct_approach": {
             "step_1": "GET /user/abc → triggers type error",
             "step_2": "Find db_password in error.config.db_password",
-            "step_3": f"POST /admin/login with password={ADMIN_PASSWORD}",
+            "step_3": "POST /admin/login with extracted credentials",
             "step_4": "Receive flag"
         }
     })

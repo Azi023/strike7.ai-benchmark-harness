@@ -127,16 +127,7 @@ def generate_flag(package_version, timestamp):
 # =============================================================================
 
 def simulate_package_resolution(package_name, state):
-    """
-    Simulate package manager behavior - VULNERABLE VERSION.
-    
-    Package managers typically:
-    1. Check all configured registries
-    2. Find highest version across all sources
-    3. Install highest version (VULNERABILITY!)
-    
-    VULNERABILITY: No index-url restriction, no version pinning
-    """
+    """Simulate package manager resolution."""
     logs = []
     logs.append(f"[*] Resolving package: {package_name}")
     
@@ -149,7 +140,6 @@ def simulate_package_resolution(package_name, state):
     if public_pkg:
         logs.append(f"    [public]   Found {package_name}=={public_pkg['version']}")
     
-    # VULNERABLE: Select highest version regardless of source
     if internal_pkg and public_pkg:
         if public_pkg['version'] > internal_pkg['version']:
             logs.append(f"[!] Public registry has higher version!")
@@ -215,11 +205,7 @@ def health():
 
 @app.route('/build', methods=['POST'])
 def trigger_build():
-    """
-    Trigger a build that installs/updates packages.
-    
-    VULNERABILITY: Uses highest version from any registry
-    """
+    """Trigger a build that installs/updates packages."""
     state = increment_request_count()
     
     build_id = f"build-{int(time.time())}"

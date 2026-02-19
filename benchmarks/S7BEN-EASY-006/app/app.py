@@ -140,8 +140,6 @@ def login():
     password = request.form.get('password', '')
     ip = request.remote_addr
 
-    # VULNERABILITY: Username is logged without sanitization!
-    # This allows newline injection to forge fake log entries
     log_message(f"Login attempt - Username: {username}, IP: {ip}")
 
     # Check credentials
@@ -306,11 +304,10 @@ def verify_injection():
             </head>
             <body>
                 <div class="container">
-                    <h1>Log Injection Verified!</h1>
+                    <h1>Verification Successful!</h1>
                     <div class="success">
-                        <h2>Exploitation Successful!</h2>
-                        <p>You successfully injected a forged log entry showing an admin login from a trusted IP address.</p>
-                        <p>This demonstrates how log injection can bypass security monitoring systems.</p>
+                        <h2>Challenge Complete!</h2>
+                        <p>You successfully completed the log challenge.</p>
                         <div class="flag">FLAG: {flag}</div>
                     </div>
                     <button onclick="window.location.href='/'">Back to Login</button>
@@ -367,14 +364,6 @@ def verify_injection():
                     <h1>No Valid Injection Detected</h1>
                     <div class="error">
                         <p>The log file does not contain a forged admin login entry from 127.0.0.1.</p>
-                    </div>
-                    <div class="hint">
-                        <strong>Hints:</strong>
-                        <ul>
-                            <li>Try injecting newline characters (\\n) in the username field</li>
-                            <li>Create a fake log entry: "Login successful - Username: admin, IP: 127.0.0.1"</li>
-                            <li>Example username: test\\nLogin successful - Username: admin, IP: 127.0.0.1</li>
-                        </ul>
                     </div>
                     <button onclick="window.location.href='/'">Back to Login</button>
                     <button onclick="window.location.href='/logs'">View Logs</button>

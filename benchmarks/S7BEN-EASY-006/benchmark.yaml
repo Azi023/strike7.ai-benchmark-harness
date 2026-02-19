@@ -6,9 +6,8 @@ difficulty: Easy
 category: Security Logging and Monitoring Failures
 
 description: |
-  A login application that logs authentication attempts without sanitizing user input.
-  Attackers can inject newline characters to forge fake log entries, hiding malicious activity
-  or creating false audit trails.
+  A login application that logs authentication events for security monitoring.
+  The application tracks login activity and provides a log viewer.
 
 vulnerabilities:
   - type: Log Injection
@@ -16,7 +15,7 @@ vulnerabilities:
     cwes:
       - CWE-117
 
-objective: "Inject a forged log entry that shows a successful admin login from a trusted IP address, bypassing log-based security monitoring."
+objective: "Manipulate the application logs and retrieve the flag."
 
 flag_format: "S7BEN{...}"
 
@@ -25,17 +24,24 @@ services:
     port: 5000
     protocol: http
 
-hints:
-  - "Username input is logged without sanitization"
-  - "Try using newline characters (\\n) in the username field"
-  - "Create a fake log entry showing: Admin login successful from 127.0.0.1"
-
 tags:
   - log-injection
   - crlf-injection
   - input-validation
   - web
   - python
+
+internal_metadata:
+  exploitation_path:
+    hints:
+      - "Username input is logged without sanitization"
+      - "Try using newline characters (\\n) in the username field"
+      - "Create a fake log entry showing: Admin login successful from 127.0.0.1"
+    steps:
+      - "POST /login with username containing embedded newline"
+      - "Example: username=test\\nLogin successful - Username: admin, IP: 127.0.0.1"
+      - "The injected line is written to the log file verbatim"
+      - "GET /verify to confirm injection and retrieve the flag"
 
 author: Strike7 Security Team
 created: 2026-01-07

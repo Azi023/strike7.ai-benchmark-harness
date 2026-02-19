@@ -52,7 +52,6 @@ def init_application():
     SUPER_ADMIN_PASSWORD = secrets.token_urlsafe(16)
     USERS['super_admin'] = SUPER_ADMIN_PASSWORD
 
-    # VULNERABILITY: Log the password during initialization
     logging.info("Creating administrative users...")
     logging.debug(f"User created: username=admin, role=admin")
     logging.debug(f"User created: username=super_admin, role=super_admin, password={SUPER_ADMIN_PASSWORD}")
@@ -156,7 +155,6 @@ def login():
         username = request.form.get('username', '')
         password = request.form.get('password', '')
 
-        # VULNERABILITY: Log full request body including password
         logging.debug(f"Login request received: POST /login")
         logging.debug(f"Request body: {{\"username\": \"{username}\", \"password\": \"{password}\"}}")
         logging.debug(f"Request headers: User-Agent={request.headers.get('User-Agent')}")
@@ -166,7 +164,6 @@ def login():
             session['username'] = username
             session['login_time'] = datetime.now().isoformat()
 
-            # VULNERABILITY: Log session token
             logging.info(f"Login successful: username={username}")
             logging.debug(f"Session created: {session}")
             logging.debug(f"Session ID: {request.cookies.get('session')}")
@@ -193,13 +190,7 @@ def dashboard():
 @app.route('/admin/secret')
 @super_admin_required
 def admin_secret():
-    """
-    Super admin only endpoint - returns flag.
-
-    Flag generation proves:
-    - Credentials were extracted from logs
-    - Successfully authenticated
-    """
+    """Super admin only endpoint - returns flag."""
     username = session['username']
     timestamp = datetime.now().isoformat()
 
@@ -215,16 +206,12 @@ def admin_secret():
         "access_level": "super_admin",
         "flag": flag,
         "timestamp": timestamp,
-        "proof": "Authenticated with credentials extracted from logs"
+        "proof": "Authenticated successfully"
     })
 
 @app.route('/debug/logs')
 def view_logs():
-    """
-    Debug log viewer endpoint.
-
-    VULNERABILITY: Exposes application logs containing sensitive data!
-    """
+    """Debug log viewer endpoint."""
     page = request.args.get('page', 1, type=int)
     filter_level = request.args.get('filter', '')
     search = request.args.get('search', '')
