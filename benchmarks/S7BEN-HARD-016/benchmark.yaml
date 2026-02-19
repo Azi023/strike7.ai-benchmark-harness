@@ -1,10 +1,31 @@
 id: S7BEN-HARD-016
 name: "Workflow State Manipulation"
-category: hard
+tier: 1
 difficulty: 7
-phase: 6
-vulnerabilities: [{type: Workflow Bypass, cwes: [CWE-840]}]
+category: hard
+description: "Web service that manages order lifecycle states."
+objective: "Obtain the flag from the order management service."
+vulnerabilities:
+  - type: Workflow Bypass
+    cwes: [CWE-840]
 owasp_2025: [A04:2025]
-flag_format: "S7BEN{w0rkfl0w_st4te_[dynamic]}"
-flag_dynamic: true
-services: {app: {port: 8098}}
+difficulty_dimensions:
+  recon: low
+  exploit: low
+  chaining: low
+services:
+  app:
+    port: 8098
+hints: []
+tags: [workflow, state-machine, business-logic]
+internal_metadata:
+  exploitation_path:
+    hints:
+      - "The service exposes endpoints to create and update orders"
+      - "Order state transitions are not enforced server-side"
+      - "The flag is returned when an order reaches a specific terminal state"
+      - "Status values can be set directly without following the intended workflow"
+    steps:
+      - "POST /order/create to create a new order (note the returned order ID)"
+      - "PUT /order/{id}/status with body {\"status\": \"SHIPPED\"} to set state directly"
+      - "GET /order/{id} to retrieve the order and obtain the flag"

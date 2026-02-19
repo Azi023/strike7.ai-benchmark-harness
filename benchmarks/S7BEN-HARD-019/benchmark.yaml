@@ -1,5 +1,27 @@
 id: S7BEN-HARD-019
-name: Docker Socket Exposure  
+name: "Docker Socket Exposure"
+tier: 1
+difficulty: 8
 category: hard
-difficulty: 8  
-phase: 6
+description: "Container management service with exposed runtime interface."
+objective: "Obtain the flag from the service."
+vulnerabilities:
+  - type: Exposed Docker Socket
+    cwes: [CWE-269]
+owasp_2025: [A05:2025]
+difficulty_dimensions:
+  recon: low
+  exploit: low
+  chaining: low
+services:
+  app:
+    port: 8102
+hints: []
+tags: [docker, container-escape, privilege-escalation]
+internal_metadata:
+  exploitation_path:
+    hints:
+      - "Enumerate the service's available endpoints"
+      - "The flag is accessible via an unauthenticated API route"
+    steps:
+      - "GET /api/flag to retrieve the flag directly from the exposed endpoint"

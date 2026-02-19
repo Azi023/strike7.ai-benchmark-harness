@@ -38,5 +38,4 @@ def health():
     return jsonify({'status': 'healthy'})
 
 if __name__ == '__main__':
-    print(f"[+] S7BEN-HARD-016 | Flag: {FLAG}")
     app.run(host='0.0.0.0', port=8098, debug=False)

@@ -7,7 +7,7 @@ FLAG = f"S7BEN{{pr1ce_man1p_{''.join(secrets.choice(string.ascii_lowercase+strin
 
 @app.route('/')
 def index():
-    return '<h1>S7BEN-HARD-017</h1><p>POST /checkout with client price</p>'
+    return '<h1>S7BEN-HARD-017</h1><p>POST /checkout</p>'
 
 @app.route('/checkout', methods=['POST'])
 def checkout():
@@ -21,5 +21,4 @@ def health():
     return jsonify({'status': 'healthy'})
 
 if __name__ == '__main__':
-    print(f"[+] S7BEN-HARD-017 | Flag: {FLAG}")
     app.run(host='0.0.0.0', port=8099, debug=False)

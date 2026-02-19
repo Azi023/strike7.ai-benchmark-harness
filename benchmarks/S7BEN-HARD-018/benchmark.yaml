@@ -1,11 +1,29 @@
 id: S7BEN-HARD-018
 name: "Kubernetes RBAC Privilege Escalation"
-category: hard
+tier: 1
 difficulty: 8
-phase: 6
-description: Over-privileged service account allows secret access
-vulnerabilities: [{type: Excessive Permissions, cwes: [CWE-269]}]
+category: hard
+description: "Simulated Kubernetes API service with RBAC access controls."
+objective: "Obtain the flag from the Kubernetes secrets endpoint."
+vulnerabilities:
+  - type: Excessive Permissions
+    cwes: [CWE-269]
 owasp_2025: [A05:2025]
-flag_format: "S7BEN{k8s_rb4c_esc4lat10n_[dynamic]}"
-flag_dynamic: true
-services: {webapp: {port: 8101}, k8s-api: {port: 6443}}
+difficulty_dimensions:
+  recon: low
+  exploit: low
+  chaining: medium
+services:
+  app:
+    port: 8101
+hints: []
+tags: [kubernetes, rbac, privilege-escalation, credentials]
+internal_metadata:
+  exploitation_path:
+    hints:
+      - "The service exposes a token retrieval endpoint"
+      - "The returned token can be used to authenticate to other API endpoints"
+      - "Service account permissions are overly broad"
+    steps:
+      - "GET /api/token to retrieve the service account token"
+      - "GET /k8s/secrets with header Authorization: Bearer {token} to access secrets and obtain the flag"
