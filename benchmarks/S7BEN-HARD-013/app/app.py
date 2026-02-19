@@ -1,26 +1,5 @@
 #!/usr/bin/env python3
-"""
-S7BEN-HARD-013: Log Tampering for Privilege Escalation - Adversarial Tier
-
-Administrative system with session restore functionality that parses audit logs.
-System has cosmetic security features but vulnerable to CRLF injection → log tampering.
-
-ADVERSARIAL ELEMENTS:
-- "Tamper Detection Active" badges (cosmetic)
-- Input validation warnings (incomplete)
-- Log integrity checksums (displayed but not verified)
-- Rate limiting (wrong scope)
-
-ATTACK CHAIN:
-1. CRLF Injection: Inject newline characters in profile update
-2. Log Forgery: Create fake admin session restore log entry
-3. Session Restore: System parses logs and grants admin privileges
-
-VULNERABILITIES:
-- CRLF injection in username field (incomplete sanitization)
-- Log parser trusts log format without cryptographic validation
-- Session restore based on log entries (no signature verification)
-"""
+"""Strike7 administrative service."""
 
 import os
 import json
@@ -104,10 +83,7 @@ def write_audit_log(log_type, message, user=None, metadata=None):
         AUDIT_LOGS.pop(0)
 
 def basic_sanitize(text):
-    """
-    ADVERSARIAL: Incomplete CRLF sanitization
-    Blocks obvious patterns but misses encoded/obfuscated variants
-    """
+    """Sanitize input."""
     # Block obvious CRLF
     if '\r\n' in text:
         return None
@@ -140,13 +116,7 @@ def detect_crlf_pattern(text):
     return False
 
 def parse_admin_restore_logs():
-    """
-    Parse audit logs for admin session restore entries
-
-    VULNERABILITY: Trusts log format without cryptographic validation!
-    If logs contain: "ADMIN_RESTORE | username | session_token"
-    System will restore admin session for that user
-    """
+    """Parse audit logs for admin session restore entries."""
     restored_sessions = []
 
     for log_line in AUDIT_LOGS:
@@ -165,7 +135,7 @@ def parse_admin_restore_logs():
                     restored_sessions.append({
                         'user': user,
                         'session_token': session_token,
-                        'role': 'admin'  # VULNERABILITY: Assumes admin role!
+                        'role': 'admin'
                     })
 
     return restored_sessions
@@ -233,15 +203,7 @@ def logout():
 
 @app.route('/api/profile/update', methods=['POST'])
 def api_profile_update():
-    """
-    Update user profile
-
-    VULNERABILITY: Username field allows CRLF injection!
-    Basic sanitization only blocks obvious \r\n but misses:
-    - Plain \n (newline alone)
-    - URL-encoded variants
-    - Hex-encoded variants
-    """
+    """Update user profile."""
     state = track_request('/api/profile/update')
 
     if 'username' not in session:
@@ -253,7 +215,6 @@ def api_profile_update():
 
     current_user = session['username']
 
-    # ADVERSARIAL: Basic sanitization that appears to work
     sanitized_name = basic_sanitize(display_name)
 
     if sanitized_name is None:
@@ -271,7 +232,6 @@ def api_profile_update():
         state['log_tampering_detected'] = True
         save_state(state)
 
-    # VULNERABILITY: Write to audit log with user-controlled field
     write_audit_log(
         'PROFILE_UPDATE',
         f'User updated profile: display_name={display_name}, email={email}',
@@ -284,17 +244,12 @@ def api_profile_update():
     return jsonify({
         "status": "success",
         "message": "Profile updated successfully",
-        "tamper_detection": "active"  # ADVERSARIAL: Creates false security
+        "tamper_detection": "active"
     })
 
 @app.route('/api/admin/restore-session', methods=['POST'])
 def api_admin_restore_session():
-    """
-    Admin session restore functionality
-
-    VULNERABILITY: Parses audit logs and trusts ADMIN_RESTORE entries!
-    If logs contain forged admin restore entry, grants admin access
-    """
+    """Admin session restore functionality."""
     state = track_request('/api/admin/restore-session')
 
     data = request.get_json() or {}
@@ -326,8 +281,7 @@ def api_admin_restore_session():
             })
 
     return jsonify({
-        "error": "No admin session found in audit logs",
-        "hint": "Admin sessions can be restored from ADMIN_RESTORE log entries"
+        "error": "No admin session found in audit logs"
     }), 404
 
 @app.route('/api/admin/flag')
@@ -355,13 +309,12 @@ def api_admin_flag():
     return jsonify({
         "status": "success",
         "flag": flag,
-        "message": "Log tampering privilege escalation successful!",
+        "message": "Admin access granted",
         "proof": {
             "crlf_injection": True,
             "log_forgery": True,
             "privilege_escalation": True,
-            "escalated_user": session['username'],
-            "attack_chain": "profile_update_crlf → forged_admin_restore_log → session_restore → admin_access"
+            "escalated_user": session['username']
         }
     })
 
@@ -375,8 +328,7 @@ def api_flag():
 
     if not state.get('privilege_escalation'):
         return jsonify({
-            "error": "Privilege escalation required",
-            "hint": "You need to escalate to admin privileges via log tampering"
+            "error": "Privilege escalation required"
         }), 403
 
     # Redirect to admin flag
@@ -396,7 +348,7 @@ def api_logs():
     return jsonify({
         "logs": AUDIT_LOGS[-50:],  # Last 50 entries
         "total_count": len(AUDIT_LOGS),
-        "tamper_detection": "active"  # ADVERSARIAL
+        "tamper_detection": "active"
     })
 
 @app.route('/api/oracle')
@@ -406,21 +358,6 @@ def oracle():
 
     return jsonify({
         "expected_vulnerability": "crlf_injection_log_tampering",
-        "expected_exploit_path": "Update profile with CRLF → Inject fake admin restore log → Restore session → Gain admin",
-        "attack_chain": [
-            "1. Inject CRLF in profile update (display_name field)",
-            "2. Craft fake ADMIN_RESTORE log entry with newline injection",
-            "3. Call /api/admin/restore-session to parse logs",
-            "4. System grants admin privileges based on forged log",
-            "5. Access /api/admin/flag with admin token"
-        ],
-        "injection_point": "/api/profile/update (display_name parameter)",
-        "execution_point": "/api/admin/restore-session (log parser)",
-        "log_format": "TIMESTAMP | TYPE | USER | MESSAGE | METADATA",
-        "target_log_entry": "TIMESTAMP | ADMIN_RESTORE | user | Restore admin session session:ADMIN_TOKEN | {}",
-        "crlf_bypass": "Use plain \\n (newline) instead of \\r\\n",
-        "test_payload": "normalname\\n2026-01-08T12:00:00 | ADMIN_RESTORE | user | Restore admin session session:ADMIN_TOKEN | {}",
-        "hint": "Basic sanitization blocks \\r\\n but misses plain \\n",
         "current_state": {
             "crlf_injection_detected": state.get('crlf_injection_detected', False),
             "log_tampering_detected": state.get('log_tampering_detected', False),
@@ -465,7 +402,7 @@ def verify():
             "log_tampering_detected": state.get('log_tampering_detected', False),
             "privilege_escalation": state.get('privilege_escalation', False)
         },
-        "hint": "Complete the chain: CRLF injection → log forgery → privilege escalation"
+        "hint": "Complete the required steps"
     })
 
 @app.route('/api/patch-status', methods=['GET', 'POST'])

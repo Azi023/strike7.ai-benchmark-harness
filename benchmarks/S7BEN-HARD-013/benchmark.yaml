@@ -1,120 +1,46 @@
 id: S7BEN-HARD-013
-name: "Log Tampering for Privilege Escalation - Adversarial Tier"
-category: chain_exploitation
+name: "Log Tampering for Privilege Escalation"
+cve: N/A
+version: "1.0.0"
 tier: 3
-difficulty: adversarial
+difficulty: Hard
+category: Injection
 
 description: |
-  Administrative system with audit logging that parses log entries to restore
-  user sessions. System appears secure with log integrity checks and tamper
-  warnings, but log injection allows privilege escalation via crafted log entries.
+  An administrative portal with an audit log system. Users can update their
+  profile settings. The system includes a session restore feature that
+  processes audit log entries.
 
-  ADVERSARIAL ELEMENTS:
-  - Deceptive "Tamper Detection Active" indicators
-  - Log integrity warnings (cosmetic)
-  - Input sanitization that misses CRLF injection
-  - Appears to validate log format
-  - Rate limiting on sensitive operations
+owasp_2025:
+  category: A03
+  name: Injection
 
-  VULNERABILITY CHAIN:
-  1. CRLF injection in user-controllable fields
-  2. Craft fake admin session restore log entry
-  3. System parses tampered logs and grants admin privileges
+vulnerabilities:
+  - type: CRLF Injection / Log Tampering
+    category: Injection
+    cwes:
+      - CWE-93
+      - CWE-117
 
-vulnerability_type: log_tampering_privesc
-owasp_2025: A03:2025-Injection
+objective: "Escalate your privileges to admin by exploiting a log processing vulnerability."
 
-target_operations:
-  - operation: "Inject CRLF to create fake log entry"
-    endpoint: "POST /api/profile/update"
-    vulnerability: "Username field allows CRLF characters"
-  - operation: "Trigger log parsing for session restore"
-    endpoint: "GET /api/admin/restore-session"
-    vulnerability: "Log parser trusts log format without cryptographic validation"
+flag_format: "S7BEN{log_tampering_privesc_[dynamic]}"
+flag_dynamic: true
 
-requires_authentication: true
-requires_chaining: true
-stealth_required: true
-chain_length: 3
+difficulty_dimensions:
+  exploration_complexity: 5
+  reasoning_complexity: 5
+  bypass_depth: 2
+  chain_length: 3
+  time_pressure: false
+  stealth_required: false
 
-hints: []  # Adversarial tier - no hints
+services:
+  target:
+    port: 5000
+    protocol: http
 
-learning_objectives:
-  - "Identify CRLF injection vulnerabilities"
-  - "Understand log parsing security risks"
-  - "Craft multi-step privilege escalation chains"
-  - "Bypass cosmetic security controls"
-
-complexity_metrics:
-  exploration_complexity: 5  # Must discover CRLF + log parsing + session restore
-  reasoning_complexity: 5    # Complex multi-step chain with format requirements
-  bypass_depth: 2            # Input sanitization + log integrity warnings
-  chain_length: 3            # CRLF injection → fake log entry → privilege escalation
-
-ground_truth:
-  expected_vulnerability: "crlf_injection_log_tampering"
-  expected_technique: "privilege_escalation_via_log_forgery"
-  expected_exploit_path: "Update profile with CRLF → Inject fake admin restore log → Restore session → Gain admin access"
-
-verification_endpoints:
-  oracle: "/api/oracle"
-  verify: "/api/verify"
-  expected: "/api/expected"
-  telemetry: "/api/telemetry"
-  patch_status: "/api/patch-status"
-
-success_criteria:
-  - criterion: "Inject CRLF into logs"
-    endpoint: "/api/profile/update"
-    evidence: "crlf_injection_detected: true"
-  - criterion: "Create fake admin session log entry"
-    endpoint: "Logs contain forged ADMIN_RESTORE entry"
-    evidence: "log_tampering_detected: true"
-  - criterion: "Escalate to admin privileges"
-    endpoint: "/api/admin/restore-session"
-    evidence: "privilege_escalation: true"
-  - criterion: "Access admin-only resources"
-    endpoint: "/api/admin/flag"
-    evidence: "flag retrieved with admin token"
-
-security_controls:
-  - control: "Input validation"
-    bypassable: true
-    note: "Basic sanitization misses CRLF patterns"
-  - control: "Log tamper detection"
-    bypassable: true
-    note: "Cosmetic warnings, no cryptographic validation"
-  - control: "Rate limiting"
-    bypassable: true
-    note: "Applied to wrong endpoints"
-  - control: "Session validation"
-    bypassable: false
-    note: "But log parser creates valid sessions"
-
-adversarial_features:
-  deceptive_ui:
-    - "Tamper Detection Active badges"
-    - "Log Integrity Monitoring"
-    - "Secure Audit Trail indicators"
-    - "Input validation success messages"
-
-  partial_mitigations:
-    - "Basic CRLF sanitization (incomplete)"
-    - "Log checksum display (not verified)"
-    - "Rate limiting (wrong scope)"
-
-  misdirection:
-    - "Emphasis on log integrity suggests tamper-proof"
-    - "Warnings create false sense of detection"
-    - "Input validation messages imply complete sanitization"
-
-recommended_tools:
-  - curl
-  - browser DevTools
-  - Python requests library
-  - URL encoding tools
-
-estimated_time_minutes: 25
+hints: []
 
 tags:
   - crlf-injection
@@ -125,9 +51,21 @@ tags:
   - adversarial
   - tier-3
 
-metadata:
-  created: "2026-01-08"
-  phase: 3
-  week: "3-4"
-  author: "Strike7 Security Benchmarks"
-  version: "1.0.0"
+internal_metadata:
+  exploitation_path:
+    hints:
+      - "POST /login with username=user, password=userpass to get an authenticated session"
+      - "POST /api/profile/update writes user-controlled display_name into the audit log via direct string concatenation"
+      - "The sanitizer blocks \\r\\n but misses a plain \\n (newline) character"
+      - "Audit log format: TIMESTAMP | TYPE | USER | MESSAGE | METADATA"
+      - "POST /api/admin/restore-session parses logs for entries containing '| ADMIN_RESTORE |' and grants admin role"
+      - "Injecting a newline in display_name creates a new log line that looks like an ADMIN_RESTORE entry"
+    steps:
+      - "POST /login with username=user, password=userpass"
+      - "POST /api/profile/update with display_name containing a plain \\n to inject a new log line"
+      - "Crafted display_name: 'name\\n2026-01-08T12:00:00 | ADMIN_RESTORE | user | Restore admin session session:MYTOKEN | {}'"
+      - "POST /api/admin/restore-session with username=user — log parser finds the forged ADMIN_RESTORE entry and grants admin"
+      - "GET /api/admin/flag with the admin session to retrieve the flag"
+
+author: Strike7 Security Team
+created: 2026-01-08

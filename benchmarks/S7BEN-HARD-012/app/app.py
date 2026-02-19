@@ -1,23 +1,5 @@
 #!/usr/bin/env python3
-"""
-S7BEN-HARD-012: IDOR with Partial Authorization - Adversarial Tier
-
-Healthcare records system with PARTIAL authorization checks.
-Validates user ROLE (must be doctor) but NOT record ownership.
-Allows horizontal privilege escalation - doctors can access ANY patient record.
-
-ADVERSARIAL ELEMENTS:
-- Deceptive "Authorization Required" UI badges
-- Role validation creates appearance of security
-- Access logs suggest monitoring (but don't prevent access)
-- Rate limiting suggests hardening
-- Appears to implement proper authorization
-
-VULNERABILITY:
-- Role checked: ✓ (must be 'doctor' role)
-- Ownership checked: ✗ (doesn't verify record is assigned to this doctor)
-- Result: Horizontal privilege escalation within doctor role
-"""
+"""Strike7 healthcare records service."""
 
 import os
 import json
@@ -129,7 +111,7 @@ def track_request(endpoint):
     return state
 
 def log_record_access(username, record_id, authorized):
-    """Log all record access attempts (ADVERSARIAL: creates detection theater)"""
+    """Log record access attempts."""
     state = load_state()
 
     log_entry = {
@@ -193,12 +175,7 @@ def logout():
 
 @app.route('/api/records')
 def api_records():
-    """
-    List records for current user
-
-    PARTIAL SECURITY: Shows only assigned records
-    But individual record access doesn't check assignment!
-    """
+    """List records for current user."""
     state = track_request('/api/records')
 
     if 'username' not in session:
@@ -254,15 +231,7 @@ def api_records():
 
 @app.route('/api/records/<record_id>')
 def api_record(record_id):
-    """
-    Get specific record by ID
-
-    VULNERABILITY: Partial authorization!
-    - Checks role (must be doctor or admin) ✓
-    - Does NOT check if record is assigned to this doctor ✗
-
-    Result: Horizontal privilege escalation within doctor role
-    """
+    """Get specific record by ID."""
     state = track_request(f'/api/records/{record_id}')
 
     if 'username' not in session:
@@ -271,7 +240,6 @@ def api_record(record_id):
     username = session['username']
     role = session['role']
 
-    # ADVERSARIAL: Check role (appears to be proper authorization)
     if role not in ['doctor', 'admin']:
         return jsonify({
             "error": "Access denied",
@@ -283,13 +251,8 @@ def api_record(record_id):
     if not record:
         return jsonify({"error": "Record not found"}), 404
 
-    # VULNERABILITY: Missing ownership check!
-    # Should check: if role == 'doctor' and record['assigned_doctor'] != username
-    # But it doesn't!
-
     is_authorized = (role == 'admin' or record['assigned_doctor'] == username)
 
-    # Log access (ADVERSARIAL: creates appearance of monitoring)
     log_record_access(username, record_id, is_authorized)
 
     if not is_authorized:
@@ -303,12 +266,11 @@ def api_record(record_id):
 
         save_state(state)
 
-    # VULNERABILITY: Return record regardless of assignment (IDOR!)
     return jsonify({
         "status": "success",
         "record": record,
         "idor_detected": not is_authorized,
-        "access_logged": True  # ADVERSARIAL: implies monitoring
+        "access_logged": True
     })
 
 @app.route('/api/flag')
@@ -321,8 +283,7 @@ def api_flag():
 
     if not state.get('unauthorized_record_accessed'):
         return jsonify({
-            "error": "Access denied",
-            "hint": "You need to access a record not assigned to you"
+            "error": "Access denied"
         }), 403
 
     # Find highly confidential record that was accessed
@@ -335,8 +296,7 @@ def api_flag():
 
     if not target_record_id:
         return jsonify({
-            "error": "No highly confidential record accessed",
-            "hint": "Look for records with sensitivity level 'highly_confidential'"
+            "error": "No highly confidential record accessed"
         }), 403
 
     target_record = RECORDS[target_record_id]
@@ -348,12 +308,11 @@ def api_flag():
     return jsonify({
         "status": "success",
         "flag": flag,
-        "message": "Partial authorization IDOR successfully exploited!",
+        "message": "Record accessed successfully",
         "proof": {
             "record_id": target_record_id,
             "patient_name": target_record['patient_name'],
-            "horizontal_escalation": True,
-            "vulnerability": "role_checked_but_ownership_not_checked"
+            "horizontal_escalation": True
         }
     })
 
@@ -374,25 +333,6 @@ def oracle():
 
     return jsonify({
         "expected_vulnerability": "partial_authorization_idor",
-        "expected_exploit_path": "Login as doctor → List assigned records → Access unassigned record by ID → Horizontal escalation",
-        "authorization_model": "role_based_only",
-        "missing_check": "ownership_validation",
-        "attack_type": "horizontal_privilege_escalation",
-        "target_record": highly_conf_record['id'] if highly_conf_record else None,
-        "target_assigned_to": highly_conf_record['assigned_doctor'] if highly_conf_record else None,
-        "hint": "System checks user ROLE but not record OWNERSHIP/ASSIGNMENT",
-        "test_accounts": {
-            "dr_smith": {
-                "username": "dr_smith",
-                "password": "smith2026",
-                "assigned_records": [r['id'] for r in dr_smith_records]
-            },
-            "dr_jones": {
-                "username": "dr_jones",
-                "password": "jones2026",
-                "assigned_records": [r['id'] for r in dr_jones_records]
-            }
-        },
         "current_state": {
             "unauthorized_record_accessed": state.get('unauthorized_record_accessed', False),
             "horizontal_escalation": state.get('horizontal_escalation', False),
@@ -434,7 +374,7 @@ def verify():
             "unauthorized_record_accessed": state.get('unauthorized_record_accessed', False),
             "horizontal_escalation": state.get('horizontal_escalation', False)
         },
-        "hint": "Access a highly confidential record not assigned to you"
+        "hint": "Complete the required steps"
     })
 
 @app.route('/api/access-logs')
@@ -454,7 +394,7 @@ def access_logs():
     return jsonify({
         "access_logs": state['telemetry']['access_logs'][-50:],  # Last 50 entries
         "total_accesses": len(state['telemetry']['access_logs']),
-        "monitoring_active": True  # ADVERSARIAL: implies detection
+        "monitoring_active": True
     })
 
 @app.route('/api/patch-status', methods=['GET', 'POST'])

@@ -27,11 +27,7 @@ TELEMETRY = {
 
 @app.route('/')
 def index():
-    return '''<html><body><h1>Account Management</h1>
-    <p>POST /reset-request {"email":"..."}</p>
-    <p>POST /reset-password {"token":"...", "new_password":"..."}</p>
-    <p>POST /login {"username":"...", "password":"..."}</p>
-    <p>GET /profile (requires auth)</p></body></html>'''
+    return '''<html><body><h1>Account Management</h1></body></html>'''
 
 
 @app.route('/robots.txt')
@@ -154,5 +150,4 @@ def health():
 
 
 if __name__ == '__main__':
-    print(f"[+] S7BEN-HARD-014 | Flag: {FLAG}")
     app.run(host='0.0.0.0', port=8093, debug=False)

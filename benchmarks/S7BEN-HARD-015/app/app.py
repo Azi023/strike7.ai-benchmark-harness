@@ -11,11 +11,10 @@ TELEMETRY = {'start_time': time.time(), 'fixation_attacks': 0, 'flag_captured': 
 
 @app.route('/')
 def index():
-    return '<html><body><h1>S7BEN-HARD-015</h1><p>GET /login?sessionid=ATTACKER_ID</p><p>POST /login {"username":"victim","password":"victim123"}</p><p>GET /profile (cookie: sessionid)</p></body></html>'
+    return '<html><body><h1>User Portal</h1></body></html>'
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    # VULNERABILITY: Accept session ID from URL
     fixed_session = request.args.get('sessionid')
     if fixed_session:
         TELEMETRY['fixation_attacks'] += 1
@@ -27,7 +26,6 @@ def login():
 
         user = USERS.get(username)
         if user and hashlib.sha256(password.encode()).hexdigest() == user['pass']:
-            # VULNERABILITY: Don't rotate session ID after login!
             session_id = request.cookies.get('sessionid') or fixed_session or secrets.token_hex(16)
             SESSIONS[session_id] = username
 
@@ -64,5 +62,4 @@ def health():
     return jsonify({'status': 'healthy'})
 
 if __name__ == '__main__':
-    print(f"[+] S7BEN-HARD-015 | Flag: {FLAG}")
     app.run(host='0.0.0.0', port=8094, debug=False)
