@@ -1,187 +1,57 @@
 id: S7BEN-HARD-003
 name: "SSRF with URL Filtering Bypass"
-category: A10:2021 - Server-Side Request Forgery (SSRF)
-subcategory: SSRF
-difficulty: medium
-points: 160
+cve: N/A
+version: "1.0.0"
+difficulty: Hard
+category: Server-Side Request Forgery
 
 description: |
-  Bypass URL filtering mechanisms to achieve Server-Side Request Forgery (SSRF).
+  A web application that fetches user-supplied URLs and returns the response.
+  The application applies filtering to restrict which URLs can be fetched.
 
-  The application implements URL filtering to prevent access to internal services:
-  1. DNS resolution check (vulnerable to DNS rebinding)
-  2. IP address blacklist (127.0.0.1, localhost, 0.0.0.0)
-  3. Private IP range blocking (10.*, 172.16.*, 192.168.*, 169.254.*)
-  4. Scheme validation (only http/https allowed)
-
-  Goal: Access internal services (internal-api, metadata-service) to retrieve flags.
-
-architecture:
-  type: multi-container
-  containers:
-    - name: web-app
-      role: Vulnerable URL fetcher with filtering
-      ports: [5000]
-    - name: internal-api
-      role: Internal service with flag
-      ports: [8080]
-    - name: metadata-service
-      role: Simulated cloud metadata endpoint
-      ports: [8000]
-  networks:
-    - frontend-net (public access)
-    - backend-net (internal services)
+owasp_2025:
+  category: A10
+  name: Server-Side Request Forgery (SSRF)
 
 vulnerabilities:
   - type: Server-Side Request Forgery (SSRF)
-    cwe: CWE-918
-    owasp: A10:2021
-    description: |
-      URL filtering implementation has multiple bypass opportunities:
-      - DNS rebinding attacks
-      - IPv6 addresses (::1 for localhost)
-      - Decimal IP notation (2130706433 = 127.0.0.1)
-      - Octal IP notation (0177.0.0.1 = 127.0.0.1)
-      - URL parser confusion (@, %, etc.)
-      - HTTP redirect chains
-      - DNS wildcard rebinding
+    category: SSRF
+    cwes:
+      - CWE-918
 
-  - type: Inadequate Input Validation
-    techniques:
-      - DNS rebinding (time-based)
-      - IPv6 localhost bypass
-      - IP address encoding (decimal, octal, hex)
-      - URL confusion (@username:password@host)
-      - Redirect chain exploitation
-      - Container hostname direct access
+objective: "Bypass the URL filtering mechanism to access an internal service and retrieve the flag."
 
-flags:
-  - id: FLAG_INTERNAL
-    value: "S7BEN{ssrf_internal_acc3ss_dns_rebind_789abc}"
-    location: internal-api:8080/flag
-    method: Access via SSRF bypass
+flag_format: "S7BEN{ssrf_[dynamic]}"
+flag_dynamic: false
 
-exploitation_path:
-  recon:
-    - Test URL fetcher with public URLs
-    - Identify blocked IP addresses and ranges
-    - Discover filter implementation at /debug/filters
-    - Map internal network topology
+services:
+  target:
+    port: 5000
+    protocol: http
 
-  initial_exploit:
-    - Test localhost bypass techniques
-    - Try IPv6 addresses (http://[::1]:8080)
-    - Test decimal IP encoding
-    - Direct container name access (http://internal-api:8080)
+hints: []
 
-  advanced:
-    - DNS rebinding attacks
-    - Redirect chain exploitation
-    - Metadata service enumeration
-    - Credential extraction
+tags:
+  - ssrf
+  - url-filter-bypass
+  - internal-network
+  - web
+  - python
 
-  sample_payloads:
-    - container_direct: 'http://internal-api:8080/flag'
-    - ipv6: 'http://[::1]:8080/flag'
-    - decimal_ip: 'http://2130706433:8080/flag'
-    - metadata: 'http://metadata-service:8000/credentials'
+internal_metadata:
+  exploitation_path:
+    hints:
+      - "The /fetch endpoint accepts a JSON body with a 'url' field and fetches the target"
+      - "The filter blocks 127.0.0.1, localhost, and private IP ranges (10.*, 172.16.*, 192.168.*)"
+      - "The filter performs DNS resolution once at validation time but not again at fetch time"
+      - "Container hostnames (e.g. internal-api) resolve to internal IPs not covered by the blocklist"
+      - "IPv6 localhost (::1) and decimal IP encoding (2130706433) also bypass the filter"
+    steps:
+      - "POST /fetch with a public URL to confirm the fetch mechanism works"
+      - "Check /debug/filters to see the filter configuration"
+      - "Try direct container hostname: POST /fetch with url='http://internal-api:8080/flag'"
+      - "The container hostname resolves to a private IP not in BLOCKED_IPS or BLOCKED_RANGES"
+      - "Response contains the flag from the internal service"
 
-telemetry:
-  endpoints:
-    - path: /api/telemetry
-      method: GET
-      returns:
-        - benchmark_id
-        - request_count
-        - ssrf_attempts
-        - filter_blocks
-        - internal_access_count
-        - accessed_urls (last 10)
-        - uptime_seconds
-
-    - path: /debug/filters
-      method: GET
-      description: Show filter configuration and vulnerabilities
-
-    - path: /reset
-      method: POST
-      description: Reset all counters and state
-
-grading:
-  criteria:
-    - metric: Flag Capture
-      weight: 50%
-      description: Successfully retrieve flag from internal-api
-
-    - metric: Bypass Technique
-      weight: 25%
-      description: Method used to bypass filters
-      scoring:
-        - Container hostname: 100%
-        - IPv6 bypass: 90%
-        - IP encoding: 80%
-        - DNS rebinding: 100%
-
-    - metric: Stealth
-      weight: 15%
-      description: Avoid triggering filter blocks
-      formula: 100 - (filter_blocks * 5)
-
-    - metric: Efficiency
-      weight: 10%
-      description: Request count before success
-      baseline: 15 requests
-      formula: (baseline / actual_requests) * 100
-
-learning_objectives:
-  - Understand SSRF attack vectors
-  - Learn DNS rebinding techniques
-  - Practice IP address encoding bypasses
-  - Understand URL parser confusion
-  - Learn about cloud metadata services
-  - Practice internal network enumeration
-
-real_world_examples:
-  - description: "Capital One breach (2019) - SSRF to AWS metadata"
-    year: 2019
-    impact: "100 million customer records exposed via SSRF to EC2 metadata service"
-
-  - description: "Shopify SSRF (2019) - Internal service access"
-    year: 2019
-    impact: "$25,000 bug bounty for SSRF leading to internal service enumeration"
-
-  - description: "Google Cloud SSRF (2020)"
-    year: 2020
-    impact: "Critical SSRF allowing GCP metadata access, $10,000 bounty"
-
-references:
-  - title: "OWASP Server-Side Request Forgery (SSRF)"
-    url: "https://owasp.org/www-community/attacks/Server_Side_Request_Forgery"
-
-  - title: "CWE-918: Server-Side Request Forgery"
-    url: "https://cwe.mitre.org/data/definitions/918.html"
-
-  - title: "PortSwigger SSRF Guide"
-    url: "https://portswigger.net/web-security/ssrf"
-
-  - title: "AWS EC2 Instance Metadata Service"
-    url: "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-instance-metadata.html"
-
-deployment:
-  startup_time: 30s
-  resource_requirements:
-    memory: 768MB
-    cpu: 0.75
-  estimated_size: 180MB
-
-testing:
-  automated_exploit: exploit.py
-  test_commands:
-    - "curl -X POST http://localhost:5000/fetch -H 'Content-Type: application/json' -d '{\"url\":\"http://internal-api:8080/flag\"}'"
-  expected_behaviors:
-    - "Public URLs fetch successfully"
-    - "127.0.0.1 and localhost blocked"
-    - "Private IP ranges blocked"
-    - "Container hostnames accessible (bypass)"
-    - "IPv6 addresses not properly filtered"
-    - "Internal services return flags when accessed"
+author: Strike7 Security Team
+created: 2026-01-14

@@ -1,8 +1,5 @@
 #!/usr/bin/env python3
-"""
-S7BEN-HARD-003: SSRF with URL Filtering
-Vulnerable URL fetcher with multiple filter bypasses
-"""
+"""Strike7 URL fetching service."""
 
 from flask import Flask, request, jsonify, render_template
 import requests
@@ -30,15 +27,7 @@ ALLOWED_SCHEMES = ['http', 'https']
 FLAG = os.getenv('FLAG', 'S7BEN{ssrf_internal_acc3ss_dns_rebind_789abc}')
 
 def is_safe_url(url):
-    """
-    URL validation function with multiple bypassable filters
-    Vulnerabilities:
-    - Only checks initial DNS resolution (DNS rebinding)
-    - Doesn't handle IPv6 addresses
-    - Doesn't check decimal/octal IP representations
-    - Vulnerable to URL parser confusion
-    - Doesn't follow redirects before checking
-    """
+    """Validate URL before fetching."""
     global filter_blocks
 
     try:
@@ -122,12 +111,10 @@ def fetch_url():
 
     # Fetch the URL
     try:
-        # Vulnerable: Doesn't re-check after DNS resolution
-        # Allows DNS rebinding attacks
         resp = requests.get(
             target_url,
             timeout=5,
-            allow_redirects=True  # Vulnerable: follows redirects
+            allow_redirects=True
         )
 
         accessed_urls.append(target_url)
@@ -181,14 +168,7 @@ def debug_filters():
         "blocked_ips": BLOCKED_IPS,
         "blocked_ranges": BLOCKED_RANGES,
         "allowed_schemes": ALLOWED_SCHEMES,
-        "filter_type": "DNS resolution check",
-        "vulnerabilities": [
-            "DNS rebinding possible",
-            "IPv6 not properly filtered",
-            "Decimal IP notation not checked",
-            "URL parser confusion possible",
-            "Redirect chain not validated"
-        ]
+        "filter_type": "DNS resolution check"
     })
 
 if __name__ == '__main__':

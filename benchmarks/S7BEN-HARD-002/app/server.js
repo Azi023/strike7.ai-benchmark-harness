@@ -28,7 +28,7 @@ app.use(session({
     secret: 'insecure-secret-key-123',
     resave: false,
     saveUninitialized: true,
-    cookie: { secure: false, httpOnly: false } // Vulnerable: allows XSS to read cookies
+    cookie: { secure: false, httpOnly: false }
 }));
 
 app.set('view engine', 'ejs');
@@ -84,12 +84,11 @@ function customBlacklist(input) {
     return { filtered, blocked };
 }
 
-// DOMPurify sanitization (Second layer - allows SVG by default)
+// DOMPurify sanitization (Second layer)
 function sanitizeWithDOMPurify(input) {
-    // Default DOMPurify config - allows SVG elements
     return DOMPurify.sanitize(input, {
         ALLOWED_TAGS: ['b', 'i', 'em', 'strong', 'a', 'p', 'br', 'svg', 'g', 'path', 'circle'],
-        ALLOWED_ATTR: ['href', 'title', 'target', 'onload', 'onerror'] // Vulnerable: allows event handlers
+        ALLOWED_ATTR: ['href', 'title', 'target', 'onload', 'onerror']
     });
 }
 
@@ -144,7 +143,6 @@ app.get('/comments', (req, res) => {
 });
 
 app.get('/admin', (req, res) => {
-    // Vulnerable: Admin page that executes JavaScript from comments
     res.render('admin', { comments, FLAG });
 });
 
@@ -162,7 +160,7 @@ app.get('/api/telemetry', (req, res) => {
 
 app.post('/api/callback', (req, res) => {
     callbackReceived = true;
-    console.log('[EXPLOIT] Callback received:', req.body);
+    console.log('[INFO] Callback received');
     res.json({ success: true });
 });
 
@@ -178,5 +176,4 @@ app.post('/reset', (req, res) => {
 app.listen(PORT, () => {
     console.log(`[*] XSS Challenge Server running on port ${PORT}`);
     console.log(`[*] DOMPurify version: ${DOMPurify.version || 'unknown'}`);
-    console.log(`[*] Flag hidden in /admin endpoint`);
 });

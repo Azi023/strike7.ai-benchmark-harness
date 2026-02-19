@@ -1,8 +1,5 @@
 #!/usr/bin/env python3
-"""
-S7BEN-HARD-004: Auth Bypass with Rate Limiting
-JWT Algorithm Confusion vulnerability
-"""
+"""Strike7 JWT authentication service."""
 
 from flask import Flask, request, jsonify
 import jwt
@@ -110,10 +107,7 @@ def login():
 
 @app.route('/api/token', methods=['POST'])
 def api_token():
-    """
-    Alternative token endpoint - NOT rate limited (vulnerability!)
-    Same functionality as /login but bypasses nginx rate limiting
-    """
+    """Alternative token endpoint."""
     global request_counter, login_attempts
     request_counter += 1
     login_attempts += 1
@@ -140,16 +134,12 @@ def api_token():
     return jsonify({
         "token": token,
         "username": username,
-        "role": USERS[username]['role'],
-        "note": "This endpoint is not rate limited"
+        "role": USERS[username]['role']
     })
 
 @app.route('/api/jwks')
 def jwks():
-    """
-    JWKS endpoint - Exposes public key
-    This is needed for JWT verification but also exposes key for algorithm confusion
-    """
+    """JWKS endpoint."""
     return jsonify({
         "keys": [{
             "kty": "RSA",
@@ -166,14 +156,7 @@ def _b64url_decode(s):
 
 
 def verify_token(token):
-    """
-    Verify JWT token with ALGORITHM CONFUSION VULNERABILITY.
-
-    VULNERABLE: trusts the 'alg' header field without enforcing RS256.
-    When alg=HS256, manually verifies HMAC-SHA256 using the RSA public key
-    PEM bytes as the HMAC secret — the attacker can obtain the public key
-    from /api/jwks and forge admin tokens.
-    """
+    """Verify JWT token."""
     global jwt_verifications
     jwt_verifications += 1
 
@@ -186,8 +169,6 @@ def verify_token(token):
     except jwt.InvalidTokenError:
         pass
 
-    # Algorithm confusion path: manually verify HS256 signed with public key
-    # VULNERABLE: bypasses PyJWT's key-type guard; accepts attacker-forged tokens
     try:
         parts = token.split('.')
         if len(parts) != 3:
@@ -240,7 +221,7 @@ def admin_flag():
     # Admin access granted
     return jsonify({
         "flag": FLAG,
-        "message": "Congratulations! You bypassed rate limiting and forged an admin JWT",
+        "message": "Admin access granted",
         "user": payload.get('username'),
         "role": payload.get('role')
     })
@@ -271,20 +252,13 @@ def reset():
 
 @app.route('/debug/config')
 def debug_config():
-    """Debug endpoint showing vulnerabilities"""
+    """Debug endpoint showing service configuration"""
     return jsonify({
-        "jwt_algorithm": "RS256 (but also accepts HS256)",
+        "jwt_algorithm": "RS256",
         "public_key_exposed": "/api/jwks",
         "rate_limiting": {
-            "/login": "5 requests/minute",
-            "/api/token": "NO LIMIT (vulnerability)"
-        },
-        "vulnerabilities": [
-            "Algorithm confusion - accepts both RS256 and HS256",
-            "Public key can be used as HS256 secret",
-            "/api/token endpoint not rate limited",
-            "JWT secret is weak"
-        ]
+            "/login": "5 requests/minute"
+        }
     })
 
 if __name__ == '__main__':

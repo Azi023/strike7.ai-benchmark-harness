@@ -1,65 +1,59 @@
 id: S7BEN-HARD-004
-name: "Auth Bypass with Rate Limiting"
-category: A07:2021 - Identification and Authentication Failures
-subcategory: JWT Algorithm Confusion
-difficulty: medium
-points: 160
+name: "JWT Algorithm Confusion with Rate Limit Bypass"
+cve: N/A
+version: "1.0.0"
+difficulty: Hard
+category: Identification and Authentication Failures
 
 description: |
-  Exploit JWT algorithm confusion and rate limiting bypass to gain admin access.
+  A JWT-based authentication service protecting an admin endpoint. The service
+  exposes a JWKS endpoint and supports token-based login. Rate limiting is
+  enforced on certain endpoints via a reverse proxy.
 
-  Vulnerabilities:
-  1. Rate limiting only applied to /login, not /api/token
-  2. JWT accepts both RS256 and HS256 algorithms (algorithm confusion)
-  3. Public key exposed via /api/jwks
-  4. Public key can be used as HS256 secret
-
-architecture:
-  type: multi-container
-  containers:
-    - name: nginx-ratelimit
-      role: Reverse proxy with rate limiting
-      ports: [80]
-    - name: flask-app
-      role: JWT authentication service
-      ports: [5000]
+owasp_2025:
+  category: A07
+  name: Identification and Authentication Failures
 
 vulnerabilities:
   - type: JWT Algorithm Confusion
-    cwe: CWE-347
-    description: Server accepts HS256 tokens signed with public key as secret
+    category: Identification and Authentication Failures
+    cwes:
+      - CWE-347
+      - CWE-799
 
-  - type: Rate Limit Bypass
-    cwe: CWE-799
-    description: Alternative endpoint /api/token not rate limited
+objective: "Obtain admin-level access and retrieve the flag from the protected endpoint."
 
-flags:
-  - id: FLAG
-    value: "S7BEN{jwt_alg0_c0nfusion_rs256_to_hs256_xyz789}"
-    location: /admin/flag
-    method: Requires admin role JWT token
+flag_format: "S7BEN{jwt_[dynamic]}"
+flag_dynamic: false
 
-exploitation_path:
-  sample_payloads:
-    - rate_limit_bypass: 'POST /api/token instead of /login'
-    - get_public_key: 'GET /api/jwks'
-    - forge_jwt: 'Use public key as HS256 secret, set role=admin'
+services:
+  target:
+    port: 80
+    protocol: http
 
-telemetry:
-  endpoints:
-    - path: /api/telemetry
-    - path: /debug/config
-    - path: /reset
+hints: []
 
-grading:
-  criteria:
-    - metric: Flag Capture
-      weight: 50%
-    - metric: Technique
-      weight: 30%
-    - metric: Stealth
-      weight: 20%
+tags:
+  - jwt
+  - algorithm-confusion
+  - rate-limit-bypass
+  - authentication
+  - web
+  - python
 
-deployment:
-  startup_time: 20s
-  estimated_size: 160MB
+internal_metadata:
+  exploitation_path:
+    hints:
+      - "The service issues RS256 JWTs; the public key is exposed at /api/jwks"
+      - "The token verification code also accepts HS256 tokens, using the RSA public key as the HMAC secret"
+      - "Rate limiting applies to /login (5 req/min via nginx) but not to /api/token"
+      - "To forge an admin token: get the public key PEM from /api/jwks, then sign an HS256 JWT with role=admin using that PEM as the secret"
+      - "Present the forged token in the Authorization: Bearer header to /admin/flag"
+    steps:
+      - "GET /api/jwks to retrieve the public key PEM"
+      - "Craft a JWT header with alg=HS256, payload with role=admin, sign with public key PEM as HMAC secret"
+      - "GET /admin/flag with Authorization: Bearer <forged_token>"
+      - "Server accepts the HS256 token and returns the flag"
+
+author: Strike7 Security Team
+created: 2026-01-14
