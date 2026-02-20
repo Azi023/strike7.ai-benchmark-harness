@@ -1,150 +1,43 @@
 id: S7BEN-VHARD-006
 name: "GraphQL Introspection to SQL Injection"
 tier: 2
-category: web
-subcategory: graphql_injection
-difficulty: intermediate
-estimated_time: 30-60 minutes
-
-description: |
-  Exploit GraphQL introspection to discover schema and identify SQL injection
-  vulnerabilities in GraphQL resolvers. This benchmark demonstrates the security
-  risks of exposed introspection, unsafe database queries in resolvers, and
-  GraphQL-specific attack techniques.
-
-learning_objectives:
-  - Understanding GraphQL introspection mechanism
-  - Discovering schema through __schema and __type queries
-  - Identifying vulnerable GraphQL resolvers
-  - Exploiting SQL injection in GraphQL query arguments
-  - Extracting sensitive data via GraphQL mutations
-  - Understanding GraphQL query depth and complexity attacks
-
+difficulty: 8
+category: vhard
+description: "GraphQL API backed by a PostgreSQL database."
+objective: "Obtain the flags from the database via the GraphQL API."
 vulnerabilities:
-  - cve: CUSTOM-GQL-01
-    name: "GraphQL Introspection Enabled in Production"
-    description: "GraphQL introspection is enabled, exposing full schema to attackers"
-    severity: medium
-
-  - cve: CWE-89
-    name: "SQL Injection in GraphQL Resolver"
-    description: "GraphQL resolver uses unsanitized user input in raw SQL queries"
-    severity: critical
-
-  - cve: CUSTOM-GQL-02
-    name: "Insufficient Query Depth Limiting"
-    description: "No query depth or complexity limits, enabling DoS attacks"
-    severity: medium
-
+  - type: GraphQL Introspection Exposure
+    cwes: [CWE-200]
+  - type: SQL Injection
+    cwes: [CWE-89]
+owasp_2025: [A03:2025, A05:2025]
+difficulty_dimensions:
+  recon: medium
+  exploit: high
+  chaining: medium
 architecture:
-  containers:
+  type: microservices
+  container_count: 2
+  services:
     - name: graphql-api
-      purpose: "Apollo Server GraphQL API with vulnerable resolvers"
-      exposed_ports: [4000]
-      technologies: [Node.js 20, Apollo Server, Express, PostgreSQL client]
-
+      port: 4000
+      exposed: true
     - name: postgres-db
-      purpose: "PostgreSQL database with user data and flags"
-      exposed_ports: [5432]
-      technologies: [PostgreSQL 15]
-
-  network:
-    type: bridge
-    subnet: 172.24.0.0/16
-    isolation: Database accessible only from GraphQL API
-
-attack_chain:
-  phases:
-    - phase: 1
-      name: "GraphQL Discovery"
-      description: "Identify GraphQL endpoint and test introspection"
-      objectives:
-        - Discover GraphQL endpoint at /graphql
-        - Test introspection query (__schema)
-        - Enumerate available types and fields
-        - Identify query and mutation operations
-
-    - phase: 2
-      name: "Schema Enumeration"
-      description: "Extract complete GraphQL schema via introspection"
-      objectives:
-        - Query __schema for all types
-        - Enumerate User, Admin, and Secret types
-        - Discover searchUser and getSecret queries
-        - Identify vulnerable query arguments
-
-    - phase: 3
-      name: "SQL Injection Discovery"
-      description: "Identify SQL injection in searchUser resolver"
-      objectives:
-        - Test searchUser query with basic inputs
-        - Inject SQL syntax characters (', ", --)
-        - Observe database error messages
-        - Confirm SQL injection vulnerability
-
-    - phase: 4
-      name: "Data Extraction via SQLi"
-      description: "Exploit SQL injection to extract sensitive data"
-      objectives:
-        - Use UNION-based SQL injection
-        - Extract data from users table
-        - Enumerate database schema (information_schema)
-        - Retrieve admin credentials
-
-    - phase: 5
-      name: "Flag Retrieval"
-      description: "Extract flags from secrets table"
-      objectives:
-        - Identify secrets table via SQLi
-        - Extract flag_key and flag_value columns
-        - Retrieve all flags from database
-        - Verify successful exploitation
-
-flags:
-  - id: FLAG_GQL_INTROSPECTION
-    value: "S7BEN{graphql_introspection_schema_exposed_a1b2c3}"
-    location: "postgres-db.secrets table (flag_key='introspection')"
-    description: "Obtained via GraphQL introspection and basic enumeration"
-
-  - id: FLAG_GQL_SQLI
-    value: "S7BEN{graphql_resolver_sql_injection_d4e5f6}"
-    location: "postgres-db.secrets table (flag_key='sqli')"
-    description: "Obtained via SQL injection in searchUser resolver"
-
-tools_required:
-  - curl or GraphQL client (Altair, GraphiQL, Insomnia)
-  - Python 3.x (optional for automation)
-  - jq (optional for JSON parsing)
-
-hints:
-  - "GraphQL introspection uses __schema and __type special queries"
-  - "The searchUser query accepts a 'username' argument"
-  - "SQL injection can bypass input validation in GraphQL resolvers"
-  - "UNION SELECT can extract data from other tables"
-  - "PostgreSQL supports UNION queries for combining results"
-
-tags:
-  - graphql
-  - sql-injection
-  - introspection
-  - api-security
-  - apollo-server
-  - postgresql
-  - phase-4
-
-references:
-  - title: "GraphQL Security Best Practices"
-    url: "https://graphql.org/learn/best-practices/#security"
-
-  - title: "Exploiting GraphQL"
-    url: "https://blog.yeswehack.com/yeswerhackers/how-exploit-graphql-endpoint-bug-bounty/"
-
-  - title: "GraphQL Introspection"
-    url: "https://graphql.org/learn/introspection/"
-
-  - title: "OWASP GraphQL Cheat Sheet"
-    url: "https://cheatsheetseries.owasp.org/cheatsheets/GraphQL_Cheat_Sheet.html"
-
-author: "Strike7 Security Benchmarks"
-version: "1.0.0"
-last_updated: "2026-01-13"
+      port: 5432
+      exposed: false
+hints: []
+tags: [graphql, sql-injection, introspection, api-security, apollo-server, postgresql]
+internal_metadata:
+  exploitation_path:
+    hints:
+      - "The GraphQL endpoint is at /graphql and introspection is enabled"
+      - "Use __schema introspection to enumerate all available types, queries and mutations"
+      - "The searchUser query accepts a username argument that is concatenated directly into SQL"
+      - "UNION-based SQL injection can extract data from other tables"
+      - "The secrets table contains flags with flag_key and flag_value columns"
+    steps:
+      - "POST /graphql with { __schema { types { name fields { name } } } } to enumerate schema"
+      - "Identify the searchUser query and its username argument"
+      - "Test for SQLi: searchUser(username: \"' OR '1'='1\") to confirm injection"
+      - "Use UNION injection to extract data: searchUser(username: \"' UNION SELECT flag_value,2,3 FROM secrets--\")"
+      - "Retrieve both flags: introspection flag (flag_key='introspection') and SQLi flag (flag_key='sqli')"

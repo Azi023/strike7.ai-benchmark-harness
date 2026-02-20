@@ -1,155 +1,46 @@
 id: S7BEN-VHARD-004
 name: "Java Deserialization RCE"
 tier: 2
-category: web
-subcategory: deserialization
-difficulty: intermediate
-estimated_time: 45-90 minutes
-
-description: |
-  Exploit insecure Java deserialization vulnerabilities to achieve remote code execution.
-  This benchmark simulates a common enterprise Java application stack with serialized
-  session objects, vulnerable libraries, and internal services.
-
-learning_objectives:
-  - Understanding Java serialization and deserialization
-  - Identifying deserialization gadget chains
-  - Crafting malicious serialized payloads
-  - Exploiting Apache Commons Collections
-  - Remote code execution via deserialization
-  - Post-exploitation and lateral movement
-
+difficulty: 9
+category: vhard
+description: "Multi-container Java web application with session management and internal API communication."
+objective: "Obtain the flags from the web application and internal services."
 vulnerabilities:
-  - cve: CVE-2015-4852
-    name: "Apache Commons Collections Deserialization RCE"
-    description: "Insecure deserialization in Commons Collections allows arbitrary code execution"
-    severity: critical
-
-  - cve: CUSTOM-001
-    name: "Unsafe Session Deserialization"
-    description: "Application deserializes user-controlled session data without validation"
-    severity: high
-
-  - cve: CUSTOM-002
-    name: "Trust Boundary Violation"
-    description: "Internal API trusts serialized objects from external sources"
-    severity: medium
-
+  - type: Insecure Deserialization
+    cwes: [CWE-502]
+owasp_2025: [A08:2025]
+difficulty_dimensions:
+  recon: high
+  exploit: very_high
+  chaining: high
 architecture:
-  containers:
+  type: microservices
+  container_count: 3
+  services:
     - name: web-app
-      purpose: "Vulnerable Java web application with insecure session handling"
-      exposed_ports: [8080]
-      technologies: [Java 8, Spring Boot, Apache Commons Collections 3.1]
-
+      port: 8080
+      exposed: true
     - name: internal-api
-      purpose: "Internal microservice that deserializes untrusted data"
-      exposed_ports: [8081]
-      technologies: [Java 8, REST API]
-
+      port: 8081
+      exposed: false
     - name: victim-app
-      purpose: "Backend application vulnerable to RCE via deserialization"
-      technologies: [Java 8, File storage]
-
-  network:
-    type: bridge
-    subnet: 172.25.0.0/16
-    isolation: Container-to-container communication allowed
-
-attack_chain:
-  phases:
-    - phase: 1
-      name: "Reconnaissance"
-      description: "Identify serialized Java objects in HTTP responses"
-      objectives:
-        - Discover base64-encoded serialized objects
-        - Identify Java application framework
-        - Enumerate available classes
-
-    - phase: 2
-      name: "Gadget Chain Discovery"
-      description: "Identify exploitable deserialization gadget chains"
-      objectives:
-        - Detect Apache Commons Collections in classpath
-        - Identify ChainedTransformer usage
-        - Verify InvokerTransformer availability
-
-    - phase: 3
-      name: "Payload Crafting"
-      description: "Generate malicious serialized payload"
-      objectives:
-        - Use ysoserial to generate payload
-        - Craft reverse shell command
-        - Encode payload for transport
-
-    - phase: 4
-      name: "Remote Code Execution"
-      description: "Execute arbitrary code on target"
-      objectives:
-        - Deliver malicious payload
-        - Trigger deserialization
-        - Achieve RCE
-        - Extract flag from filesystem
-
-    - phase: 5
-      name: "Lateral Movement"
-      description: "Pivot to internal services"
-      objectives:
-        - Enumerate internal network
-        - Exploit internal-api deserialization
-        - Access victim-app
-        - Extract final flag
-
-flags:
-  - id: FLAG_DESER_WEB
-    value: "S7BEN{java_deserialize_web_rce_a1b2c3d4e5f6}"
-    location: "/app/flag.txt"
-    description: "Obtained after successful RCE on web-app"
-
-  - id: FLAG_DESER_INTERNAL
-    value: "S7BEN{internal_api_deserialization_g7h8i9j0k1l2}"
-    location: "/opt/api/secret.txt"
-    description: "Obtained after pivoting to internal-api"
-
-  - id: FLAG_DESER_VICTIM
-    value: "S7BEN{victim_app_full_compromise_m3n4o5p6q7r8}"
-    location: "/data/admin_flag.txt"
-    description: "Obtained after compromising victim-app"
-
-tools_required:
-  - ysoserial
-  - Java Development Kit (JDK) 8+
-  - curl or similar HTTP client
-  - Base64 encoder/decoder
-  - netcat (for reverse shell)
-
-hints:
-  - "Look for 'rO0AB' at the start of base64 strings (Java serialized object magic bytes)"
-  - "Apache Commons Collections 3.1 is vulnerable to gadget chain attacks"
-  - "Use ysoserial's CommonsCollections5 or CommonsCollections6 payload"
-  - "Session cookies may contain serialized objects"
-  - "Internal API accepts POST requests with serialized data"
-
-tags:
-  - java
-  - deserialization
-  - rce
-  - gadget-chain
-  - commons-collections
-  - ysoserial
-  - spring-boot
-  - microservices
-
-references:
-  - title: "Exploiting Insecure Deserialization Vulnerabilities"
-    url: "https://owasp.org/www-community/vulnerabilities/Deserialization_of_untrusted_data"
-
-  - title: "ysoserial - Java Deserialization Tool"
-    url: "https://github.com/frohoff/ysoserial"
-
-  - title: "Apache Commons Collections Vulnerability"
-    url: "https://commons.apache.org/proper/commons-collections/security-reports.html"
-
-author: "Strike7 Security Benchmark Suite"
-version: "1.0.0"
-last_updated: "2026-01-13"
+      exposed: false
+hints: []
+tags: [java, deserialization, rce, gadget-chain, commons-collections, spring-boot]
+internal_metadata:
+  exploitation_path:
+    hints:
+      - "The web application serializes session objects into base64-encoded cookies"
+      - "Java serialized objects start with 'rO0AB' in base64 (magic bytes 0xACED 0x0005)"
+      - "Apache Commons Collections 3.1 is on the classpath — use a CommonsCollections gadget chain"
+      - "Use ysoserial to generate deserialization payloads"
+      - "The internal API also accepts POST requests with serialized data"
+      - "The victim-app is reachable from the internal network after initial foothold"
+    steps:
+      - "Identify base64-encoded serialized objects in session cookies or HTTP responses"
+      - "Generate a payload: java -jar ysoserial.jar CommonsCollections6 'id' | base64"
+      - "Inject the malicious payload into the session cookie and make a request to trigger deserialization"
+      - "Confirm RCE and read /app/flag.txt from the web-app container"
+      - "Pivot to internal-api: POST a serialized payload to the internal API endpoint"
+      - "Read /opt/api/secret.txt after RCE on the internal API"
+      - "Reach the victim-app from the internal network and read /data/admin_flag.txt"

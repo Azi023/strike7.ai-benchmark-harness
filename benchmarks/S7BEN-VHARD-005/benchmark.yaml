@@ -1,164 +1,48 @@
 id: S7BEN-VHARD-005
 name: "Python Pickle Deserialization Chain"
 tier: 2
-category: web
-subcategory: deserialization
-difficulty: intermediate
-estimated_time: 45-90 minutes
-
-description: |
-  Exploit insecure Python pickle deserialization vulnerabilities across multiple services.
-  This benchmark demonstrates pickle-based session handling, Redis cache poisoning, and
-  Celery task queue exploitation leading to remote code execution.
-
-learning_objectives:
-  - Understanding Python pickle serialization and deserialization
-  - Identifying pickle gadget chains using __reduce__ method
-  - Exploiting pickle in session cookies
-  - Cache poisoning attacks with pickled objects
-  - Celery task queue exploitation
-  - Post-exploitation and lateral movement in Python environments
-
+difficulty: 9
+category: vhard
+description: "Flask web application with session handling, caching layer, and background task processing."
+objective: "Obtain the flags from the web application, cache, and worker services."
 vulnerabilities:
-  - cve: CUSTOM-PICKLE-01
-    name: "Insecure Pickle Session Deserialization"
-    description: "Flask application deserializes user-controlled session cookies using pickle"
-    severity: critical
-
-  - cve: CUSTOM-PICKLE-02
-    name: "Redis Cache Pickle Poisoning"
-    description: "Redis cache stores and deserializes untrusted pickled objects"
-    severity: high
-
-  - cve: CUSTOM-PICKLE-03
-    name: "Celery Task Deserialization RCE"
-    description: "Celery worker deserializes malicious pickled task payloads"
-    severity: critical
-
+  - type: Insecure Deserialization
+    cwes: [CWE-502]
+owasp_2025: [A08:2025]
+difficulty_dimensions:
+  recon: high
+  exploit: very_high
+  chaining: high
 architecture:
-  containers:
+  type: microservices
+  container_count: 3
+  services:
     - name: web-app
-      purpose: "Flask web application with pickle-based session handling"
-      exposed_ports: [5000]
-      technologies: [Python 3.11, Flask, Redis, pickle]
-
+      port: 5000
+      exposed: true
     - name: redis-cache
-      purpose: "Redis cache storing pickled session and task objects"
-      exposed_ports: [6379]
-      technologies: [Redis 7]
-
+      port: 6379
+      exposed: false
     - name: worker-service
-      purpose: "Celery worker processing pickled task queue"
-      exposed_ports: [5555]
-      technologies: [Python 3.11, Celery, Redis]
-
-  network:
-    type: bridge
-    networks:
-      - frontend-net: web-app exposed
-      - backend-net: redis-cache, worker-service internal
-    isolation: Internal services isolated from external access
-
-attack_chain:
-  phases:
-    - phase: 1
-      name: "Reconnaissance"
-      description: "Identify pickle serialization in session cookies"
-      objectives:
-        - Detect base64-encoded session cookies
-        - Identify pickle magic bytes (0x80 0x03)
-        - Enumerate application endpoints
-        - Discover Redis cache usage
-
-    - phase: 2
-      name: "Pickle Gadget Discovery"
-      description: "Craft malicious pickle payload with __reduce__ gadget"
-      objectives:
-        - Understand pickle protocol and opcode structure
-        - Craft __reduce__ payload for command execution
-        - Test pickle payload locally before injection
-        - Base64-encode payload for cookie injection
-
-    - phase: 3
-      name: "Session Cookie Exploitation"
-      description: "Inject malicious pickle into session cookie"
-      objectives:
-        - Replace legitimate session cookie with malicious payload
-        - Trigger deserialization via authenticated endpoint
-        - Achieve RCE on web-app container
-        - Extract first flag from filesystem
-
-    - phase: 4
-      name: "Redis Cache Poisoning"
-      description: "Poison Redis cache with pickled RCE payload"
-      objectives:
-        - Discover cache poisoning endpoint
-        - Inject malicious pickled object into cache
-        - Trigger cache retrieval and deserialization
-        - Access internal Redis container
-
-    - phase: 5
-      name: "Celery Task Queue Exploitation"
-      description: "Exploit Celery worker via pickled task injection"
-      objectives:
-        - Enumerate Celery task queue structure
-        - Craft malicious Celery task with pickle payload
-        - Submit task to Redis queue
-        - Trigger worker deserialization
-        - Extract final flag from worker container
-
-flags:
-  - id: FLAG_PICKLE_WEB
-    value: "S7BEN{pickle_session_cookie_rce_f1a2b3c4d5e6}"
-    location: "/app/flag.txt"
-    description: "Obtained after successful RCE via session cookie exploitation"
-
-  - id: FLAG_PICKLE_CACHE
-    value: "S7BEN{redis_cache_poisoning_pickle_g7h8i9j0k1l2}"
-    location: "/data/cache_flag.txt"
-    description: "Obtained after Redis cache poisoning attack"
-
-  - id: FLAG_PICKLE_WORKER
-    value: "S7BEN{celery_worker_task_deserialization_m3n4o5p6q7r8}"
-    location: "/worker/secret_flag.txt"
-    description: "Obtained after Celery worker task exploitation"
-
-tools_required:
-  - Python 3.x
-  - curl or similar HTTP client
-  - base64 encoder/decoder
-  - redis-cli (optional)
-  - Python pickle module
-
-hints:
-  - "Pickle magic bytes start with 0x80 0x03 or 0x80 0x04 for protocol 3/4"
-  - "The __reduce__ method can return (callable, args) for arbitrary code execution"
-  - "Session cookies may be base64-encoded pickled objects"
-  - "Redis KEYS command can enumerate cached pickle objects"
-  - "Celery uses pickle as default serializer (insecure)"
-
-tags:
-  - python
-  - pickle
-  - deserialization
-  - rce
-  - flask
-  - redis
-  - celery
-  - session-cookies
-  - cache-poisoning
-  - phase-4
-
-references:
-  - title: "Exploiting Python Pickles"
-    url: "https://davidhamann.de/2020/04/05/exploiting-python-pickle/"
-
-  - title: "Pickle Security Issues"
-    url: "https://docs.python.org/3/library/pickle.html#module-pickle"
-
-  - title: "Celery Security"
-    url: "https://docs.celeryproject.org/en/stable/userguide/security.html"
-
-author: "Strike7 Security Benchmarks"
-version: "1.0.0"
-last_updated: "2026-01-13"
+      port: 5555
+      exposed: false
+hints: []
+tags: [python, pickle, deserialization, rce, flask, redis, celery, session-cookies, cache-poisoning]
+internal_metadata:
+  exploitation_path:
+    hints:
+      - "The application uses pickle to serialize and deserialize session objects"
+      - "Pickle magic bytes are 0x80 0x03 or 0x80 0x04 for protocol 3/4"
+      - "The __reduce__ method enables arbitrary code execution during deserialization"
+      - "Session cookies are base64-encoded pickled objects controlled by the client"
+      - "The Redis cache stores pickled objects that can be poisoned via a cache write endpoint"
+      - "Celery uses pickle as its task serializer, enabling RCE via task queue injection"
+    steps:
+      - "Craft a malicious pickle payload using __reduce__: os.system('id') or subprocess call"
+      - "Base64-encode the payload and inject it as the session cookie"
+      - "Make an authenticated request to trigger session deserialization and achieve RCE on web-app"
+      - "Read /app/flag.txt from the web-app container"
+      - "Discover the cache poisoning endpoint — POST a pickled payload to cache storage"
+      - "Trigger cache retrieval to deserialize the poisoned object and read /data/cache_flag.txt"
+      - "Craft a malicious Celery task dict with a pickled args payload and publish to the Redis queue"
+      - "The worker deserializes the task and executes the payload — read /worker/secret_flag.txt"
