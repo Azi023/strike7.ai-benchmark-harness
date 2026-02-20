@@ -1,8 +1,6 @@
 /**
  * SBEN-GQL-01: GraphQL API with SQL Injection Vulnerabilities
  *
- * INTENTIONALLY VULNERABLE CODE - DO NOT USE IN PRODUCTION
- *
  * This Apollo Server demonstrates:
  * 1. Enabled introspection in production (information disclosure)
  * 2. SQL injection in GraphQL resolvers (critical vulnerability)
@@ -45,15 +43,8 @@ const resolvers = {
       }));
     },
 
-    // CRITICAL VULNERABILITY: SQL Injection in searchUser
-    // User input is directly concatenated into SQL query
     searchUser: async (_, { username }) => {
-      console.log(`[VULNERABLE] Searching for user: ${username}`);
-
-      // UNSAFE: Direct string concatenation - SQL INJECTION VULNERABILITY
       const query = `SELECT * FROM users WHERE username LIKE '%${username}%'`;
-
-      console.log(`[VULNERABLE] Executing SQL: ${query}`);
 
       try {
         const result = await pool.query(query);
@@ -101,14 +92,8 @@ const resolvers = {
       }));
     },
 
-    // CRITICAL VULNERABILITY: SQL Injection in getSecret
     getSecret: async (_, { flagKey }) => {
-      console.log(`[VULNERABLE] Getting secret: ${flagKey}`);
-
-      // UNSAFE: Direct string concatenation
       const query = `SELECT * FROM secrets WHERE flag_key = '${flagKey}'`;
-
-      console.log(`[VULNERABLE] Executing SQL: ${query}`);
 
       try {
         const result = await pool.query(query);
@@ -160,14 +145,8 @@ const resolvers = {
       };
     },
 
-    // CRITICAL VULNERABILITY: SQL Injection in deleteUser
     deleteUser: async (_, { username }) => {
-      console.log(`[VULNERABLE] Deleting user: ${username}`);
-
-      // UNSAFE: Direct string concatenation
       const query = `DELETE FROM users WHERE username = '${username}'`;
-
-      console.log(`[VULNERABLE] Executing SQL: ${query}`);
 
       try {
         const result = await pool.query(query);
@@ -183,16 +162,11 @@ const resolvers = {
 async function startServer() {
   const app = express();
 
-  // Create Apollo Server with INSECURE configuration
+  // Create Apollo Server configuration
   const server = new ApolloServer({
     typeDefs,
     resolvers,
-    // VULNERABILITY: Introspection enabled in production
     introspection: true,
-    // VULNERABILITY: Playground enabled in production
-    // Note: Apollo Server 4 uses Apollo Sandbox instead
-    // VULNERABILITY: No query complexity/depth limiting
-    // VULNERABILITY: No rate limiting
   });
 
   await server.start();
@@ -313,8 +287,7 @@ query SearchUser {
 
   app.listen(PORT, () => {
     console.log(`🚀 GraphQL API running at http://localhost:${PORT}/graphql`);
-    console.log(`⚠️  Introspection: ENABLED (VULNERABLE)`);
-    console.log(`⚠️  SQL Injection: searchUser, getSecret, deleteUser (VULNERABLE)`);
+    console.log(`Introspection: ENABLED`);
     console.log(`📍 Health check: http://localhost:${PORT}/health`);
   });
 }

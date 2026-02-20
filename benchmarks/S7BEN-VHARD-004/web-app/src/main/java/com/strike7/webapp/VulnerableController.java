@@ -56,7 +56,6 @@ public class VulnerableController {
             UserSession session = new UserSession(username, "admin", true);
 
             try {
-                // VULNERABLE: Serialize session object to cookie
                 String serialized = serializeObject(session);
                 Cookie sessionCookie = new Cookie("SESSION", serialized);
                 sessionCookie.setPath("/");
@@ -67,7 +66,6 @@ public class VulnerableController {
                 result.put("message", "Login successful");
                 result.put("username", username);
                 result.put("session", serialized);
-                result.put("hint", "Session data is serialized. Check the SESSION cookie!");
 
                 return ResponseEntity.ok(result);
             } catch (Exception e) {
@@ -93,7 +91,6 @@ public class VulnerableController {
         for (Cookie cookie : cookies) {
             if ("SESSION".equals(cookie.getName())) {
                 try {
-                    // VULNERABLE: Deserialize user-controlled data without validation
                     Object sessionObj = deserializeObject(cookie.getValue());
 
                     if (sessionObj instanceof UserSession) {
@@ -129,21 +126,18 @@ public class VulnerableController {
         }
 
         try {
-            // VULNERABLE: Deserialize arbitrary base64-encoded data
             Object obj = deserializeObject(data);
 
             Map<String, Object> result = new HashMap<>();
             result.put("success", true);
             result.put("message", "Data processed successfully");
             result.put("type", obj.getClass().getName());
-            result.put("hint", "This endpoint deserializes any base64-encoded Java object!");
 
             return ResponseEntity.ok(result);
         } catch (Exception e) {
             Map<String, Object> error = new HashMap<>();
             error.put("error", "Deserialization failed");
             error.put("message", e.getMessage());
-            error.put("hint", "Make sure the data is a base64-encoded Java serialized object");
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
         }
     }
@@ -158,7 +152,6 @@ public class VulnerableController {
             Map<String, Object> result = new HashMap<>();
             result.put("sample_session", serialized);
             result.put("note", "This is a serialized UserSession object");
-            result.put("hint", "Java serialized objects start with 'rO0AB' in base64");
 
             return ResponseEntity.ok(result);
         } catch (Exception e) {
@@ -174,7 +167,7 @@ public class VulnerableController {
             String flag = new String(Files.readAllBytes(Paths.get("/app/flag.txt")));
             Map<String, Object> result = new HashMap<>();
             result.put("flag", flag.trim());
-            result.put("message", "Congratulations! You achieved RCE via deserialization");
+            result.put("message", "Flag retrieved");
             return ResponseEntity.ok(result);
         } catch (Exception e) {
             Map<String, Object> error = new HashMap<>();
@@ -183,7 +176,6 @@ public class VulnerableController {
         }
     }
 
-    // VULNERABLE: Unsafe serialization
     private String serializeObject(Object obj) throws IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         ObjectOutputStream oos = new ObjectOutputStream(baos);
@@ -192,7 +184,6 @@ public class VulnerableController {
         return Base64.encodeBase64String(baos.toByteArray());
     }
 
-    // VULNERABLE: Unsafe deserialization - NO INPUT VALIDATION
     private Object deserializeObject(String base64Data) throws IOException, ClassNotFoundException {
         byte[] data = Base64.decodeBase64(base64Data);
         ByteArrayInputStream bais = new ByteArrayInputStream(data);

@@ -65,10 +65,7 @@ def list_users():
 
 @app.route('/api/credentials')
 def list_credentials():
-    """
-    List stored credentials - VULNERABLE ENDPOINT
-    Should require authentication but doesn't
-    """
+    """List stored credentials."""
     try:
         conn = get_db_connection()
         cur = conn.cursor()

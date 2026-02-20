@@ -27,7 +27,6 @@ public class InternalAPI {
                 }
 
                 try {
-                    // VULNERABLE: Deserialize without validation
                     byte[] data = Base64.getDecoder().decode(body.toString());
                     ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(data));
                     Object obj = ois.readObject();

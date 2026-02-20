@@ -70,7 +70,6 @@ HTML_TEMPLATE = """
 def is_private_ip(hostname):
     """
     Check if hostname resolves to private IP
-    VULNERABILITY: Only checks resolved IP, not all possible representations
     """
     try:
         ip = socket.gethostbyname(hostname)
@@ -82,14 +81,7 @@ def is_private_ip(hostname):
 
 def basic_url_filter(url):
     """
-    Basic URL filtering - VULNERABLE to multiple bypass techniques
-
-    VULNERABILITIES:
-    1. Only checks lowercase hostname
-    2. Doesn't handle URL encoding
-    3. Doesn't check IP address formats (hex, octal, decimal)
-    4. Vulnerable to @ symbol confusion
-    5. Doesn't validate after redirects
+    Basic URL filtering
     """
 
     # Parse URL using urllib (validation parser)
@@ -103,7 +95,7 @@ def basic_url_filter(url):
     if not hostname:
         return False, "No hostname in URL"
 
-    # Convert to lowercase for comparison (VULNERABILITY: case-sensitive bypass)
+    # Convert to lowercase for comparison
     hostname_lower = hostname.lower()
 
     # Blocked hostnames (simple string matching)
@@ -123,17 +115,13 @@ def basic_url_filter(url):
         if blocked in hostname_lower:
             return False, f"Blocked hostname: {blocked}"
 
-    # Check if resolves to private IP (VULNERABILITY: timing-based, can bypass with DNS rebinding)
+    # Check if resolves to private IP
     if is_private_ip(hostname):
         return False, f"Private IP address detected"
 
     # Block certain schemes
     if parsed.scheme not in ['http', 'https']:
         return False, f"Only HTTP/HTTPS allowed"
-
-    # VULNERABILITY: Doesn't check for CRLF injection in URL
-    # VULNERABILITY: Doesn't validate redirect targets
-    # VULNERABILITY: Doesn't check decimal/hex/octal IP formats
 
     return True, "URL passed validation"
 
@@ -153,14 +141,7 @@ def health():
 @app.route('/fetch', methods=['POST', 'GET'])
 def fetch_url():
     """
-    Fetch URL endpoint - VULNERABLE TO SSRF
-
-    Bypass techniques:
-    1. IP obfuscation (hex, octal, decimal)
-    2. URL parser confusion (@ symbol)
-    3. Case variations
-    4. CRLF header injection
-    5. Redirect chaining
+    Fetch URL endpoint
     """
 
     # Get URL from request
@@ -174,7 +155,7 @@ def fetch_url():
             return jsonify({"error": "URL parameter required"}), 400
         return render_template_string(HTML_TEMPLATE, error="URL parameter required")
 
-    # Apply basic filter (VULNERABLE)
+    # Apply basic filter
     allowed, message = basic_url_filter(url)
 
     if not allowed:
@@ -183,22 +164,18 @@ def fetch_url():
         return render_template_string(HTML_TEMPLATE, error=f"URL blocked: {message}")
 
     try:
-        # Make request (VULNERABILITY: uses requests library which has different URL parser than urllib)
-        # This creates a parser confusion vulnerability
+        # Make request
         response = requests.get(
             url,
             timeout=10,
-            allow_redirects=True,  # VULNERABILITY: Follows redirects without revalidation
+            allow_redirects=True,
             headers={
                 'User-Agent': 'URLFetcherBot/1.0'
             }
         )
 
-        # VULNERABILITY: Returns full response (information disclosure)
-        # In production, this should be sanitized
         content = response.text
 
-        # VULNERABILITY: Response size limit can be bypassed with precise path targeting
         max_response_size = 2000
         if len(content) > max_response_size:
             content = content[:max_response_size] + f"\n\n[... truncated {len(content) - max_response_size} bytes ...]"

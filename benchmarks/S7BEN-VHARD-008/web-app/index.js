@@ -40,7 +40,7 @@ const userSchema = new mongoose.Schema({
     email: String,
     role: String,
     created_at: Date
-}, { strict: false }); // VULNERABILITY: strict: false allows injection
+}, { strict: false });
 
 const User = mongoose.model('User', userSchema, 'users');
 
@@ -85,8 +85,7 @@ app.get('/login', (req, res) => {
     res.render('login', { error: null });
 });
 
-// VULNERABILITY 1: Authentication Bypass via $ne Operator
-// POST /api/login - Vulnerable to NoSQL injection
+// POST /api/login
 app.post('/api/login', async (req, res) => {
     try {
         const { username, password } = req.body;
@@ -130,8 +129,7 @@ app.post('/api/login', async (req, res) => {
     }
 });
 
-// VULNERABILITY 2: Data Extraction via $regex Operator
-// POST /api/search - Vulnerable to regex injection
+// POST /api/search
 app.post('/api/search', async (req, res) => {
     try {
         const { username } = req.body;
@@ -157,8 +155,7 @@ app.post('/api/search', async (req, res) => {
     }
 });
 
-// VULNERABILITY 3: JavaScript Injection in $where Clause
-// POST /api/query - Vulnerable to $where JavaScript injection
+// POST /api/query
 app.post('/api/query', async (req, res) => {
     try {
         const { filter } = req.body;

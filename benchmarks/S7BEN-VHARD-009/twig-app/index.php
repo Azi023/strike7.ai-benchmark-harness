@@ -14,7 +14,7 @@ if (!file_exists($flagFile)) {
 $loader = new \Twig\Loader\ArrayLoader([]);
 $twig = new \Twig\Environment($loader, [
     'debug' => true,
-    'autoescape' => false  // VULNERABILITY: Autoescape disabled
+    'autoescape' => false
 ]);
 
 // Enable string template loading (required for SSTI)

@@ -80,7 +80,6 @@ if __name__ == '__main__':
     with open(FLAG_FILE, 'w') as f:
         f.write(flag)
 
-    print(f"[INTERNAL-API] Flag created at: {FLAG_FILE}")
     print(f"[INTERNAL-API] Starting internal API service...")
 
     app.run(host='0.0.0.0', port=5000, debug=False)

@@ -5,7 +5,7 @@ require_once __DIR__ . '/vendor/autoload.php';
 $loader = new \Twig\Loader\ArrayLoader([]);
 $twig = new \Twig\Environment($loader, [
     'debug' => true,
-    'autoescape' => false  // VULNERABILITY: Autoescape disabled
+    'autoescape' => false
 ]);
 
 $name = isset($_GET['name']) ? $_GET['name'] : '';
@@ -15,7 +15,6 @@ if (empty($name)) {
     exit;
 }
 
-// VULNERABILITY: Direct template rendering with user input
 $template = "Hello, " . $name . "!";
 
 try {

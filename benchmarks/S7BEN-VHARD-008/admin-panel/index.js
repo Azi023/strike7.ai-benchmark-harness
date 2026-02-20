@@ -116,7 +116,6 @@ app.get('/health', (req, res) => {
 app.listen(PORT, '0.0.0.0', () => {
     console.log(`🚀 Admin Panel running on port ${PORT}`);
     console.log(`📍 Health check: http://localhost:${PORT}/health`);
-    console.log(`🔐 Admin Flag: ${FLAG_ADMIN}`);
 });
 
 // Graceful shutdown

@@ -152,8 +152,6 @@ def greet():
     if not name:
         return render_template_string(GREETING_TEMPLATE, greeting_output="Please enter a name!", user_input="")
 
-    # VULNERABILITY: Direct template rendering with user input
-    # This allows Server-Side Template Injection (SSTI)
     greeting = f"Hello, {name}!"  # User input embedded in string
 
     try:
@@ -189,7 +187,6 @@ if __name__ == '__main__':
         f.write(flag_content)
 
     print(f"🚀 Jinja2 SSTI App running on port 5000")
-    print(f"🚩 Flag stored at: {FLAG_FILE}")
     print(f"⚠️  WARNING: This application contains intentional SSTI vulnerabilities")
 
     app.run(host='0.0.0.0', port=5000, debug=False)

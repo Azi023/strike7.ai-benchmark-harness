@@ -11,7 +11,7 @@ const FLAG_FILE = '/app/flag.txt';
 
 // Configure Nunjucks
 const env = nunjucks.configure('views', {
-    autoescape: false,  // VULNERABILITY: Autoescape disabled
+    autoescape: false,
     express: app
 });
 
@@ -164,7 +164,6 @@ app.get('/greet', (req, res) => {
         return res.send('<h1>Please enter a name!</h1><a href="/">Go back</a>');
     }
 
-    // VULNERABILITY: Direct template rendering with user input
     const template = `Hello, ${name}!`;
 
     try {
@@ -276,6 +275,5 @@ app.listen(PORT, '0.0.0.0', () => {
     fs.writeFileSync(FLAG_FILE, flagContent);
 
     console.log(`🚀 Nunjucks SSTI App running on port ${PORT}`);
-    console.log(`🚩 Flag stored at: ${FLAG_FILE}`);
     console.log(`⚠️  WARNING: This application contains intentional SSTI vulnerabilities`);
 });

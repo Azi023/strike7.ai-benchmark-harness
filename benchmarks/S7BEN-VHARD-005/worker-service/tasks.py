@@ -1,8 +1,6 @@
 """
 S7BEN-VHARD-005: Celery Worker Service
 
-INTENTIONALLY VULNERABLE CODE - DO NOT USE IN PRODUCTION
-
 This Celery worker demonstrates pickle deserialization vulnerabilities
 in asynchronous task processing.
 
@@ -20,9 +18,9 @@ RESULT_BACKEND = os.environ.get('CELERY_RESULT_BACKEND', 'redis://redis-cache:63
 
 app = Celery('tasks', broker=BROKER_URL, backend=RESULT_BACKEND)
 
-# CRITICAL: Using pickle as task serializer (insecure)
+# Using pickle as task serializer
 app.conf.update(
-    task_serializer='pickle',  # VULNERABLE: Allows arbitrary code execution
+    task_serializer='pickle',
     result_serializer='pickle',
     accept_content=['pickle', 'json'],  # Accepts pickle content
     timezone='UTC',
@@ -36,9 +34,6 @@ FLAG_FILE = '/worker/secret_flag.txt'
 def process_data(*args, **kwargs):
     """
     Sample Celery task that processes data
-
-    VULNERABILITY: If args contain pickled objects with __reduce__ gadgets,
-    they will be executed during deserialization
     """
     print(f"[WORKER] Processing task with args: {args}, kwargs: {kwargs}")
 
@@ -55,8 +50,6 @@ def process_data(*args, **kwargs):
 def compute_hash(data):
     """
     Task that computes hash of data
-
-    VULNERABILITY: 'data' parameter is deserialized using pickle
     """
     import hashlib
 
@@ -107,8 +100,7 @@ if __name__ == '__main__':
     with open(FLAG_FILE, 'w') as f:
         f.write(flag)
 
-    print("[WORKER] Starting Celery worker with PICKLE serialization (VULNERABLE)")
-    print("[WORKER] Flag created at:", FLAG_FILE)
+    print("[WORKER] Starting Celery worker")
 
     # Start worker
     app.worker_main(['worker', '--loglevel=info'])

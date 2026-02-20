@@ -16,7 +16,6 @@ app.get('/health', (req, res) => {
 
 /**
  * Open redirect endpoint
- * VULNERABILITY: Redirects to user-controlled URL without validation
  * Can be used to bypass SSRF filters through redirect chaining
  */
 app.get('/redirect', (req, res) => {
@@ -29,14 +28,12 @@ app.get('/redirect', (req, res) => {
         });
     }
 
-    // VULNERABILITY: No validation of redirect target
     // Allows redirecting to internal services
     res.redirect(302, target);
 });
 
 /**
  * Service discovery endpoint
- * VULNERABILITY: Information disclosure about internal services
  */
 app.get('/services', (req, res) => {
     res.json({

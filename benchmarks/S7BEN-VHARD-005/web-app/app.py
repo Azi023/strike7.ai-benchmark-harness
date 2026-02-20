@@ -1,8 +1,6 @@
 """
 S7BEN-VHARD-005: Python Pickle Deserialization Chain - Web Application
 
-INTENTIONALLY VULNERABLE CODE - DO NOT USE IN PRODUCTION
-
 This Flask application demonstrates multiple pickle deserialization vulnerabilities:
 1. Session cookie deserialization without validation
 2. Redis cache deserialization of untrusted data
@@ -48,8 +46,7 @@ class UserSession:
 
 def serialize_session(session_obj):
     """
-    VULNERABILITY: Uses pickle to serialize session objects
-    Pickle is inherently insecure for untrusted data
+    Serialize session objects using pickle
     """
     pickled = pickle.dumps(session_obj)
     return base64.b64encode(pickled).decode('utf-8')
@@ -57,8 +54,7 @@ def serialize_session(session_obj):
 
 def deserialize_session(session_str):
     """
-    CRITICAL VULNERABILITY: Deserializes user-controlled pickle data
-    NO INPUT VALIDATION - allows arbitrary code execution via __reduce__
+    Deserialize session data
     """
     try:
         pickled_data = base64.b64decode(session_str.encode('utf-8'))
@@ -72,7 +68,7 @@ def deserialize_session(session_str):
 
 def cache_set(key, value, ttl=3600):
     """
-    VULNERABILITY: Stores pickled objects in Redis cache
+    Store objects in Redis cache
     """
     pickled_value = pickle.dumps(value)
     redis_client.setex(key, ttl, pickled_value)
@@ -80,7 +76,7 @@ def cache_set(key, value, ttl=3600):
 
 def cache_get(key):
     """
-    CRITICAL VULNERABILITY: Deserializes cached pickle data without validation
+    Retrieve cached data
     """
     try:
         pickled_data = redis_client.get(key)
@@ -134,8 +130,7 @@ def login():
 @app.route('/api/profile')
 def profile():
     """
-    VULNERABILITY: Deserializes session cookie using pickle
-    Endpoint triggers the deserialization of user-controlled session data
+    Returns user profile from session
     """
     session_cookie = request.cookies.get('session')
 
@@ -159,8 +154,7 @@ def profile():
 @app.route('/api/cache/set', methods=['POST'])
 def cache_set_endpoint():
     """
-    VULNERABILITY: Allows users to store arbitrary data in cache
-    Data is pickled before storage, enabling cache poisoning attacks
+    Store data in cache
     """
     data = request.get_json()
     key = data.get('key')
@@ -171,7 +165,6 @@ def cache_set_endpoint():
         return jsonify({'error': 'Missing key or value'}), 400
 
     try:
-        # VULNERABLE: User-controlled data is pickled and cached
         cache_set(key, value, ttl)
         return jsonify({
             'success': True,
@@ -185,8 +178,7 @@ def cache_set_endpoint():
 @app.route('/api/cache/get/<key>')
 def cache_get_endpoint(key):
     """
-    CRITICAL VULNERABILITY: Retrieves and deserializes cached pickle data
-    If cache has been poisoned, this triggers RCE
+    Retrieve data from cache
     """
     try:
         # UNSAFE: Deserializing potentially poisoned cache data
@@ -207,8 +199,7 @@ def cache_get_endpoint(key):
 @app.route('/api/task/submit', methods=['POST'])
 def submit_task():
     """
-    VULNERABILITY: Submits Celery tasks with pickled payloads
-    Allows arbitrary task submission to worker queue
+    Submit a task to the worker queue
     """
     data = request.get_json()
     task_name = data.get('task_name', 'process_data')
@@ -216,7 +207,6 @@ def submit_task():
 
     try:
         # Submit task to Celery worker
-        # VULNERABLE: Task args could contain malicious pickled objects
         task = celery.send_task(task_name, args=task_args)
 
         return jsonify({
