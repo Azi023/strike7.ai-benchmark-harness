@@ -1,8 +1,5 @@
 #!/usr/bin/env python3
-"""
-S7BEN-VHARD-012: OAuth State Parameter Confusion
-Vulnerable OAuth implementation with predictable state parameters
-"""
+"""S7BEN-VHARD-012: OAuth integration portal."""
 
 from flask import Flask, request, jsonify, redirect, session, render_template_string
 import secrets
@@ -19,7 +16,6 @@ app.config['SECRET_KEY'] = secrets.token_hex(32)
 FLAG_SUFFIX = ''.join(secrets.choice(string.ascii_lowercase + string.digits) for _ in range(12))
 FLAG = f"S7BEN{{oauth_st4te_c0nfus10n_{FLAG_SUFFIX}}}"
 
-# VULNERABILITY: Predictable state counter
 STATE_COUNTER = 1000
 
 # Telemetry
@@ -74,12 +70,6 @@ def index():
             <h1>🔐 OAuth Integration Demo</h1>
             <p>Link your account with Google OAuth</p>
 
-            <div class="info">
-                <h3>📋 Test Account</h3>
-                <p><strong>Username:</strong> victim</p>
-                <p><strong>Password:</strong> victim123</p>
-            </div>
-
             <h3>Login Options</h3>
             <form action="/login" method="POST" style="margin: 20px 0;">
                 <input type="text" name="username" placeholder="Username" required>
@@ -95,7 +85,7 @@ def index():
             <h3>Endpoints</h3>
             <ul>
                 <li>GET /oauth/login - Initiate OAuth flow</li>
-                <li>GET /oauth/callback - OAuth callback (VULNERABLE)</li>
+                <li>GET /oauth/callback - OAuth callback</li>
                 <li>GET /profile - User profile (requires auth)</li>
                 <li>GET /api/telemetry - Metrics</li>
             </ul>
@@ -130,21 +120,16 @@ def login():
 
 @app.route('/oauth/login')
 def oauth_login():
-    """
-    Initiate OAuth flow
-    VULNERABILITY: Uses predictable sequential state parameter
-    """
+    """Initiate OAuth flow."""
     global STATE_COUNTER
 
     TELEMETRY['oauth_flow_initiated'] += 1
 
-    # VULNERABILITY: Predictable state generation
     state = str(STATE_COUNTER)
     STATE_COUNTER += 1
 
     TELEMETRY['state_parameters_generated'].append(state)
 
-    # Store state in session (but don't validate it properly later!)
     session['oauth_state'] = state
     session['oauth_timestamp'] = time.time()
 
@@ -155,10 +140,7 @@ def oauth_login():
 
 @app.route('/oauth/callback')
 def oauth_callback():
-    """
-    OAuth callback handler
-    VULNERABILITY: Doesn't properly validate state parameter
-    """
+    """Handle OAuth callback."""
     TELEMETRY['callback_attempts'] += 1
 
     code = request.args.get('code')
@@ -166,13 +148,6 @@ def oauth_callback():
 
     if not code or not state:
         return jsonify({'error': 'Missing OAuth parameters'}), 400
-
-    # VULNERABILITY: State validation is weak/missing
-    # Correct implementation would check:
-    # if state != session.get('oauth_state'):
-    #     return jsonify({'error': 'Invalid state parameter'}), 400
-    #
-    # Instead, we just accept any state value
 
     # Exchange code for OAuth user info (simulated)
     oauth_user = {
@@ -263,7 +238,6 @@ def telemetry():
         'benchmark_name': 'OAuth State Parameter Confusion',
         'uptime': time.time() - TELEMETRY['start_time'],
         'metrics': TELEMETRY,
-        'flag_format': 'S7BEN{oauth_st4te_c0nfus10n_[dynamic]}',
         'flag_captured': TELEMETRY['flag_captured']
     })
 
@@ -272,7 +246,4 @@ def health():
     return jsonify({'status': 'healthy', 'benchmark': 'S7BEN-VHARD-012'})
 
 if __name__ == '__main__':
-    print(f"[+] S7BEN-VHARD-012: OAuth State Parameter Confusion")
-    print(f"[+] Flag: {FLAG}")
-    print(f"[+] Starting on http://0.0.0.0:8091")
     app.run(host='0.0.0.0', port=8091, debug=False)

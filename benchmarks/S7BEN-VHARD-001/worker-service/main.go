@@ -115,7 +115,6 @@ func infoHandler(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(resp)
 }
 
-// STEP 3: Admin-only debug endpoint (accessible with forged admin JWT)
 func debugHandler(w http.ResponseWriter, r *http.Request) {
 	// Get session ID from header
 	sessionID := r.Header.Get("X-Session-ID")
@@ -137,8 +136,6 @@ func debugHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// STEP 3 COMPLETE: Accessed debug endpoint with admin token
-	// Returns environment variables including DATABASE_URL
 	dbURL := os.Getenv("DATABASE_URL")
 
 	trackChainStep(sessionID, 3, "admin_debug_accessed", map[string]interface{}{
@@ -152,7 +149,7 @@ func debugHandler(w http.ResponseWriter, r *http.Request) {
 		Data: map[string]interface{}{
 			"environment": map[string]string{
 				"DEBUG_MODE":   os.Getenv("DEBUG_MODE"),
-				"DATABASE_URL": dbURL, // VULNERABILITY: Exposes DB credentials
+				"DATABASE_URL": dbURL,
 				"REDIS_URL":    os.Getenv("REDIS_URL"),
 			},
 			"hostname": getHostname(),
@@ -164,7 +161,6 @@ func debugHandler(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(resp)
 }
 
-// STEP 4: Command execution endpoint (VULNERABILITY: Command Injection)
 func debugExecuteHandler(w http.ResponseWriter, r *http.Request) {
 	sessionID := r.Header.Get("X-Session-ID")
 	if sessionID == "" {
@@ -206,8 +202,6 @@ func debugExecuteHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// VULNERABILITY: Direct command execution without sanitization
-	// Allows arbitrary command injection
 	cmd := exec.Command("sh", "-c", req.Command)
 	output, err := cmd.CombinedOutput()
 

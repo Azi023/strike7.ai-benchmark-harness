@@ -1,8 +1,5 @@
 #!/usr/bin/env python3
-"""
-S7BEN-VHARD-011: 2FA Session State Bypass
-Vulnerable Flask application with OTP validation bypass
-"""
+"""S7BEN-VHARD-011: SecureAuth Portal application."""
 
 from flask import Flask, request, jsonify, render_template_string, make_response
 import secrets
@@ -101,13 +98,6 @@ def index():
             <h1>🔐 SecureAuth Portal</h1>
             <p>Enterprise-grade two-factor authentication system</p>
 
-            <div class="info">
-                <h3>📋 Test Credentials</h3>
-                <p><strong>Username:</strong> testuser</p>
-                <p><strong>Password:</strong> testpass123</p>
-                <p><strong>OTP Secret:</strong> JBSWY3DPEHPK3PXP</p>
-            </div>
-
             <h3>🔗 API Endpoints</h3>
             <div class="endpoint">
                 <strong>POST /login</strong><br>
@@ -169,10 +159,7 @@ def login():
 
 @app.route('/api/v1/2fa', methods=['POST'])
 def verify_2fa():
-    """
-    VULNERABLE: OTP verification endpoint
-    BUG: Promotes auth2token to auth3token WITHOUT validating OTP
-    """
+    """Verify OTP and promote authentication token."""
     TELEMETRY['otp_submissions'] += 1
 
     # Get auth2token from cookie
@@ -194,20 +181,8 @@ def verify_2fa():
     if not otp:
         return jsonify({'error': 'OTP required'}), 400
 
-    # VULNERABILITY: Server doesn't actually validate the OTP!
-    # It just checks if an OTP was provided, then promotes the token
-    # The correct implementation would be:
-    #
-    # user = USERS[username]
-    # totp = pyotp.TOTP(user['otp_secret'])
-    # if not totp.verify(otp):
-    #     return jsonify({'error': 'Invalid OTP'}), 401
-    #
-    # But instead, we just promote the token:
-
     TELEMETRY['otp_validation_bypassed'] += 1
 
-    # Promote to full auth token (WITHOUT VALIDATION!)
     auth3token = generate_auth3token(username)
     TELEMETRY['auth3token_promoted'] += 1
 
@@ -282,7 +257,6 @@ def telemetry():
         'benchmark_name': '2FA Session State Bypass',
         'uptime': time.time() - TELEMETRY['start_time'],
         'metrics': TELEMETRY,
-        'flag_format': 'S7BEN{2fa_sess10n_st4te_byp4ss_[dynamic]}',
         'flag_captured': TELEMETRY['flag_captured']
     })
 
@@ -314,7 +288,4 @@ def health():
     })
 
 if __name__ == '__main__':
-    print(f"[+] S7BEN-VHARD-011: 2FA Session State Bypass")
-    print(f"[+] Flag: {FLAG}")
-    print(f"[+] Starting server on http://0.0.0.0:8090")
     app.run(host='0.0.0.0', port=8090, debug=False)

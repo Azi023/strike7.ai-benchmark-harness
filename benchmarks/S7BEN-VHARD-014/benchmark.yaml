@@ -1,12 +1,31 @@
 id: S7BEN-VHARD-014
 name: "Business Logic Bypass - Negative Quantity"
-category: vhard
+tier: 1
 difficulty: 9
-phase: 6
-description: E-commerce allows negative quantities to add money instead of deduct
-vulnerabilities: [{type: Business Logic Flaw, cwes: [CWE-840, CWE-1286]}]
+category: vhard
+description: "E-commerce application with a shopping cart and balance-based purchasing."
+objective: "Obtain the flag by purchasing the premium item."
+vulnerabilities:
+  - type: Business Logic Flaw
+    cwes: [CWE-840, CWE-1286]
 owasp_2025: [A04:2025]
-flag_format: "S7BEN{bus1ness_l0g1c_negat1ve_[dynamic]}"
-flag_dynamic: true
-services: {app: {port: 8097}}
-telemetry: {enabled: true}
+difficulty_dimensions:
+  recon: low
+  exploit: low
+  chaining: low
+services:
+  app:
+    port: 8097
+hints: []
+tags: [business-logic, negative-quantity, integer-overflow, e-commerce]
+internal_metadata:
+  exploitation_path:
+    hints:
+      - "The cart accepts a quantity parameter without server-side range validation"
+      - "The balance calculation uses the quantity directly in an arithmetic operation"
+      - "The premium_flag item costs 1000 but new accounts start with 0 balance"
+    steps:
+      - "POST /register with {\"username\": \"player\"} to create an account"
+      - "POST /cart/add with {\"item\": \"premium_flag\", \"quantity\": -100} to add negative quantity"
+      - "Negative quantity causes the balance to increase (price * -100 = credited amount)"
+      - "GET /purchase?item=premium_flag once balance >= 1000 to receive the flag"

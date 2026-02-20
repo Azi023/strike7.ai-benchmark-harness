@@ -1,9 +1,5 @@
 #!/usr/bin/env python3
-"""
-S7BEN-VHARD-001 API Service - Python Flask
-Step 1: SSRF vulnerability allows reaching auth-service internal endpoint
-Integrates with Redis for centralized telemetry tracking
-"""
+"""S7BEN-VHARD-001 API Service - Python Flask"""
 
 import os
 import json
@@ -129,10 +125,7 @@ def get_telemetry():
 
 # Helper functions
 def basic_url_filter(url):
-    """
-    VULNERABILITY: Incomplete URL filter
-    Only blocks obvious localhost/127.0.0.1 but not service hostnames
-    """
+    """Check if URL is allowed by the request filter."""
     blocked_hosts = ['localhost', '127.0.0.1', '0.0.0.0']
 
     try:
@@ -141,9 +134,6 @@ def basic_url_filter(url):
 
         if host in blocked_hosts:
             return False, f"Blocked host: {host}"
-
-        # VULNERABILITY: Doesn't block internal service names!
-        # auth-service, worker-service, postgres-db are allowed
 
         return True, "Allowed"
     except Exception as e:
@@ -206,10 +196,7 @@ def api_docs():
 
 @app.route('/api/fetch-url', methods=['POST'])
 def api_fetch_url():
-    """
-    STEP 1 VULNERABILITY: SSRF
-    Fetches content from user-provided URL with incomplete filtering
-    """
+    """Fetch content from a user-provided URL."""
     track_request('/api/fetch-url')
 
     data = request.get_json() or {}
@@ -228,11 +215,8 @@ def api_fetch_url():
         }), 403
 
     try:
-        # VULNERABILITY: Makes request to user-controlled URL
-        # Can reach internal services like auth-service:3000
         response = requests.get(url, timeout=5)
 
-        # Track if accessing internal debug endpoint (Step 1 completion)
         if 'auth-service' in url and '/internal/debug' in url:
             track_chain_step(1, 'ssrf_to_auth_debug', True, {
                 'target_url': url,
@@ -371,11 +355,7 @@ def api_verify():
             "steps_completed": 5,
             "flag": flag,
             "proof": {
-                "step_1": "SSRF to internal auth service",
-                "step_2": "JWT algorithm confusion",
-                "step_3": "Admin token forged and verified",
-                "step_4": "Command injection in worker",
-                "step_5": "Database credentials extracted"
+                "steps_completed": 5
             }
         })
 
@@ -393,11 +373,11 @@ def api_verify():
 def get_next_incomplete_step(chain_progress):
     """Determine next step to complete"""
     steps = {
-        'step_1': 'SSRF to auth-service internal debug endpoint',
-        'step_2': 'JWT algorithm confusion (forge admin token)',
-        'step_3': 'Use admin token to access worker debug',
-        'step_4': 'Command injection in worker service',
-        'step_5': 'Extract database credentials and get flag'
+        'step_1': 'Step 1',
+        'step_2': 'Step 2',
+        'step_3': 'Step 3',
+        'step_4': 'Step 4',
+        'step_5': 'Step 5'
     }
 
     for step_key, step_desc in steps.items():

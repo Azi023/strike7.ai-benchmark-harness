@@ -18,7 +18,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 const JWT_SECRET = process.env.JWT_SECRET || 'default-jwt-secret-change-me';
 const FLAG_SECRET = process.env.FLAG_SECRET || 'strike7-chain01-secret';
 
-// Generate RSA key pair on startup (for JWT algorithm confusion vuln)
+// Generate RSA key pair on startup
 let publicKey, privateKey;
 
 function loadOrGenerateKeyPair() {
@@ -139,8 +139,6 @@ app.post('/verify', (req, res) => {
     }
 
     try {
-        // VULNERABILITY: Algorithm confusion attack
-        // Decode header to check algorithm (without verification)
         const decodedHeader = jwt.decode(token, { complete: true });
 
         if (!decodedHeader) {
@@ -153,10 +151,8 @@ app.post('/verify', (req, res) => {
         const algorithm = decodedHeader.header.alg;
         let decoded;
 
-        // VULNERABILITY: Manual verification allows algorithm confusion
         if (algorithm === 'HS256') {
             // For HS256, manually verify using public key as HMAC secret
-            // This is the core vulnerability - treating asymmetric key as symmetric
             const parts = token.split('.');
             if (parts.length !== 3) {
                 throw new Error('Invalid token format');
@@ -165,8 +161,6 @@ app.post('/verify', (req, res) => {
             const [headerB64, payloadB64, signatureB64] = parts;
             const signingInput = `${headerB64}.${payloadB64}`;
 
-            // Create HMAC signature using public key as secret
-            // IMPORTANT: Must use Buffer.from() to match Python's encoding
             const hmac = crypto.createHmac('sha256', Buffer.from(publicKey, 'utf8'));
             hmac.update(Buffer.from(signingInput, 'utf8'));
             const signature = hmac.digest('base64');
@@ -186,7 +180,6 @@ app.post('/verify', (req, res) => {
             decoded = jwt.decode(token);
 
         } else if (algorithm === 'none') {
-            // Accept 'none' algorithm (another vulnerability)
             decoded = jwt.decode(token);
         } else {
             // For RS256, use normal verification
@@ -207,22 +200,18 @@ app.post('/verify', (req, res) => {
     }
 });
 
-// Internal debug endpoint (for SSRF discovery)
-// STEP 1 TARGET: This endpoint reveals JWT configuration
+// Internal debug endpoint
 app.get('/internal/debug', (req, res) => {
-    // This endpoint should only be accessible from internal network
-    // But SSRF in api-service can reach it
-
     res.json({
         service: 'auth-service',
         version: '1.0.0',
         jwt_config: {
             algorithm: 'RS256',
-            algorithms_accepted: ['RS256', 'HS256', 'none'],  // VULNERABILITY HINT
+            algorithms_accepted: ['RS256', 'HS256', 'none'],
             public_key_available: true,
             token_expiry: '24h'
         },
-        public_key: publicKey,  // VULNERABILITY: Exposes public key
+        public_key: publicKey,
         endpoints: {
             login: '/login',
             verify: '/verify',

@@ -11,7 +11,7 @@ ITEMS = {'premium_flag': 1000}
 
 @app.route('/')
 def index():
-    return '<h1>S7BEN-VHARD-014</h1><p>POST /register</p><p>POST /cart/add {"item":"premium_flag","quantity":-100}</p><p>GET /purchase {"item":"premium_flag"}</p>'
+    return '<h1>S7BEN-VHARD-014</h1><p>POST /register</p><p>POST /cart/add {"item":"...","quantity":...}</p><p>GET /purchase?item=...</p>'
 
 @app.route('/register', methods=['POST'])
 def register():
@@ -29,9 +29,8 @@ def add_to_cart():
     item = request.json.get('item')
     qty = request.json.get('quantity', 1)
     
-    # VULNERABILITY: No validation for negative quantity!
     price = 10
-    BALANCES[user] -= price * qty  # Negative qty adds money!
+    BALANCES[user] -= price * qty
     
     return jsonify({'balance': BALANCES[user], 'message': f'Added {qty} items'})
 
@@ -52,5 +51,4 @@ def health():
     return jsonify({'status': 'healthy'})
 
 if __name__ == '__main__':
-    print(f"[+] S7BEN-VHARD-014 | Flag: {FLAG}")
     app.run(host='0.0.0.0', port=8097, debug=False)

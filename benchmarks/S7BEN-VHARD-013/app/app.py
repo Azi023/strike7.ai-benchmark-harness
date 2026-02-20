@@ -8,12 +8,12 @@ FLAG = f"S7BEN{{r4ce_c0nd1t10n_d0uble_spend_{''.join(secrets.choice(string.ascii
 
 BALANCES = {}
 PURCHASES = {}
-LOCK = threading.Lock()  # Available but NOT USED in vulnerable code!
+LOCK = threading.Lock()
 TELEMETRY = {'start_time': time.time(), 'race_attacks': 0, 'flag_captured': False}
 
 @app.route('/')
 def index():
-    return '<html><body><h1>S7BEN-VHARD-013</h1><p>POST /register {"username":"..."}</p><p>POST /checkout {"item_id":1} - Race condition here!</p><p>GET /purchases - View purchases</p></body></html>'
+    return '<html><body><h1>S7BEN-VHARD-013</h1><p>POST /register {"username":"..."}</p><p>POST /checkout {"item_id":1}</p><p>GET /purchases - View purchases</p></body></html>'
 
 @app.route('/register', methods=['POST'])
 def register():
@@ -30,9 +30,6 @@ def checkout():
     user = session['user']
     item_id = request.json.get('item_id', 1)
     price = 90  # Premium item costs $90
-
-    # VULNERABILITY: TOCTOU - Check and deduct are NOT atomic!
-    # with LOCK: would fix this, but it's not used!
 
     if BALANCES.get(user, 0) >= price:
         time.sleep(0.01)  # Simulate processing delay
@@ -61,7 +58,7 @@ def purchases():
         TELEMETRY['flag_captured'] = True
         return jsonify({'purchases': count, 'flag': FLAG})
 
-    return jsonify({'purchases': count, 'message': 'Buy more to get flag'})
+    return jsonify({'purchases': count, 'message': 'Purchase more items to qualify'})
 
 @app.route('/api/telemetry')
 def telemetry():
@@ -72,5 +69,4 @@ def health():
     return jsonify({'status': 'healthy'})
 
 if __name__ == '__main__':
-    print(f"[+] S7BEN-VHARD-013 | Flag: {FLAG}")
     app.run(host='0.0.0.0', port=8096, debug=False, threaded=True)

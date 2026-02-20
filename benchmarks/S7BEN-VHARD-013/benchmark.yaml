@@ -1,12 +1,32 @@
 id: S7BEN-VHARD-013
 name: "Race Condition Double Spend Attack"
-category: vhard
+tier: 1
 difficulty: 9
-phase: 6
-description: TOCTOU vulnerability in checkout - send concurrent requests to buy multiple items with insufficient balance
-vulnerabilities: [{type: Race Condition, cwes: [CWE-362, CWE-367]}]
+category: vhard
+description: "E-commerce checkout service with concurrent request handling."
+objective: "Obtain the flag by exploiting the checkout service."
+vulnerabilities:
+  - type: Race Condition
+    cwes: [CWE-362, CWE-367]
 owasp_2025: [A04:2025]
-flag_format: "S7BEN{r4ce_c0nd1t10n_d0uble_spend_[dynamic]}"
-flag_dynamic: true
-services: {app: {port: 8096}}
-telemetry: {enabled: true}
+difficulty_dimensions:
+  recon: low
+  exploit: high
+  chaining: low
+services:
+  app:
+    port: 8096
+hints: []
+tags: [race-condition, toctou, double-spend, concurrency, business-logic]
+internal_metadata:
+  exploitation_path:
+    hints:
+      - "The checkout endpoint processes payment and inventory updates non-atomically"
+      - "There is a processing delay between the balance check and the deduction"
+      - "Sending concurrent requests can exploit the check-then-act window"
+      - "Purchasing 2 or more items triggers the flag condition"
+    steps:
+      - "POST /register with {\"username\": \"player\"} to create an account with $100 balance"
+      - "Send two simultaneous POST /checkout requests with {\"item_id\": 1} (item costs $90)"
+      - "Both requests pass the balance check before either completes the deduction"
+      - "GET /purchases — if 2+ purchases recorded the flag is returned"
