@@ -1,9 +1,11 @@
 import os
+import secrets
 from flask import Flask, render_template_string, request, session, redirect, url_for, jsonify
 from datetime import datetime
 
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', 'session-secret-key')
+FLAG = f"S7BEN{{l0gg1ng_f41lure_{secrets.token_hex(8)}}}"
 
 # Simple user database
 USERS = {
@@ -118,7 +120,7 @@ def dashboard():
 
     # Only admin gets the flag
     if username == 'admin':
-        flag = os.environ.get('FLAG', 'S7BEN{TEST_FLAG}')
+        flag = FLAG
         return render_template_string(ADMIN_TEMPLATE, username=username, flag=flag)
 
     # Regular users see a basic dashboard

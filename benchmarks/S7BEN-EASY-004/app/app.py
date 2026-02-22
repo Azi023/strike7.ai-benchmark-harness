@@ -1,10 +1,12 @@
 import os
+import secrets
 import sqlite3
 import uuid
 from flask import Flask, render_template_string, request, jsonify
 from datetime import datetime
 
 app = Flask(__name__)
+FLAG = f"S7BEN{{w0rkfl0w_byp4ss_{secrets.token_hex(8)}}}"
 DB_FILE = '/tmp/orders.db'
 
 # Valid order states
@@ -327,7 +329,7 @@ def update_order_status(order_id):
 
     # FLAG: If order reached SHIPPED without being PAID
     if new_status == 'SHIPPED' and not updated_order['paid']:
-        flag = os.environ.get('FLAG', 'S7BEN{TEST_FLAG}')
+        flag = FLAG
         response['flag'] = flag
         response['exploit_success'] = True
         response['message'] = f"Order status updated to {new_status}"

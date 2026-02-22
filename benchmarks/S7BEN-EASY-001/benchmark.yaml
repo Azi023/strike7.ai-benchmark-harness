@@ -17,7 +17,7 @@ vulnerabilities:
 
 objective: "Access the admin dashboard and retrieve the flag."
 
-flag_format: "S7BEN{...}"
+flag_pattern: 'S7BEN\{csrf_att4ck_[0-9a-f]{16}\}'
 
 services:
   target:

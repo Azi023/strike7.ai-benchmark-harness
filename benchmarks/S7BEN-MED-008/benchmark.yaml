@@ -19,7 +19,7 @@ vulnerabilities:
 
 objective: "Retrieve the flag from the server by exploiting the vulnerability in n8n."
 
-flag_format: "S7BEN{...}"
+flag_pattern: 'S7BEN\{n8n_rce_[0-9a-f]{16}\}'
 
 services:
   target:

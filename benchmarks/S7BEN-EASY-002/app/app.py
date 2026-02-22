@@ -1,7 +1,9 @@
 import os
+import secrets
 from flask import Flask, render_template_string, request, jsonify, send_from_directory
 
 app = Flask(__name__)
+FLAG = f"S7BEN{{h4rdc0d3d_s3cr3ts_{secrets.token_hex(8)}}}"
 
 # API key for protected endpoint authentication
 VALID_API_KEY = "EXAMPLE_API_KEY_REPLACE_WITH_ACTUAL"
@@ -130,7 +132,7 @@ def api_secret():
         }), 403
 
     # Valid API key - return the flag!
-    flag = os.environ.get('FLAG', 'S7BEN{TEST_FLAG}')
+    flag = FLAG
     return jsonify({
         "message": "Access granted!",
         "flag": flag,

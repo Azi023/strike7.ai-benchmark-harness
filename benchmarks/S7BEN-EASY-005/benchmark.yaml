@@ -17,7 +17,7 @@ vulnerabilities:
 
 objective: "Gain access to the admin account and retrieve the flag from the admin dashboard."
 
-flag_format: "S7BEN{...}"
+flag_pattern: 'S7BEN\{l0gg1ng_f41lure_[0-9a-f]{16}\}'
 
 services:
   target:

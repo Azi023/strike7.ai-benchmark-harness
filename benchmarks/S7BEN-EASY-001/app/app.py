@@ -1,9 +1,11 @@
 import os
+import secrets
 from flask import Flask, render_template_string, render_template, request, session, redirect, url_for, jsonify
 from functools import wraps
 
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', 'session-secret-key')
+FLAG = f"S7BEN{{csrf_att4ck_{secrets.token_hex(8)}}}"
 
 # Simple user database with passwords
 USERS = {
@@ -305,7 +307,7 @@ def login():
 @login_required
 def dashboard():
     username = session['username']
-    flag = os.environ.get('FLAG', 'S7BEN{TEST_FLAG}')
+    flag = FLAG
 
     # Check if admin password was changed to 'hacked'
     admin_password_is = USERS.get('admin', '')

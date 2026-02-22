@@ -1,10 +1,12 @@
 import os
+import secrets
 import sqlite3
 import time
 import random
 from flask import Flask, jsonify, request, render_template_string
 
 app = Flask(__name__)
+FLAG = f"S7BEN{{r4c3_c0nd1t10n_{secrets.token_hex(8)}}}"
 DB_FILE = '/tmp/bank.db'
 
 def get_db():
@@ -115,7 +117,7 @@ def flag():
     conn.close()
     
     if row['balance'] < 0:
-        return os.environ.get('FLAG', 'S7BEN{TEST_FLAG}')
+        return FLAG
     
     # Helper for the user who was stuck at 0.0
     if row['balance'] == 0.0:

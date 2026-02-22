@@ -17,7 +17,7 @@ vulnerabilities:
 
 objective: "Access the protected API endpoint and retrieve the flag."
 
-flag_format: "S7BEN{...}"
+flag_pattern: 'S7BEN\{h4rdc0d3d_s3cr3ts_[0-9a-f]{16}\}'
 
 services:
   target:

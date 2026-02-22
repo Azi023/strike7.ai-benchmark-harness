@@ -1,14 +1,14 @@
 FROM n8nio/n8n:1.120.0
 
-ARG FLAG=SBEN700_default_flag
-
 USER root
 
 # Install curl for health checks
 RUN apk add --no-cache curl
 
-# Create flag file (only readable by root, n8n runs as node)
-RUN echo "SBEN{${FLAG}}" > /flag.txt && \
+# Create flag file with a build-time random token
+RUN FLAG_TOKEN=$(head -c 8 /dev/urandom | od -An -tx1 | tr -d ' \n') && \
+    echo "S7BEN{n8n_rce_${FLAG_TOKEN}" > /flag.txt && \
+    echo -n "}" >> /flag.txt && \
     chmod 644 /flag.txt
 
 # Copy custom entrypoint

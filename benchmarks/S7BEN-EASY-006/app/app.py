@@ -1,9 +1,11 @@
 import os
 import re
+import secrets
 from flask import Flask, render_template_string, request, jsonify
 from datetime import datetime
 
 app = Flask(__name__)
+FLAG = f"S7BEN{{l0g_1nj3ct10n_{secrets.token_hex(8)}}}"
 
 # Log file path
 LOG_FILE = '/tmp/app.log'
@@ -257,7 +259,7 @@ def verify_injection():
                     forged_success = True
 
         if forged_success:
-            flag = os.environ.get('FLAG', 'S7BEN{TEST_FLAG}')
+            flag = FLAG
 
             html = f'''
             <html>

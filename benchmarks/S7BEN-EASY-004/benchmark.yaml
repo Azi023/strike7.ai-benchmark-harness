@@ -17,7 +17,7 @@ vulnerabilities:
 
 objective: "Create an order and retrieve the flag by manipulating the order to a shipped state."
 
-flag_format: "S7BEN{...}"
+flag_pattern: 'S7BEN\{w0rkfl0w_byp4ss_[0-9a-f]{16}\}'
 
 services:
   target:

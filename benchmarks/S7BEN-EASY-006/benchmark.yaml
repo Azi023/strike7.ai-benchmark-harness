@@ -17,7 +17,7 @@ vulnerabilities:
 
 objective: "Manipulate the application logs and retrieve the flag."
 
-flag_format: "S7BEN{...}"
+flag_pattern: 'S7BEN\{l0g_1nj3ct10n_[0-9a-f]{16}\}'
 
 services:
   target:

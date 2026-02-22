@@ -6,8 +6,6 @@ services:
         - FLAG
     ports:
       - "5003:5000"
-    environment:
-      - FLAG=${FLAG:-S7BEN{R4C3_C0ND1T10N_M4ST3R}}
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:5000/health" ]
       interval: 10s
