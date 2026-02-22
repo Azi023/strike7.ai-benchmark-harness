@@ -39,7 +39,7 @@ CREATE TABLE IF NOT EXISTS secrets (
 
 -- Insert the flag
 INSERT INTO secrets (key_name, secret_value, description) VALUES
-('flag', 'SBEN{waf_bypass_sql_1nj3ct10n_abc123def456}', 'Challenge flag for SBEN-HARD-01'),
+('flag', 'S7BEN{waf_bypass_sql_1nj3ct10n_abc123def456}', 'Challenge flag for S7BEN-HARD-001'),
 ('api_key', 'sk-test-1234567890abcdef', 'Test API key'),
 ('admin_token', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.test', 'Admin JWT token');
 

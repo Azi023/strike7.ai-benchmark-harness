@@ -7,7 +7,6 @@ services:
       - "3000:3000"
     environment:
       - NODE_ENV=development
-      - FLAG=${FLAG_WEB:-S7BEN{xss_sanitizer_byp4ss_svg_onload_def456}}
       - CALLBACK_URL=http://callback-server:8080
     networks:
       - frontend-net

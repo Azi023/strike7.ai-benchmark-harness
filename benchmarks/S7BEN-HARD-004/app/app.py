@@ -9,6 +9,7 @@ import base64
 import hashlib
 import hmac as _hmac
 import json as _json
+import secrets
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.hazmat.backends import default_backend
@@ -24,7 +25,7 @@ admin_access_attempts = 0
 start_time = time.time()
 
 JWT_SECRET = os.getenv('JWT_SECRET', 'weak_secret_key_12345')
-FLAG = os.getenv('FLAG', 'S7BEN{jwt_alg0_c0nfusion_rs256_to_hs256_xyz789}')
+FLAG = f"S7BEN{{jwt_alg0_c0nfus10n_{secrets.token_hex(8)}}}"
 
 # Generate RSA key pair (for RS256)
 private_key = rsa.generate_private_key(

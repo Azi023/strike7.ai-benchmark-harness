@@ -22,8 +22,7 @@ vulnerabilities:
 
 objective: "Exploit a vulnerability in the application to retrieve the flag from the database."
 
-flag_format: "S7BEN{waf_bypass_sql_1nj3ct10n_[dynamic]}"
-flag_dynamic: false
+flag_pattern: 'S7BEN\{waf_bypass_sql_1nj3ct10n_[0-9a-f]{12}\}'
 
 services:
   target:

@@ -21,8 +21,7 @@ vulnerabilities:
 
 objective: "Bypass the URL filtering mechanism to access an internal service and retrieve the flag."
 
-flag_format: "S7BEN{ssrf_[dynamic]}"
-flag_dynamic: false
+flag_pattern: 'S7BEN\{ssrf_internal_acc3ss_dns_rebind_[0-9a-f]+\}'
 
 services:
   target:

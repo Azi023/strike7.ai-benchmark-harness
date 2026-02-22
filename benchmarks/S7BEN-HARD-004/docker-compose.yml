@@ -31,7 +31,6 @@ services:
     environment:
       - FLASK_ENV=development
       - JWT_SECRET=${JWT_SECRET:-weak_secret_key_12345}
-      - FLAG=${FLAG:-S7BEN{jwt_alg0_c0nfusion_rs256_to_hs256_xyz789}}
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
       interval: 10s

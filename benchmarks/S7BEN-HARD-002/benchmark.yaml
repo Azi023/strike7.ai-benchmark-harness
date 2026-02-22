@@ -22,8 +22,7 @@ vulnerabilities:
 
 objective: "Inject a payload that bypasses the sanitization layer and executes in the admin panel to retrieve the flag."
 
-flag_format: "S7BEN{xss_[dynamic]}"
-flag_dynamic: false
+flag_pattern: 'S7BEN\{xss_sanitizer_byp4ss_[0-9a-f]{16}\}'
 
 services:
   target:

@@ -4,10 +4,11 @@ const cookieParser = require('cookie-parser');
 const session = require('express-session');
 const { JSDOM } = require('jsdom');
 const createDOMPurify = require('isomorphic-dompurify');
+const crypto = require('crypto');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const FLAG = process.env.FLAG || 'SBEN{xss_sanitizer_byp4ss_svg_onload_def456}';
+const FLAG = `S7BEN{xss_sanitizer_byp4ss_${crypto.randomBytes(8).toString('hex')}}`;
 
 // Initialize DOMPurify
 const window = new JSDOM('').window;
