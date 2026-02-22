@@ -5,6 +5,7 @@ difficulty: 9
 category: vhard
 description: "Web application implementing a two-stage authentication system with session token promotion."
 objective: "Obtain the flag from the protected dashboard endpoint."
+flag_pattern: 'S7BEN\{2fa_sess10n_st4te_byp4ss_[a-z0-9]{8}\}'
 vulnerabilities:
   - type: Broken Authentication
     cwes: [CWE-287, CWE-602, CWE-841]

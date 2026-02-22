@@ -5,6 +5,7 @@ difficulty: 9
 category: vhard
 description: "Multi-language web application environment with three template-rendering services."
 objective: "Obtain the flags from each template engine service."
+flag_pattern: 'S7BEN\{(jinja2_ssti_python_rce|nunjucks_ssti_nodejs_rce|twig_ssti_php_rce)_[0-9a-z]{8}\}'
 vulnerabilities:
   - type: Server-Side Template Injection
     cwes: [CWE-94]

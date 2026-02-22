@@ -74,7 +74,7 @@ db.secrets.insertMany([
     {
         id: 'flag_bypass',
         name: 'Authentication Bypass Flag',
-        flag: process.env.FLAG_BYPASS || 'SBEN{nosql_auth_bypass_ne_operator_a1b2c3}',
+        flag: process.env.FLAG_BYPASS || 'S7BEN{nosql_auth_bypass_ne_operator_a1b2c3}',
         description: 'Retrieved via $ne operator authentication bypass',
         difficulty: 'easy',
         technique: 'ne_operator',
@@ -83,7 +83,7 @@ db.secrets.insertMany([
     {
         id: 'flag_regex',
         name: 'Regex Extraction Flag',
-        flag: process.env.FLAG_REGEX || 'SBEN{nosql_regex_data_extraction_d4e5f6}',
+        flag: process.env.FLAG_REGEX || 'S7BEN{nosql_regex_data_extraction_d4e5f6}',
         description: 'Retrieved via $regex operator for data extraction',
         difficulty: 'medium',
         technique: 'regex_injection',
@@ -92,7 +92,7 @@ db.secrets.insertMany([
     {
         id: 'flag_where',
         name: 'JavaScript Injection Flag',
-        flag: process.env.FLAG_WHERE || 'SBEN{nosql_where_javascript_injection_g7h8i9}',
+        flag: process.env.FLAG_WHERE || 'S7BEN{nosql_where_javascript_injection_g7h8i9}',
         description: 'Retrieved via $where clause JavaScript injection',
         difficulty: 'hard',
         technique: 'where_injection',

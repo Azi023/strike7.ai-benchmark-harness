@@ -5,6 +5,7 @@ difficulty: 9
 category: vhard
 description: "E-commerce checkout service with concurrent request handling."
 objective: "Obtain the flag by exploiting the checkout service."
+flag_pattern: 'S7BEN\{r4ce_c0nd1t10n_d0uble_spend_[a-z0-9]{12}\}'
 vulnerabilities:
   - type: Race Condition
     cwes: [CWE-362, CWE-367]

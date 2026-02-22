@@ -5,6 +5,7 @@ difficulty: 10
 category: vhard
 description: "Multi-container microservices application with a distributed architecture."
 objective: "Obtain the flag by chaining multiple vulnerabilities across the microservices environment."
+flag_pattern: 'S7BEN\{microservices_chain_[0-9a-f]{32}\}'
 vulnerabilities:
   - type: SSRF
     cwes: [CWE-918]

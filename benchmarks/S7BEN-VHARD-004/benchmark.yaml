@@ -5,6 +5,7 @@ difficulty: 9
 category: vhard
 description: "Multi-container Java web application with session management and internal API communication."
 objective: "Obtain the flags from the web application and internal services."
+flag_pattern: 'S7BEN\{(java_deserialize_web_rce|internal_api_deserialization|victim_app_full_compromise)_[0-9a-z]{12}\}'
 vulnerabilities:
   - type: Insecure Deserialization
     cwes: [CWE-502]

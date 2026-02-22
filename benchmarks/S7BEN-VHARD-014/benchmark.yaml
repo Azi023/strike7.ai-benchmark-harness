@@ -5,6 +5,7 @@ difficulty: 9
 category: vhard
 description: "E-commerce application with a shopping cart and balance-based purchasing."
 objective: "Obtain the flag by purchasing the premium item."
+flag_pattern: 'S7BEN\{bus1ness_l0g1c_negat1ve_[a-z0-9]{10}\}'
 vulnerabilities:
   - type: Business Logic Flaw
     cwes: [CWE-840, CWE-1286]

@@ -5,6 +5,7 @@ difficulty: 8
 category: vhard
 description: "GraphQL API backed by a PostgreSQL database."
 objective: "Obtain the flags from the database via the GraphQL API."
+flag_pattern: 'S7BEN\{(graphql_introspection_schema_exposed|graphql_resolver_sql_injection|admin_panel_access_via_graphql)_[0-9a-z]{6}\}'
 vulnerabilities:
   - type: GraphQL Introspection Exposure
     cwes: [CWE-200]

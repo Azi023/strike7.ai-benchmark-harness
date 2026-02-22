@@ -5,6 +5,7 @@ difficulty: 8
 category: vhard
 description: "Web application with URL fetching functionality and multiple layers of request filtering."
 objective: "Obtain the flag from the internal services by exploiting the URL fetching functionality."
+flag_pattern: 'S7BEN\{admin_access_via_ssrf_credentials\}'
 vulnerabilities:
   - type: SSRF
     cwes: [CWE-918]

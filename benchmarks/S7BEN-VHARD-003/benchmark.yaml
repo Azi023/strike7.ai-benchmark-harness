@@ -5,6 +5,7 @@ difficulty: 10
 category: vhard
 description: "Simulated enterprise Active Directory environment with OpenLDAP and MIT Kerberos."
 objective: "Obtain the flag by compromising the domain environment."
+flag_pattern: 'S7BEN\{(domain_admin_golden_ticket|kerberoast_service_account|asrep_roast_no_preauth)_[0-9a-z]{16}\}'
 vulnerabilities:
   - type: Kerberoasting
     cwes: [CWE-521]

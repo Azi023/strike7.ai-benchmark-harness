@@ -5,6 +5,7 @@ difficulty: 8
 category: vhard
 description: "PHP web application with a multi-service architecture including a centralized logging service and an internal file repository."
 objective: "Obtain the flags from the web application and internal services."
+flag_pattern: 'S7BEN\{(lfi_path_traversal_file_read|php_session_poisoning_rce|internal_file_server_access|apache_log_poisoning_rce)_[0-9a-z]{6}\}'
 vulnerabilities:
   - type: Local File Inclusion
     cwes: [CWE-98, CWE-22]

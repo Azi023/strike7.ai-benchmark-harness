@@ -5,6 +5,7 @@ difficulty: 9
 category: vhard
 description: "Java Spring Boot application that parses XML input, with an internal API and an external DTD server."
 objective: "Obtain the flags from the web application and internal service via XML processing."
+flag_pattern: 'S7BEN\{(xxe_external_entity_file_read|xxe_out_of_band_exfiltration|xxe_internal_api_access)_[0-9a-z]{6}\}'
 vulnerabilities:
   - type: XML External Entity Injection
     cwes: [CWE-611]

@@ -5,6 +5,7 @@ difficulty: 9
 category: vhard
 description: "Web application with OAuth 2.0 third-party authentication integration."
 objective: "Obtain the flag from the victim user's profile page."
+flag_pattern: 'S7BEN\{oauth_st4te_c0nfus10n_[a-z0-9]{12}\}'
 vulnerabilities:
   - type: Cross-Site Request Forgery in OAuth Flow
     cwes: [CWE-352, CWE-330, CWE-346]

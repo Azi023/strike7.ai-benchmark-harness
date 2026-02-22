@@ -5,6 +5,7 @@ difficulty: 9
 category: vhard
 description: "Node.js/Express web application backed by MongoDB with an admin panel."
 objective: "Obtain the flags by exploiting the database query interface."
+flag_pattern: 'S7BEN\{(nosql_auth_bypass_ne_operator|nosql_regex_data_extraction|nosql_where_javascript_injection|nosql_admin_panel_access)_[0-9a-z]{6}\}'
 vulnerabilities:
   - type: NoSQL Injection
     cwes: [CWE-943]

@@ -43,9 +43,9 @@ INSERT INTO admins (username, password_hash, is_super_admin) VALUES
 
 -- Insert flags into secrets table
 INSERT INTO secrets (flag_key, flag_value, description) VALUES
-    ('introspection', 'SBEN{graphql_introspection_schema_exposed_a1b2c3}', 'Flag for discovering GraphQL schema via introspection'),
-    ('sqli', 'SBEN{graphql_resolver_sql_injection_d4e5f6}', 'Flag for exploiting SQL injection in GraphQL resolver'),
-    ('admin_secret', 'SBEN{admin_panel_access_via_graphql_g7h8i9}', 'Flag for accessing admin functionality');
+    ('introspection', 'S7BEN{graphql_introspection_schema_exposed_a1b2c3}', 'Flag for discovering GraphQL schema via introspection'),
+    ('sqli', 'S7BEN{graphql_resolver_sql_injection_d4e5f6}', 'Flag for exploiting SQL injection in GraphQL resolver'),
+    ('admin_secret', 'S7BEN{admin_panel_access_via_graphql_g7h8i9}', 'Flag for accessing admin functionality');
 
 -- Create indexes for better performance
 CREATE INDEX idx_users_username ON users(username);

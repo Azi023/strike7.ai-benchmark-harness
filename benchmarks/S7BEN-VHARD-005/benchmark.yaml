@@ -5,6 +5,7 @@ difficulty: 9
 category: vhard
 description: "Flask web application with session handling, caching layer, and background task processing."
 objective: "Obtain the flags from the web application, cache, and worker services."
+flag_pattern: 'S7BEN\{(pickle_session_cookie_rce|redis_cache_poisoning_pickle|celery_worker_task_deserialization)_[0-9a-z]{12}\}'
 vulnerabilities:
   - type: Insecure Deserialization
     cwes: [CWE-502]

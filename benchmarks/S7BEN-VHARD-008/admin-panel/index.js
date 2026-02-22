@@ -8,7 +8,7 @@ const PORT = 4000;
 
 // MongoDB connection
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://mongo-db:27017/nosqldb';
-const FLAG_ADMIN = process.env.FLAG_ADMIN || 'SBEN{nosql_admin_panel_access_j1k2l3}';
+const FLAG_ADMIN = process.env.FLAG_ADMIN || 'S7BEN{nosql_admin_panel_access_j1k2l3}';
 
 let db = null;
 let client = null;
