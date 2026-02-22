@@ -91,8 +91,6 @@
                                     {{ log.user }}
                                 </td>
                                 <td class="px-6 py-4 text-sm text-gray-800">
-                                    {# VULNERABILITY: Rendering log message without escaping! #}
-                                    {# This allows stored XSS via log injection #}
                                     {{ log.message | safe }}
                                 </td>
                             </tr>

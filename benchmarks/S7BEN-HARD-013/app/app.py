@@ -74,7 +74,6 @@ def write_audit_log(log_type, message, user=None, metadata=None):
     user_str = user or 'system'
     metadata_str = json.dumps(metadata) if metadata else '{}'
 
-    # VULNERABILITY: Direct string concatenation without sanitization
     log_entry = f"{timestamp} | {log_type} | {user_str} | {message} | {metadata_str}"
 
     AUDIT_LOGS.append(log_entry)
@@ -90,9 +89,6 @@ def basic_sanitize(text):
 
     if '\\r\\n' in text:
         return None
-
-    # VULNERABILITY: Misses URL-encoded, hex-encoded, and other variants
-    # Also misses \n alone or \r alone
 
     return text
 
@@ -261,7 +257,6 @@ def api_admin_restore_session():
     # Find matching session
     for restored in restored_sessions:
         if restored['user'] == requested_user or not requested_user:
-            # VULNERABILITY: Grants admin access based on log entry!
             session['username'] = restored['user']
             session['role'] = 'admin'
             session['restored'] = True

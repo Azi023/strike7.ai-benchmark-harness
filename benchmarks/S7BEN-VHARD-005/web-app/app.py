@@ -58,7 +58,6 @@ def deserialize_session(session_str):
     """
     try:
         pickled_data = base64.b64decode(session_str.encode('utf-8'))
-        # UNSAFE: pickle.loads() on untrusted data enables RCE
         session_obj = pickle.loads(pickled_data)
         return session_obj
     except Exception as e:
@@ -81,7 +80,6 @@ def cache_get(key):
     try:
         pickled_data = redis_client.get(key)
         if pickled_data:
-            # UNSAFE: Deserializing cached data that could be poisoned
             return pickle.loads(pickled_data)
         return None
     except Exception as e:
@@ -137,7 +135,6 @@ def profile():
     if not session_cookie:
         return jsonify({'error': 'No session cookie found'}), 401
 
-    # CRITICAL: Deserializing untrusted cookie data
     session = deserialize_session(session_cookie)
 
     if session and hasattr(session, 'authenticated') and session.authenticated:
@@ -181,7 +178,6 @@ def cache_get_endpoint(key):
     Retrieve data from cache
     """
     try:
-        # UNSAFE: Deserializing potentially poisoned cache data
         value = cache_get(key)
 
         if value is None:

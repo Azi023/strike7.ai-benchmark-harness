@@ -155,7 +155,6 @@ def greet():
     greeting = f"Hello, {name}!"  # User input embedded in string
 
     try:
-        # UNSAFE: render_template_string on user-controlled content
         output = render_template_string(greeting)
     except Exception as e:
         output = f"Error: {str(e)}"
@@ -168,7 +167,6 @@ def test():
     template = request.args.get('template', '{{7*7}}')
 
     try:
-        # UNSAFE: Directly render user-supplied template
         result = render_template_string(template)
         return f"<h1>Template Result:</h1><pre>{result}</pre>"
     except Exception as e:

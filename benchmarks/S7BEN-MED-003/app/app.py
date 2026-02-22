@@ -211,7 +211,7 @@ def api_product_by_sku(sku):
     return jsonify({"product": dict(product)})
 
 # =============================================================================
-# VULNERABLE ENDPOINT - String concatenation "for performance"
+# SEARCH ENDPOINT
 # =============================================================================
 
 @app.route('/api/inventory/search')

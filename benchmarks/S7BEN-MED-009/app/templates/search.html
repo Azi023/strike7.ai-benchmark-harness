@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Search Results - Strike7 Store</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- VULNERABILITY: AngularJS is loaded and can be triggered via ng-app -->
     <script src="https://code.angularjs.org/1.8.2/angular.min.js"></script>
 </head>
 <body class="bg-gradient-to-br from-gray-50 to-green-100 min-h-screen">
@@ -42,7 +41,6 @@
             <div class="bg-white rounded-lg shadow-xl p-6">
                 {% if query %}
                     <h2 class="text-xl font-semibold text-gray-800 mb-4">
-                        <!-- VULNERABILITY: Query is reflected here without proper escaping! -->
                         Results for: {{ query|safe }}
                     </h2>
 
@@ -50,7 +48,6 @@
                         <div class="space-y-4">
                             {% for result in results %}
                             <div class="p-4 bg-gray-50 rounded-lg">
-                                <!-- VULNERABILITY: Result titles also reflect unsanitized input -->
                                 <h3 class="font-semibold text-gray-800">{{ result.title|safe }}</h3>
                                 <p class="text-sm text-gray-600 mt-1">{{ result.description }}</p>
                             </div>

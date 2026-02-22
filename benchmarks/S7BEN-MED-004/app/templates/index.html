@@ -66,19 +66,12 @@
     </main>
 
     <script>
-        // ================================================================
-        // VULNERABLE CODE - DOM-based XSS
-        // ================================================================
-
         function loadNoteFromHash() {
-            // VULNERABILITY: Reads from location.hash and writes to innerHTML!
-            // No sanitization or escaping applied
             const hash = location.hash;
 
             if (hash && hash.length > 1) {
                 const noteContent = decodeURIComponent(hash.slice(1));
 
-                // VULNERABLE SINK: innerHTML with user-controlled data
                 document.getElementById('note-content').innerHTML = noteContent;
             }
         }
