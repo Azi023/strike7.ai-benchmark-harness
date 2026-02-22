@@ -647,23 +647,76 @@ def print_server_info():
         print(f"Public IP: {public_ip}", file=sys.stderr)
     print("=" * 60, file=sys.stderr)
     print("", file=sys.stderr)
-    print("To test with MCP Inspector:", file=sys.stderr)
-    print("  npx @modelcontextprotocol/inspector python dashboard/strike7_mcp_server.py", file=sys.stderr)
+    print("Transport modes (MCP_TRANSPORT env var):", file=sys.stderr)
+    print("  sse   (default) — HTTP SSE on port 5000, for VPS/remote agents", file=sys.stderr)
+    print("  stdio           — stdin/stdout, for Claude Desktop subprocess use", file=sys.stderr)
+    print("", file=sys.stderr)
+    print("Test with MCP Inspector (SSE mode):", file=sys.stderr)
+    print("  npx @modelcontextprotocol/inspector http://localhost:5000/sse", file=sys.stderr)
     print("", file=sys.stderr)
 
 
 if __name__ == "__main__":
     import sys
 
-    # Check if running interactively or via MCP
-    if sys.stdin.isatty():
-        print_server_info()
+    # Transport selection:
+    #   MCP_TRANSPORT=sse   (default) — HTTP SSE server, network-accessible (VPS)
+    #   MCP_TRANSPORT=stdio           — stdin/stdout, for Claude Desktop subprocess use
+    transport = os.getenv("MCP_TRANSPORT", "sse")
+    host = os.getenv("MCP_HOST", "0.0.0.0")
+    port = int(os.getenv("MCP_PORT", "5000"))
 
-    # Run the MCP server with stdio transport
-    try:
-        mcp.run(transport="stdio")
-    except KeyboardInterrupt:
-        print("\n[INFO] Server stopped by user", file=sys.stderr)
-    except Exception as e:
-        print(f"\n[ERROR] Server crashed: {e}", file=sys.stderr)
-        sys.exit(1)
+    print_server_info()
+
+    if transport == "stdio":
+        print(f"[INFO] Starting stdio transport", file=sys.stderr)
+        try:
+            mcp.run(transport="stdio")
+        except KeyboardInterrupt:
+            print("\n[INFO] Server stopped by user", file=sys.stderr)
+        except Exception as e:
+            print(f"\n[ERROR] Server crashed: {e}", file=sys.stderr)
+            sys.exit(1)
+    else:
+        # SSE transport — expose MCP over HTTP for network access
+        print(f"[INFO] Starting SSE transport on {host}:{port}", file=sys.stderr)
+        print(f"[INFO] MCP endpoint:    http://{public_ip or host}:{port}/sse", file=sys.stderr)
+        print(f"[INFO] Health endpoint: http://{public_ip or host}:{port}/health", file=sys.stderr)
+
+        try:
+            import uvicorn
+            from starlette.applications import Starlette
+            from starlette.routing import Route, Mount
+            from starlette.responses import JSONResponse
+
+            async def health_endpoint(request):
+                """Health check for monitoring and smoke tests."""
+                dashboard_health = api_get("/api/health")
+                return JSONResponse({
+                    "status": "healthy",
+                    "service": "strike7-mcp",
+                    "version": "1.0.0",
+                    "transport": "sse",
+                    "api_url": STRIKE7_API_URL,
+                    "dashboard_status": dashboard_health.get("status", "unknown"),
+                    "tools_available": 11,
+                    "mcp_endpoint": f"http://{public_ip or host}:{port}/sse",
+                })
+
+            sse_app = mcp.sse_app()
+            app = Starlette(routes=[
+                Route("/health", health_endpoint),
+                Mount("/", app=sse_app),
+            ])
+
+            uvicorn.run(app, host=host, port=port, log_level="info")
+
+        except ImportError as e:
+            print(f"[ERROR] Missing dependency for SSE: {e}", file=sys.stderr)
+            print("[ERROR] Install: pip install uvicorn starlette --break-system-packages", file=sys.stderr)
+            sys.exit(1)
+        except KeyboardInterrupt:
+            print("\n[INFO] Server stopped by user", file=sys.stderr)
+        except Exception as e:
+            print(f"\n[ERROR] Server crashed: {e}", file=sys.stderr)
+            sys.exit(1)
