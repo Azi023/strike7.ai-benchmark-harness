@@ -15,12 +15,6 @@
 </div>
 <?php endif; ?>
 
-<div class="info-box" style="margin-top: 20px;">
-    <strong>💡 Session Poisoning Hint:</strong><br>
-    Your input is being stored in the session. Session files are located at:<br>
-    <code>/var/lib/php/sessions/sess_<?php echo session_id(); ?></code>
-</div>
-
 <h3>Project Information:</h3>
 <ul>
     <li><strong>Project:</strong> Strike7 Security Benchmarks</li>

@@ -1,0 +1,49 @@
+id: S7BEN-VHARD-010
+name: "Local File Inclusion to RCE Chain"
+tier: 2
+difficulty: 8
+category: vhard
+description: "PHP web application with a multi-service architecture including a centralized logging service and an internal file repository."
+objective: "Obtain the flags from the web application and internal services."
+vulnerabilities:
+  - type: Local File Inclusion
+    cwes: [CWE-98, CWE-22]
+owasp_2025: [A03:2025]
+difficulty_dimensions:
+  recon: medium
+  exploit: high
+  chaining: high
+architecture:
+  type: multi-container
+  container_count: 3
+  services:
+    - name: web-app
+      port: 8080
+      exposed: true
+    - name: file-server
+      port: 8081
+      exposed: true
+    - name: log-server
+      port: 80
+      exposed: false
+hints: []
+tags: [lfi, file-inclusion, path-traversal, log-poisoning, session-poisoning, rce, php, apache]
+internal_metadata:
+  exploitation_path:
+    hints:
+      - "The web application loads pages dynamically using a URL parameter"
+      - "PHP's include() function without input sanitization enables path traversal"
+      - "The ?page parameter accepts file paths relative to the pages/ directory"
+      - "Apache access logs record the full User-Agent header value"
+      - "Log files are shared between the web-app and log-server via Docker volume"
+      - "PHP session files are stored in /var/lib/php/sessions/ and contain user-controlled data"
+      - "php://filter wrapper can be used to read PHP source files in base64"
+    steps:
+      - "Identify the ?page parameter on the web application (port 8080)"
+      - "Test path traversal: ?page=../../../etc/passwd to confirm LFI"
+      - "Read the flag file directly via LFI: ?page=flag.txt (relative) or path traversal"
+      - "Use php://filter wrapper to read PHP source: ?page=php://filter/convert.base64-encode/resource=index.php"
+      - "Poison Apache access logs by sending a request with a PHP web shell in the User-Agent header"
+      - "Include the poisoned log file via LFI: ?page=../../../var/log/apache2/access.log&cmd=id"
+      - "Use session poisoning: submit PHP code via the name parameter, then include /var/lib/php/sessions/sess_<ID>"
+      - "Enumerate the internal file-server (port 8081) via SSRF or RCE to retrieve the internal flag"

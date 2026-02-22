@@ -12,14 +12,13 @@ if (isset($_GET['name'])) {
     $_SESSION['user_name'] = $_GET['name'];
 }
 
-// VULNERABILITY: LFI via page parameter
 $page = isset($_GET['page']) ? $_GET['page'] : 'home';
 
 ?>
 <!DOCTYPE html>
 <html>
 <head>
-    <title>LFI Vulnerable Web App - SBEN-LFI-01</title>
+    <title>S7BEN-VHARD-010</title>
     <style>
         * {
             margin: 0;
@@ -115,17 +114,11 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'home';
 <body>
     <div class="container">
         <div class="header">
-            <h1>🔓 LFI Vulnerable Web Application</h1>
-            <p class="subtitle">SBEN-LFI-01: Local File Inclusion to RCE Chain</p>
+            <h1>S7BEN-VHARD-010</h1>
+            <p class="subtitle">Enterprise Content Portal</p>
         </div>
 
         <div class="content">
-            <div class="warning">
-                <strong>⚠️ Security Warning</strong><br>
-                This application contains intentional LFI vulnerabilities for educational purposes.
-                DO NOT deploy in production environments.
-            </div>
-
             <div class="nav">
                 <strong>Navigation:</strong>
                 <a href="?page=home">Home</a>
@@ -145,15 +138,12 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'home';
 
             <div style="background: white; padding: 20px; border-radius: 10px;">
                 <?php
-                // UNSAFE: Direct file inclusion with user input
-                // This allows path traversal attacks
                 $file_to_include = "pages/" . $page . ".php";
 
                 // Check if file exists before including
                 if (file_exists($file_to_include)) {
                     include($file_to_include);
                 } else {
-                    // Attempt to include anyway (VULNERABILITY)
                     @include($page);
 
                     if (!headers_sent()) {
@@ -167,15 +157,11 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'home';
                 ?>
             </div>
 
-            <div class="info-box">
-                <strong>💡 Hint:</strong> Try exploring different pages using the ?page parameter.
-                This application demonstrates Local File Inclusion vulnerabilities.
-            </div>
+
         </div>
 
         <div class="footer">
-            Strike7 Security Benchmarks | SBEN-LFI-01<br>
-            Local File Inclusion Demonstration
+            Strike7 Security Benchmarks
         </div>
     </div>
 </body>

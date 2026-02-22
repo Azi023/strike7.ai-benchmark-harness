@@ -20,8 +20,3 @@
     <li><strong>Session Poisoning</strong>: Injecting PHP code into session data</li>
 </ol>
 
-<div class="info-box">
-    <strong>🚩 First Flag Location:</strong><br>
-    A flag has been hidden in the file system. Can you find it using LFI?<br>
-    <em>Hint: Check /var/www/html/flag.txt</em>
-</div>

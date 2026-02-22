@@ -57,13 +57,5 @@
         ?></pre>
     </div>
 
-    <div class="flag-box">
-        🚩 Log Poisoning Flag: <?php echo getenv('FLAG_LOG') ?: 'SBEN{apache_log_poisoning_rce_d4e5f6}'; ?>
-    </div>
-
-    <div style="background: #34495e; padding: 15px; border-radius: 5px; margin-top: 20px;">
-        <strong>Hint:</strong> Apache logs are stored at /var/log/apache2/access.log<br>
-        Try poisoning the User-Agent header with PHP code and then include the log file!
-    </div>
 </body>
 </html>
