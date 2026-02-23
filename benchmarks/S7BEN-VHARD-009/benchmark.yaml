@@ -22,10 +22,10 @@ architecture:
       port: 5000
       exposed: true
     - name: nunjucks-app
-      port: 3000
+      port: 8117
       exposed: true
     - name: twig-app
-      port: 8080
+      port: 8118
       exposed: true
 hints: []
 tags: [ssti, template-injection, jinja2, nunjucks, twig, rce, python, nodejs, php]

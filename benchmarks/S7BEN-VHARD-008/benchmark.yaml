@@ -19,7 +19,7 @@ architecture:
   container_count: 3
   services:
     - name: web-app
-      port: 3000
+      port: 8115
       exposed: true
     - name: mongo-db
       port: 27017

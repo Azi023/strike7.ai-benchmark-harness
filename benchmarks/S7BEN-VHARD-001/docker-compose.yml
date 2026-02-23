@@ -4,7 +4,7 @@ services:
     build: ./nginx-gateway
     container_name: sben-chain01-nginx
     ports:
-      - "80:80"
+      - "8113:80"
     networks:
       - frontend-net
       - backend-net

@@ -4,10 +4,9 @@ services:
     container_name: deser-webapp
     hostname: webapp
     ports:
-      - "8080:8080"
+      - "8120:8080"
     networks:
-      deser-net:
-        ipv4_address: 172.25.0.10
+      - deser-net
     environment:
       - FLAG_WEB=${FLAG_WEB:-S7BEN{java_deserialize_web_rce_a1b2c3d4e5f6}}
       - INTERNAL_API_URL=http://internal-api:8081
@@ -25,8 +24,7 @@ services:
     container_name: deser-internal
     hostname: internal-api
     networks:
-      deser-net:
-        ipv4_address: 172.25.0.20
+      - deser-net
     environment:
       - FLAG_INTERNAL=${FLAG_INTERNAL:-S7BEN{internal_api_deserialization_g7h8i9j0k1l2}}
       - VICTIM_APP_URL=http://victim-app:8082
@@ -42,8 +40,7 @@ services:
     container_name: deser-victim
     hostname: victim-app
     networks:
-      deser-net:
-        ipv4_address: 172.25.0.30
+      - deser-net
     environment:
       - FLAG_VICTIM=${FLAG_VICTIM:-S7BEN{victim_app_full_compromise_m3n4o5p6q7r8}}
     volumes:
@@ -58,9 +55,6 @@ services:
 networks:
   deser-net:
     driver: bridge
-    ipam:
-      config:
-        - subnet: 172.25.0.0/16
 
 volumes:
   webapp-data:

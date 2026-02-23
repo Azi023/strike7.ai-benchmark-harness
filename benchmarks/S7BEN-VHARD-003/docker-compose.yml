@@ -12,7 +12,7 @@ services:
       - "464:464"   # Kerberos password change
     networks:
       corp-net:
-        ipv4_address: 172.30.0.10
+        ipv4_address: 10.200.3.10
     environment:
       - DOMAIN=CORP.LOCAL
       - REALM=CORP.LOCAL
@@ -36,7 +36,7 @@ services:
     domainname: corp.local
     networks:
       corp-net:
-        ipv4_address: 172.30.0.20
+        ipv4_address: 10.200.3.20
     environment:
       - DOMAIN=CORP.LOCAL
       - DC_HOST=dc.corp.local
@@ -58,7 +58,7 @@ services:
       - "5052:3000"
     networks:
       corp-net:
-        ipv4_address: 172.30.0.30
+        ipv4_address: 10.200.3.30
     environment:
       - DOMAIN=CORP.LOCAL
       - LDAP_URL=ldap://dc.corp.local:389
@@ -79,7 +79,7 @@ services:
     domainname: corp.local
     networks:
       corp-net:
-        ipv4_address: 172.30.0.40
+        ipv4_address: 10.200.3.40
     environment:
       - POSTGRES_PASSWORD=DBP@ssw0rd!
       - DOMAIN=CORP.LOCAL
@@ -99,7 +99,7 @@ services:
     domainname: corp.local
     networks:
       corp-net:
-        ipv4_address: 172.30.0.50
+        ipv4_address: 10.200.3.50
     ports:
       - "5053:5000"
     environment:
@@ -120,7 +120,7 @@ networks:
     driver: bridge
     ipam:
       config:
-        - subnet: 172.30.0.0/16
+        - subnet: 10.200.3.0/24
 
 volumes:
   dc-data:

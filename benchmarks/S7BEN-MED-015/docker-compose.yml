@@ -5,3 +5,9 @@ services:
     ports: ["8103:8103"]
     environment:
       - WERKZEUG_DEBUG_PIN=off
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8103/"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 15s

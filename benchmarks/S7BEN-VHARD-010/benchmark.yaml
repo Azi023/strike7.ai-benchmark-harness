@@ -19,10 +19,10 @@ architecture:
   container_count: 3
   services:
     - name: web-app
-      port: 8080
+      port: 8122
       exposed: true
     - name: file-server
-      port: 8081
+      port: 8123
       exposed: true
     - name: log-server
       port: 80

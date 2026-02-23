@@ -4,6 +4,12 @@ services:
     build: ./app
     container_name: s7ben-hard-014
     ports: ["8093:8093"]
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8093/"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
     networks: [frontend]
 networks:
   frontend:

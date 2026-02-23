@@ -6,6 +6,12 @@ services:
     container_name: s7ben-vhard-012-app
     ports:
       - "8091:8091"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8091/"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
     networks:
       - frontend
     depends_on:
@@ -16,6 +22,12 @@ services:
     container_name: s7ben-vhard-012-oauth
     ports:
       - "8092:8092"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8092/"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
     networks:
       - frontend
 

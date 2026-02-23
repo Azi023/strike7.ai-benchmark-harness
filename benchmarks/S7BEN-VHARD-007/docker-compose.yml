@@ -5,7 +5,7 @@ services:
     container_name: xxe-webapp
     hostname: webapp
     ports:
-      - "8080:8080"
+      - "8121:8080"
     networks:
       - frontend-net
       - backend-net

@@ -5,7 +5,7 @@ services:
     container_name: nosql-webapp
     hostname: webapp
     ports:
-      - "3000:3000"
+      - "8115:3000"
     networks:
       - nosql-net
     environment:
@@ -48,7 +48,7 @@ services:
     container_name: nosql-admin
     hostname: admin-panel
     ports:
-      - "4000:4000"
+      - "8116:4000"
     networks:
       - nosql-net
     environment:

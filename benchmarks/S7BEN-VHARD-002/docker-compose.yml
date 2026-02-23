@@ -4,14 +4,14 @@ services:
     build: ./web-app
     container_name: ssrf-web-app
     ports:
-      - "80:5000"
+      - "8114:5000"
     networks:
       - frontend-net
       - backend-net
     extra_hosts:
       # Map cloud metadata IPs to our simulated metadata service
-      - "169.254.169.254:172.20.0.10"
-      - "metadata.internal:172.20.0.10"
+      - "169.254.169.254:10.200.2.10"
+      - "metadata.internal:10.200.2.10"
     environment:
       - FLAG_SECRET=${FLAG_SECRET:-strike7-ssrf-secret-key}
     healthcheck:
@@ -40,7 +40,7 @@ services:
     container_name: ssrf-metadata
     networks:
       backend-net:
-        ipv4_address: 172.20.0.10
+        ipv4_address: 10.200.2.10
     environment:
       - AWS_ACCESS_KEY_ID=AKIAIOSFODNN7EXAMPLE
       - AWS_SECRET_ACCESS_KEY=wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
@@ -75,4 +75,4 @@ networks:
     internal: true
     ipam:
       config:
-        - subnet: 172.20.0.0/16
+        - subnet: 10.200.2.0/24

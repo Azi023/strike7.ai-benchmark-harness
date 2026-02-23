@@ -38,7 +38,7 @@ services:
     port: 5000
     protocol: http
   mock-registry:
-    port: 5001
+    port: 8124
     protocol: http
 
 hints: []
