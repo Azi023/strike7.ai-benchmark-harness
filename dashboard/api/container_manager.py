@@ -6,7 +6,7 @@ Handles Docker container lifecycle, status monitoring, and safety enforcement
 import subprocess
 import json
 import time
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Dict, List, Optional, Tuple
 
 
@@ -58,6 +58,22 @@ class ContainerManager:
                 'benchmark_id': benchmark_id
             }
 
+        # Get benchmark directory and compose project name
+        benchmark_dir = self._get_benchmark_directory(benchmark_id)
+        compose_project = self._get_compose_project_name(benchmark_id)
+
+        # Check if benchmark already running BEFORE concurrent limit check
+        # (re-starting an already-running benchmark should always succeed)
+        if self._is_benchmark_running(benchmark_id):
+            return {
+                'status': 'success',
+                'message': 'Container already running',
+                'benchmark_id': benchmark_id,
+                'container_name': compose_project,
+                'port': benchmark.get('port'),
+                'already_running': True
+            }
+
         # Check concurrent limit
         running_count = len(self.get_running_containers())
         if running_count >= self.config['max_concurrent']:
@@ -73,29 +89,14 @@ class ContainerManager:
         else:
             stopped_ids = []
 
-        # Get benchmark directory and compose project name
-        benchmark_dir = self._get_benchmark_directory(benchmark_id)
-        compose_project = self._get_compose_project_name(benchmark_id)
-
-        # Check if benchmark already running (project-scoped, independent of service/container names)
-        if self._is_benchmark_running(benchmark_id):
-            return {
-                'status': 'success',
-                'message': 'Container already running',
-                'benchmark_id': benchmark_id,
-                'container_name': compose_project,
-                'port': benchmark.get('port'),
-                'already_running': True
-            }
-
         # Start container using docker-compose
         try:
             result = subprocess.run(
-                ['docker-compose', 'up', '-d'],
+                ['docker-compose', 'up', '-d', '--build'],
                 cwd=benchmark_dir,
                 capture_output=True,
                 text=True,
-                timeout=30
+                timeout=120
             )
 
             if result.returncode != 0:
@@ -106,17 +107,20 @@ class ContainerManager:
                     'benchmark_id': benchmark_id
                 }
 
-            # Calculate auto-stop time
+            # Calculate auto-stop time using UTC to avoid timezone skew
             timeout = timeout_minutes or self.config['timeout_minutes']
-            auto_stop_at = datetime.now() + timedelta(minutes=timeout)
+            now_utc = datetime.now(timezone.utc)
+            auto_stop_at = now_utc + timedelta(minutes=timeout)
 
             # Track running container
             container_info = {
                 'benchmark_id': benchmark_id,
                 'container_name': compose_project,
                 'port': benchmark.get('port'),
-                'started_at': datetime.now().isoformat(),
-                'auto_stop_at': auto_stop_at.isoformat(),
+                # Use ISO 8601 with milliseconds and UTC offset to ensure
+                # consistent parsing in browsers and backend.
+                'started_at': now_utc.isoformat(timespec='milliseconds'),
+                'auto_stop_at': auto_stop_at.isoformat(timespec='milliseconds'),
                 'timeout_minutes': timeout
             }
             self.running_containers[benchmark_id] = container_info
@@ -200,7 +204,11 @@ class ContainerManager:
                 started_at = datetime.fromisoformat(
                     self.running_containers[benchmark_id]['started_at']
                 )
-                runtime_seconds = (datetime.now() - started_at).total_seconds()
+                # Backward compatibility: if stored timestamp is naive, assume UTC
+                if started_at.tzinfo is None:
+                    started_at = started_at.replace(tzinfo=timezone.utc)
+                now_utc = datetime.now(timezone.utc)
+                runtime_seconds = (now_utc - started_at).total_seconds()
                 del self.running_containers[benchmark_id]
 
             return {
@@ -280,8 +288,12 @@ class ContainerManager:
                                 tracked = self.running_containers[benchmark_id]
                                 container_info['started_at'] = tracked['started_at']
                                 started = datetime.fromisoformat(tracked['started_at'])
+                                # Backward compatibility for older naive timestamps
+                                if started.tzinfo is None:
+                                    started = started.replace(tzinfo=timezone.utc)
+                                now_utc = datetime.now(timezone.utc)
                                 container_info['runtime_seconds'] = (
-                                    datetime.now() - started
+                                    now_utc - started
                                 ).total_seconds()
 
                             # Keep one status object per benchmark. Prefer a container that
@@ -550,10 +562,12 @@ class ContainerManager:
             List of benchmark IDs that were stopped due to timeout
         """
         stopped = []
-        now = datetime.now()
+        now = datetime.now(timezone.utc)
 
         for benchmark_id, info in list(self.running_containers.items()):
             auto_stop_at = datetime.fromisoformat(info['auto_stop_at'])
+            if auto_stop_at.tzinfo is None:
+                auto_stop_at = auto_stop_at.replace(tzinfo=timezone.utc)
             if now >= auto_stop_at:
                 result = self.stop_container(benchmark_id)
                 if result['status'] == 'success':

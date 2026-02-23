@@ -164,7 +164,7 @@ function createBenchmarkCard(benchmark) {
             <div class="manual-controls">
                 <label>🔧 Manual Controls:</label>
                 
-                <div class="status-indicator">○ Not Running</div>
+                <div class="status-indicator status-not-running">Not Running</div>
 
                  <!-- Running Info / Access Box (Hidden by default) -->
                 <div class="running-info" style="display: none;">
@@ -172,7 +172,15 @@ function createBenchmarkCard(benchmark) {
                         <div class="access-header">
                             <span class="status-dot running"></span>
                             <strong>Container Running</strong>
-                            <span class="runtime-counter">0s</span>
+                            <span class="runtime-counter" title="Start time unavailable">Running for 0s</span>
+                        </div>
+
+                        <div class="port-display">
+                            <span class="port-label">Port:</span>
+                            <code class="port-value">${benchmark.port}</code>
+                            <button class="btn-icon btn-copy-port" onclick="copyPort(this)" title="Copy port">
+                                📋
+                            </button>
                         </div>
 
                         <div class="access-url-section">
@@ -242,6 +250,7 @@ async function startBenchmark(benchmarkId) {
     if (!response.ok) {
         const error = new Error(data.message || data.error || 'Failed to start container');
         error.status = response.status;
+        error.data = data;
         throw error;
     }
 
@@ -363,16 +372,18 @@ function updateContainerUI(status) {
             const statusEl = card.querySelector('.status-indicator');
             if (statusEl) {
                 if (isHealthy) {
-                    statusEl.textContent = '● Running';
+                    setStatusIndicator(statusEl, 'healthy', 'Healthy');
                 } else if (isStarting) {
-                    statusEl.textContent = '🔄 Starting (health checks)';
+                    setStatusIndicator(statusEl, 'starting', 'Starting');
                 } else if (isUnhealthy) {
-                    statusEl.textContent = '⚠️ Unhealthy';
+                    setStatusIndicator(statusEl, 'unhealthy', 'Unhealthy');
+                } else {
+                    setStatusIndicator(statusEl, 'healthy', 'Running');
                 }
             }
         } else {
             const statusEl = card.querySelector('.status-indicator');
-            if (statusEl) statusEl.textContent = '○ Not Running';
+            if (statusEl) setStatusIndicator(statusEl, 'not-running', 'Not Running');
         }
     });
 
@@ -414,6 +425,8 @@ function updateBenchmarkCardRunning(card, containerInfo) {
     // Update port number in display
     const portEl = card.querySelector('.port-number');
     if (portEl) portEl.textContent = containerInfo.port;
+    const portValueEl = card.querySelector('.port-value');
+    if (portValueEl) portValueEl.textContent = containerInfo.port;
 
     // Update access URL if present
     const urlEl = card.querySelector('.access-url');
@@ -437,6 +450,8 @@ function startRuntimeCounter(card, startedAt) {
     }
 
     const startTime = new Date(startedAt).getTime();
+    const startedLabel = new Date(startedAt).toLocaleString();
+    counterEl.title = `Started at ${startedLabel}`;
 
     // Initial update
     const update = () => {
@@ -457,17 +472,17 @@ function startRuntimeCounter(card, startedAt) {
 }
 
 function formatRuntime(seconds) {
-    if (seconds < 0) return '0s'; // Clock skew protection
+    if (seconds < 0) return 'Running for 0s'; // Clock skew protection
     if (seconds < 60) {
-        return `${seconds}s`;
+        return `Running for ${seconds}s`;
     } else if (seconds < 3600) {
         const mins = Math.floor(seconds / 60);
         const secs = seconds % 60;
-        return `${mins}m ${secs}s`;
+        return `Running for ${mins}m ${secs}s`;
     } else {
         const hours = Math.floor(seconds / 3600);
         const mins = Math.floor((seconds % 3600) / 60);
-        return `${hours}h ${mins}m`;
+        return `Running for ${hours}h ${mins}m`;
     }
 }
 
@@ -481,6 +496,7 @@ async function handleStartClick(benchmarkId) {
         button.disabled = true;
         button.innerHTML = '<span class="spinner"></span> Starting...';
     }
+    setCardActionState(card, true);
 
     try {
         const result = await startBenchmark(benchmarkId);
@@ -502,6 +518,7 @@ async function handleStartClick(benchmarkId) {
                 button.disabled = false;
                 button.innerHTML = '▶ Start';
             }
+            setCardActionState(card, false);
         }
     } catch (error) {
         const message = handleApiError(error, 'start');
@@ -510,6 +527,10 @@ async function handleStartClick(benchmarkId) {
             button.disabled = false;
             button.innerHTML = '▶ Start';
         }
+        setCardActionState(card, false);
+    } finally {
+        // Safe to re-enable; running state visibility is controlled by polling.
+        setCardActionState(card, false);
     }
 }
 
@@ -555,6 +576,7 @@ async function handleStopClick(benchmarkId) {
         button.disabled = true;
         button.innerHTML = '<span class="spinner"></span> Stopping...';
     }
+    setCardActionState(card, true);
 
     try {
         await stopBenchmark(benchmarkId);
@@ -567,6 +589,7 @@ async function handleStopClick(benchmarkId) {
             button.disabled = false;
             button.innerHTML = originalText;
         }
+        setCardActionState(card, false);
     }
 }
 
@@ -761,6 +784,7 @@ window.showBenchmarkDetails = (id) => {
 window.closeModal = closeModal;
 window.submitFlagFromModal = submitFlagFromModal;
 window.copyAccessUrl = copyAccessUrl;
+window.copyPort = copyPort;
 window.openInBrowser = openInBrowser;
 window.startFromDetails = startFromDetails;
 
@@ -1110,6 +1134,25 @@ function copyAccessUrl(button) {
     });
 }
 
+function copyPort(button) {
+    const card = button.closest('.benchmark-card');
+    const port = card?.dataset?.port || card?.querySelector('.port-value')?.textContent || '';
+    if (!port) return;
+
+    navigator.clipboard.writeText(String(port)).then(() => {
+        const originalText = button.innerHTML;
+        button.innerHTML = '✓';
+        button.style.color = '#4ADE80';
+
+        setTimeout(() => {
+            button.innerHTML = originalText;
+            button.style.color = '';
+        }, 1200);
+
+        showNotification('success', `Port ${port} copied`);
+    });
+}
+
 function openInBrowser(button) {
     const card = button.closest('.benchmark-card');
     const port = card.dataset.port;
@@ -1157,8 +1200,12 @@ function validateFlagFormat(flag) {
 function handleApiError(error, operation) {
     let message = '';
 
+    const apiMessage = error?.data?.message || error?.data?.error;
+
     if (error.message === 'Failed to fetch') {
         message = `Cannot connect to Dashboard API at localhost:5500.\n\nIs the server running?\n\nStart it with: python dashboard/app.py`;
+    } else if (apiMessage) {
+        message = `${operation} failed: ${apiMessage}`;
     } else if (error.status === 404) {
         message = `Benchmark not found.\n\nThis benchmark may not be installed or the ID is incorrect.`;
     } else if (error.status === 500) {
@@ -1176,13 +1223,44 @@ function showNotification(type, message) {
     // Create toast notification
     const toast = document.createElement('div');
     toast.className = `toast toast-${type}`;
-    toast.textContent = message;
+    toast.setAttribute('role', type === 'error' ? 'alert' : 'status');
+
+    const icon = document.createElement('span');
+    icon.className = 'toast-icon';
+    icon.textContent = type === 'error' ? '⚠' : (type === 'success' ? '✓' : 'ℹ');
+
+    const text = document.createElement('span');
+    text.className = 'toast-text';
+    text.textContent = message;
+
+    toast.appendChild(icon);
+    toast.appendChild(text);
 
     document.body.appendChild(toast);
 
-    // Auto-remove after 5 seconds
+    // Auto-dismiss success quickly; keep errors visible longer.
+    const dismissMs = type === 'success' ? 3000 : (type === 'error' ? 7000 : 5000);
     setTimeout(() => {
         toast.classList.add('fade-out');
         setTimeout(() => toast.remove(), 300);
-    }, 5000);
+    }, dismissMs);
+}
+
+function setStatusIndicator(el, state, label) {
+    el.textContent = label;
+    el.classList.remove(
+        'status-healthy',
+        'status-starting',
+        'status-unhealthy',
+        'status-not-running'
+    );
+    el.classList.add(`status-${state}`);
+}
+
+function setCardActionState(card, disabled) {
+    if (!card) return;
+    const buttons = card.querySelectorAll('.btn-start, .btn-stop, .btn-submit-flag, .btn-details, .btn-icon');
+    buttons.forEach(btn => {
+        btn.disabled = disabled;
+    });
 }

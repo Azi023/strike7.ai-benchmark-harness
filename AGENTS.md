@@ -62,3 +62,29 @@
   ```
 - For VPS checks (read-only): `ssh root@139.59.80.137`, then inspect `docker ps`, `systemctl status strike7-dashboard`, and `journalctl -u strike7-dashboard -n 100`.
 - Keep fixes minimal and ordered: diagnose one issue, patch one issue, run smoke checks, then move to the next issue.
+
+## QA Audit Tasks (Sprint 8)
+
+### Priority 1: Benchmark Quality Audit
+For each benchmark in `benchmarks/`:
+1. Check for hardcoded flags — search for: `FLAG`, `flag`, `S7{`, `capture_the_flag` in all source files
+2. Verify `ARG flag` exists in each Dockerfile and is used (not ignored)
+3. Check for hint leakage — search variable names, function names, route names for: `sqli`, `xss`, `ssrf`, `idor`, `rce`, `inject`, `vuln`, `exploit`, `bypass`
+4. Check source code comments for hints about vulnerability types
+5. Verify `benchmark-config.json` or `benchmark.yaml` exists and has valid metadata
+6. Verify `docker-compose.yml` has healthchecks
+7. Generate a JSON report at `docs/qa-audit-report.json`
+
+### Priority 2: MCP Server Validation
+1. Review `strike7_mcp_server.py` — check all endpoints respond
+2. Review `test_mcp_capability.py` and `test_mcp_easy002.py` for test coverage
+3. Check if telemetry recording works (look at dashboard API routes)
+
+### SSH Access (if needed for live validation)
+- VPS: `ssh root@139.59.80.137`
+- Benchmarks are deployed there via CI/CD (git push auto-deploys)
+
+### DO NOT
+- Attempt actual exploitation of benchmarks
+- Modify benchmark source code without approval
+- Push directly to main branch

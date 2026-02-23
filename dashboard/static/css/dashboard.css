@@ -805,15 +805,41 @@ body::before {
 
 /* Status indicator */
 .status-indicator {
-    display: block;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
     margin-bottom: 0.75rem;
     font-size: 0.8rem;
-    color: var(--s7-text-secondary);
+    color: var(--s7-text-primary);
     font-family: var(--s7-font-mono);
+    padding: 0.22rem 0.6rem;
+    border-radius: 999px;
+    border: 1px solid var(--s7-border);
+    background: var(--s7-bg-input);
 }
 
-.status-indicator.running {
-    color: var(--s7-easy-text);
+.status-healthy {
+    background: rgba(74, 222, 128, 0.14);
+    border-color: rgba(74, 222, 128, 0.45);
+    color: #7BF0A2;
+}
+
+.status-starting {
+    background: rgba(251, 191, 36, 0.14);
+    border-color: rgba(251, 191, 36, 0.45);
+    color: #FFD670;
+}
+
+.status-unhealthy {
+    background: rgba(248, 113, 113, 0.14);
+    border-color: rgba(248, 113, 113, 0.45);
+    color: #FF9D9D;
+}
+
+.status-not-running {
+    background: rgba(172, 172, 172, 0.12);
+    border-color: rgba(172, 172, 172, 0.35);
+    color: #CFCFCF;
 }
 
 /* Flag submission modal */
@@ -973,8 +999,49 @@ body::before {
 .runtime-counter {
     margin-left: auto;
     font-family: var(--s7-font-mono);
-    color: var(--s7-text-secondary);
+    color: #E8E8E8;
     font-size: 0.875rem;
+    font-weight: 600;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 999px;
+    padding: 0.25rem 0.6rem;
+}
+
+.port-display {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: #111;
+    border: 1px solid var(--s7-border);
+    border-left: 3px solid var(--s7-accent);
+    border-radius: 4px;
+    padding: 0.55rem 0.65rem;
+    margin-bottom: 0.75rem;
+}
+
+.port-label {
+    color: var(--s7-text-secondary);
+    font-size: 0.82rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.port-value {
+    color: var(--s7-accent);
+    font-family: var(--s7-font-mono);
+    font-size: 1.08rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+}
+
+.btn-copy-port {
+    margin-left: auto;
+    border: 1px solid var(--s7-border);
+    border-radius: 4px;
+    font-size: 0.95rem;
+    line-height: 1;
+    padding: 0.35rem 0.5rem;
 }
 
 .access-url-section {
@@ -1039,28 +1106,56 @@ body::before {
 /* --- Toast Notifications --- */
 .toast {
     position: fixed;
-    bottom: 2rem;
+    top: 1.25rem;
     right: 2rem;
-    padding: 1rem 1.5rem;
+    padding: 0.9rem 1rem;
     border-radius: 4px;
     color: var(--s7-text-primary);
-    font-size: 0.875rem;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+    font-size: 0.92rem;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.55);
     z-index: 9999;
     animation: slideIn 0.3s ease;
-    max-width: 400px;
+    max-width: 520px;
     white-space: pre-line;
     background: var(--s7-bg-card); /* Default fallback */
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    display: flex;
+    align-items: flex-start;
+    gap: 0.65rem;
+}
+
+.toast-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.1rem;
+    font-size: 0.95rem;
+    margin-top: 0.05rem;
+}
+
+.toast-text {
+    flex: 1;
+    line-height: 1.35;
 }
 
 .toast-success {
-    background: var(--s7-easy-bg);
-    border-left: 4px solid var(--s7-easy-text);
+    background: linear-gradient(90deg, rgba(45, 74, 62, 0.98), rgba(33, 56, 46, 0.98));
+    border-left: 4px solid #4ADE80;
 }
 
 .toast-error {
-    background: var(--s7-hard-bg);
-    border-left: 4px solid var(--s7-hard-text);
+    background: linear-gradient(90deg, rgba(88, 43, 43, 0.98), rgba(65, 27, 27, 0.98));
+    border-left: 4px solid #F87171;
+}
+
+.toast-warning {
+    background: linear-gradient(90deg, rgba(78, 62, 31, 0.98), rgba(62, 48, 20, 0.98));
+    border-left: 4px solid #FBBF24;
+}
+
+.toast-info {
+    background: linear-gradient(90deg, rgba(35, 52, 84, 0.98), rgba(24, 38, 63, 0.98));
+    border-left: 4px solid #7AA2FF;
 }
 
 .toast.fade-out {
@@ -1086,6 +1181,16 @@ body::before {
     to {
         transform: translateX(400px);
         opacity: 0;
+    }
+}
+
+@media (max-width: 768px) {
+    .toast {
+        top: auto;
+        bottom: 1rem;
+        right: 1rem;
+        left: 1rem;
+        max-width: none;
     }
 }
 
