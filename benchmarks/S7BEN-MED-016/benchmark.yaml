@@ -22,8 +22,7 @@ vulnerabilities:
 
 objective: "Discover credentials and authenticate to the admin area to retrieve the flag."
 
-flag_format: "S7BEN{def4ult_creds_[dynamic]}"
-flag_dynamic: true
+flag_pattern: 'S7BEN\{def4ult_creds_[0-9a-f]{10}\}'
 
 services:
   target:

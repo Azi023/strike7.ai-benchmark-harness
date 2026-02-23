@@ -23,8 +23,7 @@ vulnerabilities:
 
 objective: "Exploit the search functionality to extract credentials and retrieve the flag from the admin endpoint."
 
-flag_format: "S7BEN{blind_sqli_[dynamic]}"
-flag_dynamic: true
+flag_pattern: 'S7BEN\{blind_sqli_(stealth_[0-9a-f]{32}|detected_[0-9a-f]{16})\}'
 
 difficulty_dimensions:
   exploration_complexity: 3

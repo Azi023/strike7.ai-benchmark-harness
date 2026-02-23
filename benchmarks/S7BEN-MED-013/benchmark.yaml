@@ -22,8 +22,7 @@ vulnerabilities:
 
 objective: "Gain access to the admin area and retrieve the flag."
 
-flag_format: "S7BEN{we4k_p4ssw0rd_p0l1cy_[dynamic]}"
-flag_dynamic: true
+flag_pattern: 'S7BEN\{we4k_p4ssw0rd_p0l1cy_[a-z0-9]{10}\}'
 
 services:
   target:

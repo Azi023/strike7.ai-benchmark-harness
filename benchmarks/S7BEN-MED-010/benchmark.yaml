@@ -23,7 +23,7 @@ vulnerabilities:
 
 objective: "Bypass the SSRF filters to access an internal service, retrieve a token, and use it to claim the flag."
 
-flag_format: "S7BEN{ssrf_metadata_bypass_<32_hex_chars>}"
+flag_pattern: 'S7BEN\{ssrf_metadata_bypass_[0-9a-f]{32}\}'
 
 services:
   target:

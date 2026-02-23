@@ -5,6 +5,7 @@ difficulty: 7
 category: hard
 description: "E-commerce checkout service."
 objective: "Obtain the flag from the checkout service."
+flag_pattern: 'S7BEN\{pr1ce_man1p_[a-z0-9]{10}\}'
 vulnerabilities:
   - type: Client-Side Trust
     cwes: [CWE-602]

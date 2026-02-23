@@ -17,7 +17,7 @@ vulnerabilities:
 
 objective: "Upload a file, manipulate the processing pipeline, and retrieve the flag."
 
-flag_format: "S7BEN{...}"
+flag_pattern: 'S7BEN\{toctou_file_race_[0-9a-f]{32}\}'
 
 services:
   target:

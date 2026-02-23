@@ -24,8 +24,7 @@ vulnerabilities:
 
 objective: "Access patient records beyond your authorization scope and retrieve the flag."
 
-flag_format: "S7BEN{partial_authz_idor_[dynamic]}"
-flag_dynamic: true
+flag_pattern: 'S7BEN\{partial_authz_idor_[0-9a-f]{32}\}'
 
 difficulty_dimensions:
   exploration_complexity: 4

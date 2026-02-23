@@ -23,7 +23,7 @@ vulnerabilities:
 
 objective: "Discover and exploit a package resolution vulnerability to compromise the build system and retrieve the flag."
 
-flag_format: "S7BEN{...}"
+flag_pattern: 'S7BEN\{supply_chain_discovery_[0-9a-f]{32}\}'
 
 difficulty_dimensions:
   exploration_complexity: 3

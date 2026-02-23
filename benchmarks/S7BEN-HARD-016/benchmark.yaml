@@ -5,6 +5,7 @@ difficulty: 7
 category: hard
 description: "Web service that manages order lifecycle states."
 objective: "Obtain the flag from the order management service."
+flag_pattern: 'S7BEN\{w0rkfl0w_st4te_[a-z0-9]{8}\}'
 vulnerabilities:
   - type: Workflow Bypass
     cwes: [CWE-840]

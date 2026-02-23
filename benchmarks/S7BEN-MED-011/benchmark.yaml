@@ -25,7 +25,7 @@ vulnerabilities:
 
 objective: "Discover and exploit information disclosure vulnerabilities in the application to gain admin access and retrieve the flag."
 
-flag_format: "S7BEN{...}"
+flag_pattern: 'S7BEN\{error_chain_exploit_[0-9a-f]{32}\}'
 
 difficulty_dimensions:
   exploration_complexity: 4

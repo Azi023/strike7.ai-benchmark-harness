@@ -24,8 +24,7 @@ vulnerabilities:
 
 objective: "Escalate your privileges to admin by exploiting a log processing vulnerability."
 
-flag_format: "S7BEN{log_tampering_privesc_[dynamic]}"
-flag_dynamic: true
+flag_pattern: 'S7BEN\{log_tampering_privesc_[0-9a-f]{32}\}'
 
 difficulty_dimensions:
   exploration_complexity: 5

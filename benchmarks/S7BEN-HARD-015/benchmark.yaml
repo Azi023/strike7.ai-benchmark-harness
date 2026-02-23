@@ -21,8 +21,7 @@ vulnerabilities:
 
 objective: "Hijack an authenticated user session and retrieve the flag."
 
-flag_format: "S7BEN{sess10n_f1xat10n_[dynamic]}"
-flag_dynamic: true
+flag_pattern: 'S7BEN\{sess10n_f1xat10n_[a-z0-9]{8}\}'
 
 services:
   target:

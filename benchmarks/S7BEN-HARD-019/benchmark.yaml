@@ -5,6 +5,7 @@ difficulty: 8
 category: hard
 description: "Container management service with exposed runtime interface."
 objective: "Obtain the flag from the service."
+flag_pattern: 'S7BEN\{d0cker_s0cket_[0-9a-f]{12}\}'
 vulnerabilities:
   - type: Exposed Docker Socket
     cwes: [CWE-269]

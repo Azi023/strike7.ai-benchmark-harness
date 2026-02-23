@@ -24,8 +24,7 @@ vulnerabilities:
 
 objective: "Achieve JavaScript execution within the application and retrieve the flag from the admin endpoint."
 
-flag_format: "S7BEN{csp_bypass_gadget_[dynamic]}"
-flag_dynamic: true
+flag_pattern: 'S7BEN\{csp_bypass_gadget_[0-9a-f]{32}\}'
 
 difficulty_dimensions:
   exploration_complexity: 4

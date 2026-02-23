@@ -17,7 +17,7 @@ vulnerabilities:
 
 objective: "Gain authenticated access to a session you did not create and retrieve the flag."
 
-flag_format: "S7BEN{...}"
+flag_pattern: 'S7BEN\{session_fixation_[0-9a-f]{32}\}'
 
 services:
   target:

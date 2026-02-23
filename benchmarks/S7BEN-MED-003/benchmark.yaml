@@ -24,7 +24,7 @@ vulnerabilities:
 
 objective: "Discover a vulnerability in the application, exploit it to extract sensitive data, and use that data to retrieve the flag."
 
-flag_format: "S7BEN{...}"
+flag_pattern: 'S7BEN\{sqli_union_exploit_[0-9a-f]{32}\}'
 
 difficulty_dimensions:
   exploration_complexity: 4

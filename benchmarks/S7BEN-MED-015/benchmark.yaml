@@ -23,8 +23,7 @@ vulnerabilities:
 
 objective: "Exploit the misconfiguration to gain code execution and retrieve the flag."
 
-flag_format: "S7BEN{debug_m0de_[dynamic]}"
-flag_dynamic: true
+flag_pattern: 'S7BEN\{debug_m0de_[0-9a-f]{12}\}'
 
 services:
   target:

@@ -5,6 +5,7 @@ difficulty: 8
 category: hard
 description: "Simulated Kubernetes API service with RBAC access controls."
 objective: "Obtain the flag from the Kubernetes secrets endpoint."
+flag_pattern: 'S7BEN\{k8s_rb4c_esc4lat10n_[a-z0-9]{10}\}'
 vulnerabilities:
   - type: Excessive Permissions
     cwes: [CWE-269]

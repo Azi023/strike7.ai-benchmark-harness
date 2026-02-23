@@ -21,8 +21,7 @@ vulnerabilities:
 
 objective: "Exploit a flaw in the coupon system to make qualifying purchases at a discount and retrieve the flag."
 
-flag_format: "S7BEN{c0up0n_reuse_[dynamic]}"
-flag_dynamic: true
+flag_pattern: 'S7BEN\{c0up0n_reuse_[a-z0-9]{8}\}'
 
 services:
   target:

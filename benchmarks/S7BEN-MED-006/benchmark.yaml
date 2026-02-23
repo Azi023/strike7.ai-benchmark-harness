@@ -23,7 +23,7 @@ vulnerabilities:
 
 objective: "Exploit a multi-step vulnerability chain in the application to gain access to admin resources and retrieve the flag."
 
-flag_format: "S7BEN{...}"
+flag_pattern: 'S7BEN\{log_injection_xss_[0-9a-f]{32}\}'
 
 difficulty_dimensions:
   exploration_complexity: 3

@@ -23,7 +23,7 @@ vulnerabilities:
 
 objective: "Discover a client-side vulnerability in the application, exploit it to gain access to admin resources, and retrieve the flag."
 
-flag_format: "S7BEN{...}"
+flag_pattern: 'S7BEN\{dom_xss_theft_[0-9a-f]{32}\}'
 
 difficulty_dimensions:
   exploration_complexity: 4

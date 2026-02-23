@@ -22,7 +22,7 @@ vulnerabilities:
 
 objective: "Bypass the Content Security Policy to achieve XSS, steal the admin session, and retrieve the flag."
 
-flag_format: "S7BEN{csp_bypass_gadget_<32_hex_chars>}"
+flag_pattern: 'S7BEN\{csp_bypass_gadget_[0-9a-f]{32}\}'
 
 services:
   target:

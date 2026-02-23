@@ -23,7 +23,7 @@ vulnerabilities:
 
 objective: "Discover an access control vulnerability in the document management system, access restricted documents, and retrieve the flag."
 
-flag_format: "S7BEN{...}"
+flag_pattern: 'S7BEN\{uuid_idor_[0-9a-f]{32}\}'
 
 difficulty_dimensions:
   exploration_complexity: 4

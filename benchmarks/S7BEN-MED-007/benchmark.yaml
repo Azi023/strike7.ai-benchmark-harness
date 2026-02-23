@@ -22,7 +22,7 @@ vulnerabilities:
 
 objective: "Exploit the authentication mechanism to gain admin access and retrieve the flag."
 
-flag_format: "S7BEN{jwt_alg_confusion_<32_hex_chars>}"
+flag_pattern: 'S7BEN\{jwt_alg_confusion_[0-9a-f]{32}\}'
 
 services:
   target:
