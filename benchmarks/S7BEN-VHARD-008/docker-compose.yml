@@ -7,8 +7,7 @@ services:
     ports:
       - "3000:3000"
     networks:
-      nosql-net:
-        ipv4_address: 172.26.0.10
+      - nosql-net
     environment:
       - NODE_ENV=production
       - MONGODB_URI=mongodb://mongo-db:27017/nosqldb
@@ -30,8 +29,7 @@ services:
     container_name: nosql-db
     hostname: mongo-db
     networks:
-      nosql-net:
-        ipv4_address: 172.26.0.20
+      - nosql-net
     environment:
       - MONGO_INITDB_DATABASE=nosqldb
     volumes:
@@ -52,8 +50,7 @@ services:
     ports:
       - "4000:4000"
     networks:
-      nosql-net:
-        ipv4_address: 172.26.0.30
+      - nosql-net
     environment:
       - MONGODB_URI=mongodb://mongo-db:27017/nosqldb
       - FLAG_ADMIN=${FLAG_ADMIN:-S7BEN{nosql_admin_panel_access_j1k2l3}}
@@ -71,9 +68,6 @@ services:
 networks:
   nosql-net:
     driver: bridge
-    ipam:
-      config:
-        - subnet: 172.26.0.0/16
 
 volumes:
   mongo-data:

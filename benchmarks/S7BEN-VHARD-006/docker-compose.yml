@@ -7,8 +7,7 @@ services:
     ports:
       - "4000:4000"
     networks:
-      gql-net:
-        ipv4_address: 172.24.0.10
+      - gql-net
     environment:
       - NODE_ENV=production
       - DATABASE_URL=postgresql://gqluser:${DB_PASSWORD:-GraphQLPass123!}@postgres-db:5432/gqldb
@@ -30,8 +29,7 @@ services:
     container_name: gql-db
     hostname: postgres-db
     networks:
-      gql-net:
-        ipv4_address: 172.24.0.20
+      - gql-net
     environment:
       - POSTGRES_USER=gqluser
       - POSTGRES_PASSWORD=${DB_PASSWORD:-GraphQLPass123!}
@@ -50,9 +48,6 @@ services:
 networks:
   gql-net:
     driver: bridge
-    ipam:
-      config:
-        - subnet: 172.24.0.0/16
 
 volumes:
   db_data:
