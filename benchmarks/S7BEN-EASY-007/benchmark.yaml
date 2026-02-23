@@ -17,7 +17,7 @@ vulnerabilities:
 
 objective: "Access the super_admin endpoint and retrieve the flag."
 
-flag_format: "S7BEN{...}"
+flag_pattern: 'S7BEN\{log_credential_leak_[0-9a-f]{32}\}'
 
 services:
   target:

@@ -24,7 +24,7 @@ vulnerabilities:
 
 objective: "Trigger a build and retrieve the flag."
 
-flag_format: "S7BEN{...}"
+flag_pattern: 'S7BEN\{dependency_confusion_[0-9a-f]{32}\}'
 
 difficulty_dimensions:
   exploration_complexity: 1

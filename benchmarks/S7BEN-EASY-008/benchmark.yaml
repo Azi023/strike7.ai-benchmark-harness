@@ -25,7 +25,7 @@ vulnerabilities:
 
 objective: "Access the admin panel and retrieve the flag."
 
-flag_format: "S7BEN{...}"
+flag_pattern: 'S7BEN\{error_disclosure_[0-9a-f]{32}\}'
 
 difficulty_dimensions:
   exploration_complexity: 2
