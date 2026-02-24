@@ -84,6 +84,18 @@ if public_ip and "localhost" in STRIKE7_API_URL:
     print(f"[INFO] Detected public IP: {public_ip}", file=sys.stderr)
     print(f"[INFO] Consider setting STRIKE7_API_URL=http://{public_ip}:5500", file=sys.stderr)
 
+# Path prefix for nginx reverse proxy.
+# When nginx proxies /mcp/sse and /mcp/messages/, the FastMCP library
+# advertises /messages/ in the SSE endpoint event — which is wrong.
+# Set MCP_PATH_PREFIX=/mcp (or whatever nginx prefix) to fix this.
+# Auto-defaults to /mcp when a public IP is detected (VPS mode).
+MCP_PATH_PREFIX = os.getenv("MCP_PATH_PREFIX", "/mcp" if public_ip else "")
+
+# Public-facing URL for accurate health endpoint responses.
+# Set MCP_PUBLIC_URL=http://your-vps-ip on VPS deployments where the
+# hostname doesn't resolve to the public IP (common in cloud VMs).
+MCP_PUBLIC_URL = os.getenv("MCP_PUBLIC_URL", "")
+
 print(f"[INIT] Strike7 MCP Server", file=sys.stderr)
 print(f"[INIT] API URL: {STRIKE7_API_URL}", file=sys.stderr)
 
@@ -610,6 +622,45 @@ Tools available:
 
 
 # ============================================
+# PATH PREFIX MIDDLEWARE
+# ============================================
+
+class _PathPrefixMiddleware:
+    """
+    Rewrites the SSE endpoint event to advertise the correct external path.
+
+    Problem: FastMCP emits 'event: endpoint / data: /messages/?session_id=...'
+    but when nginx reverse-proxies at /mcp/, the correct external path is
+    '/mcp/messages/?session_id=...'.  Naive clients that follow the SSE data
+    will hit 404s.
+
+    Fix: intercept the SSE /sse response body and rewrite the data line.
+    Only active when MCP_PATH_PREFIX is set (auto-detected on VPS).
+    """
+
+    def __init__(self, app, prefix: str):
+        self.app = app
+        self._old = b"data: /messages/"
+        self._new = f"data: {prefix.rstrip('/')}/messages/".encode()
+
+    async def __call__(self, scope, receive, send):
+        # Only intercept HTTP requests to the /sse endpoint
+        if scope.get("type") != "http" or not scope.get("path", "").endswith("/sse"):
+            await self.app(scope, receive, send)
+            return
+
+        async def patched_send(message):
+            if (
+                message.get("type") == "http.response.body"
+                and self._old in message.get("body", b"")
+            ):
+                message = {**message, "body": message["body"].replace(self._old, self._new)}
+            await send(message)
+
+        await self.app(scope, receive, patched_send)
+
+
+# ============================================
 # SERVER ENTRY POINT
 # ============================================
 
@@ -679,9 +730,16 @@ if __name__ == "__main__":
             sys.exit(1)
     else:
         # SSE transport — expose MCP over HTTP for network access
+        ext_base = (
+            MCP_PUBLIC_URL.rstrip("/")
+            if MCP_PUBLIC_URL
+            else (f"http://{public_ip}" if public_ip else f"http://localhost:{port}")
+        )
         print(f"[INFO] Starting SSE transport on {host}:{port}", file=sys.stderr)
-        print(f"[INFO] MCP endpoint:    http://{public_ip or host}:{port}/sse", file=sys.stderr)
-        print(f"[INFO] Health endpoint: http://{public_ip or host}:{port}/health", file=sys.stderr)
+        print(f"[INFO] SSE endpoint:    {ext_base}{MCP_PATH_PREFIX}/sse", file=sys.stderr)
+        print(f"[INFO] Messages path:   {ext_base}{MCP_PATH_PREFIX}/messages/", file=sys.stderr)
+        print(f"[INFO] Health endpoint: {ext_base}{MCP_PATH_PREFIX}/health", file=sys.stderr)
+        print(f"[INFO] Path prefix:     '{MCP_PATH_PREFIX or '(none)'}' | Public URL: {ext_base}", file=sys.stderr)
 
         try:
             import uvicorn
@@ -692,6 +750,16 @@ if __name__ == "__main__":
             async def health_endpoint(request):
                 """Health check for monitoring and smoke tests."""
                 dashboard_health = api_get("/api/health")
+                # External base URL priority:
+                #   1. MCP_PUBLIC_URL env var (explicit VPS config)
+                #   2. Detected public IP (auto)
+                #   3. localhost fallback
+                ext_base = (
+                    MCP_PUBLIC_URL.rstrip("/")
+                    if MCP_PUBLIC_URL
+                    else (f"http://{public_ip}" if public_ip else f"http://localhost:{port}")
+                )
+                prefix   = MCP_PATH_PREFIX  # e.g. "/mcp" or ""
                 return JSONResponse({
                     "status": "healthy",
                     "service": "strike7-mcp",
@@ -700,7 +768,10 @@ if __name__ == "__main__":
                     "api_url": STRIKE7_API_URL,
                     "dashboard_status": dashboard_health.get("status", "unknown"),
                     "tools_available": 11,
-                    "mcp_endpoint": f"http://{public_ip or host}:{port}/sse",
+                    "sse_endpoint":      f"{ext_base}{prefix}/sse",
+                    "messages_endpoint": f"{ext_base}{prefix}/messages/",
+                    "health_endpoint":   f"{ext_base}{prefix}/health",
+                    "path_prefix": prefix or "(none – direct access)",
                 })
 
             sse_app = mcp.sse_app()
@@ -708,6 +779,11 @@ if __name__ == "__main__":
                 Route("/health", health_endpoint),
                 Mount("/", app=sse_app),
             ])
+
+            # Fix SSE endpoint event path when behind nginx reverse proxy
+            if MCP_PATH_PREFIX:
+                print(f"[INFO] Path prefix '{MCP_PATH_PREFIX}' active — SSE endpoint event will be rewritten", file=sys.stderr)
+                app = _PathPrefixMiddleware(app, MCP_PATH_PREFIX)
 
             uvicorn.run(app, host=host, port=port, log_level="info")
 
