@@ -875,5 +875,21 @@
     "phase": 6,
     "description": "",
     "hints": []
+  },
+  {
+    "id": "S7BEN-CVE-012",
+    "name": "Media Processing API",
+    "category": "CVE",
+    "owasp_category": "A10:2025 - Server-Side Request Forgery",
+    "cwe": [
+      "CWE-918",
+      "CWE-78"
+    ],
+    "port": 8126,
+    "flag_format": "S7BEN{cloud_flag_[dynamic]}",
+    "difficulty": 5,
+    "phase": 9,
+    "description": "A web application that provides image processing capabilities. Users can submit image URLs for server-side processing and conversion. The service operates in a cloud environment.",
+    "hints": []
   }
 ]

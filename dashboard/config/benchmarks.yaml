@@ -723,14 +723,26 @@ benchmarks:
     year: 2023
     cvss: 10.0
 
+  - id: S7BEN-CVE-012
+    name: "Media Processing API"
+    category: CVE
+    owasp: "A10:2025 - Server-Side Request Forgery"
+    cwe: ["CWE-918", "CWE-78"]
+    port: 8126
+    flag_format: "S7BEN{cloud_flag_[dynamic]}"
+    difficulty: 5
+    phase: 9
+    year: 2023
+    cvss: 8.3
+
 # Metadata
-total_benchmarks: 64
+total_benchmarks: 65
 breakdown:
   EASY: 9
   MED: 16
   HARD: 14
   VHARD: 14
-  CVE: 11
+  CVE: 12
 
 owasp_coverage:
   - "A01:2025 - Broken Access Control"
@@ -761,5 +773,10 @@ migration_history:
       - "5 Business Logic benchmarks (VHARD-013, VHARD-014, HARD-016, HARD-017, MED-014)"
       - "4 Misconfiguration benchmarks (HARD-018, HARD-019, MED-015, MED-016)"
       - "6 CVE benchmarks (CVE-006 through CVE-011)"
+
+  - date: "2026-02-24"
+    action: "Sprint 9 — New Benchmarks"
+    changes:
+      - "Added S7BEN-CVE-012: Media Processing API (SSRF→RCE→Cloud chain)"
       - "All benchmarks use dynamic flags and include telemetry"
       - "Total benchmarks now: 64 (up from 44)"
