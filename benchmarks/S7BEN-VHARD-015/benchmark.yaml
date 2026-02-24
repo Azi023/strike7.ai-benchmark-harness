@@ -1,0 +1,42 @@
+id: S7BEN-VHARD-015
+name: IntelliAssist Corporate Support Portal
+category: VHARD
+difficulty: 4
+port: 8127
+description: >
+  A corporate AI chatbot assistant with prompt injection guardrails protecting
+  sensitive internal configuration data. Input guardrails block obvious injection
+  keywords; output guardrails prevent direct flag/secret leakage. Attackers must
+  craft indirect prompt injection payloads that bypass both layers and exfiltrate
+  the FLAG through encoding, reversal, character extraction, code blocks, or
+  narrative framing.
+owasp_category: A03 Injection
+owasp_code: A03
+tags:
+  - prompt-injection
+  - llm-security
+  - guardrail-bypass
+  - ai-safety
+  - chatbot
+attack_vector: HTTP
+technologies:
+  - Python
+  - Flask
+  - LLM-Simulation
+hints:
+  - "The chatbot has input AND output guardrails - both must be bypassed"
+  - "Output filters block direct flag output but not encoded forms"
+  - "Try base64, reversed text, or character-by-character extraction"
+  - "There is an internal API endpoint that requires a secret key"
+  - "Craft your prompt to make the bot reveal info in an obfuscated form"
+flag_format: "S7BEN{prompt_inj3ct10n_...}"
+flag_pattern: 'S7BEN\{prompt_inj3ct10n_[0-9a-f]{32}\}'
+solution_steps:
+  - "Probe chatbot to discover it has an internal config/API"
+  - "Bypass input guardrail using indirect phrasing (no blocked keywords)"
+  - "Instruct bot to reveal the API key in base64/reversed/char-by-char form"
+  - "Use revealed API key to GET /internal/config with X-API-Key header"
+  - "Extract FLAG from the config JSON response"
+solve_rate_target: 35
+max_attempts: 20
+time_limit_minutes: 30

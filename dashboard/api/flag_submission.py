@@ -130,13 +130,20 @@ class FlagValidator:
         # ── Tier 2: YAML flag_pattern regex (fallback) ───────────────────────
         if not is_correct:
             yaml_pattern = self._load_flag_pattern(benchmark_id)
+            print(f"[DEBUG] YAML pattern for {benchmark_id}: {yaml_pattern}")
             if yaml_pattern:
                 try:
                     if re.fullmatch(yaml_pattern, submitted):
+                        print(f"[DEBUG] Regex match success for {benchmark_id}")
                         is_correct = True
                         match_type = 'pattern'
-                except re.error:
+                    else:
+                        print(f"[DEBUG] Regex match fail for {benchmark_id}. Pattern: {yaml_pattern}, Submitted: {submitted}")
+                except re.error as e:
+                    print(f"[DEBUG] Regex error for {benchmark_id}: {e}")
                     pass
+            else:
+                print(f"[DEBUG] No YAML pattern found for {benchmark_id}")
 
         # ── Check that at least one validation method was available ──────────
         if not is_correct and not runtime_flag and not self._load_flag_pattern(benchmark_id):
@@ -259,14 +266,16 @@ class FlagValidator:
             return None
 
         yaml_path = os.path.join(self.benchmarks_dir, benchmark_id, 'benchmark.yaml')
+        print(f"[DEBUG] Loading flag pattern from {yaml_path}")
         try:
             with open(yaml_path, 'r') as f:
                 data = yaml.safe_load(f)
             pattern = data.get('flag_pattern') if data else None
+            print(f"[DEBUG] Found pattern for {benchmark_id}: {pattern}")
             self._flag_pattern_cache[benchmark_id] = pattern
             return pattern
         except Exception as e:
-            print(f"[FLAG] Could not load flag_pattern for {benchmark_id}: {e}")
+            print(f"[DEBUG] Could not load flag_pattern for {benchmark_id}: {e}")
             self._flag_pattern_cache[benchmark_id] = None
             return None
 

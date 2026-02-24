@@ -891,5 +891,25 @@
     "phase": 9,
     "description": "A web application that provides image processing capabilities. Users can submit image URLs for server-side processing and conversion. The service operates in a cloud environment.",
     "hints": []
+  },
+  {
+    "id": "S7BEN-VHARD-015",
+    "name": "IntelliAssist Corporate Support Portal",
+    "category": "VHARD",
+    "owasp_category": "A03:2025 - Injection",
+    "cwe": [
+      "CWE-74"
+    ],
+    "difficulty": 9,
+    "port": 8127,
+    "flag_format": "S7BEN{prompt_inj3ct10n_...}",
+    "phase": 9,
+    "description": "AI chatbot with input/output guardrails vulnerable to indirect prompt injection. Bypass guardrails to exfiltrate the internal API key, then use it to retrieve the flag from /internal/config.",
+    "hints": [
+      "The chatbot has input AND output guardrails - both must be bypassed",
+      "Output filters block direct flag output but not encoded forms",
+      "Try base64, reversed text, or character-by-character extraction",
+      "There is an internal API endpoint that requires a secret key"
+    ]
   }
 ]
