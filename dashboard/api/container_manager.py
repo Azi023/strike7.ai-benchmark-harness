@@ -531,9 +531,10 @@ class ContainerManager:
           1. printenv FLAG
           2. printenv S7BEN_FLAG
           3. python3 -c "import os; print(os.environ.get('FLAG',''))"
-          4. cat /flag.txt
-          5. cat /app/flag.txt
-          6. cat /var/www/flag.txt
+          4. cat /tmp/flag.txt
+          5. cat /flag.txt
+          6. cat /app/flag.txt
+          7. cat /var/www/flag.txt
 
         Container discovery:
           - All containers in the compose project (via label filter)
@@ -574,7 +575,7 @@ class ContainerManager:
                 seen.add(candidate)
 
         # ── Probe each container with multiple methods ───────────────────────
-        flag_files = ['/flag.txt', '/app/flag.txt', '/var/www/flag.txt']
+        flag_files = ['/tmp/flag.txt', '/flag.txt', '/app/flag.txt', '/var/www/flag.txt']
 
         for container_name in container_candidates:
             flag = self._probe_container_for_flag(container_name, flag_files)
