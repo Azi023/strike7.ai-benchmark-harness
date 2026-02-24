@@ -525,22 +525,28 @@ class ContainerManager:
 
     def read_runtime_flag(self, benchmark_id: str) -> Optional[str]:
         """
-        Try to read the FLAG value from a running benchmark container.
+        Try to read the dynamic FLAG from a running benchmark container.
 
-        Attempts (in order):
-          1. docker exec <container> printenv FLAG
-          2. docker exec <container> cat /flag.txt
-          3. docker exec <container> cat /app/flag.txt
-          4. docker-compose exec -T app printenv FLAG  (fallback via compose)
+        Per-container probe order:
+          1. printenv FLAG
+          2. printenv S7BEN_FLAG
+          3. python3 -c "import os; print(os.environ.get('FLAG',''))"
+          4. cat /flag.txt
+          5. cat /app/flag.txt
+          6. cat /var/www/flag.txt
+
+        Container discovery:
+          - All containers in the compose project (via label filter)
+          - Conventional name fallbacks: _app_1, -app-1, _web_1, -web-1, etc.
 
         Returns the flag string (e.g. "S7BEN{...}") or None if not found.
-        Benchmarks that generate flags as Python module-level variables (not
-        env vars or files) cannot be captured this way; tier-2 YAML pattern
-        matching is used for those instead.
+        Benchmarks where the flag is a Python module-level variable (not in env
+        or on disk) cannot be captured here; tier-2 YAML pattern matching is
+        used for those instead.
         """
         project = self._get_compose_project_name(benchmark_id)
 
-        # Discover the actual running container name(s) via docker ps labels
+        # ── Discover running containers for this benchmark ───────────────────
         container_candidates: List[str] = []
         try:
             result = subprocess.run(
@@ -557,46 +563,27 @@ class ContainerManager:
         except Exception:
             pass
 
-        # Add conventional name fallbacks
-        for candidate in [f"{project}_app_1", f"{project}-app-1"]:
-            if candidate not in container_candidates:
+        # Conventional fallback names when label lookup returns nothing
+        suffixes = ['_app_1', '-app-1', '_app', '_web_1', '-web-1',
+                    '_flask_1', '-flask-1', '_server_1', '-server-1']
+        seen = set(container_candidates)
+        for suffix in suffixes:
+            candidate = f"{project}{suffix}"
+            if candidate not in seen:
                 container_candidates.append(candidate)
+                seen.add(candidate)
 
-        flag_paths = ['/flag.txt', '/app/flag.txt']
+        # ── Probe each container with multiple methods ───────────────────────
+        flag_files = ['/flag.txt', '/app/flag.txt', '/var/www/flag.txt']
 
         for container_name in container_candidates:
-            # printenv FLAG
-            try:
-                result = subprocess.run(
-                    ['docker', 'exec', container_name, 'printenv', 'FLAG'],
-                    capture_output=True, text=True, timeout=5
-                )
-                if result.returncode == 0:
-                    flag = result.stdout.strip()
-                    if flag.startswith('S7BEN{'):
-                        print(f"[ContainerManager] read_runtime_flag {benchmark_id}: "
-                              f"captured via printenv from {container_name}")
-                        return flag
-            except Exception:
-                pass
+            flag = self._probe_container_for_flag(container_name, flag_files)
+            if flag:
+                print(f"[FLAG] Captured runtime flag for {benchmark_id} "
+                      f"from container {container_name}")
+                return flag
 
-            # cat /flag.txt or /app/flag.txt
-            for path in flag_paths:
-                try:
-                    result = subprocess.run(
-                        ['docker', 'exec', container_name, 'cat', path],
-                        capture_output=True, text=True, timeout=5
-                    )
-                    if result.returncode == 0:
-                        flag = result.stdout.strip()
-                        if flag.startswith('S7BEN{'):
-                            print(f"[ContainerManager] read_runtime_flag {benchmark_id}: "
-                                  f"captured from {path} in {container_name}")
-                            return flag
-                except Exception:
-                    pass
-
-        # Last resort: docker-compose exec (requires compose project context)
+        # ── Last resort: docker-compose exec ────────────────────────────────
         try:
             benchmark_dir = self._get_benchmark_directory(benchmark_id)
             result = subprocess.run(
@@ -606,14 +593,66 @@ class ContainerManager:
             if result.returncode == 0:
                 flag = result.stdout.strip()
                 if flag.startswith('S7BEN{'):
-                    print(f"[ContainerManager] read_runtime_flag {benchmark_id}: "
-                          f"captured via docker-compose exec")
+                    print(f"[FLAG] Captured runtime flag for {benchmark_id} "
+                          f"via docker-compose exec")
                     return flag
         except Exception:
             pass
 
-        print(f"[ContainerManager] read_runtime_flag {benchmark_id}: "
-              f"not found (module-level var; YAML pattern will be used)")
+        print(f"[FLAG] WARNING: Could not capture dynamic flag for {benchmark_id} "
+              f"-- YAML pattern fallback will be used for validation")
+        return None
+
+    def _probe_container_for_flag(self, container_name: str,
+                                  flag_files: List[str]) -> Optional[str]:
+        """
+        Try every known method to extract a S7BEN{...} flag from one container.
+        Returns the flag string, or None if nothing matched.
+        """
+        # Method 1: printenv FLAG
+        flag = self._exec_and_extract(container_name, ['printenv', 'FLAG'])
+        if flag:
+            return flag
+
+        # Method 2: printenv S7BEN_FLAG
+        flag = self._exec_and_extract(container_name, ['printenv', 'S7BEN_FLAG'])
+        if flag:
+            return flag
+
+        # Method 3: python3 os.environ (some containers set FLAG in a subprocess
+        # environment rather than the top-level env, but it's still readable this way)
+        flag = self._exec_and_extract(
+            container_name,
+            ['python3', '-c', "import os; print(os.environ.get('FLAG',''))"]
+        )
+        if flag:
+            return flag
+
+        # Method 4–6: flag files on disk
+        for path in flag_files:
+            flag = self._exec_and_extract(container_name, ['cat', path])
+            if flag:
+                return flag
+
+        return None
+
+    def _exec_and_extract(self, container_name: str,
+                          cmd: List[str]) -> Optional[str]:
+        """
+        Run `docker exec <container_name> <cmd>` and return the output if it
+        starts with 'S7BEN{', otherwise return None.
+        """
+        try:
+            result = subprocess.run(
+                ['docker', 'exec', container_name] + cmd,
+                capture_output=True, text=True, timeout=5
+            )
+            if result.returncode == 0:
+                flag = result.stdout.strip()
+                if flag.startswith('S7BEN{'):
+                    return flag
+        except Exception:
+            pass
         return None
 
     def _get_container_stats(self, container_name: str) -> Dict:

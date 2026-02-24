@@ -10,6 +10,8 @@ import yaml
 import os
 import subprocess
 import json
+import threading
+import time
 from datetime import datetime
 from collections import Counter
 
@@ -69,6 +71,29 @@ flag_validator = FlagValidator(BENCHMARKS_CACHE, BENCHMARKS_DIR)
 container_manager = ContainerManager(BENCHMARKS_CACHE)
 session_tracker = SessionTracker()
 metrics_tracker = MetricsTracker()
+
+def _capture_flag_with_retry(benchmark_id: str,
+                              max_retries: int = 2,
+                              delay_seconds: int = 5):
+    """
+    Background thread: retry flag capture after a short delay so containers
+    that are still starting up have time to finish initialization.
+
+    Skips retries if another attempt already succeeded in the meantime.
+    """
+    for attempt in range(1, max_retries + 1):
+        time.sleep(delay_seconds)
+        if benchmark_id in flag_validator.runtime_flags:
+            return  # Already captured by a parallel attempt
+        flag = container_manager.read_runtime_flag(benchmark_id)
+        if flag:
+            flag_validator.set_runtime_flag(benchmark_id, flag)
+            print(f"[FLAG] Retry #{attempt} succeeded for {benchmark_id}")
+            return
+        print(f"[FLAG] Retry #{attempt} failed for {benchmark_id}")
+    print(f"[FLAG] All retries exhausted for {benchmark_id}; "
+          f"YAML pattern matching will be used for validation")
+
 
 @app.route('/')
 def index():
@@ -389,11 +414,21 @@ def start_benchmark(benchmark_id):
 
         if result['status'] == 'success':
             flag_validator.mark_container_started(benchmark_id)
-            # Try to capture the live FLAG from the container (works for env-var
-            # based flags). Falls back to YAML pattern matching for in-process flags.
+            flag_validator.clear_runtime_flag(benchmark_id)  # clear any stale flag from previous run
+
+            # Attempt immediate flag capture (works for env-var / file-based flags)
             runtime_flag = container_manager.read_runtime_flag(benchmark_id)
             if runtime_flag:
                 flag_validator.set_runtime_flag(benchmark_id, runtime_flag)
+            else:
+                # Container may still be initializing; retry in background
+                t = threading.Thread(
+                    target=_capture_flag_with_retry,
+                    args=(benchmark_id,),
+                    kwargs={'max_retries': 2, 'delay_seconds': 5},
+                    daemon=True
+                )
+                t.start()
 
         status_code = 200 if result['status'] == 'success' else 400
         return jsonify(result), status_code
