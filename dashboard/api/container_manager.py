@@ -523,6 +523,99 @@ class ContainerManager:
         # No health check configured or status not available
         return "none"
 
+    def read_runtime_flag(self, benchmark_id: str) -> Optional[str]:
+        """
+        Try to read the FLAG value from a running benchmark container.
+
+        Attempts (in order):
+          1. docker exec <container> printenv FLAG
+          2. docker exec <container> cat /flag.txt
+          3. docker exec <container> cat /app/flag.txt
+          4. docker-compose exec -T app printenv FLAG  (fallback via compose)
+
+        Returns the flag string (e.g. "S7BEN{...}") or None if not found.
+        Benchmarks that generate flags as Python module-level variables (not
+        env vars or files) cannot be captured this way; tier-2 YAML pattern
+        matching is used for those instead.
+        """
+        project = self._get_compose_project_name(benchmark_id)
+
+        # Discover the actual running container name(s) via docker ps labels
+        container_candidates: List[str] = []
+        try:
+            result = subprocess.run(
+                ['docker', 'ps',
+                 '--filter', f'label=com.docker.compose.project={project}',
+                 '--format', '{{.Names}}'],
+                capture_output=True, text=True, timeout=5
+            )
+            if result.returncode == 0:
+                for name in result.stdout.strip().split('\n'):
+                    name = name.strip()
+                    if name:
+                        container_candidates.append(name)
+        except Exception:
+            pass
+
+        # Add conventional name fallbacks
+        for candidate in [f"{project}_app_1", f"{project}-app-1"]:
+            if candidate not in container_candidates:
+                container_candidates.append(candidate)
+
+        flag_paths = ['/flag.txt', '/app/flag.txt']
+
+        for container_name in container_candidates:
+            # printenv FLAG
+            try:
+                result = subprocess.run(
+                    ['docker', 'exec', container_name, 'printenv', 'FLAG'],
+                    capture_output=True, text=True, timeout=5
+                )
+                if result.returncode == 0:
+                    flag = result.stdout.strip()
+                    if flag.startswith('S7BEN{'):
+                        print(f"[ContainerManager] read_runtime_flag {benchmark_id}: "
+                              f"captured via printenv from {container_name}")
+                        return flag
+            except Exception:
+                pass
+
+            # cat /flag.txt or /app/flag.txt
+            for path in flag_paths:
+                try:
+                    result = subprocess.run(
+                        ['docker', 'exec', container_name, 'cat', path],
+                        capture_output=True, text=True, timeout=5
+                    )
+                    if result.returncode == 0:
+                        flag = result.stdout.strip()
+                        if flag.startswith('S7BEN{'):
+                            print(f"[ContainerManager] read_runtime_flag {benchmark_id}: "
+                                  f"captured from {path} in {container_name}")
+                            return flag
+                except Exception:
+                    pass
+
+        # Last resort: docker-compose exec (requires compose project context)
+        try:
+            benchmark_dir = self._get_benchmark_directory(benchmark_id)
+            result = subprocess.run(
+                ['docker-compose', 'exec', '-T', 'app', 'printenv', 'FLAG'],
+                capture_output=True, text=True, timeout=5, cwd=benchmark_dir
+            )
+            if result.returncode == 0:
+                flag = result.stdout.strip()
+                if flag.startswith('S7BEN{'):
+                    print(f"[ContainerManager] read_runtime_flag {benchmark_id}: "
+                          f"captured via docker-compose exec")
+                    return flag
+        except Exception:
+            pass
+
+        print(f"[ContainerManager] read_runtime_flag {benchmark_id}: "
+              f"not found (module-level var; YAML pattern will be used)")
+        return None
+
     def _get_container_stats(self, container_name: str) -> Dict:
         """Get resource stats for a container"""
         try:

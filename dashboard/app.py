@@ -54,8 +54,18 @@ def load_benchmarks():
 # Cache benchmarks in memory
 BENCHMARKS_CACHE = load_benchmarks()
 
+_REDACTED_FLAG_PLACEHOLDER = 'S7BEN{...}'
+
+def _redact_flag(benchmark: dict) -> dict:
+    """Return a copy of benchmark with flag_format replaced by a placeholder.
+    Prevents agents from trivially reading the answer via the API."""
+    result = dict(benchmark)
+    if 'flag_format' in result:
+        result['flag_format'] = _REDACTED_FLAG_PLACEHOLDER
+    return result
+
 # Initialize API modules
-flag_validator = FlagValidator(BENCHMARKS_CACHE)
+flag_validator = FlagValidator(BENCHMARKS_CACHE, BENCHMARKS_DIR)
 container_manager = ContainerManager(BENCHMARKS_CACHE)
 session_tracker = SessionTracker()
 metrics_tracker = MetricsTracker()
@@ -115,17 +125,19 @@ def get_benchmarks():
                      if search_lower in b.get('name', '').lower()
                      or search_lower in b.get('id', '').lower()]
 
+    # Redact flag_format so agents can't retrieve the answer via the API
+    safe_benchmarks = [_redact_flag(b) for b in benchmarks]
     return jsonify({
-        'total': len(benchmarks),
-        'benchmarks': benchmarks
+        'total': len(safe_benchmarks),
+        'benchmarks': safe_benchmarks
     })
 
 @app.route('/api/benchmarks/<benchmark_id>', methods=['GET'])
 def get_benchmark(benchmark_id):
-    """Get a single benchmark by ID"""
+    """Get a single benchmark by ID (flag_format is redacted)"""
     benchmark = next((b for b in BENCHMARKS_CACHE if b.get('id') == benchmark_id), None)
     if benchmark:
-        return jsonify(benchmark)
+        return jsonify(_redact_flag(benchmark))
     return jsonify({'error': 'Benchmark not found'}), 404
 
 @app.route('/api/statistics', methods=['GET'])
@@ -289,8 +301,7 @@ def reload_benchmarks():
     """Reload benchmarks from YAML file"""
     global BENCHMARKS_CACHE, flag_validator, container_manager
     BENCHMARKS_CACHE = load_benchmarks()
-    # Reinitialize API modules with new data
-    flag_validator = FlagValidator(BENCHMARKS_CACHE)
+    flag_validator = FlagValidator(BENCHMARKS_CACHE, BENCHMARKS_DIR)
     container_manager = ContainerManager(BENCHMARKS_CACHE)
     return jsonify({
         'status': 'reloaded',
@@ -376,9 +387,13 @@ def start_benchmark(benchmark_id):
             timeout_minutes=timeout_minutes
         )
 
-        # Mark container start time for flag validation timing
         if result['status'] == 'success':
             flag_validator.mark_container_started(benchmark_id)
+            # Try to capture the live FLAG from the container (works for env-var
+            # based flags). Falls back to YAML pattern matching for in-process flags.
+            runtime_flag = container_manager.read_runtime_flag(benchmark_id)
+            if runtime_flag:
+                flag_validator.set_runtime_flag(benchmark_id, runtime_flag)
 
         status_code = 200 if result['status'] == 'success' else 400
         return jsonify(result), status_code
@@ -397,9 +412,9 @@ def stop_benchmark(benchmark_id):
     try:
         result = container_manager.stop_container(benchmark_id)
 
-        # Mark container stopped for flag validation
         if result['status'] == 'success':
             flag_validator.mark_container_stopped(benchmark_id)
+            flag_validator.clear_runtime_flag(benchmark_id)
 
         status_code = 200 if result['status'] == 'success' else 400
         return jsonify(result), status_code
