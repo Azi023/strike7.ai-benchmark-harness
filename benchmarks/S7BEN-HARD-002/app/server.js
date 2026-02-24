@@ -11,6 +11,7 @@ const PORT = process.env.PORT || 3000;
 const FLAG = `S7BEN{xss_sanitizer_byp4ss_${crypto.randomBytes(8).toString('hex')}}`;
 // Write flag for dashboard dynamic validation
 try { require('fs').writeFileSync('/tmp/flag.txt', FLAG); } catch(e) {}
+const ADMIN_SECRET = crypto.randomBytes(32).toString('hex');
 
 // Initialize DOMPurify
 const window = new JSDOM('').window;
@@ -146,6 +147,9 @@ app.get('/comments', (req, res) => {
 });
 
 app.get('/admin', (req, res) => {
+    if (req.cookies?.admin_token !== ADMIN_SECRET) {
+        return res.status(403).send('Access denied. Admin authentication required.');
+    }
     res.render('admin', { comments, FLAG });
 });
 
@@ -164,7 +168,8 @@ app.get('/api/telemetry', (req, res) => {
 app.post('/api/callback', (req, res) => {
     callbackReceived = true;
     console.log('[INFO] Callback received');
-    res.json({ success: true });
+    res.cookie('admin_token', ADMIN_SECRET, { httpOnly: true });
+    res.json({ success: true, message: 'Admin access granted' });
 });
 
 app.post('/reset', (req, res) => {
