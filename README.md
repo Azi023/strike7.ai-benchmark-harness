@@ -136,56 +136,72 @@ curl -X POST http://139.59.80.137/api/benchmark/S7BEN-EASY-001/submit-flag \
 curl -X POST http://139.59.80.137/api/benchmark/S7BEN-EASY-001/stop
 ```
 
-### Option B — MCP Server (for Claude Desktop / Claude Code)
+### Option B — MCP Server (recommended for AI agents)
 
-The MCP server is running live at `http://139.59.80.137/mcp/sse`.
+The MCP server implements the Model Context Protocol over SSE, allowing any compatible AI agent to discover and solve benchmarks using structured tool calls.
 
-**For Claude Code** — tell the agent directly:
-> "Connect to the Strike7 benchmark platform MCP server at `http://139.59.80.137/mcp/sse`. Use it to list benchmarks, start containers, and submit flags."
+**Step 1 — verify the server is up:**
 
-**For Claude Desktop** — add to `claude_desktop_config.json`:
+```bash
+curl http://139.59.80.137/mcp/health
+# {"status":"healthy","tools_available":11,"sse_endpoint":"http://139.59.80.137/mcp/sse",...}
+```
+
+**Step 2 — explore tools interactively (zero code):**
+
+```bash
+npx @modelcontextprotocol/inspector http://139.59.80.137/mcp/sse
+```
+
+**Step 3 — connect programmatically:**
+
+See [`docs/mcp_client_example.py`](docs/mcp_client_example.py) for a minimal working Python client (~90 lines, only `requests` needed). For a full agent loop with exploit examples see [`docs/mcp_solver_example.py`](docs/mcp_solver_example.py).
+
+```python
+from docs.mcp_solver_example import StrikeClient
+
+with StrikeClient() as s:
+    s.start("S7BEN-EASY-001")
+    output = s.cmd("curl -s http://localhost:5001/")   # run commands against the container
+    s.submit("S7BEN-EASY-001", flag)
+    s.stop("S7BEN-EASY-001")
+```
+
+> **How SSE responses work** (most common point of confusion):
+> `POST /mcp/messages/` always returns `202 Accepted` — that is just an acknowledgment.
+> The actual tool result arrives as `event: message` on the open SSE stream.
+> Your client must keep the GET `/mcp/sse` connection open and read from it concurrently.
+
+**For Claude Code** — tell the agent:
+> "Connect to the Strike7 MCP server at `http://139.59.80.137/mcp/sse`. Use it to list benchmarks, start containers, run commands, and submit flags."
+
+**For Claude Desktop** — remote SSE:
 
 ```json
 {
   "mcpServers": {
-    "strike7": {
-      "command": "python",
-      "args": ["/path/to/strike7-benchmarks/dashboard/strike7_mcp_server.py"],
-      "env": {
-        "STRIKE7_API_URL": "http://139.59.80.137",
-        "MCP_TRANSPORT": "stdio"
-      }
-    }
+    "strike7": { "url": "http://139.59.80.137/mcp/sse" }
   }
 }
 ```
 
-Or point directly at the hosted SSE endpoint (if your MCP client supports remote SSE):
+**Available MCP tools (11 total):**
 
-```json
-{
-  "mcpServers": {
-    "strike7": {
-      "url": "http://139.59.80.137/mcp/sse"
-    }
-  }
-}
-```
+| Tool | Purpose | Key args |
+|------|---------|----------|
+| `list_benchmarks` | List/filter all benchmarks | `category`, `owasp` |
+| `get_benchmark_details` | Full details for one benchmark | `benchmark_id` |
+| `start_benchmark` | Start a benchmark container | `benchmark_id`, `timeout_minutes` |
+| `stop_benchmark` | Stop a running container | `benchmark_id` |
+| `get_container_status` | Health and running state | — |
+| `submit_flag` | Validate a captured flag | `benchmark_id`, `flag` |
+| `execute_command` | **Run shell commands on the VPS** — use `curl http://localhost:<port>` to reach the benchmark container | `command` |
+| `get_statistics` | Aggregated solve stats | — |
+| `start_session` | Begin a tracked eval session | `agent_id` |
+| `get_metrics` | Performance metrics | `agent_id` |
+| `health_check` | Server and API health | — |
 
-**Available MCP tools:**
-
-| Tool | Description |
-|------|-------------|
-| `list_benchmarks` | List/filter benchmarks by category or OWASP tag |
-| `get_benchmark_details` | Get full details for a specific benchmark |
-| `start_benchmark` | Start a benchmark container on the VPS |
-| `stop_benchmark` | Stop a running benchmark container |
-| `get_container_status` | Check all running containers and resource usage |
-| `submit_flag` | Validate a captured flag |
-| `execute_command` | Run shell commands (curl, nmap, etc.) from the VPS |
-| `start_session` | Begin a tracked evaluation session |
-| `get_metrics` | Get session metrics and solve statistics |
-| `health_check` | Verify API and MCP connectivity |
+Typical agent workflow: `list_benchmarks` → `start_benchmark` → `execute_command` (×N) → `submit_flag` → `stop_benchmark`
 
 ### Option C — Direct HTTP (no library)
 
