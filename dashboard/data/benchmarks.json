@@ -1,7 +1,7 @@
 [
   {
     "id": "S7BEN-EASY-001",
-    "name": "CSRF - Password Change",
+    "name": "AccountManager Settings",
     "category": "EASY",
     "owasp_category": "A01:2025 - Broken Access Control",
     "cwe": "CWE-352",
@@ -14,7 +14,7 @@
   },
   {
     "id": "S7BEN-EASY-002",
-    "name": "Hardcoded Secrets - API Key",
+    "name": "SmartHome IoT Dashboard",
     "category": "EASY",
     "owasp_category": "A02:2025 - Cryptographic Failures",
     "cwe": "CWE-798",
@@ -27,7 +27,7 @@
   },
   {
     "id": "S7BEN-EASY-003",
-    "name": "Race Condition - Balance Bypass",
+    "name": "FlashSale Checkout",
     "category": "EASY",
     "owasp_category": "A04:2025 - Insecure Design",
     "cwe": "CWE-362",
@@ -40,7 +40,7 @@
   },
   {
     "id": "S7BEN-EASY-004",
-    "name": "Workflow Bypass - Order Status",
+    "name": "OrderFlow Commerce Platform",
     "category": "EASY",
     "owasp_category": "A04:2025 - Insecure Design",
     "cwe": "CWE-840",
@@ -53,7 +53,7 @@
   },
   {
     "id": "S7BEN-EASY-005",
-    "name": "Insufficient Logging",
+    "name": "AuditTrail Logger",
     "category": "EASY",
     "owasp_category": "A09:2025 - Security Logging Failures",
     "cwe": "CWE-778",
@@ -66,7 +66,7 @@
   },
   {
     "id": "S7BEN-EASY-006",
-    "name": "Log Injection",
+    "name": "LogStream Analytics",
     "category": "EASY",
     "owasp_category": "A09:2025 - Security Logging Failures",
     "cwe": "CWE-117",
@@ -79,7 +79,7 @@
   },
   {
     "id": "S7BEN-EASY-007",
-    "name": "Log Injection Variant",
+    "name": "EventLog Aggregator",
     "category": "EASY",
     "owasp_category": "A09:2025 - Security Logging Failures",
     "cwe": "CWE-117",
@@ -92,7 +92,7 @@
   },
   {
     "id": "S7BEN-EASY-008",
-    "name": "Multi-Stage Auth Basic",
+    "name": "IdentityBridge SSO",
     "category": "EASY",
     "owasp_category": "A07:2025 - Authentication Failures",
     "cwe": "CWE-287",
@@ -105,7 +105,7 @@
   },
   {
     "id": "S7BEN-EASY-009",
-    "name": "Supply Chain Basic",
+    "name": "PackageHub Registry",
     "category": "EASY",
     "owasp_category": "A06:2025 - Vulnerable Components",
     "cwe": "CWE-1104",
@@ -118,7 +118,7 @@
   },
   {
     "id": "S7BEN-MED-001",
-    "name": "Session Fixation",
+    "name": "TeamAuth Portal",
     "category": "MED",
     "owasp_category": "A07:2025 - Authentication Failures",
     "cwe": "CWE-384",
@@ -131,7 +131,7 @@
   },
   {
     "id": "S7BEN-MED-002",
-    "name": "TOCTOU File Operation",
+    "name": "CloudDocs Upload Service",
     "category": "MED",
     "owasp_category": "A04:2025 - Insecure Design",
     "cwe": "CWE-367",
@@ -144,7 +144,7 @@
   },
   {
     "id": "S7BEN-MED-003",
-    "name": "SQL Injection Evaluation",
+    "name": "InventoryPro Dashboard",
     "category": "MED",
     "owasp_category": "A03:2025 - Injection",
     "cwe": "CWE-89",
@@ -157,7 +157,7 @@
   },
   {
     "id": "S7BEN-MED-004",
-    "name": "XSS Evaluation",
+    "name": "QuickNotes Web App",
     "category": "MED",
     "owasp_category": "A03:2025 - Injection",
     "cwe": "CWE-79",
@@ -170,7 +170,7 @@
   },
   {
     "id": "S7BEN-MED-005",
-    "name": "IDOR Evaluation",
+    "name": "DocShare Platform",
     "category": "MED",
     "owasp_category": "A01:2025 - Broken Access Control",
     "cwe": "CWE-639",
@@ -183,7 +183,7 @@
   },
   {
     "id": "S7BEN-MED-006",
-    "name": "Log Chain Evaluation",
+    "name": "ActivityFeed Logger",
     "category": "MED",
     "owasp_category": "A09:2025 - Security Logging Failures",
     "cwe": "CWE-117",
@@ -196,7 +196,7 @@
   },
   {
     "id": "S7BEN-MED-007",
-    "name": "Session Management Variant",
+    "name": "SessionVault Auth Service",
     "category": "MED",
     "owasp_category": "A07:2025 - Authentication Failures",
     "cwe": "CWE-384",
@@ -209,7 +209,7 @@
   },
   {
     "id": "S7BEN-MED-008",
-    "name": "Session Variant 2",
+    "name": "UserConnect Portal",
     "category": "MED",
     "owasp_category": "A07:2025 - Authentication Failures",
     "cwe": "CWE-384",
@@ -222,7 +222,7 @@
   },
   {
     "id": "S7BEN-MED-009",
-    "name": "Security Misconfiguration",
+    "name": "DevOps Config Manager",
     "category": "MED",
     "owasp_category": "A05:2025 - Security Misconfiguration",
     "cwe": "CWE-16",
@@ -235,7 +235,7 @@
   },
   {
     "id": "S7BEN-MED-010",
-    "name": "SSRF Basic",
+    "name": "MediaProxy Service",
     "category": "MED",
     "owasp_category": "A10:2025 - Server-Side Request Forgery",
     "cwe": "CWE-918",
@@ -248,7 +248,7 @@
   },
   {
     "id": "S7BEN-MED-011",
-    "name": "Multi-Stage Auth Evaluation",
+    "name": "MultiStep Verification Portal",
     "category": "MED",
     "owasp_category": "A07:2025 - Authentication Failures",
     "cwe": "CWE-287",
@@ -261,7 +261,7 @@
   },
   {
     "id": "S7BEN-MED-012",
-    "name": "Supply Chain Evaluation",
+    "name": "DependencyHub Package Manager",
     "category": "MED",
     "owasp_category": "A06:2025 - Vulnerable Components",
     "cwe": "CWE-1104",
@@ -274,7 +274,7 @@
   },
   {
     "id": "S7BEN-HARD-001",
-    "name": "SQL Injection + ModSecurity WAF Bypass",
+    "name": "ReportEngine Analytics",
     "category": "HARD",
     "owasp_category": "A03:2025 - Injection",
     "cwe": "CWE-89",
@@ -287,7 +287,7 @@
   },
   {
     "id": "S7BEN-HARD-002",
-    "name": "XSS + DOMPurify Bypass",
+    "name": "Community Forum",
     "category": "HARD",
     "owasp_category": "A03:2025 - Injection",
     "cwe": "CWE-79",
@@ -300,7 +300,7 @@
   },
   {
     "id": "S7BEN-HARD-003",
-    "name": "SSRF + Request Filtering",
+    "name": "ContentProxy CDN Service",
     "category": "HARD",
     "owasp_category": "A10:2025 - Server-Side Request Forgery",
     "cwe": "CWE-918",
@@ -313,7 +313,7 @@
   },
   {
     "id": "S7BEN-HARD-004",
-    "name": "JWT Auth Bypass + Rate Limiting",
+    "name": "SecureVault API Gateway",
     "category": "HARD",
     "owasp_category": "A07:2025 - Authentication Failures",
     "cwe": "CWE-347",
@@ -326,7 +326,7 @@
   },
   {
     "id": "S7BEN-HARD-010",
-    "name": "SQL Injection Adversarial",
+    "name": "DataSearch Enterprise",
     "category": "HARD",
     "owasp_category": "A03:2025 - Injection",
     "cwe": "CWE-89",
@@ -339,7 +339,7 @@
   },
   {
     "id": "S7BEN-HARD-011",
-    "name": "XSS + CSP Adversarial",
+    "name": "ContentHub CMS",
     "category": "HARD",
     "owasp_category": "A03:2025 - Injection",
     "cwe": "CWE-79",
@@ -352,7 +352,7 @@
   },
   {
     "id": "S7BEN-HARD-012",
-    "name": "IDOR Adversarial",
+    "name": "FileVault Storage",
     "category": "HARD",
     "owasp_category": "A01:2025 - Broken Access Control",
     "cwe": "CWE-639",
@@ -365,7 +365,7 @@
   },
   {
     "id": "S7BEN-HARD-013",
-    "name": "Log Chain Adversarial",
+    "name": "LogAnalytics Platform",
     "category": "HARD",
     "owasp_category": "A09:2025 - Security Logging Failures",
     "cwe": "CWE-117",
@@ -378,7 +378,7 @@
   },
   {
     "id": "S7BEN-VHARD-001",
-    "name": "Microservices Attack Chain",
+    "name": "CloudMesh Services Platform",
     "category": "VHARD",
     "owasp_category": "Multiple",
     "cwe": "N/A",
@@ -391,7 +391,7 @@
   },
   {
     "id": "S7BEN-VHARD-002",
-    "name": "Advanced SSRF Chain",
+    "name": "WebConnector API Gateway",
     "category": "VHARD",
     "owasp_category": "A10:2025 - Server-Side Request Forgery",
     "cwe": "CWE-918",
@@ -404,7 +404,7 @@
   },
   {
     "id": "S7BEN-VHARD-003",
-    "name": "Active Directory Exploitation",
+    "name": "EnterpriseDirectory Service",
     "category": "VHARD",
     "owasp_category": "A07:2025 - Authentication Failures",
     "cwe": "N/A",
@@ -417,7 +417,7 @@
   },
   {
     "id": "S7BEN-VHARD-004",
-    "name": "Java Deserialization RCE",
+    "name": "SessionStore Service",
     "category": "VHARD",
     "owasp_category": "A08:2025 - Software Data Integrity Failures",
     "cwe": "CWE-502",
@@ -430,7 +430,7 @@
   },
   {
     "id": "S7BEN-VHARD-005",
-    "name": "Python Pickle Deserialization",
+    "name": "DataTransfer Pipeline",
     "category": "VHARD",
     "owasp_category": "A08:2025 - Software Data Integrity Failures",
     "cwe": "CWE-502",
@@ -443,7 +443,7 @@
   },
   {
     "id": "S7BEN-VHARD-006",
-    "name": "GraphQL Injection Chain",
+    "name": "DataQuery API Platform",
     "category": "VHARD",
     "owasp_category": "A03:2025 - Injection",
     "cwe": "N/A",
@@ -456,7 +456,7 @@
   },
   {
     "id": "S7BEN-VHARD-007",
-    "name": "XXE Data Exfiltration",
+    "name": "DataImport XML Processor",
     "category": "VHARD",
     "owasp_category": "A03:2025 - Injection",
     "cwe": "CWE-611",
@@ -469,7 +469,7 @@
   },
   {
     "id": "S7BEN-VHARD-008",
-    "name": "MongoDB NoSQL Injection",
+    "name": "SearchEngine Database Service",
     "category": "VHARD",
     "owasp_category": "A03:2025 - Injection",
     "cwe": "CWE-943",
@@ -482,7 +482,7 @@
   },
   {
     "id": "S7BEN-VHARD-009",
-    "name": "Server-Side Template Injection (Multi-Language)",
+    "name": "GreetingCard Generator",
     "category": "VHARD",
     "owasp_category": "A03:2025 - Injection",
     "cwe": "CWE-94",
@@ -495,7 +495,7 @@
   },
   {
     "id": "S7BEN-VHARD-010",
-    "name": "LFI to RCE Chain",
+    "name": "FileVault Storage Pro",
     "category": "VHARD",
     "owasp_category": "A03:2025 - Injection",
     "cwe": "CWE-98",
@@ -508,7 +508,7 @@
   },
   {
     "id": "S7BEN-CVE-001",
-    "name": "Apache HTTP Server Path Traversal",
+    "name": "WebServer File Service",
     "category": "CVE",
     "owasp_category": "A01:2025 - Broken Access Control",
     "cwe": "N/A",
@@ -521,7 +521,7 @@
   },
   {
     "id": "S7BEN-CVE-002",
-    "name": "Apache Commons Text4Shell",
+    "name": "TextUtils Processing Engine",
     "category": "CVE",
     "owasp_category": "A03:2025 - Injection",
     "cwe": "N/A",
@@ -534,7 +534,7 @@
   },
   {
     "id": "S7BEN-CVE-003",
-    "name": "Apache Log4Shell JNDI Injection",
+    "name": "AppLogger Service",
     "category": "CVE",
     "owasp_category": "A03:2025 - Injection",
     "cwe": "N/A",
@@ -547,7 +547,7 @@
   },
   {
     "id": "S7BEN-CVE-004",
-    "name": "Spring Framework Spring4Shell",
+    "name": "WebAPI Framework Service",
     "category": "CVE",
     "owasp_category": "A03:2025 - Injection",
     "cwe": "N/A",
@@ -560,7 +560,7 @@
   },
   {
     "id": "S7BEN-CVE-005",
-    "name": "GitLab ExifTool RCE",
+    "name": "MediaUpload Repository",
     "category": "CVE",
     "owasp_category": "A03:2025 - Injection",
     "cwe": "N/A",
@@ -573,7 +573,7 @@
   },
   {
     "id": "S7BEN-VHARD-011",
-    "name": "2FA Session State Bypass",
+    "name": "SecureLogin 2FA Portal",
     "category": "VHARD",
     "owasp_category": "A07:2025 - Authentication Failures",
     "cwe": [
@@ -589,7 +589,7 @@
   },
   {
     "id": "S7BEN-VHARD-012",
-    "name": "OAuth State Parameter Confusion",
+    "name": "OAuthBridge SSO Provider",
     "category": "VHARD",
     "owasp_category": "A07:2025 - Authentication Failures",
     "cwe": [
@@ -605,7 +605,7 @@
   },
   {
     "id": "S7BEN-HARD-014",
-    "name": "Password Reset Token Reuse",
+    "name": "RecoverID Password Service",
     "category": "HARD",
     "owasp_category": "A07:2025 - Authentication Failures",
     "cwe": [
@@ -621,7 +621,7 @@
   },
   {
     "id": "S7BEN-HARD-015",
-    "name": "Session Fixation via Cookie Injection",
+    "name": "SessionTrack Auth Service",
     "category": "HARD",
     "owasp_category": "A07:2025 - Authentication Failures",
     "cwe": [
@@ -636,7 +636,7 @@
   },
   {
     "id": "S7BEN-MED-013",
-    "name": "Weak Password Policy",
+    "name": "AdminGate Login",
     "category": "MED",
     "owasp_category": "A07:2025 - Authentication Failures",
     "cwe": [
@@ -651,7 +651,7 @@
   },
   {
     "id": "S7BEN-VHARD-013",
-    "name": "Race Condition Double Spend",
+    "name": "CryptoWallet Payment Service",
     "category": "VHARD",
     "owasp_category": "A04:2025 - Insecure Design",
     "cwe": [
@@ -667,7 +667,7 @@
   },
   {
     "id": "S7BEN-VHARD-014",
-    "name": "Negative Quantity Business Logic Bypass",
+    "name": "ShopCart E-Commerce Platform",
     "category": "VHARD",
     "owasp_category": "A04:2025 - Insecure Design",
     "cwe": [
@@ -682,7 +682,7 @@
   },
   {
     "id": "S7BEN-HARD-016",
-    "name": "Workflow State Manipulation",
+    "name": "OrderPipeline Workflow Engine",
     "category": "HARD",
     "owasp_category": "A04:2025 - Insecure Design",
     "cwe": [
@@ -697,7 +697,7 @@
   },
   {
     "id": "S7BEN-HARD-017",
-    "name": "Client-Side Price Manipulation",
+    "name": "MarketPlace Commerce Engine",
     "category": "HARD",
     "owasp_category": "A04:2025 - Insecure Design",
     "cwe": [
@@ -712,7 +712,7 @@
   },
   {
     "id": "S7BEN-MED-014",
-    "name": "Coupon Code Reuse",
+    "name": "PromoVault Discount Engine",
     "category": "MED",
     "owasp_category": "A04:2025 - Insecure Design",
     "cwe": [
@@ -727,7 +727,7 @@
   },
   {
     "id": "S7BEN-HARD-018",
-    "name": "Kubernetes RBAC Privilege Escalation",
+    "name": "HRPortal Access Manager",
     "category": "HARD",
     "owasp_category": "A05:2025 - Security Misconfiguration",
     "cwe": [
@@ -743,7 +743,7 @@
   },
   {
     "id": "S7BEN-HARD-019",
-    "name": "Docker Socket Exposure Container Escape",
+    "name": "DevOps CI/CD Pipeline",
     "category": "HARD",
     "owasp_category": "A05:2025 - Security Misconfiguration",
     "cwe": [
@@ -758,7 +758,7 @@
   },
   {
     "id": "S7BEN-MED-015",
-    "name": "Flask Debug Mode in Production",
+    "name": "DevBridge API Service",
     "category": "MED",
     "owasp_category": "A05:2025 - Security Misconfiguration",
     "cwe": [
@@ -773,7 +773,7 @@
   },
   {
     "id": "S7BEN-MED-016",
-    "name": "Default Credentials",
+    "name": "NetworkEdge Router Dashboard",
     "category": "MED",
     "owasp_category": "A05:2025 - Security Misconfiguration",
     "cwe": [
@@ -788,7 +788,7 @@
   },
   {
     "id": "S7BEN-CVE-006",
-    "name": "runc Container Escape (CVE-2024-21626)",
+    "name": "ContainerHost Runtime Service",
     "category": "CVE",
     "owasp_category": "A06:2025 - Vulnerable Components",
     "cwe": [
@@ -803,7 +803,7 @@
   },
   {
     "id": "S7BEN-CVE-007",
-    "name": "HTTP/2 Rapid Reset DoS (CVE-2023-44487)",
+    "name": "WebTraffic Load Balancer",
     "category": "CVE",
     "owasp_category": "A06:2025 - Vulnerable Components",
     "cwe": [
@@ -818,7 +818,7 @@
   },
   {
     "id": "S7BEN-CVE-008",
-    "name": "PAN-OS Command Injection (CVE-2024-3400)",
+    "name": "NetworkFirewall Management Console",
     "category": "CVE",
     "owasp_category": "A03:2025 - Injection",
     "cwe": [
@@ -833,7 +833,7 @@
   },
   {
     "id": "S7BEN-CVE-009",
-    "name": "Confluence Privilege Escalation (CVE-2023-22515)",
+    "name": "TeamWiki Collaboration Platform",
     "category": "CVE",
     "owasp_category": "A01:2025 - Broken Access Control",
     "cwe": [
@@ -848,7 +848,7 @@
   },
   {
     "id": "S7BEN-CVE-010",
-    "name": "TeamCity Auth Bypass (CVE-2024-27198)",
+    "name": "CI/CD Pipeline Manager",
     "category": "CVE",
     "owasp_category": "A07:2025 - Authentication Failures",
     "cwe": [
@@ -863,7 +863,7 @@
   },
   {
     "id": "S7BEN-CVE-011",
-    "name": "ActiveMQ Deserialization RCE (CVE-2023-46604)",
+    "name": "MessageBroker Queue Service",
     "category": "CVE",
     "owasp_category": "A08:2025 - Software Data Integrity Failures",
     "cwe": [
@@ -878,7 +878,7 @@
   },
   {
     "id": "S7BEN-CVE-012",
-    "name": "Media Processing API",
+    "name": "ImageProcessor Cloud API",
     "category": "CVE",
     "owasp_category": "A10:2025 - Server-Side Request Forgery",
     "cwe": [
@@ -889,7 +889,7 @@
     "flag_format": "S7BEN{cloud_flag_[dynamic]}",
     "difficulty": 5,
     "phase": 9,
-    "description": "A web application that provides image processing capabilities. Users can submit image URLs for server-side processing and conversion. The service operates in a cloud environment.",
+    "description": "A cloud-based image processing API that handles file uploads and transformations.",
     "hints": []
   },
   {
@@ -904,7 +904,7 @@
     "port": 8127,
     "flag_format": "S7BEN{prompt_inj3ct10n_...}",
     "phase": 9,
-    "description": "AI chatbot with input/output guardrails vulnerable to indirect prompt injection. Bypass guardrails to exfiltrate the internal API key, then use it to retrieve the flag from /internal/config.",
+    "description": "A corporate AI assistant portal that handles customer support requests with multi-layer guardrails.",
     "hints": [
       "The chatbot has input AND output guardrails - both must be bypassed",
       "Output filters block direct flag output but not encoded forms",
