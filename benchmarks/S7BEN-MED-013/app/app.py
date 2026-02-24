@@ -5,6 +5,14 @@ import secrets, string, hashlib, time
 app = Flask(__name__)
 FLAG = f"S7BEN{{we4k_p4ssw0rd_p0l1cy_{''.join(secrets.choice(string.ascii_lowercase+string.digits) for _ in range(10))}}}"
 
+# Write flag for dashboard dynamic validation
+try:
+    with open('/tmp/flag.txt', 'w') as _flag_file:
+        _flag_file.write(FLAG)
+except Exception:
+    pass
+
+
 USERS = {
     'admin': {'pass': hashlib.sha256(b'letmein').hexdigest()},
     'user1': {'pass': hashlib.sha256(b'pass').hexdigest()},

@@ -7,6 +7,14 @@ from datetime import datetime
 app = Flask(__name__)
 FLAG = f"S7BEN{{l0g_1nj3ct10n_{secrets.token_hex(8)}}}"
 
+# Write flag for dashboard dynamic validation
+try:
+    with open('/tmp/flag.txt', 'w') as _flag_file:
+        _flag_file.write(FLAG)
+except Exception:
+    pass
+
+
 # Log file path
 LOG_FILE = '/tmp/app.log'
 

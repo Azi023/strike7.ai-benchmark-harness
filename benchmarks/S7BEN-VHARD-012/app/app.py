@@ -16,6 +16,14 @@ app.config['SECRET_KEY'] = secrets.token_hex(32)
 FLAG_SUFFIX = ''.join(secrets.choice(string.ascii_lowercase + string.digits) for _ in range(12))
 FLAG = f"S7BEN{{oauth_st4te_c0nfus10n_{FLAG_SUFFIX}}}"
 
+# Write flag for dashboard dynamic validation
+try:
+    with open('/tmp/flag.txt', 'w') as _flag_file:
+        _flag_file.write(FLAG)
+except Exception:
+    pass
+
+
 STATE_COUNTER = 1000
 
 # Telemetry

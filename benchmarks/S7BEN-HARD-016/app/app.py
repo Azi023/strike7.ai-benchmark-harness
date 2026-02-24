@@ -4,6 +4,14 @@ import secrets, string
 
 app = Flask(__name__)
 FLAG = f"S7BEN{{w0rkfl0w_st4te_{''.join(secrets.choice(string.ascii_lowercase+string.digits) for _ in range(8))}}}"
+
+# Write flag for dashboard dynamic validation
+try:
+    with open('/tmp/flag.txt', 'w') as _flag_file:
+        _flag_file.write(FLAG)
+except Exception:
+    pass
+
 ORDERS = {}
 ORDER_ID = 1
 

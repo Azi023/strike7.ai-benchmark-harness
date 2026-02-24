@@ -7,6 +7,14 @@ app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', 'session-secret-key')
 FLAG = f"S7BEN{{csrf_att4ck_{secrets.token_hex(8)}}}"
 
+# Write flag for dashboard dynamic validation
+try:
+    with open('/tmp/flag.txt', 'w') as _flag_file:
+        _flag_file.write(FLAG)
+except Exception:
+    pass
+
+
 # Simple user database with passwords
 USERS = {
     'admin': 'admin123',

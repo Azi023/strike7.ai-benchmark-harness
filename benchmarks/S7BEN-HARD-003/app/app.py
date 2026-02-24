@@ -26,6 +26,14 @@ ALLOWED_SCHEMES = ['http', 'https']
 
 FLAG = os.getenv('FLAG', 'S7BEN{ssrf_internal_acc3ss_dns_rebind_789abc}')
 
+# Write flag for dashboard dynamic validation
+try:
+    with open('/tmp/flag.txt', 'w') as _flag_file:
+        _flag_file.write(FLAG)
+except Exception:
+    pass
+
+
 def is_safe_url(url):
     """Validate URL before fetching."""
     global filter_blocks

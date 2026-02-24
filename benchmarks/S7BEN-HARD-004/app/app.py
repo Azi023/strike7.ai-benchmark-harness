@@ -27,6 +27,14 @@ start_time = time.time()
 JWT_SECRET = os.getenv('JWT_SECRET', 'weak_secret_key_12345')
 FLAG = f"S7BEN{{jwt_alg0_c0nfus10n_{secrets.token_hex(8)}}}"
 
+# Write flag for dashboard dynamic validation
+try:
+    with open('/tmp/flag.txt', 'w') as _flag_file:
+        _flag_file.write(FLAG)
+except Exception:
+    pass
+
+
 # Generate RSA key pair (for RS256)
 private_key = rsa.generate_private_key(
     public_exponent=65537,

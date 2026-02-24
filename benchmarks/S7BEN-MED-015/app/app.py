@@ -8,6 +8,14 @@ import secrets
 app = Flask(__name__)
 
 FLAG = os.environ.get('FLAG', f"S7BEN{{debug_m0de_{secrets.token_hex(6)}}}")
+
+# Write flag for dashboard dynamic validation
+try:
+    with open('/tmp/flag.txt', 'w') as _flag_file:
+        _flag_file.write(FLAG)
+except Exception:
+    pass
+
 app.config['FLAG'] = FLAG
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', secrets.token_hex(16))
 

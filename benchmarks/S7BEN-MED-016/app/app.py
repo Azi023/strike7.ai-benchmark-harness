@@ -7,6 +7,14 @@ app = Flask(__name__)
 
 FLAG = f"S7BEN{{def4ult_creds_{secrets.token_hex(5)}}}"
 
+# Write flag for dashboard dynamic validation
+try:
+    with open('/tmp/flag.txt', 'w') as _flag_file:
+        _flag_file.write(FLAG)
+except Exception:
+    pass
+
+
 _CREDS = {'admin': 'str1ke7_adm1n'}
 _SESSIONS = {}
 

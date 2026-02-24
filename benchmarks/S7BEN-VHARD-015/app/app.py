@@ -22,6 +22,14 @@ from chatbot import get_response
 app = Flask(__name__)
 
 FLAG = os.environ.get('FLAG', 'S7BEN{prompt_inj3ct10n_development_mode}')
+
+# Write flag for dashboard dynamic validation
+try:
+    with open('/tmp/flag.txt', 'w') as _flag_file:
+        _flag_file.write(FLAG)
+except Exception:
+    pass
+
 INTERNAL_API_KEY = os.environ.get('INTERNAL_API_KEY', 'sk-strike7-a8f3n2k9x4m1')
 
 

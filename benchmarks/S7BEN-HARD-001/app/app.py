@@ -10,6 +10,14 @@ app = Flask(__name__)
 
 # Configuration
 FLAG = os.environ.get('FLAG', 'S7BEN{waf_bypass_sql_1nj3ct10n_abc123def456}')
+
+# Write flag for dashboard dynamic validation
+try:
+    with open('/tmp/flag.txt', 'w') as _flag_file:
+        _flag_file.write(FLAG)
+except Exception:
+    pass
+
 DB_CONFIG = {
     'host': os.environ.get('DB_HOST', 'mysql-db'),
     'user': os.environ.get('DB_USER', 'appuser'),

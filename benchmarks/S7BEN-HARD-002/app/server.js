@@ -9,6 +9,8 @@ const crypto = require('crypto');
 const app = express();
 const PORT = process.env.PORT || 3000;
 const FLAG = `S7BEN{xss_sanitizer_byp4ss_${crypto.randomBytes(8).toString('hex')}}`;
+// Write flag for dashboard dynamic validation
+try { require('fs').writeFileSync('/tmp/flag.txt', FLAG); } catch(e) {}
 
 // Initialize DOMPurify
 const window = new JSDOM('').window;

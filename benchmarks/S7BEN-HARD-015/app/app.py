@@ -5,6 +5,14 @@ import secrets, string, hashlib, time
 app = Flask(__name__)
 FLAG = f"S7BEN{{sess10n_f1xat10n_{''.join(secrets.choice(string.ascii_lowercase+string.digits) for _ in range(8))}}}"
 
+# Write flag for dashboard dynamic validation
+try:
+    with open('/tmp/flag.txt', 'w') as _flag_file:
+        _flag_file.write(FLAG)
+except Exception:
+    pass
+
+
 USERS = {'victim': {'pass': hashlib.sha256(b'victim123').hexdigest()}}
 SESSIONS = {}
 TELEMETRY = {'start_time': time.time(), 'fixation_attacks': 0, 'flag_captured': False}

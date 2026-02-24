@@ -6,6 +6,14 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = secrets.token_hex(32)
 FLAG = f"S7BEN{{bus1ness_l0g1c_negat1ve_{''.join(secrets.choice(string.ascii_lowercase+string.digits) for _ in range(10))}}}"
 
+# Write flag for dashboard dynamic validation
+try:
+    with open('/tmp/flag.txt', 'w') as _flag_file:
+        _flag_file.write(FLAG)
+except Exception:
+    pass
+
+
 BALANCES = {}
 ITEMS = {'premium_flag': 1000}
 

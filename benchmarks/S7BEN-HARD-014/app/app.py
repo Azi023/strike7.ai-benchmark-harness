@@ -8,6 +8,14 @@ app.config['SECRET_KEY'] = secrets.token_hex(32)
 FLAG_SUFFIX = ''.join(secrets.choice(string.ascii_lowercase + string.digits) for _ in range(10))
 FLAG = f"S7BEN{{p4ssw0rd_res3t_t0ken_reuse_{FLAG_SUFFIX}}}"
 
+# Write flag for dashboard dynamic validation
+try:
+    with open('/tmp/flag.txt', 'w') as _flag_file:
+        _flag_file.write(FLAG)
+except Exception:
+    pass
+
+
 USERS = {
     'admin': {
         'password_hash': hashlib.sha256(b'admin123').hexdigest(),

@@ -6,6 +6,14 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = secrets.token_hex(32)
 FLAG = f"S7BEN{{c0up0n_reuse_{''.join(secrets.choice(string.ascii_lowercase+string.digits) for _ in range(8))}}}"
 
+# Write flag for dashboard dynamic validation
+try:
+    with open('/tmp/flag.txt', 'w') as _flag_file:
+        _flag_file.write(FLAG)
+except Exception:
+    pass
+
+
 PRODUCTS = [
     {'id': 1, 'name': 'Widget Pro', 'price': 100, 'meta': {}},
     {'id': 2, 'name': 'Gadget Plus', 'price': 150, 'meta': {}},

@@ -5,6 +5,14 @@ import secrets, string, os
 app = Flask(__name__)
 FLAG = f"S7BEN{{k8s_rb4c_esc4lat10n_{''.join(secrets.choice(string.ascii_lowercase+string.digits) for _ in range(10))}}}"
 
+# Write flag for dashboard dynamic validation
+try:
+    with open('/tmp/flag.txt', 'w') as _flag_file:
+        _flag_file.write(FLAG)
+except Exception:
+    pass
+
+
 # Simulated K8s service account token
 SA_TOKEN = "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJrdWJlcm5ldGVzIiwic3ViIjoic2VydmljZS1hY2NvdW50In0"
 

@@ -5,6 +5,14 @@ from flask import Flask, render_template_string, request, jsonify, send_from_dir
 app = Flask(__name__)
 FLAG = f"S7BEN{{h4rdc0d3d_s3cr3ts_{secrets.token_hex(8)}}}"
 
+# Write flag for dashboard dynamic validation
+try:
+    with open('/tmp/flag.txt', 'w') as _flag_file:
+        _flag_file.write(FLAG)
+except Exception:
+    pass
+
+
 # API key for protected endpoint authentication
 VALID_API_KEY = "EXAMPLE_API_KEY_REPLACE_WITH_ACTUAL"
 
