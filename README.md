@@ -70,13 +70,13 @@ A10 SSRF                         █████            5 benchmarks
 
 | Range | Category |
 |-------|----------|
-| 5000–5009 | EASY benchmarks |
+| 5001–5009 | EASY benchmarks |
 | 5010–5069 | MED benchmarks |
 | 5070–5080 | CVE-001 through CVE-011 |
 | 8090–8110 | HARD / VHARD benchmarks |
 | 8111–8127 | Sprint 9 — recently added benchmarks |
 | 5500 | Dashboard API |
-| 5001 | MCP server (SSE) — proxied via nginx at `/mcp/` |
+| 5000 | MCP server (SSE) — proxied via nginx at `/mcp/` |
 
 ---
 
