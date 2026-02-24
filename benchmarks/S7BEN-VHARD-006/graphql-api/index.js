@@ -228,12 +228,7 @@ async function startServer() {
         </style>
       </head>
       <body>
-        <h1>🔓 SBEN-GQL-01: GraphQL Introspection to SQL Injection</h1>
-
-        <div class="warning">
-          <strong>⚠️ WARNING:</strong> This API contains intentional security vulnerabilities.
-          DO NOT expose to untrusted networks.
-        </div>
+        <h1>DataQuery API Platform</h1>
 
         <h2>GraphQL Endpoint</h2>
         <p><code>POST /graphql</code> - Main GraphQL endpoint with introspection enabled</p>

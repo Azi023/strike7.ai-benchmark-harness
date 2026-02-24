@@ -176,11 +176,8 @@ DASHBOARD_TEMPLATE = '''
         </div>
         {% else %}
         <div class="info">
-            <strong>CSRF Challenge:</strong><br>
-            This application is vulnerable to Cross-Site Request Forgery (CSRF) attacks.
-            The password change form does not validate CSRF tokens.
-            <br><br>
-            <strong>Goal:</strong> Change the admin password to "hacked" using a CSRF attack.
+            <strong>Welcome to AccountManager Settings.</strong><br>
+            Use the form below to manage your account settings.
         </div>
         {% endif %}
 

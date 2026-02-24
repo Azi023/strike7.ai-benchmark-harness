@@ -111,13 +111,8 @@ GREETING_TEMPLATE = """
 </head>
 <body>
     <div class="container">
-        <h1>Python/Jinja2 Template Engine</h1>
-        <p class="subtitle">S7BEN-VHARD-009 - Server-Side Template Injection</p>
-
-        <div class="warning">
-            <strong>⚠️ Security Warning</strong><br>
-            This application contains intentional SSTI vulnerabilities for educational purposes.
-        </div>
+        <h1>GreetingCard Generator</h1>
+        <p class="subtitle">Personalized greeting card service</p>
 
         <div class="result">
             <h2>Greeting Result:</h2>
@@ -129,12 +124,8 @@ GREETING_TEMPLATE = """
             <button type="submit">Generate Greeting</button>
         </form>
 
-        <div class="hint">
-            <strong>Hint:</strong> Try entering template expressions like <code>{{7*7}}</code>
-        </div>
-
         <div class="footer">
-            Strike7 Security Benchmarks | Jinja2 SSTI
+            GreetingCard Generator | Powered by template engine
         </div>
     </div>
 </body>
