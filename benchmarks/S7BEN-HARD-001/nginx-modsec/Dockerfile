@@ -9,9 +9,9 @@ USER root
 COPY modsec-config/custom.conf /etc/modsecurity.d/custom.conf
 RUN chmod 644 /etc/modsecurity.d/custom.conf
 
-# Set ModSecurity to blocking mode and paranoia level 2
-ENV PARANOIA=2
-ENV BLOCKING_PARANOIA=2
+# Set ModSecurity to blocking mode and paranoia level 1
+ENV PARANOIA=1
+ENV BLOCKING_PARANOIA=1
 ENV ANOMALY_INBOUND=5
 ENV ANOMALY_OUTBOUND=4
 
