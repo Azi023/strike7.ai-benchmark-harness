@@ -1,355 +1,362 @@
-# Strike7 Security Benchmarks
+# Strike7 AI Security Benchmark Harness
 
-![License](https://img.shields.io/badge/license-MIT-blue.svg)
-![Benchmarks](https://img.shields.io/badge/benchmarks-64-green.svg)
-![OWASP](https://img.shields.io/badge/OWASP-Top%2010-red.svg)
+![Benchmarks](https://img.shields.io/badge/benchmarks-65-brightgreen.svg)
+![OWASP](https://img.shields.io/badge/OWASP_2025-Top_10-red.svg)
 ![Docker](https://img.shields.io/badge/docker-required-blue.svg)
 ![Python](https://img.shields.io/badge/python-3.11%2B-blue.svg)
+![License](https://img.shields.io/badge/license-MIT-blue.svg)
 
-> AI-powered penetration testing benchmark platform with 64 real-world security challenges covering OWASP Top 10 vulnerabilities.
+> Evaluate AI agent security capabilities against 65 real-world vulnerability scenarios — hosted live on a public VPS, accessible via REST API or MCP server.
 
 ---
 
-## 🎯 Overview
+## Live Platform
 
-Strike7 Benchmarks is a comprehensive security testing platform designed for evaluating AI agents' capabilities in identifying and exploiting web application vulnerabilities. Each benchmark is a self-contained Docker environment featuring realistic, intentionally vulnerable applications that mirror real-world security challenges.
+The benchmark harness is **publicly accessible** right now:
+
+| Endpoint | URL |
+|----------|-----|
+| Dashboard UI | `http://139.59.80.137` |
+| REST API | `http://139.59.80.137/api/` |
+| MCP Server (SSE) | `http://139.59.80.137/mcp/sse` |
+| MCP Health | `http://139.59.80.137/mcp/health` |
+
+No SSH access or local installation required to run your AI agent against the benchmarks.
+
+---
+
+## Overview
+
+Strike7 is a security benchmark platform designed to measure AI agents' ability to identify and exploit real-world web application vulnerabilities. Each benchmark is a self-contained Docker environment running on the VPS — your agent interacts with it over HTTP.
 
 ### Why Strike7?
 
-- **Realistic Scenarios**: 64 challenges based on actual OWASP Top 10 vulnerabilities and real CVEs
-- **AI-First Design**: RESTful API and MCP server integration for seamless AI agent interaction
-- **Isolated Environments**: Every benchmark runs in Docker containers with proper network segmentation
-- **Progressive Difficulty**: Five difficulty levels from EASY to VERY HARD, plus real CVE reproductions
-- **Production-Ready**: Comprehensive health checks, automated testing, and telemetry
+- **65 challenges** across 5 difficulty tiers: EASY, MED, HARD, VHARD, CVE
+- **Full OWASP 2025 Top 10 coverage** — every vulnerability category represented
+- **Real CVE reproductions** — 12 challenges based on actual CVEs (2023–2025)
+- **Multi-step attack chains** — advanced benchmarks require 3–6 exploitation steps
+- **Dynamic flags** — flags are regenerated on each container start; no hardcoded solutions
+- **AI-first design** — REST API + MCP server built for autonomous agent loops
 
 ---
 
-## ✨ Features
+## Benchmark Catalogue
 
-- ✅ **64 Security Challenges** across 5 difficulty levels (EASY, MED, HARD, VHARD, CVE)
-- ✅ **Complete OWASP Top 10 Coverage** - All vulnerability categories represented
-- ✅ **Docker-Based Isolation** - Self-contained environments with one-command deployment
-- ✅ **RESTful API** - Automated benchmark management and flag submission
-- ✅ **MCP Server Integration** - Native support for Claude and other AI agents
-- ✅ **Real CVE Reproductions** - 11 challenges based on actual CVEs from 2023-2025
-- ✅ **Multi-Container Architectures** - Advanced challenges with 2-6 containers per benchmark
-- ✅ **Dynamic Flag Generation** - Environment-based flags prevent solution leakage
-- ✅ **Comprehensive Documentation** - Detailed guides for each benchmark
+| Category | Count | Difficulty | Examples |
+|----------|-------|------------|---------|
+| EASY | 9 | Tier 1 | CSRF, Race Condition, Log Injection, IDOR |
+| MED | 16 | Tier 1–2 | SQLi, SSRF, Broken Auth, Dependency Confusion |
+| HARD | 14 | Tier 2 | JWT Confusion, XXE, Blind SQLi, Deserialization |
+| VHARD | 14 | Tier 2–3 | SSTI Chain, NoSQL Injection, LFI→RCE, AD Attacks |
+| CVE | 12 | Tier 2–3 | Log4Shell, Spring4Shell, Ghostscript SSRF Chain |
+| **Total** | **65** | — | **10/10 OWASP 2025 categories** |
+
+### OWASP 2025 Coverage
+
+```
+A01 Broken Access Control        ██████████████  14 benchmarks
+A02 Cryptographic Failures       ████             3 benchmarks
+A03 Injection                    ██████████████  18 benchmarks
+A04 Insecure Design              ██               2 benchmarks
+A05 Security Misconfiguration    █████            4 benchmarks
+A06 Vulnerable Components        █████████       12 benchmarks (CVE tier)
+A07 Authentication Failures      ██████           6 benchmarks
+A08 Data Integrity Failures      ███████          7 benchmarks
+A09 Logging Failures             ██               2 benchmarks
+A10 SSRF                         █████            5 benchmarks
+```
+
+### Port Map (all hosted on `139.59.80.137`)
+
+| Range | Category |
+|-------|----------|
+| 5000–5009 | EASY benchmarks |
+| 5010–5069 | MED benchmarks |
+| 5070–5080 | CVE-001 through CVE-011 |
+| 8090–8110 | HARD / VHARD benchmarks |
+| 8111–8127 | Sprint 9 — recently added benchmarks |
+| 5500 | Dashboard API |
+| 5001 | MCP server (SSE) — proxied via nginx at `/mcp/` |
 
 ---
 
-## 📊 Benchmark Categories
+## Connecting Your AI Agent
 
-| Category | Count | Difficulty | OWASP Coverage |
-|----------|-------|------------|----------------|
-| **EASY** | 9 | Tier 1 | A01, A02, A04, A09 |
-| **MEDIUM** | 16 | Tier 1-2 | A01, A03, A07, A08 |
-| **HARD** | 14 | Tier 2 | A03, A05, A06, A08 |
-| **VERY HARD** | 14 | Tier 2-3 | A01, A03, A06, A08, A10 |
-| **CVE** | 11 | Tier 2-3 | Real-world vulnerabilities |
-| **TOTAL** | **64** | — | **10/10 OWASP categories** |
+### Option A — REST API (simplest)
 
-### OWASP Top 10 Coverage
+Use the Python client library included in this repo:
 
+```python
+from dashboard.agent_client import Strike7Client
+
+# Point at the public VPS — no SSH needed
+client = Strike7Client(base_url="http://139.59.80.137")
+
+# Start a session
+session_id = client.start_session("my-agent-v1")
+
+# List all 65 benchmarks (or filter by category)
+benchmarks = client.get_benchmarks(category="EASY")
+
+# Start a benchmark container on the VPS
+result = client.start_benchmark("S7BEN-EASY-001")
+port   = result["port"]   # e.g. 5000
+# Benchmark is now live at http://139.59.80.137:<port>
+
+# Exploit it, capture the flag, submit:
+client.submit_flag("S7BEN-EASY-001", "S7BEN{...captured_flag...}")
+
+# Stop the container and move to the next
+client.stop_benchmark("S7BEN-EASY-001")
+
+# End session and get results
+client.end_session()
 ```
-A01: Broken Access Control          █████████████░░░░░  13 benchmarks
-A02: Cryptographic Failures          ███░░░░░░░░░░░░░░░   3 benchmarks
-A03: Injection                       ████████████████░░  18 benchmarks
-A04: Insecure Design                 ██░░░░░░░░░░░░░░░░   2 benchmarks
-A05: Security Misconfiguration       ████░░░░░░░░░░░░░░   4 benchmarks
-A06: Vulnerable Components           ████░░░░░░░░░░░░░░   4 benchmarks
-A07: Authentication Failures         █████░░░░░░░░░░░░░   6 benchmarks
-A08: Data Integrity Failures         ██████░░░░░░░░░░░░   7 benchmarks
-A09: Logging Failures                ██░░░░░░░░░░░░░░░░   2 benchmarks
-A10: SSRF                            █████░░░░░░░░░░░░░   5 benchmarks
-```
 
----
-
-## 🚀 Quick Start
-
-### Prerequisites
-
-- Docker & Docker Compose
-- Python 3.11 or higher
-- curl (for testing)
-
-### Installation
+Or raw HTTP with curl:
 
 ```bash
-# Clone the repository
-git clone <your-repo-url>
-cd strike7-benchmarks
+# List benchmarks
+curl http://139.59.80.137/api/benchmarks
 
-# Install dashboard dependencies (optional)
-cd dashboard
-pip install -r requirements.txt
+# Filter by category
+curl "http://139.59.80.137/api/benchmarks?category=HARD"
+
+# Start a benchmark
+curl -X POST http://139.59.80.137/api/benchmark/S7BEN-EASY-001/start \
+     -H "Content-Type: application/json" \
+     -d '{"force_stop_others": true}'
+
+# Submit a flag
+curl -X POST http://139.59.80.137/api/benchmark/S7BEN-EASY-001/submit-flag \
+     -H "Content-Type: application/json" \
+     -d '{"flag": "S7BEN{...}"}'
+
+# Stop a benchmark
+curl -X POST http://139.59.80.137/api/benchmark/S7BEN-EASY-001/stop
 ```
 
-### Run Your First Benchmark
+### Option B — MCP Server (for Claude Desktop / Claude Code)
 
-```bash
-# Navigate to any benchmark
-cd benchmarks/S7BEN-EASY-001
+The MCP server is running live at `http://139.59.80.137/mcp/sse`.
 
-# Start the environment
-make up
+**For Claude Code** — tell the agent directly:
+> "Connect to the Strike7 benchmark platform MCP server at `http://139.59.80.137/mcp/sse`. Use it to list benchmarks, start containers, and submit flags."
 
-# Check health
-make test
-
-# The benchmark is now running on http://localhost:5000
-# See the benchmark's TESTING.md for exploitation guidance
-
-# Stop when done
-make down
-```
-
-### Start the Dashboard (Optional)
-
-```bash
-cd dashboard
-python app.py
-# Dashboard available at http://localhost:8888
-```
-
----
-
-## 🤖 MCP Server Integration
-
-Strike7 includes a Model Context Protocol (MCP) server for seamless integration with AI agents like Claude.
-
-### Quick Setup
-
-```bash
-# Start the MCP server
-cd dashboard
-python strike7_mcp_server.py
-```
-
-### Configuration
-
-Add to your Claude Desktop config (`claude_desktop_config.json`):
+**For Claude Desktop** — add to `claude_desktop_config.json`:
 
 ```json
 {
   "mcpServers": {
     "strike7": {
       "command": "python",
-      "args": ["/path/to/strike7-benchmarks/dashboard/strike7_mcp_server.py"]
+      "args": ["/path/to/strike7-benchmarks/dashboard/strike7_mcp_server.py"],
+      "env": {
+        "STRIKE7_API_URL": "http://139.59.80.137",
+        "MCP_TRANSPORT": "stdio"
+      }
     }
   }
 }
 ```
 
-### MCP Capabilities
+Or point directly at the hosted SSE endpoint (if your MCP client supports remote SSE):
 
-- 📋 List and filter benchmarks by difficulty/category
-- ▶️ Start/stop benchmark containers
-- 🚩 Submit flags for validation
-- 📊 Track session progress
-- ⚡ Automated health checks
-
-**See [docs/MCP_QUICKSTART.md](docs/MCP_QUICKSTART.md) for detailed setup instructions.**
-
----
-
-## 📚 API Reference
-
-The Strike7 Dashboard provides a RESTful API for programmatic access:
-
-### Core Endpoints
-
-```bash
-GET  /api/benchmarks              # List all benchmarks
-GET  /api/benchmarks/{id}         # Get benchmark details
-POST /api/benchmarks/{id}/start   # Start a benchmark
-POST /api/benchmarks/{id}/stop    # Stop a benchmark
-POST /api/submit-flag             # Submit a flag for validation
-GET  /api/session/{id}            # Get session progress
+```json
+{
+  "mcpServers": {
+    "strike7": {
+      "url": "http://139.59.80.137/mcp/sse"
+    }
+  }
+}
 ```
 
-**Full API documentation: [dashboard/API_DOCUMENTATION.md](dashboard/API_DOCUMENTATION.md)**
+**Available MCP tools:**
+
+| Tool | Description |
+|------|-------------|
+| `list_benchmarks` | List/filter benchmarks by category or OWASP tag |
+| `get_benchmark_details` | Get full details for a specific benchmark |
+| `start_benchmark` | Start a benchmark container on the VPS |
+| `stop_benchmark` | Stop a running benchmark container |
+| `get_container_status` | Check all running containers and resource usage |
+| `submit_flag` | Validate a captured flag |
+| `execute_command` | Run shell commands (curl, nmap, etc.) from the VPS |
+| `start_session` | Begin a tracked evaluation session |
+| `get_metrics` | Get session metrics and solve statistics |
+| `health_check` | Verify API and MCP connectivity |
+
+### Option C — Direct HTTP (no library)
+
+Once a benchmark is started via the API, just hit its port directly:
+
+```bash
+# 1. Start the benchmark via API
+curl -X POST http://139.59.80.137/api/benchmark/S7BEN-MED-012/start \
+     -H "Content-Type: application/json" -d '{}'
+
+# 2. The benchmark is now at http://139.59.80.137:<port>
+#    Find the port:
+curl http://139.59.80.137/api/benchmark/S7BEN-MED-012/status
+
+# 3. Exploit freely, capture the flag, submit it
+curl -X POST http://139.59.80.137/api/benchmark/S7BEN-MED-012/submit-flag \
+     -H "Content-Type: application/json" \
+     -d '{"flag": "S7BEN{...}"}'
+```
 
 ---
 
-## 🏗️ Architecture
+## Key API Endpoints
 
-### Standard Benchmark Structure
+```
+GET  /api/benchmarks                        List all 65 benchmarks
+GET  /api/benchmarks?category=CVE           Filter by category
+GET  /api/benchmarks/<id>                   Single benchmark details
+GET  /api/benchmark/<id>/status             Container running status
+POST /api/benchmark/<id>/start              Start benchmark container
+POST /api/benchmark/<id>/stop               Stop benchmark container
+POST /api/benchmark/<id>/submit-flag        Submit a captured flag
+GET  /api/containers/status                 All running containers + resource usage
+GET  /api/statistics                        Platform-wide stats
+POST /api/session/start                     Start an evaluation session
+GET  /api/metrics/dashboard                 Full metrics dashboard
+GET  /api/health                            Dashboard health check
+```
+
+Full reference: [`dashboard/API_DOCUMENTATION.md`](dashboard/API_DOCUMENTATION.md)
+
+---
+
+## VPS Infrastructure
+
+```
+External AI Agent / Browser
+         │
+         ▼  port 80 (nginx)
+ http://139.59.80.137
+         │
+         ├── /          → Dashboard UI + REST API  (127.0.0.1:5500)
+         ├── /api/      → REST API                 (127.0.0.1:5500)
+         └── /mcp/      → MCP SSE Server            (127.0.0.1:5001)
+
+Benchmark containers run alongside and expose individual ports on 139.59.80.137.
+```
+
+### Systemd Services (always-on)
+
+| Service | Description |
+|---------|-------------|
+| `strike7-dashboard` | Flask REST API + Dashboard UI (port 5500) |
+| `strike7-mcp` | MCP SSE server (port 5001, proxied at `/mcp/`) |
+
+Both services auto-start on boot and restart on failure.
+
+### Safety Limits
+
+- Max **1 benchmark container** running at a time (auto-stops previous on new start)
+- Containers auto-stop after **30 minutes**
+- Flag submission rate-limited to **10 attempts/min** per benchmark
+
+---
+
+## Repository Structure
+
+```
+strike7-benchmarks/
+├── benchmarks/
+│   ├── S7BEN-EASY-001/          CSRF Password Change
+│   ├── S7BEN-EASY-002/          Hardcoded Secrets
+│   │   ...
+│   ├── S7BEN-MED-001/           SQL Injection
+│   │   ...
+│   ├── S7BEN-HARD-001/          WAF Bypass (ModSecurity)
+│   │   ...
+│   ├── S7BEN-VHARD-001/         Microservices SSRF Chain
+│   │   ...
+│   ├── S7BEN-CVE-011/           ActiveMQ RCE (CVE-2023-46604)
+│   └── S7BEN-CVE-012/           Ghostscript SSRF→RCE→Cloud Chain
+│
+├── dashboard/
+│   ├── app.py                   Flask REST API
+│   ├── strike7_mcp_server.py    MCP SSE server
+│   ├── agent_client.py          Python client library
+│   ├── config/
+│   │   ├── benchmarks.yaml      Benchmark registry (65 entries)
+│   │   └── settings.yaml        Platform configuration
+│   └── data/
+│       └── benchmarks.json      Live benchmark index (takes precedence)
+│
+├── docs/                        Extended documentation
+└── README.md                    This file
+```
+
+### Per-Benchmark Structure
 
 ```
 benchmarks/S7BEN-XXX-NNN/
-├── app/                    # Vulnerable application code
-│   ├── app.py
-│   ├── Dockerfile
-│   └── requirements.txt
-├── benchmark.yaml          # OWASP metadata & configuration
-├── benchmark.json          # Structured metadata
-├── docker-compose.yml      # Container orchestration
-├── Makefile               # Build automation
-├── README.md              # Overview
-└── TESTING.md             # Detailed exploitation guide
+├── benchmark.yaml          Metadata, flag pattern, difficulty, OWASP mapping
+├── docker-compose.yml      Container orchestration + healthchecks
+├── Dockerfile              Application image
+└── app/                   Vulnerable application source
 ```
-
-### Multi-Container Benchmarks
-
-Advanced challenges (VHARD/CVE) feature complex architectures:
-
-- **Microservices**: 6 containers with network segmentation
-- **Active Directory**: Domain controller, file server, workstation
-- **Attack Chains**: 3-5 exploitation steps required
-- **Polyglot Stacks**: Python, Node.js, Java, Go, PHP
 
 ---
 
-## 🎓 Usage Scenarios
+## Running Benchmarks Locally
 
-### For Security Researchers
-
-Test exploitation techniques in isolated environments:
+If you want to run the harness on your own machine instead of the VPS:
 
 ```bash
-cd benchmarks/S7BEN-VHARD-001
-make up
-# Perform your security testing
-make down
-```
+# Clone
+git clone https://github.com/Azi023/strike7.ai-benchmark-harness
+cd strike7.ai-benchmark-harness
 
-### For AI Agent Developers
+# Install dashboard deps
+python3 -m venv venv && source venv/bin/activate
+pip install -r dashboard/requirements.txt
 
-Evaluate your AI agent's security capabilities:
+# Start the dashboard
+python3 dashboard/app.py          # REST API at http://localhost:5500
 
-```python
-import requests
+# Start the MCP server (separate terminal)
+STRIKE7_API_URL=http://127.0.0.1:5500 \
+MCP_PORT=5001 \
+python3 dashboard/strike7_mcp_server.py
 
-# Start a benchmark via API
-response = requests.post("http://localhost:8888/api/benchmarks/S7BEN-EASY-001/start")
-
-# Let your AI agent work...
-flag = ai_agent.exploit("http://localhost:5000")
-
-# Submit the flag
-result = requests.post("http://localhost:8888/api/submit-flag", json={
-    "benchmark_id": "S7BEN-EASY-001",
-    "flag": flag
-})
-```
-
-### For Training & Education
-
-Hands-on security workshops:
-
-```bash
-# Run multiple benchmarks for a workshop
-for benchmark in S7BEN-EASY-*; do
-    cd $benchmark
-    make up
-    # Present the challenge
-    make down
-    cd ..
-done
+# Start a benchmark manually
+cd benchmarks/S7BEN-EASY-001
+docker compose up -d
+# Benchmark now at http://localhost:<port>
+docker compose down
 ```
 
 ---
 
-## 📖 Documentation
+## Security Notice
 
-### Getting Started
-- [Quick Start](QUICKSTART.md) - Fast testing guide
-- [MCP Quickstart](docs/MCP_QUICKSTART.md) - AI agent integration
-- [API Documentation](dashboard/API_DOCUMENTATION.md) - RESTful API reference
+**These environments contain intentional vulnerabilities for research purposes.**
 
-### Deployment
-- [Deployment Guide](docs/DEPLOYMENT.md) - Local deployment
-- [VPS Deployment](docs/MCP_VPS_DEPLOYMENT_GUIDE.md) - Production deployment on VPS
-
-### Development
-- [Dashboard Guide](docs/DASHBOARD_GUIDE.md) - Dashboard development
-- [Metrics & Telemetry](docs/METRICS_TELEMETRY_GUIDE.md) - Telemetry implementation
-
-### Per-Benchmark Documentation
-Each benchmark includes:
-- `README.md` - Overview and objectives
-- `TESTING.md` - Detailed exploitation walkthrough with multiple methods
+- Run in isolated Docker networks only
+- Do not expose benchmark ports to the public internet without authentication
+- The VPS benchmarks are intentionally vulnerable — do not store sensitive data there
+- For educational and AI evaluation use only
 
 ---
 
-## 🛠️ Make Targets
+## Project Stats (as of Feb 2026)
 
-Every benchmark supports standardized make commands:
-
-```bash
-make build    # Build Docker images
-make up       # Start containers with health checks
-make down     # Stop and remove containers
-make test     # Run health check
-make clean    # Remove all images and volumes
-make logs     # View container logs
-```
+| Metric | Value |
+|--------|-------|
+| Total benchmarks | 65 |
+| OWASP 2025 coverage | 10 / 10 categories |
+| Technologies | Python, Node.js, Java, PHP, Go, PostgreSQL, MongoDB, Redis, LDAP |
+| Sprint | 9 (active) |
+| Solve rate targets | EASY 100%, MED 90–100%, HARD 60–75%, VHARD 30–50%, CVE 50–70% |
 
 ---
 
-## 🤝 Contributing
+## License
 
-We welcome contributions! To add a new benchmark:
-
-1. Use an existing benchmark as a template
-2. Follow the standard directory structure
-3. Include comprehensive `TESTING.md` with multiple exploitation methods
-4. Test thoroughly with `make up && make test`
-5. Update `benchmark.yaml` with proper OWASP mappings
-
----
-
-## ⚠️ Security Warning
-
-**IMPORTANT: These benchmarks contain intentional security vulnerabilities.**
-
-- ❌ **DO NOT** deploy to production environments
-- ❌ **DO NOT** expose to public networks
-- ❌ **DO NOT** use in production codebases
-- ✅ **DO** use in isolated test environments only
-- ✅ **DO** run inside Docker containers
-- ✅ **DO** follow responsible disclosure for any findings
-
-**Not responsible for misuse. For educational and research purposes only.**
-
----
-
-## 📊 Project Statistics
-
-- **Total Benchmarks**: 64
-- **Total Containers**: 100+ across all benchmarks
-- **OWASP Coverage**: 10/10 categories (100%)
-- **Documentation**: 150+ pages across all guides
-- **Lines of Code**: 20,000+ (vulnerable applications + infrastructure)
-- **Technologies**: Python, Node.js, Java, Go, PHP, PostgreSQL, MongoDB, Redis, LDAP
-
----
-
-## 📝 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-Copyright (c) 2026 Strike7 AI Benchmarks
-
----
-
-## 🙏 Acknowledgments
-
-- **OWASP Top 10 2021** for vulnerability categorization
-- **CWE Database** for vulnerability classification
-- **CVE Program** for real-world vulnerability data
-- **Security Community** for best practices and research
-
----
-
-## 📞 Support & Community
-
-- **Documentation**: See `docs/` directory for comprehensive guides
-- **Issues**: Report bugs and request features via GitHub Issues
-- **Benchmark Help**: Check individual `TESTING.md` files for detailed guidance
-
----
-
-**Ready to test your security skills? Start with the [Quick Start](#-quick-start) guide!** 🚀
+MIT License — Copyright (c) 2026 Strike7 AI Benchmarks
