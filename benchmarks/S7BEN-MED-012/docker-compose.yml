@@ -27,7 +27,7 @@ services:
       context: ./mock-registry
       dockerfile: Dockerfile
     ports:
-      - "8124:5001"
+      - "5021:5001"
     environment:
       - REGISTRY_TYPE=public
     restart: unless-stopped

@@ -6,10 +6,10 @@ services:
     hostname: dc
     domainname: corp.local
     ports:
-      - "389:389"   # LDAP
-      - "636:636"   # LDAPS
-      - "88:88"     # Kerberos
-      - "464:464"   # Kerberos password change
+      - "5052:389"   # LDAP
+      - "5052:636"   # LDAPS
+      - "5052:88"     # Kerberos
+      - "5052:464"   # Kerberos password change
     networks:
       corp-net:
         ipv4_address: 10.200.3.10
@@ -101,7 +101,7 @@ services:
       corp-net:
         ipv4_address: 10.200.3.50
     ports:
-      - "5053:5000"
+      - "5052:5000"
     environment:
       - DOMAIN=CORP.LOCAL
       - DC_HOST=dc.corp.local

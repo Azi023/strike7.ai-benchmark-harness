@@ -5,7 +5,7 @@ services:
     container_name: lfi-webapp
     hostname: web-app
     ports:
-      - "8122:80"
+      - "5059:80"
     environment:
       - FLAG_LFI=${FLAG_LFI:-S7BEN{lfi_path_traversal_file_read_a1b2c3}}
       - FLAG_SESSION=${FLAG_SESSION:-S7BEN{php_session_poisoning_rce_g7h8i9}}
@@ -26,7 +26,7 @@ services:
     container_name: lfi-fileserver
     hostname: file-server
     ports:
-      - "8123:80"
+      - "5059:80"
     environment:
       - FLAG_INTERNAL=${FLAG_INTERNAL:-S7BEN{internal_file_server_access_j1k2l3}}
     networks:

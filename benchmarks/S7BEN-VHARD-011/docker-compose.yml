@@ -5,7 +5,7 @@ services:
     build: ./app
     container_name: s7ben-vhard-011-app
     ports:
-      - "8090:8090"
+      - "5060:8090"
     networks:
       - frontend
     environment:

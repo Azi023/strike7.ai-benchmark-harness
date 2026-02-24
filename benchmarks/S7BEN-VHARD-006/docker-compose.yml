@@ -5,7 +5,7 @@ services:
     container_name: gql-api
     hostname: graphql-api
     ports:
-      - "4000:4000"
+      - "5055:4000"
     networks:
       - gql-net
     environment:

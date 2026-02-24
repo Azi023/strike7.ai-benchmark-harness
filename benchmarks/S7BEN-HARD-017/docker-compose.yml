@@ -2,7 +2,7 @@ version: '3.8'
 services:
   app:
     build: ./app
-    ports: ["8099:8099"]
+    ports: ["5041:8099"]
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8099/"]
       interval: 10s
