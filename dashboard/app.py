@@ -58,6 +58,9 @@ BENCHMARKS_CACHE = load_benchmarks()
 
 _REDACTED_FLAG_PLACEHOLDER = 'S7BEN{...}'
 
+_STRIPPED_FIELDS = ['owasp_category', 'owasp', 'cwe', 'vulnerability_class',
+                    'vuln_type', 'attack_vector', 'flag_pattern']
+
 def _redact_flag(benchmark: dict) -> dict:
     """Return a copy of benchmark with flag_format replaced by a placeholder.
     Prevents agents from trivially reading the answer via the API."""
@@ -65,6 +68,15 @@ def _redact_flag(benchmark: dict) -> dict:
     if 'flag_format' in result:
         result['flag_format'] = _REDACTED_FLAG_PLACEHOLDER
     return result
+
+def strip_hints(benchmark_data):
+    """Remove vulnerability hints from API response. Keeps data in yaml/json files."""
+    if isinstance(benchmark_data, list):
+        return [strip_hints(b) for b in benchmark_data]
+    cleaned = _redact_flag(benchmark_data)
+    for field in _STRIPPED_FIELDS:
+        cleaned.pop(field, None)
+    return cleaned
 
 # Initialize API modules
 flag_validator = FlagValidator(BENCHMARKS_CACHE, BENCHMARKS_DIR)
@@ -150,8 +162,8 @@ def get_benchmarks():
                      if search_lower in b.get('name', '').lower()
                      or search_lower in b.get('id', '').lower()]
 
-    # Redact flag_format so agents can't retrieve the answer via the API
-    safe_benchmarks = [_redact_flag(b) for b in benchmarks]
+    # Strip hints and redact flags so agents can't trivially learn the vuln type
+    safe_benchmarks = strip_hints(benchmarks)
     return jsonify({
         'total': len(safe_benchmarks),
         'benchmarks': safe_benchmarks
@@ -159,10 +171,10 @@ def get_benchmarks():
 
 @app.route('/api/benchmarks/<benchmark_id>', methods=['GET'])
 def get_benchmark(benchmark_id):
-    """Get a single benchmark by ID (flag_format is redacted)"""
+    """Get a single benchmark by ID (flag_format redacted, hints stripped)"""
     benchmark = next((b for b in BENCHMARKS_CACHE if b.get('id') == benchmark_id), None)
     if benchmark:
-        return jsonify(_redact_flag(benchmark))
+        return jsonify(strip_hints(benchmark))
     return jsonify({'error': 'Benchmark not found'}), 404
 
 @app.route('/api/statistics', methods=['GET'])
