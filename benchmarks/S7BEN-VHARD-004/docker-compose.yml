@@ -17,6 +17,7 @@ services:
       interval: 10s
       timeout: 5s
       retries: 3
+      start_period: 120s
     restart: unless-stopped
 
   internal-api:
@@ -33,6 +34,7 @@ services:
       interval: 10s
       timeout: 5s
       retries: 3
+      start_period: 120s
     restart: unless-stopped
 
   victim-app:
@@ -50,6 +52,7 @@ services:
       interval: 10s
       timeout: 5s
       retries: 3
+      start_period: 120s
     restart: unless-stopped
 
 networks:

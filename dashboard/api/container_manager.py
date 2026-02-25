@@ -13,6 +13,18 @@ from typing import Dict, List, Optional, Tuple
 class ContainerManager:
     """Manages benchmark Docker containers with safety controls"""
 
+    # Tier-based startup timeouts (seconds) for docker-compose up --build.
+    # Heavy benchmarks (multi-container AD, source compilation) need much more
+    # time than simple single-container Flask apps.
+    TIER_TIMEOUTS = {
+        'EASY': 60,
+        'MED': 60,
+        'HARD': 120,
+        'VHARD': 300,
+        'CVE': 300,
+    }
+    DEFAULT_STARTUP_TIMEOUT = 120  # fallback for unknown tiers
+
     def __init__(self, benchmarks: list, config: Dict = None):
         """
         Initialize container manager
@@ -35,6 +47,32 @@ class ContainerManager:
             'memory_limit_mb': 512,
             'cpu_limit': 0.5
         }
+
+    @staticmethod
+    def _extract_tier(benchmark_id: str) -> Optional[str]:
+        """
+        Extract the tier from a benchmark ID.
+
+        Examples:
+            'S7BEN-EASY-001' -> 'EASY'
+            'S7BEN-VHARD-003' -> 'VHARD'
+            'S7BEN-CVE-012'  -> 'CVE'
+            'unknown'        -> None
+        """
+        if not benchmark_id or not benchmark_id.startswith('S7BEN-'):
+            return None
+        parts = benchmark_id.split('-')
+        if len(parts) >= 3:
+            return parts[1].upper()
+        return None
+
+    def _get_startup_timeout(self, benchmark_id: str) -> int:
+        """
+        Get the subprocess timeout (seconds) for docker-compose up based on
+        the benchmark's tier.
+        """
+        tier = self._extract_tier(benchmark_id)
+        return self.TIER_TIMEOUTS.get(tier, self.DEFAULT_STARTUP_TIMEOUT)
 
     def start_container(self, benchmark_id: str, force_stop_others: bool = True,
                        timeout_minutes: Optional[int] = None) -> Dict:
@@ -90,13 +128,19 @@ class ContainerManager:
             stopped_ids = []
 
         # Start container using docker-compose
+        startup_timeout = self._get_startup_timeout(benchmark_id)
+        tier = self._extract_tier(benchmark_id) or 'UNKNOWN'
+        if startup_timeout > 120:
+            print(f"[INFO] Starting {tier} benchmark {benchmark_id} "
+                  f"— extended timeout of {startup_timeout}s")
+
         try:
             result = subprocess.run(
                 ['docker-compose', 'up', '-d', '--build'],
                 cwd=benchmark_dir,
                 capture_output=True,
                 text=True,
-                timeout=120
+                timeout=startup_timeout
             )
 
             if result.returncode != 0:
@@ -187,7 +231,7 @@ class ContainerManager:
                 cwd=benchmark_dir,
                 capture_output=True,
                 text=True,
-                timeout=30
+                timeout=60
             )
 
             if result.returncode != 0:
