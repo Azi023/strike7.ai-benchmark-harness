@@ -1,11 +1,5 @@
 """
-S7BEN-VHARD-005: Celery Worker Service
-
-This Celery worker demonstrates pickle deserialization vulnerabilities
-in asynchronous task processing.
-
-Vulnerability:
-- CUSTOM-PICKLE-03: Celery deserializes task payloads using pickle (insecure)
+DataTransfer Pipeline - Celery Worker Service
 """
 
 import os
