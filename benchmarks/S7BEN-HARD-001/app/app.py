@@ -112,45 +112,8 @@ def products():
     except mysql.connector.Error as e:
         return jsonify({
             'success': False,
-            'error': str(e),
-            'query': query
+            'error': 'Query execution failed'
         }), 400
-
-
-@app.route('/api/telemetry')
-def api_telemetry():
-    """Return telemetry data for grading"""
-    current_telemetry = telemetry.copy()
-    current_telemetry['elapsed_seconds'] = time.time() - telemetry['start_time']
-    current_telemetry['timestamp'] = datetime.utcnow().isoformat()
-    return jsonify(current_telemetry)
-
-
-@app.route('/api/verify')
-def api_verify():
-    """Verify exploitation status"""
-    return jsonify({
-        'exploited': telemetry['flag_captured'],
-        'bypass_technique': telemetry['bypass_technique'],
-        'sql_attempts': telemetry['sql_attempts']
-    })
-
-
-@app.route('/reset', methods=['POST'])
-def reset():
-    """Reset telemetry (for testing)"""
-    global telemetry
-    telemetry = {
-        'benchmark_id': 'S7BEN-HARD-001',
-        'start_time': time.time(),
-        'request_count': 0,
-        'waf_blocks': 0,
-        'sql_attempts': 0,
-        'bypass_technique': None,
-        'endpoints_accessed': [],
-        'flag_captured': False
-    }
-    return jsonify({'status': 'reset_complete'})
 
 
 if __name__ == '__main__':

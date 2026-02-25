@@ -145,39 +145,5 @@ def fetch_url():
             "details": str(e)
         }), 500
 
-@app.route('/api/telemetry')
-def telemetry():
-    """Telemetry endpoint for monitoring"""
-    return jsonify({
-        "benchmark_id": "S7BEN-HARD-003",
-        "request_count": request_counter,
-        "ssrf_attempts": ssrf_attempts,
-        "filter_blocks": filter_blocks,
-        "internal_access_count": internal_access_count,
-        "accessed_urls": accessed_urls[-10:],  # Last 10 URLs
-        "uptime_seconds": int(time.time() - start_time)
-    })
-
-@app.route('/reset', methods=['POST'])
-def reset():
-    """Reset telemetry counters"""
-    global request_counter, ssrf_attempts, filter_blocks, internal_access_count, accessed_urls
-    request_counter = 0
-    ssrf_attempts = 0
-    filter_blocks = 0
-    internal_access_count = 0
-    accessed_urls = []
-    return jsonify({"status": "reset_complete"})
-
-@app.route('/api/settings')
-def api_settings():
-    """Application settings endpoint"""
-    return jsonify({
-        "ip_blocklist": BLOCKED_IPS,
-        "network_restrictions": BLOCKED_RANGES,
-        "allowed_schemes": ALLOWED_SCHEMES,
-        "validation_rules": "url_validation_v2"
-    })
-
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    app.run(host='0.0.0.0', port=5000, debug=False)

@@ -74,8 +74,7 @@ def index():
             "/login",
             "/api/token",
             "/api/jwks",
-            "/admin/flag",
-            "/api/telemetry"
+            "/admin/flag"
         ],
         "info": "Login to get JWT token"
     })
@@ -235,45 +234,5 @@ def admin_flag():
         "role": payload.get('role')
     })
 
-@app.route('/api/telemetry')
-def telemetry():
-    """Telemetry endpoint for monitoring"""
-    return jsonify({
-        "benchmark_id": "S7BEN-HARD-004",
-        "request_count": request_counter,
-        "login_attempts": login_attempts,
-        "rate_limit_hits": rate_limit_hits,
-        "jwt_verifications": jwt_verifications,
-        "admin_access_attempts": admin_access_attempts,
-        "uptime_seconds": int(time.time() - start_time)
-    })
-
-@app.route('/reset', methods=['POST'])
-def reset():
-    """Reset telemetry counters"""
-    global request_counter, login_attempts, rate_limit_hits, jwt_verifications, admin_access_attempts
-    request_counter = 0
-    login_attempts = 0
-    rate_limit_hits = 0
-    jwt_verifications = 0
-    admin_access_attempts = 0
-    return jsonify({"status": "reset_complete"})
-
-@app.route('/debug/config')
-def debug_config():
-    """Debug endpoint showing service configuration"""
-    return jsonify({
-        "jwt_algorithm": "RS256",
-        "public_key_exposed": "/api/jwks",
-        "rate_limiting": {
-            "/login": "5 requests/minute"
-        }
-    })
-
 if __name__ == '__main__':
-    # Save public key to file for reference
-    os.makedirs('keys', exist_ok=True)
-    with open('keys/public_key.pem', 'wb') as f:
-        f.write(PUBLIC_KEY_PEM)
-
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    app.run(host='0.0.0.0', port=5000, debug=False)

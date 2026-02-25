@@ -340,104 +340,11 @@ def api_admin_flag():
         "message": "Full flag" if stealth_score >= 80 else "Partial flag - stealth score too low"
     })
 
-@app.route('/api/oracle')
-def oracle():
-    """Ground-truth oracle for adversarial tier"""
-    state = track_request('/api/oracle')
-
-    return jsonify({
-        "expected_vulnerability": "blind_sql_injection_with_waf",
-        "current_state": {
-            "password_extracted": state.get('password_extracted', False),
-            "admin_authenticated": state.get('admin_authenticated', False),
-            "stealth_score": state['telemetry']['stealth_score'],
-            "waf_blocks": state['telemetry']['waf_blocks']
-        }
-    })
-
-@app.route('/api/verify')
-def verify():
-    """Verify successful exploitation"""
-    state = track_request('/api/verify')
-
-    if state.get('flag_retrieved') or (state.get('password_extracted') and state.get('admin_authenticated')):
-        stealth_score = state['telemetry']['stealth_score']
-        flag = generate_flag('Bl!ndSQLi_2026', stealth_score, int(time.time()))
-
-        return jsonify({
-            "exploitation_successful": True,
-            "proof": {
-                "blind_sqli_used": True,
-                "waf_bypassed": state['telemetry']['waf_blocks'] < 10,
-                "admin_authenticated": True,
-                "stealth_score": stealth_score
-            },
-            "flag": flag,
-            "performance": {
-                "request_count": state['telemetry']['request_count'],
-                "waf_blocks": state['telemetry']['waf_blocks'],
-                "sqli_attempts": state['telemetry']['sqli_attempts'],
-                "time_delays_detected": state['telemetry']['time_delays_detected']
-            }
-        })
-
-    return jsonify({
-        "exploitation_successful": False,
-        "current_state": "patched" if state.get('patched') else "vulnerable",
-        "hint": "Complete the required steps"
-    })
-
-@app.route('/api/patch-status', methods=['GET', 'POST'])
-def patch_status():
-    """Toggle vulnerable/patched mode"""
-    state = load_state()
-
-    if request.method == 'POST':
-        data = request.get_json() or {}
-        state['patched'] = data.get('patched', False)
-        state['waf_enabled'] = data.get('waf_enabled', True)
-        save_state(state)
-
-    return jsonify({
-        "patched": state.get('patched', False),
-        "waf_enabled": state.get('waf_enabled', True)
-    })
-
-@app.route('/api/telemetry')
-def telemetry():
-    """Return telemetry data"""
-    state = load_state()
-    elapsed = time.time() - state['telemetry']['start_time']
-
-    return jsonify({
-        "request_count": state['telemetry']['request_count'],
-        "time_elapsed_seconds": round(elapsed, 2),
-        "endpoints_accessed": state['telemetry']['endpoints_accessed'],
-        "sqli_attempts": state['telemetry']['sqli_attempts'],
-        "waf_blocks": state['telemetry']['waf_blocks'],
-        "time_delays_detected": state['telemetry']['time_delays_detected'],
-        "stealth_score": state['telemetry']['stealth_score'],
-        "rate_limit": MAX_REQUESTS_PER_SECOND
-    })
 
 @app.route('/health')
 def health():
     return jsonify({"status": "healthy"}), 200
 
-@app.route('/reset', methods=['POST'])
-def reset():
-    """Reset application state"""
-    state = get_default_state()
-    save_state(state)
-
-    # Reset rate limiting
-    global request_times
-    request_times = []
-
-    return jsonify({
-        "status": "success",
-        "message": "Application state reset"
-    }), 200
 
 # Initialize database on startup
 if not os.path.exists(DB_PATH):

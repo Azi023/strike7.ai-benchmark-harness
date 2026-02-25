@@ -248,15 +248,21 @@ def api_admin_restore_session():
     """Admin session restore functionality."""
     state = track_request('/api/admin/restore-session')
 
+    if 'username' not in session:
+        return jsonify({"error": "Authentication required"}), 401
+
     data = request.get_json() or {}
     requested_user = data.get('username', '')
+
+    if not requested_user:
+        return jsonify({"error": "Username required"}), 400
 
     # Parse logs for admin restore entries
     restored_sessions = parse_admin_restore_logs()
 
     # Find matching session
     for restored in restored_sessions:
-        if restored['user'] == requested_user or not requested_user:
+        if restored['user'] == requested_user:
             session['username'] = restored['user']
             session['role'] = 'admin'
             session['restored'] = True
@@ -345,110 +351,11 @@ def api_logs():
         "tamper_detection": "active"
     })
 
-@app.route('/api/oracle')
-def oracle():
-    """Ground-truth oracle"""
-    state = track_request('/api/oracle')
-
-    return jsonify({
-        "current_state": {
-            "crlf_injection_detected": state.get('crlf_injection_detected', False),
-            "log_tampering_detected": state.get('log_tampering_detected', False),
-            "privilege_escalation": state.get('privilege_escalation', False),
-            "admin_access_gained": state.get('admin_access_gained', False)
-        }
-    })
-
-@app.route('/api/verify')
-def verify():
-    """Verify successful exploitation"""
-    state = track_request('/api/verify')
-
-    chain_complete = (
-        state.get('crlf_injection_detected') and
-        state.get('log_tampering_detected') and
-        state.get('privilege_escalation') and
-        state.get('admin_access_gained')
-    )
-
-    if chain_complete:
-        flag = generate_flag('user', 'log_tampering')
-
-        return jsonify({
-            "exploitation_successful": True,
-            "proof": {
-                "crlf_injection": True,
-                "log_forgery": True,
-                "privilege_escalation": True,
-                "admin_access": True,
-                "chain_length": 3,
-                "profile_updates": state['telemetry']['profile_updates'],
-                "session_restores": state['telemetry']['session_restores']
-            },
-            "flag": flag
-        })
-
-    return jsonify({
-        "exploitation_successful": False,
-        "current_state": {
-            "crlf_injection_detected": state.get('crlf_injection_detected', False),
-            "log_tampering_detected": state.get('log_tampering_detected', False),
-            "privilege_escalation": state.get('privilege_escalation', False)
-        },
-        "hint": "Complete the required steps"
-    })
-
-@app.route('/api/patch-status', methods=['GET', 'POST'])
-def patch_status():
-    """Toggle vulnerable/patched mode"""
-    state = load_state()
-
-    if request.method == 'POST':
-        data = request.get_json() or {}
-        state['patched'] = data.get('patched', False)
-        save_state(state)
-
-    return jsonify({"patched": state.get('patched', False)})
-
-@app.route('/api/telemetry')
-def telemetry():
-    """Return telemetry data"""
-    state = load_state()
-    elapsed = time.time() - state['telemetry']['start_time']
-
-    return jsonify({
-        "request_count": state['telemetry']['request_count'],
-        "time_elapsed_seconds": round(elapsed, 2),
-        "endpoints_accessed": state['telemetry']['endpoints_accessed'],
-        "profile_updates": state['telemetry']['profile_updates'],
-        "session_restores": state['telemetry']['session_restores'],
-        "tamper_warnings": state['telemetry']['tamper_warnings'],
-        "crlf_injection_detected": state.get('crlf_injection_detected', False),
-        "log_tampering_detected": state.get('log_tampering_detected', False),
-        "privilege_escalation": state.get('privilege_escalation', False),
-        "admin_access_gained": state.get('admin_access_gained', False)
-    })
 
 @app.route('/health')
 def health():
     return jsonify({"status": "healthy"}), 200
 
-@app.route('/reset', methods=['POST'])
-def reset():
-    """Reset application state"""
-    global AUDIT_LOGS
-
-    state = get_default_state()
-    save_state(state)
-
-    AUDIT_LOGS = []
-    write_audit_log('SYSTEM', 'Application started')
-    write_audit_log('SYSTEM', 'Audit logging initialized')
-
-    return jsonify({
-        "status": "success",
-        "message": "Application state reset"
-    }), 200
 
 # Initialize with some benign logs
 write_audit_log('SYSTEM', 'Application started')

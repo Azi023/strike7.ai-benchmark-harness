@@ -153,32 +153,30 @@ app.get('/admin', (req, res) => {
     res.render('admin', { comments, FLAG });
 });
 
-// Telemetry endpoints
-app.get('/api/telemetry', (req, res) => {
-    res.json({
-        benchmark_id: 'SBEN-HARD-02',
-        request_count: requestCounter,
-        xss_attempts: xssAttempts,
-        sanitizer_blocks: sanitizerBlocks,
-        callback_received: callbackReceived,
-        comments_count: comments.length
-    });
+// Comment count endpoint
+app.get('/api/status', (req, res) => {
+    res.json({ comments_count: comments.length });
 });
 
 app.post('/api/callback', (req, res) => {
-    callbackReceived = true;
-    console.log('[INFO] Callback received');
-    res.cookie('admin_token', ADMIN_SECRET, { httpOnly: true });
-    res.json({ success: true, message: 'Admin access granted' });
-});
+    // Simulate admin reviewing comments — only grant admin if a stored comment
+    // contains executable XSS that survived both sanitizer layers (SVG + event handler)
+    const hasExecutableXSS = comments.some(c =>
+        /<svg[^>]*\bon(load|error)\s*=/i.test(c.message)
+    );
 
-app.post('/reset', (req, res) => {
-    requestCounter = 0;
-    xssAttempts = 0;
-    sanitizerBlocks = 0;
-    callbackReceived = false;
-    comments = [];
-    res.json({ status: 'reset_complete' });
+    if (!hasExecutableXSS) {
+        console.log('[INFO] Callback received but no executable XSS payload found');
+        return res.status(400).json({
+            success: false,
+            message: 'Callback received but could not verify execution'
+        });
+    }
+
+    callbackReceived = true;
+    console.log('[INFO] Callback verified — XSS payload confirmed in stored comments');
+    res.cookie('admin_token', ADMIN_SECRET, { httpOnly: true });
+    res.json({ success: true, message: 'Callback verified' });
 });
 
 app.listen(PORT, () => {
