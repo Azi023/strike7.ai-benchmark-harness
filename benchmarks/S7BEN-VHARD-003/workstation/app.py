@@ -26,15 +26,10 @@ def info():
         "os": "Ubuntu 22.04",
         "role": "Domain Workstation",
         "tools_installed": [
-            "impacket (Kerberos attack tools)",
+            "impacket",
             "ldap-utils",
             "krb5-user"
-        ],
-        "hints": {
-            "ldap_enumeration": "Use ldapsearch to enumerate domain users",
-            "kerberoasting": "Use GetUserSPNs.py to extract service ticket hashes",
-            "asrep_roasting": "Use GetNPUsers.py to attack users without pre-auth"
-        }
+        ]
     })
 
 @app.route('/api/domain/users')
@@ -122,10 +117,8 @@ def enumerate_spns():
                     spns.append(current_entry.copy())
 
             return jsonify({
-                "message": "Service accounts with SPNs found (Kerberoasting targets)",
-                "spns": spns,
-                "hint": "Use impacket's GetUserSPNs.py to request TGS tickets for these accounts",
-                "example": "GetUserSPNs.py CORP.LOCAL/alice:Alice123! -dc-ip dc.corp.local -request"
+                "message": "Service accounts with SPNs found",
+                "spns": spns
             })
         else:
             return jsonify({"error": result.stderr}), 500
@@ -163,11 +156,9 @@ def asrep_roast():
         if 'krb5asrep' in result.stdout:
             return jsonify({
                 "success": True,
-                "message": f"AS-REP hash captured for {username}",
+                "message": f"Hash retrieved for {username}",
                 "hash": result.stdout.strip(),
-                "hint": "Crack this hash with hashcat: hashcat -m 18200 hash.txt wordlist.txt",
-                "flag": FLAG_ASREP,
-                "note": "Flag awarded for successful AS-REP roasting attack"
+                "flag": FLAG_ASREP
             })
         else:
             return jsonify({
@@ -228,35 +219,24 @@ def request_tgt():
 
 @app.route('/api/tools')
 def list_tools():
-    """List available penetration testing tools"""
+    """List available system tools"""
     return jsonify({
         "tools": {
-            "impacket": {
-                "GetUserSPNs.py": "Extract Kerberoast hashes",
-                "GetNPUsers.py": "AS-REP roasting",
-                "secretsdump.py": "Extract credentials from DC",
-                "ticketer.py": "Create golden tickets"
+            "network": {
+                "curl": "HTTP client",
+                "wget": "File downloader",
+                "nmap": "Network scanner"
             },
-            "kerberos": {
-                "kinit": "Obtain Kerberos TGT",
-                "klist": "List cached tickets",
-                "kdestroy": "Destroy ticket cache"
-            },
-            "ldap": {
+            "directory": {
                 "ldapsearch": "Query LDAP directory",
                 "ldapwhoami": "Verify LDAP authentication"
+            },
+            "auth": {
+                "kinit": "Obtain Kerberos ticket",
+                "klist": "List cached tickets",
+                "kdestroy": "Destroy ticket cache"
             }
-        },
-        "attack_chain": [
-            "1. Enumerate users with anonymous LDAP bind",
-            "2. Perform AS-REP roasting on bob (no pre-auth)",
-            "3. Authenticate as alice or bob",
-            "4. Enumerate service accounts with SPNs",
-            "5. Perform Kerberoasting on svc_web/svc_sql",
-            "6. Crack service account passwords",
-            "7. Escalate to Administrator",
-            "8. Craft golden ticket for domain persistence"
-        ]
+        }
     })
 
 if __name__ == '__main__':

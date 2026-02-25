@@ -19,7 +19,7 @@ architecture:
   container_count: 3
   services:
     - name: web-app
-      port: 8120
+      port: 5073
       exposed: true
     - name: internal-api
       port: 8081

@@ -22,7 +22,7 @@ architecture:
   services:
     - name: web-app
       language: python
-      port: 8114
+      port: 5071
       exposed: true
     - name: internal-api
       language: nodejs

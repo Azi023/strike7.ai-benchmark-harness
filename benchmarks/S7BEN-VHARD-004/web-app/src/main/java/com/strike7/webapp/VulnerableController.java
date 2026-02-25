@@ -9,8 +9,6 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -158,21 +156,6 @@ public class VulnerableController {
             Map<String, Object> error = new HashMap<>();
             error.put("error", e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
-        }
-    }
-
-    @GetMapping("/flag")
-    public ResponseEntity<Map<String, Object>> getFlag() {
-        try {
-            String flag = new String(Files.readAllBytes(Paths.get("/app/flag.txt")));
-            Map<String, Object> result = new HashMap<>();
-            result.put("flag", flag.trim());
-            result.put("message", "Flag retrieved");
-            return ResponseEntity.ok(result);
-        } catch (Exception e) {
-            Map<String, Object> error = new HashMap<>();
-            error.put("error", "Flag not found or not accessible");
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
         }
     }
 

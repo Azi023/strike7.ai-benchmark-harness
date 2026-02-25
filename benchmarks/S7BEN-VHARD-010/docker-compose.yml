@@ -5,7 +5,7 @@ services:
     container_name: lfi-webapp
     hostname: web-app
     ports:
-      - "5059:80"
+      - "5078:80"
     environment:
       - FLAG_LFI=${FLAG_LFI:-S7BEN{lfi_path_traversal_file_read_a1b2c3}}
       - FLAG_SESSION=${FLAG_SESSION:-S7BEN{php_session_poisoning_rce_g7h8i9}}

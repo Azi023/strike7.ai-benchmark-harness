@@ -131,7 +131,6 @@ def api_verify():
     """Verify exploitation status"""
     return jsonify({
         'exploited': telemetry['flag_captured'],
-        'flag': FLAG if telemetry['flag_captured'] else None,
         'bypass_technique': telemetry['bypass_technique'],
         'sql_attempts': telemetry['sql_attempts']
     })

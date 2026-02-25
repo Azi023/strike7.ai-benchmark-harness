@@ -19,7 +19,7 @@ architecture:
   container_count: 3
   services:
     - name: web-app
-      port: 8122
+      port: 5078
       exposed: true
     - name: file-server
       port: 8123

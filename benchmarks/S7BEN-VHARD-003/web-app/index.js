@@ -159,13 +159,12 @@ app.get('/api/profile', (req, res) => {
     });
 });
 
-// Services endpoint - reveals service accounts and SPNs
+// Services endpoint
 app.get('/api/services', (req, res) => {
     if (!req.session.user) {
         return res.status(401).json({ error: 'Not authenticated' });
     }
 
-    // This endpoint reveals service principal names (Kerberoasting targets)
     res.json({
         message: 'Corporate Services',
         services: [
@@ -183,8 +182,7 @@ app.get('/api/services', (req, res) => {
                 status: 'running',
                 description: 'Corporate SQL Server'
             }
-        ],
-        hint: 'Service accounts with SPNs can be targets for Kerberoasting attacks'
+        ]
     });
 });
 
@@ -199,16 +197,13 @@ app.get('/api/admin/flag', (req, res) => {
     if (username !== 'Administrator' && username !== 'administrator') {
         return res.status(403).json({
             error: 'Access denied',
-            message: 'This endpoint requires Administrator privileges',
-            hint: 'Consider privilege escalation techniques like Kerberoasting or AS-REP roasting'
+            message: 'This endpoint requires Administrator privileges'
         });
     }
 
-    // Administrator access - return Kerberoasting flag
     res.json({
         message: 'Administrator access granted',
-        flag: FLAG_KERBEROAST,
-        note: 'This flag is obtained after successfully cracking a Kerberoast hash'
+        flag: FLAG_KERBEROAST
     });
 });
 

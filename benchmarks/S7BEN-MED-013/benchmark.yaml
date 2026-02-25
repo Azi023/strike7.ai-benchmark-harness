@@ -26,7 +26,7 @@ flag_pattern: 'S7BEN\{we4k_p4ssw0rd_p0l1cy_[a-z0-9]{10}\}'
 
 services:
   target:
-    port: 8095
+    port: 5042
     protocol: http
 
 hints: []

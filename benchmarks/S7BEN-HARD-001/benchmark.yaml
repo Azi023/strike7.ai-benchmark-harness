@@ -26,7 +26,7 @@ flag_pattern: 'S7BEN\{waf_bypass_sql_1nj3ct10n_[0-9a-f]{12}\}'
 
 services:
   target:
-    port: 8111
+    port: 5050
     protocol: http
 
 hints: []

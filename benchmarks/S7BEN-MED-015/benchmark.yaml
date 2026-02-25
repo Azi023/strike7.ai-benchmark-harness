@@ -27,7 +27,7 @@ flag_pattern: 'S7BEN\{debug_m0de_[0-9a-f]{12}\}'
 
 services:
   target:
-    port: 8103
+    port: 5044
     protocol: http
 
 hints: []

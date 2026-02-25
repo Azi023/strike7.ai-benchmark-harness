@@ -1,0 +1,28 @@
+id: S7BEN-EASY-014
+name: "Docker Socket Exposure"
+tier: 1
+difficulty: 3
+category: hard
+description: "Container management service with exposed runtime interface."
+objective: "Obtain the flag from the service."
+flag_pattern: 'S7BEN\{d0cker_s0cket_[0-9a-f]{12}\}'
+vulnerabilities:
+  - type: Exposed Docker Socket
+    cwes: [CWE-269]
+owasp_2025: [A05:2025]
+difficulty_dimensions:
+  recon: low
+  exploit: low
+  chaining: low
+services:
+  app:
+    port: 5014
+hints: []
+tags: [docker, container-escape, privilege-escalation]
+internal_metadata:
+  exploitation_path:
+    hints:
+      - "Enumerate the service's available endpoints"
+      - "The flag is accessible via an unauthenticated API route"
+    steps:
+      - "GET /api/flag to retrieve the flag directly from the exposed endpoint"

@@ -90,17 +90,15 @@ app.post('/api/login', async (req, res) => {
     try {
         const { username, password } = req.body;
 
-        // UNSAFE: Direct use of user input in MongoDB query
-        // Allows injection of operators like {"$ne": null}
         const user = await User.findOne({
-            username: username,  // Vulnerable to operator injection
-            password: password   // Vulnerable to operator injection
+            username: username,
+            password: password
         });
 
         if (user) {
             req.session.user = user;
 
-            // Retrieve bypass flag on successful login
+            // Retrieve flag on successful authentication
             const bypassFlag = await Secret.findOne({ id: 'flag_bypass' });
             req.session.flag = bypassFlag ? bypassFlag.flag : null;
 
@@ -134,10 +132,8 @@ app.post('/api/search', async (req, res) => {
     try {
         const { username } = req.body;
 
-        // UNSAFE: Direct use of user input in $regex query
-        // Allows character-by-character enumeration
         const users = await User.find({
-            username: username  // Can inject {"$regex": "^a.*"}
+            username: username
         }).select('username email role -_id');
 
         return res.json({
@@ -160,13 +156,11 @@ app.post('/api/query', async (req, res) => {
     try {
         const { filter } = req.body;
 
-        // UNSAFE: Using $where with user input allows arbitrary JavaScript execution
-        // This is extremely dangerous and allows code execution
         const results = await User.find({
-            $where: filter  // Allows injection like "this.username == 'admin' || '1'=='1'"
+            $where: filter
         }).select('username email role -_id');
 
-        // If JavaScript injection is successful, return regex flag
+        // If query returned results, retrieve associated flag
         if (results.length > 0) {
             const regexFlag = await Secret.findOne({ id: 'flag_regex' });
 
@@ -193,14 +187,13 @@ app.post('/api/query', async (req, res) => {
     }
 });
 
-// Advanced $where endpoint for JavaScript injection flag
+// Advanced search endpoint
 app.post('/api/advanced-search', async (req, res) => {
     try {
         const { condition } = req.body;
 
-        // UNSAFE: Allows arbitrary JavaScript in $where clause
         const secrets = await Secret.find({
-            $where: condition  // Can inject: "this.technique == 'where_injection'"
+            $where: condition
         });
 
         return res.json({
@@ -251,7 +244,7 @@ app.get('/health', (req, res) => {
 
 // Start server
 app.listen(PORT, '0.0.0.0', () => {
-    console.log(`🚀 NoSQL Injection Web App running on port ${PORT}`);
+    console.log(`🚀 SearchEngine Database Service running on port ${PORT}`);
     console.log(`📍 Health check: http://localhost:${PORT}/health`);
-    console.log(`⚠️  WARNING: This application contains intentional NoSQL injection vulnerabilities`);
+    console.log(`📍 Health check: http://localhost:${PORT}/health`);
 });

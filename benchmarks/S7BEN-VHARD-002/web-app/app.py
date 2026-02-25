@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 """
-SSRF Vulnerable Web Application
-Demonstrates multiple URL filter bypass techniques
+URL Fetcher Web Application
 """
 
 from flask import Flask, request, jsonify, render_template_string
@@ -60,7 +59,7 @@ HTML_TEMPLATE = """
 
     <hr>
     <p style="color: #666; font-size: 12px;">
-        Security filters active: Private IPs blocked, Local hosts blocked, Common ports filtered
+        Response size limit applied. Enter a publicly accessible URL.
     </p>
 </body>
 </html>
@@ -197,24 +196,6 @@ def fetch_url():
             return jsonify({"error": error_msg}), 500
         return render_template_string(HTML_TEMPLATE, error=error_msg)
 
-
-@app.route('/debug/filters')
-def debug_filters():
-    """Debug endpoint showing filter rules (information disclosure)"""
-    return jsonify({
-        "blocked_hostnames": [
-            "localhost",
-            "127.0.0.1",
-            "metadata-service",
-            "internal-api",
-            "admin-panel"
-        ],
-        "blocked_schemes": ["file", "ftp", "gopher"],
-        "allowed_schemes": ["http", "https"],
-        "ip_check": "Resolves hostname and blocks private IPs",
-        "hint": "IP address format variations might work differently",
-        "note": "Parser differences between validation and execution may exist"
-    })
 
 
 if __name__ == '__main__':

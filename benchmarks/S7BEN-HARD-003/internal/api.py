@@ -28,7 +28,6 @@ def get_flag():
     """Flag endpoint - should not be accessible from external network"""
     return jsonify({
         "flag": FLAG,
-        "message": "Congratulations! You successfully bypassed SSRF filters",
         "service": "internal-api"
     })
 

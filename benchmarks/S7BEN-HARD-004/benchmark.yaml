@@ -27,7 +27,7 @@ flag_pattern: 'S7BEN\{jwt_alg0_c0nfus10n_[0-9a-f]{16}\}'
 
 services:
   target:
-    port: 8112
+    port: 5053
     protocol: http
 
 hints: []

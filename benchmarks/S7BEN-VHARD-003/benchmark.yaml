@@ -29,7 +29,7 @@ architecture:
     - name: file-server
       port: 445
     - name: web-app
-      port: 80
+      port: 5072
     - name: database-server
       port: 5432
     - name: workstation

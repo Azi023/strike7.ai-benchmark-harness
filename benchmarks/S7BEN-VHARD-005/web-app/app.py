@@ -1,15 +1,5 @@
 """
-S7BEN-VHARD-005: Python Pickle Deserialization Chain - Web Application
-
-This Flask application demonstrates multiple pickle deserialization vulnerabilities:
-1. Session cookie deserialization without validation
-2. Redis cache deserialization of untrusted data
-3. Celery task submission with pickled payloads
-
-Vulnerabilities:
-- CUSTOM-PICKLE-01: Insecure pickle-based session handling
-- CUSTOM-PICKLE-02: Redis cache stores pickled objects from user input
-- CUSTOM-PICKLE-03: Celery task queue accepts arbitrary pickled tasks
+DataTransfer Pipeline - Web Application
 """
 
 import os
@@ -96,7 +86,7 @@ def index():
 @app.route('/health')
 def health():
     """Health check endpoint"""
-    return jsonify({'status': 'healthy', 'service': 'pickle-webapp'}), 200
+    return jsonify({'status': 'healthy', 'service': 'web-app'}), 200
 
 
 @app.route('/api/login', methods=['POST'])
@@ -116,8 +106,7 @@ def login():
         response = make_response(jsonify({
             'success': True,
             'message': 'Login successful',
-            'username': username,
-            'session_info': 'Session cookie set (pickled object)'
+            'username': username
         }))
         response.set_cookie('session', session_cookie, httponly=False, max_age=3600)
         return response, 200
@@ -165,8 +154,7 @@ def cache_set_endpoint():
         cache_set(key, value, ttl)
         return jsonify({
             'success': True,
-            'message': f'Cached key "{key}" for {ttl} seconds',
-            'warning': 'Data stored as pickled object'
+            'message': f'Cached key "{key}" for {ttl} seconds'
         }), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
@@ -215,41 +203,10 @@ def submit_task():
         return jsonify({'error': str(e)}), 500
 
 
-@app.route('/api/session/example')
-def session_example():
-    """
-    Helper endpoint to get an example pickled session cookie
-    Useful for understanding the session structure before crafting exploits
-    """
-    example_session = UserSession(username='demo_user', role='user', authenticated=True)
-    session_cookie = serialize_session(example_session)
-
-    # Show the pickle bytes for educational purposes
-    pickled_bytes = base64.b64decode(session_cookie.encode('utf-8'))
-
-    return jsonify({
-        'session_cookie': session_cookie,
-        'base64_length': len(session_cookie),
-        'pickle_bytes_hex': pickled_bytes.hex(),
-        'pickle_magic': f"0x{pickled_bytes[0]:02x} 0x{pickled_bytes[1]:02x}",
-        'note': 'This shows the structure of a legitimate session cookie'
-    }), 200
-
-
 @app.route('/api/flag')
 def get_flag():
-    """
-    Flag endpoint - requires RCE to read the flag file
-    """
-    try:
-        # This endpoint itself doesn't give the flag
-        # Flag must be obtained via RCE (reading /app/flag.txt)
-        return jsonify({
-            'message': 'Flag is located at /app/flag.txt',
-            'hint': 'Achieve RCE to read the flag file'
-        }), 200
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
+    """Flag endpoint"""
+    return jsonify({'error': 'Not found'}), 404
 
 
 @app.route('/api/debug/redis')

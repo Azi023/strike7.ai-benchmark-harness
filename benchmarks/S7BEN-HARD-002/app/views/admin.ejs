@@ -35,7 +35,6 @@
                             <span class="timestamp"><%= new Date(comment.timestamp).toLocaleString() %></span>
                         </div>
                         <div class="comment-body">
-                            <!-- VULNERABLE: Renders sanitized HTML but DOMPurify config allows SVG + event handlers -->
                             <%- comment.message %>
                         </div>
                     </div>
@@ -65,7 +64,7 @@
             }
         }
 
-        // Log page load (for exploitation verification)
+        // Log page load
         console.log('[ADMIN] Admin panel loaded');
         console.log('[ADMIN] Cookies:', document.cookie);
     </script>

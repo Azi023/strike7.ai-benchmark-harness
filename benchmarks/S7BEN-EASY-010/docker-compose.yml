@@ -1,0 +1,12 @@
+version: '3.8'
+services:
+  app:
+    build: ./app
+    container_name: s7ben-easy-010
+    ports: ["5010:8094"]
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8094/"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 15s

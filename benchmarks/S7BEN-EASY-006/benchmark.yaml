@@ -21,7 +21,7 @@ flag_pattern: 'S7BEN\{l0g_1nj3ct10n_[0-9a-f]{16}\}'
 
 services:
   target:
-    port: 5000
+    port: 5006
     protocol: http
 
 tags:

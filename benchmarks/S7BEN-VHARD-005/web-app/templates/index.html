@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SBEN-DESER-02: Python Pickle Deserialization</title>
+    <title>DataTransfer Pipeline</title>
     <style>
         body {
             font-family: 'Courier New', monospace;
@@ -59,67 +59,41 @@
     <div class="endpoint">
         <span class="method post">POST</span>
         <strong>/api/login</strong>
-        <p>Login and receive pickled session cookie</p>
+        <p>Login and receive session token</p>
         <code>{"username": "user", "password": "pass"}</code>
     </div>
 
     <div class="endpoint">
         <span class="method get">GET</span>
         <strong>/api/profile</strong>
-        <p>View profile (deserializes session cookie) 🔴 VULNERABLE</p>
+        <p>View user profile</p>
     </div>
 
     <div class="endpoint">
         <span class="method post">POST</span>
         <strong>/api/cache/set</strong>
-        <p>Store data in Redis cache (pickled) 🔴 VULNERABLE</p>
+        <p>Store data in cache</p>
         <code>{"key": "mykey", "value": "myvalue", "ttl": 3600}</code>
     </div>
 
     <div class="endpoint">
         <span class="method get">GET</span>
         <strong>/api/cache/get/&lt;key&gt;</strong>
-        <p>Retrieve cached data (deserializes pickle) 🔴 VULNERABLE</p>
+        <p>Retrieve cached data</p>
     </div>
 
     <div class="endpoint">
         <span class="method post">POST</span>
         <strong>/api/task/submit</strong>
-        <p>Submit Celery task to worker queue 🔴 VULNERABLE</p>
+        <p>Submit task to worker queue</p>
         <code>{"task_name": "process_data", "args": ["arg1", "arg2"]}</code>
     </div>
 
     <div class="endpoint">
         <span class="method get">GET</span>
-        <strong>/api/session/example</strong>
-        <p>Get example pickled session structure</p>
-    </div>
-
-    <div class="endpoint">
-        <span class="method get">GET</span>
-        <strong>/api/flag</strong>
-        <p>Flag location hint</p>
-    </div>
-
-    <div class="endpoint">
-        <span class="method get">GET</span>
         <strong>/api/debug/redis</strong>
-        <p>List Redis cache keys (reconnaissance)</p>
+        <p>List Redis cache keys</p>
     </div>
-
-    <h2>Vulnerabilities</h2>
-    <ul>
-        <li><strong>CUSTOM-PICKLE-01:</strong> Session cookies use insecure pickle deserialization</li>
-        <li><strong>CUSTOM-PICKLE-02:</strong> Redis cache stores untrusted pickled objects</li>
-        <li><strong>CUSTOM-PICKLE-03:</strong> Celery worker deserializes task payloads</li>
-    </ul>
-
-    <h2>Flags</h2>
-    <ul>
-        <li><code>/app/flag.txt</code> - Web application flag</li>
-        <li><code>/data/cache_flag.txt</code> - Redis cache flag</li>
-        <li><code>/worker/secret_flag.txt</code> - Celery worker flag</li>
-    </ul>
 
     <p style="text-align: center; margin-top: 50px; color: #888;">
         Strike7 Security Benchmarks - Phase 4

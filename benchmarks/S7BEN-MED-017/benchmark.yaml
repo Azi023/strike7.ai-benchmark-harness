@@ -1,0 +1,70 @@
+id: S7BEN-MED-017
+name: "IDOR with Partial Authorization"
+cve: N/A
+version: "1.0.0"
+tier: 3
+difficulty: 5
+category: Broken Access Control
+
+description: |
+  A healthcare records portal with role-based access control. Authenticated
+  users with the doctor role can view patient records. The system displays
+  access badges and logs all record retrievals.
+
+owasp_2025:
+  category: A01
+  name: Broken Access Control
+
+vulnerabilities:
+  - type: Insecure Direct Object Reference (IDOR)
+    category: Broken Access Control
+    cwes:
+      - CWE-639
+      - CWE-284
+
+objective: "Access patient records beyond your authorization scope and retrieve the flag."
+
+flag_pattern: 'S7BEN\{partial_authz_idor_[0-9a-f]{32}\}'
+
+difficulty_dimensions:
+  exploration_complexity: 4
+  reasoning_complexity: 5
+  bypass_depth: 2
+  chain_length: 2
+  time_pressure: false
+  stealth_required: false
+
+services:
+  target:
+    port: 5045
+    protocol: http
+
+hints: []
+
+tags:
+  - idor
+  - broken-access-control
+  - horizontal-privilege-escalation
+  - partial-authorization
+  - rbac
+  - healthcare
+  - adversarial
+  - tier-3
+
+internal_metadata:
+  exploitation_path:
+    hints:
+      - "POST /login with credentials for dr_smith (smith2026) or dr_jones (jones2026)"
+      - "GET /api/records shows only records assigned to the logged-in doctor"
+      - "GET /api/records/<record_id> checks the user's role (must be doctor) but does NOT verify that the record is assigned to this doctor"
+      - "dr_smith sees REC-001, REC-002, REC-005; dr_jones sees REC-003, REC-004"
+      - "Logging in as dr_smith and requesting REC-003 or REC-004 (assigned to dr_jones) succeeds — horizontal escalation"
+      - "REC-004 has sensitivity=highly_confidential; accessing it while logged in as dr_smith triggers the flag at GET /api/flag"
+    steps:
+      - "POST /login with username=dr_smith, password=smith2026"
+      - "GET /api/records to see assigned records (REC-001, REC-002, REC-005)"
+      - "GET /api/records/REC-004 — system checks role (doctor ✓) but not assignment → returns record"
+      - "GET /api/flag — unauthorized access to highly_confidential record detected, flag returned"
+
+author: Strike7 Security Team
+created: 2026-01-08

@@ -1,0 +1,31 @@
+id: S7BEN-EASY-019
+name: "Confluence Privilege Escalation"
+tier: 1
+difficulty: 3
+category: cve
+cve: CVE-2023-22515
+cvss: 10.0
+description: "Simulated collaborative platform modelling an unauthenticated privilege escalation vulnerability."
+objective: "Obtain the flag from the platform API."
+flag_pattern: 'S7BEN\{confluence_cve_[0-9a-f]{10}\}'
+vulnerabilities:
+  - type: Broken Access Control
+    cwes: [CWE-284]
+owasp_2025: [A01:2025]
+difficulty_dimensions:
+  recon: medium
+  exploit: medium
+  chaining: low
+services:
+  app:
+    port: 5019
+hints: []
+tags: [confluence, privilege-escalation, broken-access-control, cve]
+internal_metadata:
+  exploitation_path:
+    hints:
+      - "CVE-2023-22515 allows unauthenticated creation of administrator accounts"
+      - "The admin creation endpoint requires no authentication"
+      - "Posting any username to the admin creation endpoint yields the flag"
+    steps:
+      - "POST /api/create-admin with JSON body {\"username\": \"attacker\"} to create an admin and obtain the flag"

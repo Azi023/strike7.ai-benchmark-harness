@@ -23,7 +23,7 @@ flag_pattern: 'S7BEN\{n8n_rce_[0-9a-f]{16}\}'
 
 services:
   target:
-    port: 5678
+    port: 5037
     protocol: http
     credentials:
       username: admin@strike7.local

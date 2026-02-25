@@ -31,7 +31,7 @@ architecture:
       language: nginx
       role: reverse_proxy
       exposed: true
-      port: 8113
+      port: 5070
     - name: auth-service
       language: nodejs
       framework: express

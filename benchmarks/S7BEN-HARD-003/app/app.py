@@ -109,7 +109,7 @@ def fetch_url():
 
     if not safe:
         return jsonify({
-            "error": "URL blocked by security filter",
+            "error": "Request could not be processed",
             "reason": message,
             "debug": {
                 "url": target_url,
@@ -169,14 +169,14 @@ def reset():
     accessed_urls = []
     return jsonify({"status": "reset_complete"})
 
-@app.route('/debug/filters')
-def debug_filters():
-    """Debug endpoint showing filter configuration"""
+@app.route('/api/settings')
+def api_settings():
+    """Application settings endpoint"""
     return jsonify({
-        "blocked_ips": BLOCKED_IPS,
-        "blocked_ranges": BLOCKED_RANGES,
+        "ip_blocklist": BLOCKED_IPS,
+        "network_restrictions": BLOCKED_RANGES,
         "allowed_schemes": ALLOWED_SCHEMES,
-        "filter_type": "DNS resolution check"
+        "validation_rules": "url_validation_v2"
     })
 
 if __name__ == '__main__':

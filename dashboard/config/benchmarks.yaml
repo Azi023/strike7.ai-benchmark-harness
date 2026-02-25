@@ -1,6 +1,6 @@
 # Strike7 AI Benchmark Registry
-# Updated: 2026-01-21
-# Phase 6 Migration Complete
+# Updated: 2026-02-25
+# Sprint 12 Reclassification Complete
 
 version: "2.0"
 naming_convention: "S7BEN-{CATEGORY}-{NUMBER}"
@@ -20,7 +20,7 @@ difficulty_levels:
   CVE: varies
 
 benchmarks:
-  # ===== EASY TIER (001-009) =====
+  # ===== EASY TIER (001-021) =====
   - id: S7BEN-EASY-001
     name: "CSRF - Password Change"
     category: EASY
@@ -111,7 +111,135 @@ benchmarks:
     difficulty: 3
     phase: 3
 
-  # ===== MEDIUM TIER (001-012) =====
+  - id: S7BEN-EASY-010
+    name: "Session Fixation via Cookie Injection"
+    category: EASY
+    owasp: "A07:2025 - Authentication Failures"
+    cwe: ["CWE-384"]
+    port: 8094
+    flag_format: "S7BEN{sess10n_f1x4t10n_[dynamic]}"
+    difficulty: 3
+    phase: 6
+
+  - id: S7BEN-EASY-011
+    name: "Workflow State Manipulation"
+    category: EASY
+    owasp: "A04:2025 - Insecure Design"
+    cwe: ["CWE-840"]
+    port: 8097
+    flag_format: "S7BEN{w0rkfl0w_st4te_m4n1pul4t10n_[dynamic]}"
+    difficulty: 3
+    phase: 6
+
+  - id: S7BEN-EASY-012
+    name: "Client-Side Price Manipulation"
+    category: EASY
+    owasp: "A04:2025 - Insecure Design"
+    cwe: ["CWE-472"]
+    port: 8098
+    flag_format: "S7BEN{cl13nt_s1d3_pr1c3_[dynamic]}"
+    difficulty: 3
+    phase: 6
+
+  - id: S7BEN-EASY-013
+    name: "Kubernetes RBAC Privilege Escalation"
+    category: EASY
+    owasp: "A05:2025 - Security Misconfiguration"
+    cwe: ["CWE-250", "CWE-269"]
+    port: 8101
+    flag_format: "S7BEN{k8s_rb4c_esc4lat10n_[dynamic]}"
+    difficulty: 3
+    phase: 6
+
+  - id: S7BEN-EASY-014
+    name: "Docker Socket Exposure Container Escape"
+    category: EASY
+    owasp: "A05:2025 - Security Misconfiguration"
+    cwe: ["CWE-250"]
+    port: 8102
+    flag_format: "S7BEN{d0ck3r_s0ck3t_3sc4p3_[dynamic]}"
+    difficulty: 3
+    phase: 6
+
+  - id: S7BEN-EASY-015
+    name: "Default Credentials"
+    category: EASY
+    owasp: "A05:2025 - Security Misconfiguration"
+    cwe: ["CWE-798"]
+    port: 8104
+    flag_format: "S7BEN{d3f4ult_cr3ds_[dynamic]}"
+    difficulty: 3
+    phase: 6
+
+  - id: S7BEN-EASY-016
+    name: "Negative Quantity Business Logic Bypass"
+    category: EASY
+    owasp: "A04:2025 - Insecure Design"
+    cwe: ["CWE-840"]
+    port: 8096
+    flag_format: "S7BEN{n3g4t1v3_qu4nt1ty_[dynamic]}"
+    difficulty: 3
+    phase: 6
+
+  - id: S7BEN-EASY-017
+    name: "2FA Session State Bypass"
+    category: EASY
+    owasp: "A07:2025 - Authentication Failures"
+    cwe: ["CWE-287", "CWE-306"]
+    port: 8087
+    flag_format: "S7BEN{2fa_sess10n_st4te_byp4ss_[dynamic]}"
+    difficulty: 3
+    phase: 6
+
+  - id: S7BEN-EASY-018
+    name: "PAN-OS Command Injection (CVE-2024-3400)"
+    category: EASY
+    owasp: "A03:2025 - Injection"
+    cwe: ["CWE-77"]
+    port: 8107
+    flag_format: "S7BEN{p4n_0s_cmd_1nj3ct10n_[dynamic]}"
+    difficulty: 3
+    phase: 6
+    year: 2024
+    cvss: 10.0
+
+  - id: S7BEN-EASY-019
+    name: "Confluence Privilege Escalation (CVE-2023-22515)"
+    category: EASY
+    owasp: "A01:2025 - Broken Access Control"
+    cwe: ["CWE-269"]
+    port: 8108
+    flag_format: "S7BEN{c0nflu3nc3_pr1v_3sc_[dynamic]}"
+    difficulty: 3
+    phase: 6
+    year: 2023
+    cvss: 9.8
+
+  - id: S7BEN-EASY-020
+    name: "TeamCity Auth Bypass (CVE-2024-27198)"
+    category: EASY
+    owasp: "A07:2025 - Authentication Failures"
+    cwe: ["CWE-287"]
+    port: 8109
+    flag_format: "S7BEN{t34mc1ty_4uth_byp4ss_[dynamic]}"
+    difficulty: 3
+    phase: 6
+    year: 2024
+    cvss: 9.8
+
+  - id: S7BEN-EASY-021
+    name: "ActiveMQ Deserialization RCE (CVE-2023-46604)"
+    category: EASY
+    owasp: "A08:2025 - Software Data Integrity Failures"
+    cwe: ["CWE-502"]
+    port: 8110
+    flag_format: "S7BEN{4ct1v3mq_d3s3r_rc3_[dynamic]}"
+    difficulty: 3
+    phase: 6
+    year: 2023
+    cvss: 10.0
+
+  # ===== MEDIUM TIER (001-019) =====
   - id: S7BEN-MED-001
     name: "Session Fixation"
     category: MED
@@ -232,7 +360,67 @@ benchmarks:
     difficulty: 6
     phase: 3
 
-  # ===== HARD TIER (001-004, 010-013) =====
+  - id: S7BEN-MED-013
+    name: "Weak Password Policy"
+    category: MED
+    owasp: "A07:2025 - Authentication Failures"
+    cwe: ["CWE-521"]
+    port: 8099
+    flag_format: "S7BEN{we4k_p4ssw0rd_[dynamic]}"
+    difficulty: 5
+    phase: 6
+
+  - id: S7BEN-MED-014
+    name: "Coupon Code Reuse"
+    category: MED
+    owasp: "A04:2025 - Insecure Design"
+    cwe: ["CWE-840"]
+    port: 8100
+    flag_format: "S7BEN{c0up0n_reuse_[dynamic]}"
+    difficulty: 5
+    phase: 6
+
+  - id: S7BEN-MED-015
+    name: "Flask Debug Mode in Production"
+    category: MED
+    owasp: "A05:2025 - Security Misconfiguration"
+    cwe: ["CWE-489"]
+    port: 8103
+    flag_format: "S7BEN{fl4sk_d3bug_m0d3_[dynamic]}"
+    difficulty: 5
+    phase: 6
+
+  - id: S7BEN-MED-017
+    name: "IDOR Adversarial"
+    category: MED
+    owasp: "A01:2025 - Broken Access Control"
+    cwe: "CWE-639"
+    port: 5000
+    flag_format: "S7BEN{...}"
+    difficulty: 5
+    phase: 3
+
+  - id: S7BEN-MED-018
+    name: "Password Reset Token Reuse"
+    category: MED
+    owasp: "A07:2025 - Authentication Failures"
+    cwe: ["CWE-640", "CWE-287"]
+    port: 8093
+    flag_format: "S7BEN{p4ssw0rd_res3t_t0ken_reuse_[dynamic]}"
+    difficulty: 5
+    phase: 6
+
+  - id: S7BEN-MED-019
+    name: "Race Condition Double Spend"
+    category: MED
+    owasp: "A04:2025 - Insecure Design"
+    cwe: ["CWE-362", "CWE-367"]
+    port: 8095
+    flag_format: "S7BEN{r4ce_c0nd1t10n_d0ubl3_sp3nd_[dynamic]}"
+    difficulty: 5
+    phase: 6
+
+  # ===== HARD TIER (001-020) =====
   - id: S7BEN-HARD-001
     name: "SQL Injection + ModSecurity WAF Bypass"
     category: HARD
@@ -305,16 +493,6 @@ benchmarks:
     difficulty: 7
     phase: 3
 
-  - id: S7BEN-HARD-012
-    name: "IDOR Adversarial"
-    category: HARD
-    owasp: "A01:2025 - Broken Access Control"
-    cwe: "CWE-639"
-    port: 5000
-    flag_format: "S7BEN{...}"
-    difficulty: 7
-    phase: 3
-
   - id: S7BEN-HARD-013
     name: "Log Chain Adversarial"
     category: HARD
@@ -325,7 +503,17 @@ benchmarks:
     difficulty: 7
     phase: 3
 
-  # ===== VERY HARD TIER (001-010) =====
+  - id: S7BEN-HARD-020
+    name: "GraphQL Injection Chain"
+    category: HARD
+    owasp: "A03:2025 - Injection"
+    port: 4000
+    flag_format: "S7BEN{graphql_resolver_sql_injection_d4e5f6}"
+    difficulty: 8
+    phase: 4
+    containers: 3
+
+  # ===== VERY HARD TIER (001-015) =====
   - id: S7BEN-VHARD-001
     name: "Microservices Attack Chain"
     category: VHARD
@@ -384,16 +572,6 @@ benchmarks:
     phase: 4
     containers: 2
 
-  - id: S7BEN-VHARD-006
-    name: "GraphQL Injection Chain"
-    category: VHARD
-    owasp: "A03:2025 - Injection"
-    port: 4000
-    flag_format: "S7BEN{graphql_resolver_sql_injection_d4e5f6}"
-    difficulty: 9
-    phase: 4
-    containers: 3
-
   - id: S7BEN-VHARD-007
     name: "XXE Data Exfiltration"
     category: VHARD
@@ -442,7 +620,29 @@ benchmarks:
     phase: 4
     containers: 3
 
-  # ===== CVE TIER (001-005) =====
+  - id: S7BEN-VHARD-012
+    name: "OAuth State Parameter Confusion"
+    category: VHARD
+    owasp: "A07:2025 - Authentication Failures"
+    cwe: ["CWE-352", "CWE-330"]
+    port: 8091
+    flag_format: "S7BEN{oauth_st4te_c0nfus10n_[dynamic]}"
+    difficulty: 9
+    phase: 6
+    multi_container: true
+
+  - id: S7BEN-VHARD-015
+    name: "Prompt Injection AI Assistant"
+    category: VHARD
+    owasp: "A03:2025 - Injection"
+    cwe: ["CWE-74"]
+    port: 8127
+    flag_format: "S7BEN{prompt_inj3ct10n_...}"
+    difficulty: 9
+    phase: 9
+    description: "A corporate AI assistant portal that handles customer support requests with multi-layer guardrails."
+
+  # ===== CVE TIER (001-012) =====
   - id: S7BEN-CVE-001
     name: "Apache HTTP Server Path Traversal"
     category: CVE
@@ -504,153 +704,7 @@ benchmarks:
     year: 2021
     notes: "Requires manual exploitation - automated exploit not provided"
 
-  # ===== PHASE 6B NEW BENCHMARKS =====
 
-  # Authentication Benchmarks
-  - id: S7BEN-VHARD-011
-    name: "2FA Session State Bypass"
-    category: VHARD
-    owasp: "A07:2025 - Authentication Failures"
-    cwe: ["CWE-287", "CWE-306"]
-    port: 8087
-    flag_format: "S7BEN{2fa_sess10n_st4te_byp4ss_[dynamic]}"
-    difficulty: 9
-    phase: 6
-
-  - id: S7BEN-VHARD-012
-    name: "OAuth State Parameter Confusion"
-    category: VHARD
-    owasp: "A07:2025 - Authentication Failures"
-    cwe: ["CWE-352", "CWE-330"]
-    port: 8091
-    flag_format: "S7BEN{oauth_st4te_c0nfus10n_[dynamic]}"
-    difficulty: 9
-    phase: 6
-    multi_container: true
-
-  - id: S7BEN-HARD-014
-    name: "Password Reset Token Reuse"
-    category: HARD
-    owasp: "A07:2025 - Authentication Failures"
-    cwe: ["CWE-640", "CWE-287"]
-    port: 8093
-    flag_format: "S7BEN{p4ssw0rd_res3t_t0ken_reuse_[dynamic]}"
-    difficulty: 7
-    phase: 6
-
-  - id: S7BEN-HARD-015
-    name: "Session Fixation via Cookie Injection"
-    category: HARD
-    owasp: "A07:2025 - Authentication Failures"
-    cwe: ["CWE-384"]
-    port: 8094
-    flag_format: "S7BEN{sess10n_f1x4t10n_[dynamic]}"
-    difficulty: 7
-    phase: 6
-
-  - id: S7BEN-MED-013
-    name: "Weak Password Policy"
-    category: MED
-    owasp: "A07:2025 - Authentication Failures"
-    cwe: ["CWE-521"]
-    port: 8099
-    flag_format: "S7BEN{we4k_p4ssw0rd_[dynamic]}"
-    difficulty: 5
-    phase: 6
-
-  # Business Logic Benchmarks
-  - id: S7BEN-VHARD-013
-    name: "Race Condition Double Spend"
-    category: VHARD
-    owasp: "A04:2025 - Insecure Design"
-    cwe: ["CWE-362", "CWE-367"]
-    port: 8095
-    flag_format: "S7BEN{r4ce_c0nd1t10n_d0ubl3_sp3nd_[dynamic]}"
-    difficulty: 9
-    phase: 6
-
-  - id: S7BEN-VHARD-014
-    name: "Negative Quantity Business Logic Bypass"
-    category: VHARD
-    owasp: "A04:2025 - Insecure Design"
-    cwe: ["CWE-840"]
-    port: 8096
-    flag_format: "S7BEN{n3g4t1v3_qu4nt1ty_[dynamic]}"
-    difficulty: 9
-    phase: 6
-
-  - id: S7BEN-HARD-016
-    name: "Workflow State Manipulation"
-    category: HARD
-    owasp: "A04:2025 - Insecure Design"
-    cwe: ["CWE-840"]
-    port: 8097
-    flag_format: "S7BEN{w0rkfl0w_st4te_m4n1pul4t10n_[dynamic]}"
-    difficulty: 7
-    phase: 6
-
-  - id: S7BEN-HARD-017
-    name: "Client-Side Price Manipulation"
-    category: HARD
-    owasp: "A04:2025 - Insecure Design"
-    cwe: ["CWE-472"]
-    port: 8098
-    flag_format: "S7BEN{cl13nt_s1d3_pr1c3_[dynamic]}"
-    difficulty: 7
-    phase: 6
-
-  - id: S7BEN-MED-014
-    name: "Coupon Code Reuse"
-    category: MED
-    owasp: "A04:2025 - Insecure Design"
-    cwe: ["CWE-840"]
-    port: 8100
-    flag_format: "S7BEN{c0up0n_reuse_[dynamic]}"
-    difficulty: 5
-    phase: 6
-
-  # Misconfiguration Benchmarks
-  - id: S7BEN-HARD-018
-    name: "Kubernetes RBAC Privilege Escalation"
-    category: HARD
-    owasp: "A05:2025 - Security Misconfiguration"
-    cwe: ["CWE-250", "CWE-269"]
-    port: 8101
-    flag_format: "S7BEN{k8s_rb4c_esc4lat10n_[dynamic]}"
-    difficulty: 7
-    phase: 6
-
-  - id: S7BEN-HARD-019
-    name: "Docker Socket Exposure Container Escape"
-    category: HARD
-    owasp: "A05:2025 - Security Misconfiguration"
-    cwe: ["CWE-250"]
-    port: 8102
-    flag_format: "S7BEN{d0ck3r_s0ck3t_3sc4p3_[dynamic]}"
-    difficulty: 7
-    phase: 6
-
-  - id: S7BEN-MED-015
-    name: "Flask Debug Mode in Production"
-    category: MED
-    owasp: "A05:2025 - Security Misconfiguration"
-    cwe: ["CWE-489"]
-    port: 8103
-    flag_format: "S7BEN{fl4sk_d3bug_m0d3_[dynamic]}"
-    difficulty: 5
-    phase: 6
-
-  - id: S7BEN-MED-016
-    name: "Default Credentials"
-    category: MED
-    owasp: "A05:2025 - Security Misconfiguration"
-    cwe: ["CWE-798"]
-    port: 8104
-    flag_format: "S7BEN{d3f4ult_cr3ds_[dynamic]}"
-    difficulty: 5
-    phase: 6
-
-  # CVE Benchmarks
   - id: S7BEN-CVE-006
     name: "runc Container Escape (CVE-2024-21626)"
     category: CVE
@@ -675,54 +729,6 @@ benchmarks:
     year: 2023
     cvss: 7.5
 
-  - id: S7BEN-CVE-008
-    name: "PAN-OS Command Injection (CVE-2024-3400)"
-    category: CVE
-    owasp: "A03:2025 - Injection"
-    cwe: ["CWE-77"]
-    port: 8107
-    flag_format: "S7BEN{p4n_0s_cmd_1nj3ct10n_[dynamic]}"
-    difficulty: 8
-    phase: 6
-    year: 2024
-    cvss: 10.0
-
-  - id: S7BEN-CVE-009
-    name: "Confluence Privilege Escalation (CVE-2023-22515)"
-    category: CVE
-    owasp: "A01:2025 - Broken Access Control"
-    cwe: ["CWE-269"]
-    port: 8108
-    flag_format: "S7BEN{c0nflu3nc3_pr1v_3sc_[dynamic]}"
-    difficulty: 8
-    phase: 6
-    year: 2023
-    cvss: 9.8
-
-  - id: S7BEN-CVE-010
-    name: "TeamCity Auth Bypass (CVE-2024-27198)"
-    category: CVE
-    owasp: "A07:2025 - Authentication Failures"
-    cwe: ["CWE-287"]
-    port: 8109
-    flag_format: "S7BEN{t34mc1ty_4uth_byp4ss_[dynamic]}"
-    difficulty: 8
-    phase: 6
-    year: 2024
-    cvss: 9.8
-
-  - id: S7BEN-CVE-011
-    name: "ActiveMQ Deserialization RCE (CVE-2023-46604)"
-    category: CVE
-    owasp: "A08:2025 - Software Data Integrity Failures"
-    cwe: ["CWE-502"]
-    port: 8110
-    flag_format: "S7BEN{4ct1v3mq_d3s3r_rc3_[dynamic]}"
-    difficulty: 9
-    phase: 6
-    year: 2023
-    cvss: 10.0
-
   - id: S7BEN-CVE-012
     name: "Media Processing API"
     category: CVE
@@ -736,13 +742,14 @@ benchmarks:
     cvss: 8.3
 
 # Metadata
-total_benchmarks: 65
+
+total_benchmarks: 66
 breakdown:
-  EASY: 9
-  MED: 16
-  HARD: 14
-  VHARD: 14
-  CVE: 12
+  EASY: 21
+  MED: 18
+  HARD: 8
+  VHARD: 11
+  CVE: 8
 
 owasp_coverage:
   - "A01:2025 - Broken Access Control"
@@ -780,3 +787,15 @@ migration_history:
       - "Added S7BEN-CVE-012: Media Processing API (SSRF→RCE→Cloud chain)"
       - "All benchmarks use dynamic flags and include telemetry"
       - "Total benchmarks now: 64 (up from 44)"
+
+  - date: "2026-02-25"
+    action: "Sprint 12 — Benchmark Reclassification"
+    changes:
+      - "Reclassified 16 benchmarks across difficulty tiers"
+      - "HARD-015..019 → EASY-010..014, MED-016 → EASY-015"
+      - "VHARD-014 → EASY-016, VHARD-011 → EASY-017"
+      - "CVE-008..011 → EASY-018..021"
+      - "HARD-012 → MED-017, HARD-014 → MED-018, VHARD-013 → MED-019"
+      - "VHARD-006 → HARD-020"
+      - "Port ranges realigned: EASY 5001-5021, MED 5030-5047, HARD 5050-5057, VHARD 5070-5080, CVE 5090-5097"
+      - "Total benchmarks: 66"

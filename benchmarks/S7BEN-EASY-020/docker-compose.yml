@@ -1,0 +1,11 @@
+version: '3.8'
+services:
+  app:
+    build: ./app
+    ports: ["5020:8109"]
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8109/"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 15s

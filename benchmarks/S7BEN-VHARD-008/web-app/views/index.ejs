@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NoSQL Injection Demo - SBEN-NOSQL-01</title>
+    <title>SearchEngine Database Service</title>
     <style>
         * {
             margin: 0;
@@ -261,25 +261,25 @@
             <div class="endpoint">
                 <span class="method post">POST</span>
                 <span class="endpoint-path">/api/login</span>
-                <div class="endpoint-desc">Authentication endpoint (vulnerable to $ne operator injection)</div>
+                <div class="endpoint-desc">Authentication endpoint</div>
             </div>
 
             <div class="endpoint">
                 <span class="method post">POST</span>
                 <span class="endpoint-path">/api/search</span>
-                <div class="endpoint-desc">User search (vulnerable to $regex injection)</div>
+                <div class="endpoint-desc">User search</div>
             </div>
 
             <div class="endpoint">
                 <span class="method post">POST</span>
                 <span class="endpoint-path">/api/query</span>
-                <div class="endpoint-desc">Advanced query (vulnerable to $where JavaScript injection)</div>
+                <div class="endpoint-desc">Advanced query</div>
             </div>
 
             <div class="endpoint">
                 <span class="method post">POST</span>
                 <span class="endpoint-path">/api/advanced-search</span>
-                <div class="endpoint-desc">Secret search (vulnerable to $where clause)</div>
+                <div class="endpoint-desc">Secret search</div>
             </div>
 
             <div class="endpoint">
@@ -298,8 +298,7 @@
         </div>
 
         <div class="footer">
-            Strike7 Security Benchmarks | SBEN-NOSQL-01<br>
-            MongoDB NoSQL Injection Chain
+            SearchEngine Database Service
         </div>
     </div>
 </body>

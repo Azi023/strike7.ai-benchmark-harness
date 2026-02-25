@@ -57,7 +57,7 @@ services:
     hostname: webapp
     domainname: corp.local
     ports:
-      - "5052:3000"
+      - "5072:3000"
     networks:
       corp-net:
         ipv4_address: 10.200.3.30

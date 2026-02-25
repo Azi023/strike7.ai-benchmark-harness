@@ -218,8 +218,8 @@ def api_profile_update():
         save_state(state)
 
         return jsonify({
-            "error": "Invalid input detected",
-            "message": "Input validation failed - potential CRLF injection blocked"
+            "error": "Invalid input",
+            "message": "Input validation failed"
         }), 400
 
     # Detect CRLF patterns for telemetry
@@ -292,8 +292,7 @@ def api_admin_flag():
 
     if not state.get('privilege_escalation'):
         return jsonify({
-            "error": "Direct admin login detected",
-            "hint": "Flag requires privilege escalation via log tampering"
+            "error": "Access denied"
         }), 403
 
     flag = generate_flag(session['username'], 'log_tampering')
@@ -352,7 +351,6 @@ def oracle():
     state = track_request('/api/oracle')
 
     return jsonify({
-        "expected_vulnerability": "crlf_injection_log_tampering",
         "current_state": {
             "crlf_injection_detected": state.get('crlf_injection_detected', False),
             "log_tampering_detected": state.get('log_tampering_detected', False),

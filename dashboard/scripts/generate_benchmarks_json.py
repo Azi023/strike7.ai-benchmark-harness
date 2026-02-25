@@ -10,10 +10,10 @@ from pathlib import Path
 # Port allocation ranges
 PORT_RANGES = {
     'EASY': 5001,
-    'MED': 5010,
-    'HARD': 5030,
-    'VHARD': 5050,
-    'CVE': 5070,
+    'MED': 5030,
+    'HARD': 5050,
+    'VHARD': 5070,
+    'CVE': 5090,
 }
 
 def load_yaml_config():

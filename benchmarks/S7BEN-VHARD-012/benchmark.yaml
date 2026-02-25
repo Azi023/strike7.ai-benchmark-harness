@@ -16,7 +16,7 @@ difficulty_dimensions:
   chaining: medium
 services:
   web-app:
-    port: 8091
+    port: 5079
     protocol: http
     exposed: true
   oauth-provider:

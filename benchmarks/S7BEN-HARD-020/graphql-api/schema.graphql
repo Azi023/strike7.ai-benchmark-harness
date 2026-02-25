@@ -1,0 +1,49 @@
+# DataQuery API - GraphQL Schema
+
+type User {
+  id: ID!
+  username: String!
+  email: String!
+  role: String!
+  createdAt: String!
+}
+
+type Admin {
+  id: ID!
+  username: String!
+  isSuperAdmin: Boolean!
+  createdAt: String!
+}
+
+type Secret {
+  id: ID!
+  flagKey: String!
+  flagValue: String!
+  description: String
+  createdAt: String!
+}
+
+type Query {
+  # Get all users (safe)
+  users: [User!]!
+
+  # Search users by username
+  searchUser(username: String!): [User!]!
+
+  # Get user by ID (safe)
+  user(id: ID!): User
+
+  # Get all admins - requires authentication (not implemented)
+  admins: [Admin!]!
+
+  # Get secret by key
+  getSecret(flagKey: String!): Secret
+}
+
+type Mutation {
+  # Create user (safe)
+  createUser(username: String!, email: String!, role: String): User!
+
+  # Delete user
+  deleteUser(username: String!): Boolean!
+}

@@ -190,10 +190,10 @@ def main():
     # Resolve ports from local registry
     specs = [
         BenchSpec("S7BEN-EASY-001", 5001),
-        BenchSpec("S7BEN-MED-014", 5023),
-        BenchSpec("S7BEN-HARD-002", 5031),
-        BenchSpec("S7BEN-VHARD-006", 5055),
-        BenchSpec("S7BEN-CVE-001", 5070),
+        BenchSpec("S7BEN-MED-014", 5043),
+        BenchSpec("S7BEN-HARD-002", 5051),
+        BenchSpec("S7BEN-HARD-020", 5057),
+        BenchSpec("S7BEN-CVE-001", 5090),
     ]
     exploits = [
         exploit_easy_001,

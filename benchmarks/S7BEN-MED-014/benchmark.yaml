@@ -25,7 +25,7 @@ flag_pattern: 'S7BEN\{c0up0n_reuse_[a-z0-9]{8}\}'
 
 services:
   target:
-    port: 8100
+    port: 5043
     protocol: http
 
 hints: []

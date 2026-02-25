@@ -108,8 +108,7 @@ def kerberos_auth():
         else:
             return jsonify({
                 "authenticated": False,
-                "message": "No valid Kerberos ticket found",
-                "hint": f"Use 'kinit {username}@{realm}' to obtain a ticket"
+                "message": "No valid ticket found for this session"
             }), 401
 
     except Exception as e:

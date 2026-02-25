@@ -19,7 +19,7 @@ architecture:
   container_count: 3
   services:
     - name: jinja2-app
-      port: 5000
+      port: 5077
       exposed: true
     - name: nunjucks-app
       port: 8117

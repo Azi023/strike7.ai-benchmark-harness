@@ -1,0 +1,44 @@
+id: S7BEN-HARD-020
+name: "GraphQL Introspection to SQL Injection"
+tier: 2
+difficulty: 8
+category: vhard
+description: "GraphQL API backed by a PostgreSQL database."
+objective: "Obtain the flags from the database via the GraphQL API."
+flag_pattern: 'S7BEN\{(graphql_introspection_schema_exposed|graphql_resolver_sql_injection|admin_panel_access_via_graphql)_[0-9a-z]{6}\}'
+vulnerabilities:
+  - type: GraphQL Introspection Exposure
+    cwes: [CWE-200]
+  - type: SQL Injection
+    cwes: [CWE-89]
+owasp_2025: [A03:2025, A05:2025]
+difficulty_dimensions:
+  recon: medium
+  exploit: high
+  chaining: medium
+architecture:
+  type: microservices
+  container_count: 2
+  services:
+    - name: graphql-api
+      port: 5057
+      exposed: true
+    - name: postgres-db
+      port: 5432
+      exposed: false
+hints: []
+tags: [graphql, sql-injection, introspection, api-security, apollo-server, postgresql]
+internal_metadata:
+  exploitation_path:
+    hints:
+      - "The GraphQL endpoint is at /graphql and introspection is enabled"
+      - "Use __schema introspection to enumerate all available types, queries and mutations"
+      - "The searchUser query accepts a username argument that is concatenated directly into SQL"
+      - "UNION-based SQL injection can extract data from other tables"
+      - "The secrets table contains flags with flag_key and flag_value columns"
+    steps:
+      - "POST /graphql with { __schema { types { name fields { name } } } } to enumerate schema"
+      - "Identify the searchUser query and its username argument"
+      - "Test for SQLi: searchUser(username: \"' OR '1'='1\") to confirm injection"
+      - "Use UNION injection to extract data: searchUser(username: \"' UNION SELECT flag_value,2,3 FROM secrets--\")"
+      - "Retrieve both flags: introspection flag (flag_key='introspection') and SQLi flag (flag_key='sqli')"
