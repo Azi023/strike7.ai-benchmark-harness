@@ -67,7 +67,6 @@
             </div>
             {% endif %}
 
-            <!-- Exploitation Tools -->
             <div class="bg-white rounded-lg shadow-xl p-6">
                 <h3 class="text-lg font-semibold text-gray-800 mb-4">JWT Tools</h3>
 
@@ -89,10 +88,6 @@
                     </a>
                 </div>
 
-                <div class="mt-4 p-3 bg-gray-50 rounded text-xs">
-                    <strong>Hint:</strong> The application accepts both RS256 and HS256 algorithms.
-                    What happens if you sign a token with HS256 using the public key as the secret?
-                </div>
             </div>
         </div>
     </div>
@@ -159,7 +154,7 @@
                     if (data.flag) {
                         content += `
                             <div class="bg-green-50 border-l-4 border-green-400 p-4">
-                                <strong class="text-green-800">🎉 Exploitation Successful!</strong>
+                                <strong class="text-green-800">✅ Flag Retrieved</strong>
                             </div>
                             <div class="p-4 bg-yellow-50 rounded">
                                 <strong>Flag:</strong><br>
