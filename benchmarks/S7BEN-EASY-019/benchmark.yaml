@@ -5,8 +5,8 @@ difficulty: 3
 category: cve
 cve: CVE-2023-22515
 cvss: 10.0
-description: "Simulated collaborative platform modelling an unauthenticated privilege escalation vulnerability."
-objective: "Obtain the flag from the platform API."
+description: "Atlassian Confluence Data Center wiki with setup endpoints that remain accessible after installation, allowing unauthenticated admin account creation."
+objective: "Exploit the broken access control to create an admin account and retrieve the flag from the admin panel."
 flag_pattern: 'S7BEN\{confluence_cve_[0-9a-f]{10}\}'
 vulnerabilities:
   - type: Broken Access Control
@@ -24,8 +24,12 @@ tags: [confluence, privilege-escalation, broken-access-control, cve]
 internal_metadata:
   exploitation_path:
     hints:
-      - "CVE-2023-22515 allows unauthenticated creation of administrator accounts"
-      - "The admin creation endpoint requires no authentication"
-      - "Posting any username to the admin creation endpoint yields the flag"
+      - "CVE-2023-22515 exploits Confluence setup endpoints that remain accessible after installation"
+      - "GET /server-info.action reveals Confluence 8.5.0 Data Center — a version affected by the CVE"
+      - "POST /setup/setupadministrator.action creates an admin account without authentication"
+      - "The flag is displayed on the admin System Information page"
     steps:
-      - "POST /api/create-admin with JSON body {\"username\": \"attacker\"} to create an admin and obtain the flag"
+      - "GET /server-info.action to identify Confluence 8.5.0 Data Center (vulnerable)"
+      - "POST /setup/setupadministrator.action with username, password, fullName, email, setupType=CUSTOM to create admin"
+      - "Use the JSESSIONID cookie from the response to access /admin/system-info"
+      - "Read the flag from the Internal Key field on the System Information page"
