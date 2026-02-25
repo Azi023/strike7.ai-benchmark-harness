@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Strike7 Store - CSP Protected</title>
+    <title>Strike7 Store</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://code.angularjs.org/1.8.2/angular.min.js"></script>
 </head>
@@ -13,24 +13,7 @@
             <!-- Header -->
             <div class="text-center mb-8">
                 <h1 class="text-4xl font-bold text-gray-800 mb-2">Strike7 Store</h1>
-                <p class="text-gray-600">Secure Shopping with CSP Protection</p>
-            </div>
-
-            <!-- Security Badge -->
-            <div class="bg-green-50 border-l-4 border-green-400 p-4 mb-6">
-                <div class="flex">
-                    <div class="flex-shrink-0">
-                        <svg class="h-5 w-5 text-green-400" viewBox="0 0 20 20" fill="currentColor">
-                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-                        </svg>
-                    </div>
-                    <div class="ml-3">
-                        <p class="text-sm text-green-700">
-                            <strong>Protected by CSP:</strong> This site uses Content Security Policy to prevent XSS attacks.
-                            Inline scripts and eval() are blocked.
-                        </p>
-                    </div>
-                </div>
+                <p class="text-gray-600">Online Shopping</p>
             </div>
 
             <!-- Main Card -->
@@ -56,34 +39,6 @@
 
                 <div class="text-sm text-gray-600">
                     <strong>Try searching for:</strong> laptops, phones, tablets
-                </div>
-            </div>
-
-            <!-- CSP Information -->
-            <div class="bg-white rounded-lg shadow-xl p-6 mb-6">
-                <h3 class="text-lg font-semibold text-gray-800 mb-4">CSP Policy Details</h3>
-                <div class="bg-gray-50 p-4 rounded font-mono text-xs overflow-x-auto">
-                    <div class="whitespace-pre-wrap break-words">
-default-src 'self';
-script-src 'self' https://ajax.googleapis.com https://code.angularjs.org;
-style-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com;
-object-src 'none';
-                    </div>
-                </div>
-                <div class="mt-4 text-sm text-gray-700">
-                    <p class="mb-2"><strong>What's blocked:</strong></p>
-                    <ul class="list-disc list-inside space-y-1 text-gray-600">
-                        <li>Inline <code>&lt;script&gt;</code> tags</li>
-                        <li>Inline event handlers (onclick, onerror, etc.)</li>
-                        <li>eval() and Function() constructor</li>
-                        <li>javascript: URIs</li>
-                    </ul>
-                    <p class="mt-4 mb-2"><strong>What's allowed:</strong></p>
-                    <ul class="list-disc list-inside space-y-1 text-gray-600">
-                        <li>Scripts from same origin ('self')</li>
-                        <li>Scripts from Google CDN (ajax.googleapis.com)</li>
-                        <li>Scripts from AngularJS CDN (code.angularjs.org)</li>
-                    </ul>
                 </div>
             </div>
 
