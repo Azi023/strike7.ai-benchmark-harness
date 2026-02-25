@@ -149,3 +149,6 @@ celerybeat.pid
 .mypy_cache/
 .dmypy.json
 dmypy.json
+
+# Third-party repos (too large for git)
+third_party/

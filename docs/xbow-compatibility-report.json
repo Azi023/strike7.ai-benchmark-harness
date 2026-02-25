@@ -1,0 +1,1326 @@
+{
+  "errors": [],
+  "summary": {
+    "strike7_benchmarks": 64,
+    "xbow_benchmarks": 104,
+    "strike7_structural_match_to_xbow_expected": {
+      "matches": 0,
+      "total": 64
+    },
+    "strike7_common_mk_build_compatibility": {
+      "compatible_count": 8,
+      "total": 64
+    }
+  },
+  "xbow_expected": {
+    "docker-compose.yml": 104,
+    "benchmark.json": 104,
+    "benchmark.yaml": 104,
+    "Makefile_includes_common_mk": 104
+  },
+  "compatibility_by_benchmark": [
+    {
+      "benchmark": "S7BEN-CVE-001",
+      "structure": {
+        "docker_compose": true,
+        "benchmark_json": false,
+        "benchmark_yaml": true,
+        "makefile": true,
+        "makefile_includes_common_mk": false
+      },
+      "common_mk_build_compatible": false,
+      "dockerfiles_accepting_flag": [],
+      "suggested_changes": [
+        "add benchmark.json (metadata) with tags, level, name, description",
+        "add Makefile line: include ../../common.mk",
+        "update Dockerfile(s) to include ARG flag or ARG FLAG and use it in app logic"
+      ]
+    },
+    {
+      "benchmark": "S7BEN-CVE-002",
+      "structure": {
+        "docker_compose": true,
+        "benchmark_json": false,
+        "benchmark_yaml": true,
+        "makefile": true,
+        "makefile_includes_common_mk": false
+      },
+      "common_mk_build_compatible": false,
+      "dockerfiles_accepting_flag": [],
+      "suggested_changes": [
+        "add benchmark.json (metadata) with tags, level, name, description",
+        "add Makefile line: include ../../common.mk",
+        "update Dockerfile(s) to include ARG flag or ARG FLAG and use it in app logic"
+      ]
+    },
+    {
+      "benchmark": "S7BEN-CVE-003",
+      "structure": {
+        "docker_compose": true,
+        "benchmark_json": false,
+        "benchmark_yaml": true,
+        "makefile": true,
+        "makefile_includes_common_mk": false
+      },
+      "common_mk_build_compatible": false,
+      "dockerfiles_accepting_flag": [],
+      "suggested_changes": [
+        "add benchmark.json (metadata) with tags, level, name, description",
+        "add Makefile line: include ../../common.mk",
+        "update Dockerfile(s) to include ARG flag or ARG FLAG and use it in app logic"
+      ]
+    },
+    {
+      "benchmark": "S7BEN-CVE-004",
+      "structure": {
+        "docker_compose": true,
+        "benchmark_json": false,
+        "benchmark_yaml": true,
+        "makefile": true,
+        "makefile_includes_common_mk": false
+      },
+      "common_mk_build_compatible": false,
+      "dockerfiles_accepting_flag": [],
+      "suggested_changes": [
+        "add benchmark.json (metadata) with tags, level, name, description",
+        "add Makefile line: include ../../common.mk",
+        "update Dockerfile(s) to include ARG flag or ARG FLAG and use it in app logic"
+      ]
+    },
+    {
+      "benchmark": "S7BEN-CVE-005",
+      "structure": {
+        "docker_compose": true,
+        "benchmark_json": false,
+        "benchmark_yaml": true,
+        "makefile": true,
+        "makefile_includes_common_mk": false
+      },
+      "common_mk_build_compatible": false,
+      "dockerfiles_accepting_flag": [],
+      "suggested_changes": [
+        "add benchmark.json (metadata) with tags, level, name, description",
+        "add Makefile line: include ../../common.mk",
+        "update Dockerfile(s) to include ARG flag or ARG FLAG and use it in app logic"
+      ]
+    },
+    {
+      "benchmark": "S7BEN-CVE-006",
+      "structure": {
+        "docker_compose": true,
+        "benchmark_json": false,
+        "benchmark_yaml": true,
+        "makefile": true,
+        "makefile_includes_common_mk": false
+      },
+      "common_mk_build_compatible": false,
+      "dockerfiles_accepting_flag": [],
+      "suggested_changes": [
+        "add benchmark.json (metadata) with tags, level, name, description",
+        "add Makefile line: include ../../common.mk",
+        "update Dockerfile(s) to include ARG flag or ARG FLAG and use it in app logic"
+      ]
+    },
+    {
+      "benchmark": "S7BEN-CVE-007",
+      "structure": {
+        "docker_compose": true,
+        "benchmark_json": false,
+        "benchmark_yaml": true,
+        "makefile": true,
+        "makefile_includes_common_mk": false
+      },
+      "common_mk_build_compatible": false,
+      "dockerfiles_accepting_flag": [],
+      "suggested_changes": [
+        "add benchmark.json (metadata) with tags, level, name, description",
+        "add Makefile line: include ../../common.mk",
+        "update Dockerfile(s) to include ARG flag or ARG FLAG and use it in app logic"
+      ]
+    },
+    {
+      "benchmark": "S7BEN-CVE-008",
+      "structure": {
+        "docker_compose": true,
+        "benchmark_json": false,
+        "benchmark_yaml": true,
+        "makefile": true,
+        "makefile_includes_common_mk": false
+      },
+      "common_mk_build_compatible": false,
+      "dockerfiles_accepting_flag": [],
+      "suggested_changes": [
+        "add benchmark.json (metadata) with tags, level, name, description",
+        "add Makefile line: include ../../common.mk",
+        "update Dockerfile(s) to include ARG flag or ARG FLAG and use it in app logic"
+      ]
+    },
+    {
+      "benchmark": "S7BEN-CVE-009",
+      "structure": {
+        "docker_compose": true,
+        "benchmark_json": false,
+        "benchmark_yaml": true,
+        "makefile": true,
+        "makefile_includes_common_mk": false
+      },
+      "common_mk_build_compatible": false,
+      "dockerfiles_accepting_flag": [],
+      "suggested_changes": [
+        "add benchmark.json (metadata) with tags, level, name, description",
+        "add Makefile line: include ../../common.mk",
+        "update Dockerfile(s) to include ARG flag or ARG FLAG and use it in app logic"
+      ]
+    },
+    {
+      "benchmark": "S7BEN-CVE-010",
+      "structure": {
+        "docker_compose": true,
+        "benchmark_json": false,
+        "benchmark_yaml": true,
+        "makefile": true,
+        "makefile_includes_common_mk": false
+      },
+      "common_mk_build_compatible": false,
+      "dockerfiles_accepting_flag": [],
+      "suggested_changes": [
+        "add benchmark.json (metadata) with tags, level, name, description",
+        "add Makefile line: include ../../common.mk",
+        "update Dockerfile(s) to include ARG flag or ARG FLAG and use it in app logic"
+      ]
+    },
+    {
+      "benchmark": "S7BEN-CVE-011",
+      "structure": {
+        "docker_compose": true,
+        "benchmark_json": false,
+        "benchmark_yaml": true,
+        "makefile": true,
+        "makefile_includes_common_mk": false
+      },
+      "common_mk_build_compatible": false,
+      "dockerfiles_accepting_flag": [],
+      "suggested_changes": [
+        "add benchmark.json (metadata) with tags, level, name, description",
+        "add Makefile line: include ../../common.mk",
+        "update Dockerfile(s) to include ARG flag or ARG FLAG and use it in app logic"
+      ]
+    },
+    {
+      "benchmark": "S7BEN-EASY-001",
+      "structure": {
+        "docker_compose": true,
+        "benchmark_json": true,
+        "benchmark_yaml": true,
+        "makefile": true,
+        "makefile_includes_common_mk": false
+      },
+      "common_mk_build_compatible": true,
+      "dockerfiles_accepting_flag": [
+        {
+          "dockerfile": "app/Dockerfile",
+          "has_ARG_flag": true,
+          "has_ARG_FLAG": true,
+          "uses_flag_var": true,
+          "compatible": true
+        }
+      ],
+      "suggested_changes": [
+        "add Makefile line: include ../../common.mk"
+      ]
+    },
+    {
+      "benchmark": "S7BEN-EASY-002",
+      "structure": {
+        "docker_compose": true,
+        "benchmark_json": true,
+        "benchmark_yaml": true,
+        "makefile": true,
+        "makefile_includes_common_mk": false
+      },
+      "common_mk_build_compatible": true,
+      "dockerfiles_accepting_flag": [
+        {
+          "dockerfile": "app/Dockerfile",
+          "has_ARG_flag": true,
+          "has_ARG_FLAG": true,
+          "uses_flag_var": true,
+          "compatible": true
+        }
+      ],
+      "suggested_changes": [
+        "add Makefile line: include ../../common.mk"
+      ]
+    },
+    {
+      "benchmark": "S7BEN-EASY-003",
+      "structure": {
+        "docker_compose": true,
+        "benchmark_json": true,
+        "benchmark_yaml": true,
+        "makefile": true,
+        "makefile_includes_common_mk": false
+      },
+      "common_mk_build_compatible": true,
+      "dockerfiles_accepting_flag": [
+        {
+          "dockerfile": "app/Dockerfile",
+          "has_ARG_flag": true,
+          "has_ARG_FLAG": true,
+          "uses_flag_var": true,
+          "compatible": true
+        }
+      ],
+      "suggested_changes": [
+        "add Makefile line: include ../../common.mk"
+      ]
+    },
+    {
+      "benchmark": "S7BEN-EASY-004",
+      "structure": {
+        "docker_compose": true,
+        "benchmark_json": true,
+        "benchmark_yaml": true,
+        "makefile": true,
+        "makefile_includes_common_mk": false
+      },
+      "common_mk_build_compatible": true,
+      "dockerfiles_accepting_flag": [
+        {
+          "dockerfile": "app/Dockerfile",
+          "has_ARG_flag": true,
+          "has_ARG_FLAG": true,
+          "uses_flag_var": true,
+          "compatible": true
+        }
+      ],
+      "suggested_changes": [
+        "add Makefile line: include ../../common.mk"
+      ]
+    },
+    {
+      "benchmark": "S7BEN-EASY-005",
+      "structure": {
+        "docker_compose": true,
+        "benchmark_json": true,
+        "benchmark_yaml": true,
+        "makefile": true,
+        "makefile_includes_common_mk": false
+      },
+      "common_mk_build_compatible": true,
+      "dockerfiles_accepting_flag": [
+        {
+          "dockerfile": "app/Dockerfile",
+          "has_ARG_flag": true,
+          "has_ARG_FLAG": true,
+          "uses_flag_var": true,
+          "compatible": true
+        }
+      ],
+      "suggested_changes": [
+        "add Makefile line: include ../../common.mk"
+      ]
+    },
+    {
+      "benchmark": "S7BEN-EASY-006",
+      "structure": {
+        "docker_compose": true,
+        "benchmark_json": true,
+        "benchmark_yaml": true,
+        "makefile": true,
+        "makefile_includes_common_mk": false
+      },
+      "common_mk_build_compatible": true,
+      "dockerfiles_accepting_flag": [
+        {
+          "dockerfile": "app/Dockerfile",
+          "has_ARG_flag": true,
+          "has_ARG_FLAG": true,
+          "uses_flag_var": true,
+          "compatible": true
+        }
+      ],
+      "suggested_changes": [
+        "add Makefile line: include ../../common.mk"
+      ]
+    },
+    {
+      "benchmark": "S7BEN-EASY-007",
+      "structure": {
+        "docker_compose": true,
+        "benchmark_json": true,
+        "benchmark_yaml": true,
+        "makefile": true,
+        "makefile_includes_common_mk": false
+      },
+      "common_mk_build_compatible": false,
+      "dockerfiles_accepting_flag": [],
+      "suggested_changes": [
+        "add Makefile line: include ../../common.mk",
+        "update Dockerfile(s) to include ARG flag or ARG FLAG and use it in app logic"
+      ]
+    },
+    {
+      "benchmark": "S7BEN-EASY-008",
+      "structure": {
+        "docker_compose": true,
+        "benchmark_json": true,
+        "benchmark_yaml": true,
+        "makefile": true,
+        "makefile_includes_common_mk": false
+      },
+      "common_mk_build_compatible": false,
+      "dockerfiles_accepting_flag": [],
+      "suggested_changes": [
+        "add Makefile line: include ../../common.mk",
+        "update Dockerfile(s) to include ARG flag or ARG FLAG and use it in app logic"
+      ]
+    },
+    {
+      "benchmark": "S7BEN-EASY-009",
+      "structure": {
+        "docker_compose": true,
+        "benchmark_json": true,
+        "benchmark_yaml": true,
+        "makefile": true,
+        "makefile_includes_common_mk": false
+      },
+      "common_mk_build_compatible": false,
+      "dockerfiles_accepting_flag": [],
+      "suggested_changes": [
+        "add Makefile line: include ../../common.mk",
+        "update Dockerfile(s) to include ARG flag or ARG FLAG and use it in app logic"
+      ]
+    },
+    {
+      "benchmark": "S7BEN-HARD-001",
+      "structure": {
+        "docker_compose": true,
+        "benchmark_json": false,
+        "benchmark_yaml": true,
+        "makefile": true,
+        "makefile_includes_common_mk": false
+      },
+      "common_mk_build_compatible": true,
+      "dockerfiles_accepting_flag": [
+        {
+          "dockerfile": "app/Dockerfile",
+          "has_ARG_flag": true,
+          "has_ARG_FLAG": true,
+          "uses_flag_var": true,
+          "compatible": true
+        }
+      ],
+      "suggested_changes": [
+        "add benchmark.json (metadata) with tags, level, name, description",
+        "add Makefile line: include ../../common.mk"
+      ]
+    },
+    {
+      "benchmark": "S7BEN-HARD-002",
+      "structure": {
+        "docker_compose": true,
+        "benchmark_json": false,
+        "benchmark_yaml": true,
+        "makefile": true,
+        "makefile_includes_common_mk": false
+      },
+      "common_mk_build_compatible": false,
+      "dockerfiles_accepting_flag": [],
+      "suggested_changes": [
+        "add benchmark.json (metadata) with tags, level, name, description",
+        "add Makefile line: include ../../common.mk",
+        "update Dockerfile(s) to include ARG flag or ARG FLAG and use it in app logic"
+      ]
+    },
+    {
+      "benchmark": "S7BEN-HARD-003",
+      "structure": {
+        "docker_compose": true,
+        "benchmark_json": false,
+        "benchmark_yaml": true,
+        "makefile": true,
+        "makefile_includes_common_mk": false
+      },
+      "common_mk_build_compatible": false,
+      "dockerfiles_accepting_flag": [],
+      "suggested_changes": [
+        "add benchmark.json (metadata) with tags, level, name, description",
+        "add Makefile line: include ../../common.mk",
+        "update Dockerfile(s) to include ARG flag or ARG FLAG and use it in app logic"
+      ]
+    },
+    {
+      "benchmark": "S7BEN-HARD-004",
+      "structure": {
+        "docker_compose": true,
+        "benchmark_json": false,
+        "benchmark_yaml": true,
+        "makefile": true,
+        "makefile_includes_common_mk": false
+      },
+      "common_mk_build_compatible": false,
+      "dockerfiles_accepting_flag": [],
+      "suggested_changes": [
+        "add benchmark.json (metadata) with tags, level, name, description",
+        "add Makefile line: include ../../common.mk",
+        "update Dockerfile(s) to include ARG flag or ARG FLAG and use it in app logic"
+      ]
+    },
+    {
+      "benchmark": "S7BEN-HARD-010",
+      "structure": {
+        "docker_compose": true,
+        "benchmark_json": false,
+        "benchmark_yaml": true,
+        "makefile": true,
+        "makefile_includes_common_mk": false
+      },
+      "common_mk_build_compatible": false,
+      "dockerfiles_accepting_flag": [],
+      "suggested_changes": [
+        "add benchmark.json (metadata) with tags, level, name, description",
+        "add Makefile line: include ../../common.mk",
+        "update Dockerfile(s) to include ARG flag or ARG FLAG and use it in app logic"
+      ]
+    },
+    {
+      "benchmark": "S7BEN-HARD-011",
+      "structure": {
+        "docker_compose": true,
+        "benchmark_json": false,
+        "benchmark_yaml": true,
+        "makefile": true,
+        "makefile_includes_common_mk": false
+      },
+      "common_mk_build_compatible": false,
+      "dockerfiles_accepting_flag": [],
+      "suggested_changes": [
+        "add benchmark.json (metadata) with tags, level, name, description",
+        "add Makefile line: include ../../common.mk",
+        "update Dockerfile(s) to include ARG flag or ARG FLAG and use it in app logic"
+      ]
+    },
+    {
+      "benchmark": "S7BEN-HARD-012",
+      "structure": {
+        "docker_compose": true,
+        "benchmark_json": false,
+        "benchmark_yaml": true,
+        "makefile": true,
+        "makefile_includes_common_mk": false
+      },
+      "common_mk_build_compatible": false,
+      "dockerfiles_accepting_flag": [],
+      "suggested_changes": [
+        "add benchmark.json (metadata) with tags, level, name, description",
+        "add Makefile line: include ../../common.mk",
+        "update Dockerfile(s) to include ARG flag or ARG FLAG and use it in app logic"
+      ]
+    },
+    {
+      "benchmark": "S7BEN-HARD-013",
+      "structure": {
+        "docker_compose": true,
+        "benchmark_json": false,
+        "benchmark_yaml": true,
+        "makefile": true,
+        "makefile_includes_common_mk": false
+      },
+      "common_mk_build_compatible": false,
+      "dockerfiles_accepting_flag": [],
+      "suggested_changes": [
+        "add benchmark.json (metadata) with tags, level, name, description",
+        "add Makefile line: include ../../common.mk",
+        "update Dockerfile(s) to include ARG flag or ARG FLAG and use it in app logic"
+      ]
+    },
+    {
+      "benchmark": "S7BEN-HARD-014",
+      "structure": {
+        "docker_compose": true,
+        "benchmark_json": false,
+        "benchmark_yaml": true,
+        "makefile": true,
+        "makefile_includes_common_mk": false
+      },
+      "common_mk_build_compatible": false,
+      "dockerfiles_accepting_flag": [],
+      "suggested_changes": [
+        "add benchmark.json (metadata) with tags, level, name, description",
+        "add Makefile line: include ../../common.mk",
+        "update Dockerfile(s) to include ARG flag or ARG FLAG and use it in app logic"
+      ]
+    },
+    {
+      "benchmark": "S7BEN-HARD-015",
+      "structure": {
+        "docker_compose": true,
+        "benchmark_json": false,
+        "benchmark_yaml": true,
+        "makefile": true,
+        "makefile_includes_common_mk": false
+      },
+      "common_mk_build_compatible": false,
+      "dockerfiles_accepting_flag": [],
+      "suggested_changes": [
+        "add benchmark.json (metadata) with tags, level, name, description",
+        "add Makefile line: include ../../common.mk",
+        "update Dockerfile(s) to include ARG flag or ARG FLAG and use it in app logic"
+      ]
+    },
+    {
+      "benchmark": "S7BEN-HARD-016",
+      "structure": {
+        "docker_compose": true,
+        "benchmark_json": false,
+        "benchmark_yaml": true,
+        "makefile": true,
+        "makefile_includes_common_mk": false
+      },
+      "common_mk_build_compatible": false,
+      "dockerfiles_accepting_flag": [],
+      "suggested_changes": [
+        "add benchmark.json (metadata) with tags, level, name, description",
+        "add Makefile line: include ../../common.mk",
+        "update Dockerfile(s) to include ARG flag or ARG FLAG and use it in app logic"
+      ]
+    },
+    {
+      "benchmark": "S7BEN-HARD-017",
+      "structure": {
+        "docker_compose": true,
+        "benchmark_json": false,
+        "benchmark_yaml": true,
+        "makefile": true,
+        "makefile_includes_common_mk": false
+      },
+      "common_mk_build_compatible": false,
+      "dockerfiles_accepting_flag": [],
+      "suggested_changes": [
+        "add benchmark.json (metadata) with tags, level, name, description",
+        "add Makefile line: include ../../common.mk",
+        "update Dockerfile(s) to include ARG flag or ARG FLAG and use it in app logic"
+      ]
+    },
+    {
+      "benchmark": "S7BEN-HARD-018",
+      "structure": {
+        "docker_compose": true,
+        "benchmark_json": false,
+        "benchmark_yaml": true,
+        "makefile": true,
+        "makefile_includes_common_mk": false
+      },
+      "common_mk_build_compatible": false,
+      "dockerfiles_accepting_flag": [],
+      "suggested_changes": [
+        "add benchmark.json (metadata) with tags, level, name, description",
+        "add Makefile line: include ../../common.mk",
+        "update Dockerfile(s) to include ARG flag or ARG FLAG and use it in app logic"
+      ]
+    },
+    {
+      "benchmark": "S7BEN-HARD-019",
+      "structure": {
+        "docker_compose": true,
+        "benchmark_json": false,
+        "benchmark_yaml": true,
+        "makefile": true,
+        "makefile_includes_common_mk": false
+      },
+      "common_mk_build_compatible": false,
+      "dockerfiles_accepting_flag": [],
+      "suggested_changes": [
+        "add benchmark.json (metadata) with tags, level, name, description",
+        "add Makefile line: include ../../common.mk",
+        "update Dockerfile(s) to include ARG flag or ARG FLAG and use it in app logic"
+      ]
+    },
+    {
+      "benchmark": "S7BEN-MED-001",
+      "structure": {
+        "docker_compose": true,
+        "benchmark_json": true,
+        "benchmark_yaml": true,
+        "makefile": true,
+        "makefile_includes_common_mk": false
+      },
+      "common_mk_build_compatible": false,
+      "dockerfiles_accepting_flag": [],
+      "suggested_changes": [
+        "add Makefile line: include ../../common.mk",
+        "update Dockerfile(s) to include ARG flag or ARG FLAG and use it in app logic"
+      ]
+    },
+    {
+      "benchmark": "S7BEN-MED-002",
+      "structure": {
+        "docker_compose": true,
+        "benchmark_json": true,
+        "benchmark_yaml": true,
+        "makefile": true,
+        "makefile_includes_common_mk": false
+      },
+      "common_mk_build_compatible": false,
+      "dockerfiles_accepting_flag": [],
+      "suggested_changes": [
+        "add Makefile line: include ../../common.mk",
+        "update Dockerfile(s) to include ARG flag or ARG FLAG and use it in app logic"
+      ]
+    },
+    {
+      "benchmark": "S7BEN-MED-003",
+      "structure": {
+        "docker_compose": true,
+        "benchmark_json": true,
+        "benchmark_yaml": true,
+        "makefile": true,
+        "makefile_includes_common_mk": false
+      },
+      "common_mk_build_compatible": false,
+      "dockerfiles_accepting_flag": [],
+      "suggested_changes": [
+        "add Makefile line: include ../../common.mk",
+        "update Dockerfile(s) to include ARG flag or ARG FLAG and use it in app logic"
+      ]
+    },
+    {
+      "benchmark": "S7BEN-MED-004",
+      "structure": {
+        "docker_compose": true,
+        "benchmark_json": false,
+        "benchmark_yaml": true,
+        "makefile": true,
+        "makefile_includes_common_mk": false
+      },
+      "common_mk_build_compatible": false,
+      "dockerfiles_accepting_flag": [],
+      "suggested_changes": [
+        "add benchmark.json (metadata) with tags, level, name, description",
+        "add Makefile line: include ../../common.mk",
+        "update Dockerfile(s) to include ARG flag or ARG FLAG and use it in app logic"
+      ]
+    },
+    {
+      "benchmark": "S7BEN-MED-005",
+      "structure": {
+        "docker_compose": true,
+        "benchmark_json": false,
+        "benchmark_yaml": true,
+        "makefile": true,
+        "makefile_includes_common_mk": false
+      },
+      "common_mk_build_compatible": false,
+      "dockerfiles_accepting_flag": [],
+      "suggested_changes": [
+        "add benchmark.json (metadata) with tags, level, name, description",
+        "add Makefile line: include ../../common.mk",
+        "update Dockerfile(s) to include ARG flag or ARG FLAG and use it in app logic"
+      ]
+    },
+    {
+      "benchmark": "S7BEN-MED-006",
+      "structure": {
+        "docker_compose": true,
+        "benchmark_json": false,
+        "benchmark_yaml": true,
+        "makefile": true,
+        "makefile_includes_common_mk": false
+      },
+      "common_mk_build_compatible": false,
+      "dockerfiles_accepting_flag": [],
+      "suggested_changes": [
+        "add benchmark.json (metadata) with tags, level, name, description",
+        "add Makefile line: include ../../common.mk",
+        "update Dockerfile(s) to include ARG flag or ARG FLAG and use it in app logic"
+      ]
+    },
+    {
+      "benchmark": "S7BEN-MED-007",
+      "structure": {
+        "docker_compose": true,
+        "benchmark_json": false,
+        "benchmark_yaml": true,
+        "makefile": true,
+        "makefile_includes_common_mk": false
+      },
+      "common_mk_build_compatible": false,
+      "dockerfiles_accepting_flag": [],
+      "suggested_changes": [
+        "add benchmark.json (metadata) with tags, level, name, description",
+        "add Makefile line: include ../../common.mk",
+        "update Dockerfile(s) to include ARG flag or ARG FLAG and use it in app logic"
+      ]
+    },
+    {
+      "benchmark": "S7BEN-MED-008",
+      "structure": {
+        "docker_compose": true,
+        "benchmark_json": true,
+        "benchmark_yaml": true,
+        "makefile": true,
+        "makefile_includes_common_mk": false
+      },
+      "common_mk_build_compatible": true,
+      "dockerfiles_accepting_flag": [
+        {
+          "dockerfile": "app/Dockerfile",
+          "has_ARG_flag": true,
+          "has_ARG_FLAG": true,
+          "uses_flag_var": true,
+          "compatible": true
+        }
+      ],
+      "suggested_changes": [
+        "add Makefile line: include ../../common.mk"
+      ]
+    },
+    {
+      "benchmark": "S7BEN-MED-009",
+      "structure": {
+        "docker_compose": true,
+        "benchmark_json": false,
+        "benchmark_yaml": true,
+        "makefile": true,
+        "makefile_includes_common_mk": false
+      },
+      "common_mk_build_compatible": false,
+      "dockerfiles_accepting_flag": [],
+      "suggested_changes": [
+        "add benchmark.json (metadata) with tags, level, name, description",
+        "add Makefile line: include ../../common.mk",
+        "update Dockerfile(s) to include ARG flag or ARG FLAG and use it in app logic"
+      ]
+    },
+    {
+      "benchmark": "S7BEN-MED-010",
+      "structure": {
+        "docker_compose": true,
+        "benchmark_json": false,
+        "benchmark_yaml": true,
+        "makefile": true,
+        "makefile_includes_common_mk": false
+      },
+      "common_mk_build_compatible": false,
+      "dockerfiles_accepting_flag": [],
+      "suggested_changes": [
+        "add benchmark.json (metadata) with tags, level, name, description",
+        "add Makefile line: include ../../common.mk",
+        "update Dockerfile(s) to include ARG flag or ARG FLAG and use it in app logic"
+      ]
+    },
+    {
+      "benchmark": "S7BEN-MED-011",
+      "structure": {
+        "docker_compose": true,
+        "benchmark_json": true,
+        "benchmark_yaml": true,
+        "makefile": true,
+        "makefile_includes_common_mk": false
+      },
+      "common_mk_build_compatible": false,
+      "dockerfiles_accepting_flag": [],
+      "suggested_changes": [
+        "add Makefile line: include ../../common.mk",
+        "update Dockerfile(s) to include ARG flag or ARG FLAG and use it in app logic"
+      ]
+    },
+    {
+      "benchmark": "S7BEN-MED-012",
+      "structure": {
+        "docker_compose": true,
+        "benchmark_json": true,
+        "benchmark_yaml": true,
+        "makefile": true,
+        "makefile_includes_common_mk": false
+      },
+      "common_mk_build_compatible": false,
+      "dockerfiles_accepting_flag": [],
+      "suggested_changes": [
+        "add Makefile line: include ../../common.mk",
+        "update Dockerfile(s) to include ARG flag or ARG FLAG and use it in app logic"
+      ]
+    },
+    {
+      "benchmark": "S7BEN-MED-013",
+      "structure": {
+        "docker_compose": true,
+        "benchmark_json": false,
+        "benchmark_yaml": true,
+        "makefile": true,
+        "makefile_includes_common_mk": false
+      },
+      "common_mk_build_compatible": false,
+      "dockerfiles_accepting_flag": [],
+      "suggested_changes": [
+        "add benchmark.json (metadata) with tags, level, name, description",
+        "add Makefile line: include ../../common.mk",
+        "update Dockerfile(s) to include ARG flag or ARG FLAG and use it in app logic"
+      ]
+    },
+    {
+      "benchmark": "S7BEN-MED-014",
+      "structure": {
+        "docker_compose": true,
+        "benchmark_json": false,
+        "benchmark_yaml": true,
+        "makefile": true,
+        "makefile_includes_common_mk": false
+      },
+      "common_mk_build_compatible": false,
+      "dockerfiles_accepting_flag": [],
+      "suggested_changes": [
+        "add benchmark.json (metadata) with tags, level, name, description",
+        "add Makefile line: include ../../common.mk",
+        "update Dockerfile(s) to include ARG flag or ARG FLAG and use it in app logic"
+      ]
+    },
+    {
+      "benchmark": "S7BEN-MED-015",
+      "structure": {
+        "docker_compose": true,
+        "benchmark_json": false,
+        "benchmark_yaml": true,
+        "makefile": true,
+        "makefile_includes_common_mk": false
+      },
+      "common_mk_build_compatible": false,
+      "dockerfiles_accepting_flag": [],
+      "suggested_changes": [
+        "add benchmark.json (metadata) with tags, level, name, description",
+        "add Makefile line: include ../../common.mk",
+        "update Dockerfile(s) to include ARG flag or ARG FLAG and use it in app logic"
+      ]
+    },
+    {
+      "benchmark": "S7BEN-MED-016",
+      "structure": {
+        "docker_compose": true,
+        "benchmark_json": false,
+        "benchmark_yaml": true,
+        "makefile": true,
+        "makefile_includes_common_mk": false
+      },
+      "common_mk_build_compatible": false,
+      "dockerfiles_accepting_flag": [],
+      "suggested_changes": [
+        "add benchmark.json (metadata) with tags, level, name, description",
+        "add Makefile line: include ../../common.mk",
+        "update Dockerfile(s) to include ARG flag or ARG FLAG and use it in app logic"
+      ]
+    },
+    {
+      "benchmark": "S7BEN-VHARD-001",
+      "structure": {
+        "docker_compose": true,
+        "benchmark_json": false,
+        "benchmark_yaml": true,
+        "makefile": true,
+        "makefile_includes_common_mk": false
+      },
+      "common_mk_build_compatible": false,
+      "dockerfiles_accepting_flag": [],
+      "suggested_changes": [
+        "add benchmark.json (metadata) with tags, level, name, description",
+        "add Makefile line: include ../../common.mk",
+        "update Dockerfile(s) to include ARG flag or ARG FLAG and use it in app logic"
+      ]
+    },
+    {
+      "benchmark": "S7BEN-VHARD-002",
+      "structure": {
+        "docker_compose": true,
+        "benchmark_json": false,
+        "benchmark_yaml": true,
+        "makefile": true,
+        "makefile_includes_common_mk": false
+      },
+      "common_mk_build_compatible": false,
+      "dockerfiles_accepting_flag": [],
+      "suggested_changes": [
+        "add benchmark.json (metadata) with tags, level, name, description",
+        "add Makefile line: include ../../common.mk",
+        "update Dockerfile(s) to include ARG flag or ARG FLAG and use it in app logic"
+      ]
+    },
+    {
+      "benchmark": "S7BEN-VHARD-003",
+      "structure": {
+        "docker_compose": true,
+        "benchmark_json": false,
+        "benchmark_yaml": true,
+        "makefile": true,
+        "makefile_includes_common_mk": false
+      },
+      "common_mk_build_compatible": false,
+      "dockerfiles_accepting_flag": [],
+      "suggested_changes": [
+        "add benchmark.json (metadata) with tags, level, name, description",
+        "add Makefile line: include ../../common.mk",
+        "update Dockerfile(s) to include ARG flag or ARG FLAG and use it in app logic"
+      ]
+    },
+    {
+      "benchmark": "S7BEN-VHARD-004",
+      "structure": {
+        "docker_compose": true,
+        "benchmark_json": false,
+        "benchmark_yaml": true,
+        "makefile": true,
+        "makefile_includes_common_mk": false
+      },
+      "common_mk_build_compatible": false,
+      "dockerfiles_accepting_flag": [],
+      "suggested_changes": [
+        "add benchmark.json (metadata) with tags, level, name, description",
+        "add Makefile line: include ../../common.mk",
+        "update Dockerfile(s) to include ARG flag or ARG FLAG and use it in app logic"
+      ]
+    },
+    {
+      "benchmark": "S7BEN-VHARD-005",
+      "structure": {
+        "docker_compose": true,
+        "benchmark_json": false,
+        "benchmark_yaml": true,
+        "makefile": true,
+        "makefile_includes_common_mk": false
+      },
+      "common_mk_build_compatible": false,
+      "dockerfiles_accepting_flag": [],
+      "suggested_changes": [
+        "add benchmark.json (metadata) with tags, level, name, description",
+        "add Makefile line: include ../../common.mk",
+        "update Dockerfile(s) to include ARG flag or ARG FLAG and use it in app logic"
+      ]
+    },
+    {
+      "benchmark": "S7BEN-VHARD-006",
+      "structure": {
+        "docker_compose": true,
+        "benchmark_json": false,
+        "benchmark_yaml": true,
+        "makefile": true,
+        "makefile_includes_common_mk": false
+      },
+      "common_mk_build_compatible": false,
+      "dockerfiles_accepting_flag": [],
+      "suggested_changes": [
+        "add benchmark.json (metadata) with tags, level, name, description",
+        "add Makefile line: include ../../common.mk",
+        "update Dockerfile(s) to include ARG flag or ARG FLAG and use it in app logic"
+      ]
+    },
+    {
+      "benchmark": "S7BEN-VHARD-007",
+      "structure": {
+        "docker_compose": true,
+        "benchmark_json": false,
+        "benchmark_yaml": true,
+        "makefile": true,
+        "makefile_includes_common_mk": false
+      },
+      "common_mk_build_compatible": false,
+      "dockerfiles_accepting_flag": [],
+      "suggested_changes": [
+        "add benchmark.json (metadata) with tags, level, name, description",
+        "add Makefile line: include ../../common.mk",
+        "update Dockerfile(s) to include ARG flag or ARG FLAG and use it in app logic"
+      ]
+    },
+    {
+      "benchmark": "S7BEN-VHARD-008",
+      "structure": {
+        "docker_compose": true,
+        "benchmark_json": false,
+        "benchmark_yaml": true,
+        "makefile": true,
+        "makefile_includes_common_mk": false
+      },
+      "common_mk_build_compatible": false,
+      "dockerfiles_accepting_flag": [],
+      "suggested_changes": [
+        "add benchmark.json (metadata) with tags, level, name, description",
+        "add Makefile line: include ../../common.mk",
+        "update Dockerfile(s) to include ARG flag or ARG FLAG and use it in app logic"
+      ]
+    },
+    {
+      "benchmark": "S7BEN-VHARD-009",
+      "structure": {
+        "docker_compose": true,
+        "benchmark_json": false,
+        "benchmark_yaml": true,
+        "makefile": true,
+        "makefile_includes_common_mk": false
+      },
+      "common_mk_build_compatible": false,
+      "dockerfiles_accepting_flag": [],
+      "suggested_changes": [
+        "add benchmark.json (metadata) with tags, level, name, description",
+        "add Makefile line: include ../../common.mk",
+        "update Dockerfile(s) to include ARG flag or ARG FLAG and use it in app logic"
+      ]
+    },
+    {
+      "benchmark": "S7BEN-VHARD-010",
+      "structure": {
+        "docker_compose": true,
+        "benchmark_json": false,
+        "benchmark_yaml": false,
+        "makefile": true,
+        "makefile_includes_common_mk": false
+      },
+      "common_mk_build_compatible": false,
+      "dockerfiles_accepting_flag": [],
+      "suggested_changes": [
+        "add benchmark.json (metadata) with tags, level, name, description",
+        "add Makefile line: include ../../common.mk",
+        "update Dockerfile(s) to include ARG flag or ARG FLAG and use it in app logic",
+        "add benchmark.yaml for pipeline metadata (optional)"
+      ]
+    },
+    {
+      "benchmark": "S7BEN-VHARD-011",
+      "structure": {
+        "docker_compose": true,
+        "benchmark_json": false,
+        "benchmark_yaml": true,
+        "makefile": true,
+        "makefile_includes_common_mk": false
+      },
+      "common_mk_build_compatible": false,
+      "dockerfiles_accepting_flag": [],
+      "suggested_changes": [
+        "add benchmark.json (metadata) with tags, level, name, description",
+        "add Makefile line: include ../../common.mk",
+        "update Dockerfile(s) to include ARG flag or ARG FLAG and use it in app logic"
+      ]
+    },
+    {
+      "benchmark": "S7BEN-VHARD-012",
+      "structure": {
+        "docker_compose": true,
+        "benchmark_json": false,
+        "benchmark_yaml": true,
+        "makefile": true,
+        "makefile_includes_common_mk": false
+      },
+      "common_mk_build_compatible": false,
+      "dockerfiles_accepting_flag": [],
+      "suggested_changes": [
+        "add benchmark.json (metadata) with tags, level, name, description",
+        "add Makefile line: include ../../common.mk",
+        "update Dockerfile(s) to include ARG flag or ARG FLAG and use it in app logic"
+      ]
+    },
+    {
+      "benchmark": "S7BEN-VHARD-013",
+      "structure": {
+        "docker_compose": true,
+        "benchmark_json": false,
+        "benchmark_yaml": true,
+        "makefile": true,
+        "makefile_includes_common_mk": false
+      },
+      "common_mk_build_compatible": false,
+      "dockerfiles_accepting_flag": [],
+      "suggested_changes": [
+        "add benchmark.json (metadata) with tags, level, name, description",
+        "add Makefile line: include ../../common.mk",
+        "update Dockerfile(s) to include ARG flag or ARG FLAG and use it in app logic"
+      ]
+    },
+    {
+      "benchmark": "S7BEN-VHARD-014",
+      "structure": {
+        "docker_compose": true,
+        "benchmark_json": false,
+        "benchmark_yaml": true,
+        "makefile": true,
+        "makefile_includes_common_mk": false
+      },
+      "common_mk_build_compatible": false,
+      "dockerfiles_accepting_flag": [],
+      "suggested_changes": [
+        "add benchmark.json (metadata) with tags, level, name, description",
+        "add Makefile line: include ../../common.mk",
+        "update Dockerfile(s) to include ARG flag or ARG FLAG and use it in app logic"
+      ]
+    }
+  ],
+  "tag_coverage": {
+    "s7_tags_count": 131,
+    "xbow_tags_count": 26,
+    "overlap": [
+      "graphql",
+      "idor",
+      "jwt",
+      "sqli",
+      "ssrf",
+      "ssti",
+      "xss",
+      "xxe"
+    ],
+    "only_in_s7": [
+      "2fa-bypass",
+      "access-control",
+      "account-takeover",
+      "adversarial",
+      "angular-gadgets",
+      "apache",
+      "api-security",
+      "apollo-server",
+      "attack-chain",
+      "authentication",
+      "authentication-bypass",
+      "authorization",
+      "blind-sqli",
+      "broken-access-control",
+      "brute-force",
+      "cache-poisoning",
+      "celery",
+      "client-side",
+      "command-injection",
+      "commons-collections",
+      "credential-disclosure",
+      "crlf-injection",
+      "cryptographic-failures",
+      "csp-bypass",
+      "csrf",
+      "cve-2021-41773",
+      "cve-2021-42013",
+      "cve-2021-44228",
+      "defense-evasion",
+      "dependency-confusion",
+      "deserialization",
+      "directory-traversal",
+      "dom-xss",
+      "dtd",
+      "error-handling",
+      "evaluation",
+      "express",
+      "file-disclosure",
+      "file-operation",
+      "flask",
+      "framework-exploitation",
+      "gadget-chain",
+      "hardcoded-secrets",
+      "healthcare",
+      "horizontal-privilege-escalation",
+      "information-disclosure",
+      "injection",
+      "input-validation",
+      "insecure-design",
+      "insufficient-logging",
+      "introspection",
+      "java",
+      "javascript-injection",
+      "jinja2",
+      "jndi-injection",
+      "log-injection",
+      "log-tampering",
+      "log4j",
+      "log4shell",
+      "logging-failures",
+      "logic-flaw",
+      "microservices",
+      "modsecurity",
+      "mongodb",
+      "mongoose",
+      "multi-container",
+      "multi-stage-auth",
+      "mysql",
+      "network-segmentation",
+      "nodejs",
+      "nosql",
+      "nunjucks",
+      "oauth",
+      "otp",
+      "out-of-band",
+      "owasp-2025",
+      "owasp-crs",
+      "partial-authorization",
+      "path-traversal",
+      "phase-4",
+      "php",
+      "pickle",
+      "polyglot",
+      "postgresql",
+      "predictable-ids",
+      "privilege-escalation",
+      "python",
+      "race-condition",
+      "rbac",
+      "rce",
+      "redis",
+      "sensitive-data-exposure",
+      "session-cookies",
+      "session-fixation",
+      "session-forge",
+      "session-management",
+      "session-security",
+      "session-theft",
+      "social-engineering",
+      "spring-boot",
+      "sql-injection",
+      "state-machine",
+      "state-parameter",
+      "stealth",
+      "stored-xss",
+      "supply-chain",
+      "template-injection",
+      "tier-1",
+      "tier-2",
+      "tier-3",
+      "time-based",
+      "toctou",
+      "token-promotion",
+      "training",
+      "twig",
+      "union",
+      "uuid",
+      "waf-bypass",
+      "web",
+      "workflow",
+      "workflow-bypass",
+      "xml",
+      "ysoserial"
+    ],
+    "only_in_xbow": [
+      "arbitrary_file_upload",
+      "blind_sqli",
+      "brute_force",
+      "business_logic",
+      "command_injection",
+      "crypto",
+      "cve",
+      "default_credentials",
+      "http_method_tamper",
+      "information_disclosure",
+      "insecure_deserialization",
+      "lfi",
+      "nosqli",
+      "path_traversal",
+      "privilege_escalation",
+      "race_condition",
+      "smuggling_desync",
+      "ssh"
+    ]
+  },
+  "category_coverage": {
+    "strike7": {
+      "CVE": 11,
+      "EASY": 9,
+      "HARD": 14,
+      "MED": 16,
+      "VHARD": 14
+    },
+    "xbow_levels": [
+      "1",
+      "2",
+      "3"
+    ]
+  }
+}

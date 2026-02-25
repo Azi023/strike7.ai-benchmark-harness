@@ -1,0 +1,6363 @@
+{
+  "summary": {
+    "total": 64,
+    "passes_by_check": {
+      "config_present": 63,
+      "compose_port_convention": 27,
+      "flag_formats_clean": 42,
+      "makefile_targets_ok": 63,
+      "no_orphaned_dockerfiles": 63
+    }
+  },
+  "benchmarks": [
+    {
+      "benchmark": "S7BEN-CVE-001",
+      "checks": {
+        "config_present": {
+          "pass": true,
+          "found": [
+            "benchmark.yaml"
+          ]
+        },
+        "compose_port_convention": {
+          "pass": false,
+          "details": {
+            "inconsistent_mappings": [
+              "8049:80"
+            ],
+            "analyzed": [
+              {
+                "mapping": "8049:80",
+                "host_eq_container": false,
+                "ip_bound": false
+              }
+            ]
+          }
+        },
+        "compose_ports_found": [
+          "8049:80"
+        ],
+        "flag_formats": {
+          "pass": false,
+          "found_formats": {
+            "S7BEN{": 3,
+            "SBEN{": 4
+          },
+          "locations": [
+            {
+              "file": "benchmark.yaml",
+              "line": 51,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "README.md",
+              "line": 37,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "Makefile",
+              "line": 4,
+              "match": "SBEN{"
+            },
+            {
+              "file": "Makefile",
+              "line": 21,
+              "match": "SBEN{"
+            },
+            {
+              "file": "Dockerfile.old",
+              "line": 53,
+              "match": "SBEN{"
+            },
+            {
+              "file": "docker-compose.yml",
+              "line": 9,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "Dockerfile",
+              "line": 7,
+              "match": "SBEN{"
+            }
+          ],
+          "has_sben": true
+        },
+        "makefile_targets": {
+          "pass": true,
+          "missing_targets": [],
+          "present_optional": [
+            "build",
+            "logs",
+            "clean"
+          ],
+          "all_targets": [
+            "build",
+            "clean",
+            "down",
+            "exploit",
+            "help",
+            "logs",
+            "test",
+            "up"
+          ]
+        },
+        "orphaned_dockerfiles": {
+          "pass": false,
+          "orphans": [
+            "Dockerfile.old",
+            "Dockerfile.old"
+          ],
+          "extras": [
+            "Dockerfile.debug",
+            "Dockerfile.old",
+            "Dockerfile.old"
+          ],
+          "all_dockerfiles": [
+            "Dockerfile.debug",
+            "Dockerfile.old",
+            "Dockerfile.old",
+            "Dockerfile"
+          ]
+        }
+      }
+    },
+    {
+      "benchmark": "S7BEN-CVE-002",
+      "checks": {
+        "config_present": {
+          "pass": true,
+          "found": [
+            "benchmark.yaml"
+          ]
+        },
+        "compose_port_convention": {
+          "pass": false,
+          "details": {
+            "inconsistent_mappings": [
+              "8081:8080",
+              "8000"
+            ],
+            "analyzed": [
+              {
+                "mapping": "8081:8080",
+                "host_eq_container": false,
+                "ip_bound": false
+              },
+              {
+                "mapping": "8000",
+                "host_eq_container": false,
+                "ip_bound": false
+              }
+            ]
+          }
+        },
+        "compose_ports_found": [
+          "8081:8080",
+          "8000"
+        ],
+        "flag_formats": {
+          "pass": false,
+          "found_formats": {
+            "S7BEN{": 5,
+            "SBEN{": 1
+          },
+          "locations": [
+            {
+              "file": "benchmark.yaml",
+              "line": 40,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "README.md",
+              "line": 54,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "docker-compose.yml",
+              "line": 9,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "docker-compose.yml",
+              "line": 29,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "flag-server/server.py",
+              "line": 9,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "app/src/main/java/com/strike7/Text4ShellApp.java",
+              "line": 18,
+              "match": "SBEN{"
+            }
+          ],
+          "has_sben": true
+        },
+        "makefile_targets": {
+          "pass": true,
+          "missing_targets": [],
+          "present_optional": [
+            "build",
+            "logs",
+            "clean"
+          ],
+          "all_targets": [
+            "build",
+            "clean",
+            "down",
+            "exploit",
+            "help",
+            "logs",
+            "test",
+            "up"
+          ]
+        },
+        "orphaned_dockerfiles": {
+          "pass": true,
+          "orphans": [],
+          "extras": [],
+          "all_dockerfiles": [
+            "flag-server/Dockerfile",
+            "app/Dockerfile"
+          ]
+        }
+      }
+    },
+    {
+      "benchmark": "S7BEN-CVE-003",
+      "checks": {
+        "config_present": {
+          "pass": true,
+          "found": [
+            "benchmark.yaml"
+          ]
+        },
+        "compose_port_convention": {
+          "pass": true,
+          "details": {
+            "inconsistent_mappings": [],
+            "analyzed": [
+              {
+                "mapping": "8080:8080",
+                "host_eq_container": true,
+                "ip_bound": false
+              },
+              {
+                "mapping": "1389:1389",
+                "host_eq_container": true,
+                "ip_bound": false
+              },
+              {
+                "mapping": "8000:8000",
+                "host_eq_container": true,
+                "ip_bound": false
+              }
+            ]
+          }
+        },
+        "compose_ports_found": [
+          "8080:8080",
+          "1389:1389",
+          "8000:8000"
+        ],
+        "flag_formats": {
+          "pass": false,
+          "found_formats": {
+            "S7BEN{": 5,
+            "SBEN{": 3
+          },
+          "locations": [
+            {
+              "file": "benchmark.yaml",
+              "line": 43,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "README.md",
+              "line": 41,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "README.md",
+              "line": 150,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "README.md",
+              "line": 161,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "Makefile",
+              "line": 4,
+              "match": "SBEN{"
+            },
+            {
+              "file": "docker-compose.yml",
+              "line": 11,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "vuln-app/Dockerfile",
+              "line": 27,
+              "match": "SBEN{"
+            },
+            {
+              "file": "vuln-app/src/main/java/com/strike7/log4shell/App.java",
+              "line": 17,
+              "match": "SBEN{"
+            }
+          ],
+          "has_sben": true
+        },
+        "makefile_targets": {
+          "pass": true,
+          "missing_targets": [],
+          "present_optional": [
+            "build",
+            "logs",
+            "clean"
+          ],
+          "all_targets": [
+            "build",
+            "clean",
+            "down",
+            "exploit",
+            "help",
+            "logs",
+            "logs-http",
+            "logs-ldap",
+            "logs-vuln",
+            "test",
+            "up",
+            "verify"
+          ]
+        },
+        "orphaned_dockerfiles": {
+          "pass": true,
+          "orphans": [],
+          "extras": [],
+          "all_dockerfiles": [
+            "http-server/Dockerfile",
+            "vuln-app/Dockerfile",
+            "ldap-server/Dockerfile"
+          ]
+        }
+      }
+    },
+    {
+      "benchmark": "S7BEN-CVE-004",
+      "checks": {
+        "config_present": {
+          "pass": true,
+          "found": [
+            "benchmark.yaml"
+          ]
+        },
+        "compose_port_convention": {
+          "pass": false,
+          "details": {
+            "inconsistent_mappings": [
+              "3306"
+            ],
+            "analyzed": [
+              {
+                "mapping": "8080:8080",
+                "host_eq_container": true,
+                "ip_bound": false
+              },
+              {
+                "mapping": "3306",
+                "host_eq_container": false,
+                "ip_bound": false
+              }
+            ]
+          }
+        },
+        "compose_ports_found": [
+          "8080:8080",
+          "3306"
+        ],
+        "flag_formats": {
+          "pass": false,
+          "found_formats": {
+            "S7BEN{": 3,
+            "SBEN{": 2
+          },
+          "locations": [
+            {
+              "file": "benchmark.yaml",
+              "line": 34,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "docker-compose.yml",
+              "line": 9,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "docker-compose.yml",
+              "line": 28,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "db/init.sql",
+              "line": 6,
+              "match": "SBEN{"
+            },
+            {
+              "file": "app/src/main/java/com/strike7/controller/UserController.java",
+              "line": 13,
+              "match": "SBEN{"
+            }
+          ],
+          "has_sben": true
+        },
+        "makefile_targets": {
+          "pass": true,
+          "missing_targets": [],
+          "present_optional": [
+            "build",
+            "logs",
+            "clean"
+          ],
+          "all_targets": [
+            "build",
+            "clean",
+            "down",
+            "exploit",
+            "help",
+            "logs",
+            "test",
+            "up"
+          ]
+        },
+        "orphaned_dockerfiles": {
+          "pass": true,
+          "orphans": [],
+          "extras": [],
+          "all_dockerfiles": [
+            "db/Dockerfile",
+            "app/Dockerfile"
+          ]
+        }
+      }
+    },
+    {
+      "benchmark": "S7BEN-CVE-005",
+      "checks": {
+        "config_present": {
+          "pass": true,
+          "found": [
+            "benchmark.yaml"
+          ]
+        },
+        "compose_port_convention": {
+          "pass": false,
+          "details": {
+            "inconsistent_mappings": [
+              "8000"
+            ],
+            "analyzed": [
+              {
+                "mapping": "80:80",
+                "host_eq_container": true,
+                "ip_bound": false
+              },
+              {
+                "mapping": "443:443",
+                "host_eq_container": true,
+                "ip_bound": false
+              },
+              {
+                "mapping": "22:22",
+                "host_eq_container": true,
+                "ip_bound": false
+              },
+              {
+                "mapping": "8000",
+                "host_eq_container": false,
+                "ip_bound": false
+              }
+            ]
+          }
+        },
+        "compose_ports_found": [
+          "80:80",
+          "443:443",
+          "22:22",
+          "8000"
+        ],
+        "flag_formats": {
+          "pass": true,
+          "found_formats": {
+            "S7BEN{": 3
+          },
+          "locations": [
+            {
+              "file": "benchmark.yaml",
+              "line": 34,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "docker-compose.yml",
+              "line": 46,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "flag-server/server.py",
+              "line": 6,
+              "match": "S7BEN{"
+            }
+          ],
+          "has_sben": false
+        },
+        "makefile_targets": {
+          "pass": true,
+          "missing_targets": [],
+          "present_optional": [
+            "build",
+            "logs",
+            "clean"
+          ],
+          "all_targets": [
+            "build",
+            "clean",
+            "down",
+            "help",
+            "logs",
+            "test",
+            "up"
+          ]
+        },
+        "orphaned_dockerfiles": {
+          "pass": true,
+          "orphans": [],
+          "extras": [],
+          "all_dockerfiles": [
+            "flag-server/Dockerfile"
+          ]
+        }
+      }
+    },
+    {
+      "benchmark": "S7BEN-CVE-006",
+      "checks": {
+        "config_present": {
+          "pass": true,
+          "found": [
+            "benchmark.yaml"
+          ]
+        },
+        "compose_port_convention": {
+          "pass": true,
+          "details": {
+            "inconsistent_mappings": [],
+            "analyzed": []
+          }
+        },
+        "compose_ports_found": [],
+        "flag_formats": {
+          "pass": true,
+          "found_formats": {
+            "S7BEN{": 4
+          },
+          "locations": [
+            {
+              "file": "phase6b-test-results.md",
+              "line": 1,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "phase6b-test-results.md",
+              "line": 2,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "phase6b-test-results.md",
+              "line": 3,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "app/app.py",
+              "line": 5,
+              "match": "S7BEN{"
+            }
+          ],
+          "has_sben": false
+        },
+        "makefile_targets": {
+          "pass": true,
+          "missing_targets": [],
+          "present_optional": [],
+          "all_targets": [
+            "down",
+            "test",
+            "up"
+          ]
+        },
+        "orphaned_dockerfiles": {
+          "pass": true,
+          "orphans": [],
+          "extras": [],
+          "all_dockerfiles": [
+            "app/Dockerfile"
+          ]
+        }
+      }
+    },
+    {
+      "benchmark": "S7BEN-CVE-007",
+      "checks": {
+        "config_present": {
+          "pass": true,
+          "found": [
+            "benchmark.yaml"
+          ]
+        },
+        "compose_port_convention": {
+          "pass": true,
+          "details": {
+            "inconsistent_mappings": [],
+            "analyzed": []
+          }
+        },
+        "compose_ports_found": [],
+        "flag_formats": {
+          "pass": true,
+          "found_formats": {
+            "S7BEN{": 4
+          },
+          "locations": [
+            {
+              "file": "phase6b-test-results.md",
+              "line": 1,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "phase6b-test-results.md",
+              "line": 2,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "phase6b-test-results.md",
+              "line": 3,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "app/app.py",
+              "line": 5,
+              "match": "S7BEN{"
+            }
+          ],
+          "has_sben": false
+        },
+        "makefile_targets": {
+          "pass": true,
+          "missing_targets": [],
+          "present_optional": [],
+          "all_targets": [
+            "down",
+            "test",
+            "up"
+          ]
+        },
+        "orphaned_dockerfiles": {
+          "pass": true,
+          "orphans": [],
+          "extras": [],
+          "all_dockerfiles": [
+            "app/Dockerfile"
+          ]
+        }
+      }
+    },
+    {
+      "benchmark": "S7BEN-CVE-008",
+      "checks": {
+        "config_present": {
+          "pass": true,
+          "found": [
+            "benchmark.yaml"
+          ]
+        },
+        "compose_port_convention": {
+          "pass": true,
+          "details": {
+            "inconsistent_mappings": [],
+            "analyzed": []
+          }
+        },
+        "compose_ports_found": [],
+        "flag_formats": {
+          "pass": true,
+          "found_formats": {
+            "S7BEN{": 4
+          },
+          "locations": [
+            {
+              "file": "phase6b-test-results.md",
+              "line": 1,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "phase6b-test-results.md",
+              "line": 2,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "phase6b-test-results.md",
+              "line": 3,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "app/app.py",
+              "line": 5,
+              "match": "S7BEN{"
+            }
+          ],
+          "has_sben": false
+        },
+        "makefile_targets": {
+          "pass": true,
+          "missing_targets": [],
+          "present_optional": [],
+          "all_targets": [
+            "down",
+            "test",
+            "up"
+          ]
+        },
+        "orphaned_dockerfiles": {
+          "pass": true,
+          "orphans": [],
+          "extras": [],
+          "all_dockerfiles": [
+            "app/Dockerfile"
+          ]
+        }
+      }
+    },
+    {
+      "benchmark": "S7BEN-CVE-009",
+      "checks": {
+        "config_present": {
+          "pass": true,
+          "found": [
+            "benchmark.yaml"
+          ]
+        },
+        "compose_port_convention": {
+          "pass": true,
+          "details": {
+            "inconsistent_mappings": [],
+            "analyzed": []
+          }
+        },
+        "compose_ports_found": [],
+        "flag_formats": {
+          "pass": true,
+          "found_formats": {
+            "S7BEN{": 4
+          },
+          "locations": [
+            {
+              "file": "phase6b-test-results.md",
+              "line": 1,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "phase6b-test-results.md",
+              "line": 2,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "phase6b-test-results.md",
+              "line": 3,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "app/app.py",
+              "line": 5,
+              "match": "S7BEN{"
+            }
+          ],
+          "has_sben": false
+        },
+        "makefile_targets": {
+          "pass": true,
+          "missing_targets": [],
+          "present_optional": [],
+          "all_targets": [
+            "down",
+            "test",
+            "up"
+          ]
+        },
+        "orphaned_dockerfiles": {
+          "pass": true,
+          "orphans": [],
+          "extras": [],
+          "all_dockerfiles": [
+            "app/Dockerfile"
+          ]
+        }
+      }
+    },
+    {
+      "benchmark": "S7BEN-CVE-010",
+      "checks": {
+        "config_present": {
+          "pass": true,
+          "found": [
+            "benchmark.yaml"
+          ]
+        },
+        "compose_port_convention": {
+          "pass": true,
+          "details": {
+            "inconsistent_mappings": [],
+            "analyzed": []
+          }
+        },
+        "compose_ports_found": [],
+        "flag_formats": {
+          "pass": true,
+          "found_formats": {
+            "S7BEN{": 2
+          },
+          "locations": [
+            {
+              "file": "phase6b-test-results.md",
+              "line": 3,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "app/app.py",
+              "line": 5,
+              "match": "S7BEN{"
+            }
+          ],
+          "has_sben": false
+        },
+        "makefile_targets": {
+          "pass": true,
+          "missing_targets": [],
+          "present_optional": [],
+          "all_targets": [
+            "down",
+            "test",
+            "up"
+          ]
+        },
+        "orphaned_dockerfiles": {
+          "pass": true,
+          "orphans": [],
+          "extras": [],
+          "all_dockerfiles": [
+            "app/Dockerfile"
+          ]
+        }
+      }
+    },
+    {
+      "benchmark": "S7BEN-CVE-011",
+      "checks": {
+        "config_present": {
+          "pass": true,
+          "found": [
+            "benchmark.yaml"
+          ]
+        },
+        "compose_port_convention": {
+          "pass": true,
+          "details": {
+            "inconsistent_mappings": [],
+            "analyzed": []
+          }
+        },
+        "compose_ports_found": [],
+        "flag_formats": {
+          "pass": true,
+          "found_formats": {
+            "S7BEN{": 2
+          },
+          "locations": [
+            {
+              "file": "phase6b-test-results.md",
+              "line": 3,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "app/app.py",
+              "line": 5,
+              "match": "S7BEN{"
+            }
+          ],
+          "has_sben": false
+        },
+        "makefile_targets": {
+          "pass": true,
+          "missing_targets": [],
+          "present_optional": [],
+          "all_targets": [
+            "down",
+            "test",
+            "up"
+          ]
+        },
+        "orphaned_dockerfiles": {
+          "pass": true,
+          "orphans": [],
+          "extras": [],
+          "all_dockerfiles": [
+            "app/Dockerfile"
+          ]
+        }
+      }
+    },
+    {
+      "benchmark": "S7BEN-EASY-001",
+      "checks": {
+        "config_present": {
+          "pass": true,
+          "found": [
+            "benchmark.yaml"
+          ]
+        },
+        "compose_port_convention": {
+          "pass": false,
+          "details": {
+            "inconsistent_mappings": [
+              "5001:5000"
+            ],
+            "analyzed": [
+              {
+                "mapping": "5001:5000",
+                "host_eq_container": false,
+                "ip_bound": false
+              }
+            ]
+          }
+        },
+        "compose_ports_found": [
+          "5001:5000"
+        ],
+        "flag_formats": {
+          "pass": false,
+          "found_formats": {
+            "S7BEN{": 8,
+            "SBEN{": 2
+          },
+          "locations": [
+            {
+              "file": "benchmark.yaml",
+              "line": 21,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "TESTING.md",
+              "line": 248,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "TESTING.md",
+              "line": 250,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "TESTING.md",
+              "line": 292,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "TESTING.md",
+              "line": 317,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "TESTING.md",
+              "line": 576,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "Makefile",
+              "line": 4,
+              "match": "SBEN{"
+            },
+            {
+              "file": "docker-compose.yml",
+              "line": 10,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "app/app.py",
+              "line": 315,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "app/Dockerfile",
+              "line": 15,
+              "match": "SBEN{"
+            }
+          ],
+          "has_sben": true
+        },
+        "makefile_targets": {
+          "pass": true,
+          "missing_targets": [],
+          "present_optional": [
+            "build",
+            "clean"
+          ],
+          "all_targets": [
+            "build",
+            "clean",
+            "down",
+            "test",
+            "up"
+          ]
+        },
+        "orphaned_dockerfiles": {
+          "pass": true,
+          "orphans": [],
+          "extras": [],
+          "all_dockerfiles": [
+            "app/Dockerfile"
+          ]
+        }
+      }
+    },
+    {
+      "benchmark": "S7BEN-EASY-002",
+      "checks": {
+        "config_present": {
+          "pass": true,
+          "found": [
+            "benchmark.yaml"
+          ]
+        },
+        "compose_port_convention": {
+          "pass": false,
+          "details": {
+            "inconsistent_mappings": [
+              "5002:5000"
+            ],
+            "analyzed": [
+              {
+                "mapping": "5002:5000",
+                "host_eq_container": false,
+                "ip_bound": false
+              }
+            ]
+          }
+        },
+        "compose_ports_found": [
+          "5002:5000"
+        ],
+        "flag_formats": {
+          "pass": false,
+          "found_formats": {
+            "S7BEN{": 6,
+            "SBEN{": 2
+          },
+          "locations": [
+            {
+              "file": "benchmark.yaml",
+              "line": 21,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "TESTING.md",
+              "line": 155,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "TESTING.md",
+              "line": 282,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "TESTING.md",
+              "line": 402,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "Makefile",
+              "line": 4,
+              "match": "SBEN{"
+            },
+            {
+              "file": "docker-compose.yml",
+              "line": 10,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "app/app.py",
+              "line": 134,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "app/Dockerfile",
+              "line": 15,
+              "match": "SBEN{"
+            }
+          ],
+          "has_sben": true
+        },
+        "makefile_targets": {
+          "pass": true,
+          "missing_targets": [],
+          "present_optional": [
+            "build",
+            "clean"
+          ],
+          "all_targets": [
+            "build",
+            "clean",
+            "down",
+            "test",
+            "up"
+          ]
+        },
+        "orphaned_dockerfiles": {
+          "pass": true,
+          "orphans": [],
+          "extras": [],
+          "all_dockerfiles": [
+            "app/Dockerfile"
+          ]
+        }
+      }
+    },
+    {
+      "benchmark": "S7BEN-EASY-003",
+      "checks": {
+        "config_present": {
+          "pass": true,
+          "found": [
+            "benchmark.yaml"
+          ]
+        },
+        "compose_port_convention": {
+          "pass": false,
+          "details": {
+            "inconsistent_mappings": [
+              "5003:5000"
+            ],
+            "analyzed": [
+              {
+                "mapping": "5003:5000",
+                "host_eq_container": false,
+                "ip_bound": false
+              }
+            ]
+          }
+        },
+        "compose_ports_found": [
+          "5003:5000"
+        ],
+        "flag_formats": {
+          "pass": false,
+          "found_formats": {
+            "S7BEN{": 4,
+            "SBEN{": 2
+          },
+          "locations": [
+            {
+              "file": "benchmark.yaml",
+              "line": 21,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "TESTING.md",
+              "line": 237,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "Makefile",
+              "line": 4,
+              "match": "SBEN{"
+            },
+            {
+              "file": "docker-compose.yml",
+              "line": 10,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "app/app.py",
+              "line": 134,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "app/Dockerfile",
+              "line": 15,
+              "match": "SBEN{"
+            }
+          ],
+          "has_sben": true
+        },
+        "makefile_targets": {
+          "pass": true,
+          "missing_targets": [],
+          "present_optional": [
+            "build",
+            "clean"
+          ],
+          "all_targets": [
+            "build",
+            "clean",
+            "down",
+            "test",
+            "up"
+          ]
+        },
+        "orphaned_dockerfiles": {
+          "pass": true,
+          "orphans": [],
+          "extras": [],
+          "all_dockerfiles": [
+            "app/Dockerfile"
+          ]
+        }
+      }
+    },
+    {
+      "benchmark": "S7BEN-EASY-004",
+      "checks": {
+        "config_present": {
+          "pass": true,
+          "found": [
+            "benchmark.yaml"
+          ]
+        },
+        "compose_port_convention": {
+          "pass": false,
+          "details": {
+            "inconsistent_mappings": [
+              "5004:5000"
+            ],
+            "analyzed": [
+              {
+                "mapping": "5004:5000",
+                "host_eq_container": false,
+                "ip_bound": false
+              }
+            ]
+          }
+        },
+        "compose_ports_found": [
+          "5004:5000"
+        ],
+        "flag_formats": {
+          "pass": false,
+          "found_formats": {
+            "S7BEN{": 7,
+            "SBEN{": 2
+          },
+          "locations": [
+            {
+              "file": "benchmark.yaml",
+              "line": 21,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "TESTING.md",
+              "line": 139,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "TESTING.md",
+              "line": 258,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "TESTING.md",
+              "line": 301,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "TESTING.md",
+              "line": 462,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "Makefile",
+              "line": 4,
+              "match": "SBEN{"
+            },
+            {
+              "file": "docker-compose.yml",
+              "line": 10,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "app/app.py",
+              "line": 343,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "app/Dockerfile",
+              "line": 15,
+              "match": "SBEN{"
+            }
+          ],
+          "has_sben": true
+        },
+        "makefile_targets": {
+          "pass": true,
+          "missing_targets": [],
+          "present_optional": [
+            "build",
+            "clean"
+          ],
+          "all_targets": [
+            "build",
+            "clean",
+            "down",
+            "test",
+            "up"
+          ]
+        },
+        "orphaned_dockerfiles": {
+          "pass": true,
+          "orphans": [],
+          "extras": [],
+          "all_dockerfiles": [
+            "app/Dockerfile"
+          ]
+        }
+      }
+    },
+    {
+      "benchmark": "S7BEN-EASY-005",
+      "checks": {
+        "config_present": {
+          "pass": true,
+          "found": [
+            "benchmark.yaml"
+          ]
+        },
+        "compose_port_convention": {
+          "pass": false,
+          "details": {
+            "inconsistent_mappings": [
+              "5005:5000"
+            ],
+            "analyzed": [
+              {
+                "mapping": "5005:5000",
+                "host_eq_container": false,
+                "ip_bound": false
+              }
+            ]
+          }
+        },
+        "compose_ports_found": [
+          "5005:5000"
+        ],
+        "flag_formats": {
+          "pass": false,
+          "found_formats": {
+            "S7BEN{": 8,
+            "SBEN{": 2
+          },
+          "locations": [
+            {
+              "file": "benchmark.yaml",
+              "line": 21,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "TESTING.md",
+              "line": 179,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "TESTING.md",
+              "line": 181,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "TESTING.md",
+              "line": 219,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "TESTING.md",
+              "line": 297,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "TESTING.md",
+              "line": 391,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "Makefile",
+              "line": 4,
+              "match": "SBEN{"
+            },
+            {
+              "file": "docker-compose.yml",
+              "line": 10,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "app/app.py",
+              "line": 131,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "app/Dockerfile",
+              "line": 15,
+              "match": "SBEN{"
+            }
+          ],
+          "has_sben": true
+        },
+        "makefile_targets": {
+          "pass": true,
+          "missing_targets": [],
+          "present_optional": [
+            "build",
+            "clean"
+          ],
+          "all_targets": [
+            "build",
+            "clean",
+            "down",
+            "test",
+            "up"
+          ]
+        },
+        "orphaned_dockerfiles": {
+          "pass": true,
+          "orphans": [],
+          "extras": [],
+          "all_dockerfiles": [
+            "app/Dockerfile"
+          ]
+        }
+      }
+    },
+    {
+      "benchmark": "S7BEN-EASY-006",
+      "checks": {
+        "config_present": {
+          "pass": true,
+          "found": [
+            "benchmark.yaml"
+          ]
+        },
+        "compose_port_convention": {
+          "pass": false,
+          "details": {
+            "inconsistent_mappings": [
+              "5006:5000"
+            ],
+            "analyzed": [
+              {
+                "mapping": "5006:5000",
+                "host_eq_container": false,
+                "ip_bound": false
+              }
+            ]
+          }
+        },
+        "compose_ports_found": [
+          "5006:5000"
+        ],
+        "flag_formats": {
+          "pass": false,
+          "found_formats": {
+            "S7BEN{": 8,
+            "SBEN{": 2
+          },
+          "locations": [
+            {
+              "file": "benchmark.yaml",
+              "line": 21,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "TESTING.md",
+              "line": 164,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "TESTING.md",
+              "line": 166,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "TESTING.md",
+              "line": 167,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "TESTING.md",
+              "line": 224,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "TESTING.md",
+              "line": 456,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "Makefile",
+              "line": 4,
+              "match": "SBEN{"
+            },
+            {
+              "file": "docker-compose.yml",
+              "line": 10,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "app/app.py",
+              "line": 262,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "app/Dockerfile",
+              "line": 15,
+              "match": "SBEN{"
+            }
+          ],
+          "has_sben": true
+        },
+        "makefile_targets": {
+          "pass": true,
+          "missing_targets": [],
+          "present_optional": [
+            "build",
+            "clean"
+          ],
+          "all_targets": [
+            "build",
+            "clean",
+            "down",
+            "test",
+            "up"
+          ]
+        },
+        "orphaned_dockerfiles": {
+          "pass": true,
+          "orphans": [],
+          "extras": [],
+          "all_dockerfiles": [
+            "app/Dockerfile"
+          ]
+        }
+      }
+    },
+    {
+      "benchmark": "S7BEN-EASY-007",
+      "checks": {
+        "config_present": {
+          "pass": true,
+          "found": [
+            "benchmark.yaml"
+          ]
+        },
+        "compose_port_convention": {
+          "pass": false,
+          "details": {
+            "inconsistent_mappings": [
+              "5007:5000"
+            ],
+            "analyzed": [
+              {
+                "mapping": "5007:5000",
+                "host_eq_container": false,
+                "ip_bound": false
+              }
+            ]
+          }
+        },
+        "compose_ports_found": [
+          "5007:5000"
+        ],
+        "flag_formats": {
+          "pass": true,
+          "found_formats": {
+            "S7BEN{": 6
+          },
+          "locations": [
+            {
+              "file": "benchmark.yaml",
+              "line": 29,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "TESTING.md",
+              "line": 127,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "TESTING.md",
+              "line": 258,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "TESTING.md",
+              "line": 318,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "TESTING.md",
+              "line": 413,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "app/app.py",
+              "line": 111,
+              "match": "S7BEN{"
+            }
+          ],
+          "has_sben": false
+        },
+        "makefile_targets": {
+          "pass": true,
+          "missing_targets": [],
+          "present_optional": [
+            "build",
+            "clean"
+          ],
+          "all_targets": [
+            "build",
+            "clean",
+            "down",
+            "reset",
+            "test",
+            "up"
+          ]
+        },
+        "orphaned_dockerfiles": {
+          "pass": true,
+          "orphans": [],
+          "extras": [],
+          "all_dockerfiles": [
+            "app/Dockerfile"
+          ]
+        }
+      }
+    },
+    {
+      "benchmark": "S7BEN-EASY-008",
+      "checks": {
+        "config_present": {
+          "pass": true,
+          "found": [
+            "benchmark.yaml"
+          ]
+        },
+        "compose_port_convention": {
+          "pass": false,
+          "details": {
+            "inconsistent_mappings": [
+              "5008:5000"
+            ],
+            "analyzed": [
+              {
+                "mapping": "5008:5000",
+                "host_eq_container": false,
+                "ip_bound": false
+              }
+            ]
+          }
+        },
+        "compose_ports_found": [
+          "5008:5000"
+        ],
+        "flag_formats": {
+          "pass": true,
+          "found_formats": {
+            "S7BEN{": 5
+          },
+          "locations": [
+            {
+              "file": "benchmark.yaml",
+              "line": 31,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "TESTING.md",
+              "line": 61,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "TESTING.md",
+              "line": 172,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "benchmark.json",
+              "line": 19,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "app/app.py",
+              "line": 96,
+              "match": "S7BEN{"
+            }
+          ],
+          "has_sben": false
+        },
+        "makefile_targets": {
+          "pass": true,
+          "missing_targets": [],
+          "present_optional": [
+            "build",
+            "logs",
+            "clean"
+          ],
+          "all_targets": [
+            "build",
+            "clean",
+            "down",
+            "exploit-test",
+            "logs",
+            "reset",
+            "shell",
+            "test",
+            "up"
+          ]
+        },
+        "orphaned_dockerfiles": {
+          "pass": true,
+          "orphans": [],
+          "extras": [],
+          "all_dockerfiles": [
+            "app/Dockerfile"
+          ]
+        }
+      }
+    },
+    {
+      "benchmark": "S7BEN-EASY-009",
+      "checks": {
+        "config_present": {
+          "pass": true,
+          "found": [
+            "benchmark.yaml"
+          ]
+        },
+        "compose_port_convention": {
+          "pass": false,
+          "details": {
+            "inconsistent_mappings": [
+              "5009:5000"
+            ],
+            "analyzed": [
+              {
+                "mapping": "5009:5000",
+                "host_eq_container": false,
+                "ip_bound": false
+              }
+            ]
+          }
+        },
+        "compose_ports_found": [
+          "5009:5000"
+        ],
+        "flag_formats": {
+          "pass": true,
+          "found_formats": {
+            "S7BEN{": 6
+          },
+          "locations": [
+            {
+              "file": "benchmark.yaml",
+              "line": 30,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "TESTING.md",
+              "line": 164,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "TESTING.md",
+              "line": 185,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "TESTING.md",
+              "line": 447,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "benchmark.json",
+              "line": 18,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "app/app.py",
+              "line": 123,
+              "match": "S7BEN{"
+            }
+          ],
+          "has_sben": false
+        },
+        "makefile_targets": {
+          "pass": true,
+          "missing_targets": [],
+          "present_optional": [
+            "build",
+            "logs",
+            "clean"
+          ],
+          "all_targets": [
+            "build",
+            "clean",
+            "down",
+            "exploit-test",
+            "logs",
+            "reset",
+            "shell",
+            "test",
+            "up"
+          ]
+        },
+        "orphaned_dockerfiles": {
+          "pass": true,
+          "orphans": [],
+          "extras": [],
+          "all_dockerfiles": [
+            "app/Dockerfile"
+          ]
+        }
+      }
+    },
+    {
+      "benchmark": "S7BEN-HARD-001",
+      "checks": {
+        "config_present": {
+          "pass": true,
+          "found": [
+            "benchmark.yaml"
+          ]
+        },
+        "compose_port_convention": {
+          "pass": false,
+          "details": {
+            "inconsistent_mappings": [
+              "80:8080",
+              "5000"
+            ],
+            "analyzed": [
+              {
+                "mapping": "80:8080",
+                "host_eq_container": false,
+                "ip_bound": false
+              },
+              {
+                "mapping": "5000",
+                "host_eq_container": false,
+                "ip_bound": false
+              }
+            ]
+          }
+        },
+        "compose_ports_found": [
+          "80:8080",
+          "5000"
+        ],
+        "flag_formats": {
+          "pass": false,
+          "found_formats": {
+            "S7BEN{": 9,
+            "SBEN{": 4
+          },
+          "locations": [
+            {
+              "file": "benchmark.yaml",
+              "line": 46,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "TESTING.md",
+              "line": 415,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "TESTING.md",
+              "line": 421,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "TESTING.md",
+              "line": 433,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "README.md",
+              "line": 41,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "Makefile",
+              "line": 4,
+              "match": "SBEN{"
+            },
+            {
+              "file": "Makefile",
+              "line": 26,
+              "match": "SBEN{"
+            },
+            {
+              "file": "docker-compose.yml",
+              "line": 26,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "docker-compose.yml",
+              "line": 34,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "database/init.sql",
+              "line": 42,
+              "match": "SBEN{"
+            },
+            {
+              "file": "app/app.py",
+              "line": 16,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "app/app.py",
+              "line": 95,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "app/Dockerfile",
+              "line": 21,
+              "match": "SBEN{"
+            }
+          ],
+          "has_sben": true
+        },
+        "makefile_targets": {
+          "pass": true,
+          "missing_targets": [],
+          "present_optional": [
+            "build",
+            "logs",
+            "clean"
+          ],
+          "all_targets": [
+            "build",
+            "clean",
+            "down",
+            "exploit",
+            "help",
+            "logs",
+            "logs-flask",
+            "logs-mysql",
+            "logs-nginx",
+            "reset",
+            "shell-flask",
+            "shell-nginx",
+            "test",
+            "up"
+          ]
+        },
+        "orphaned_dockerfiles": {
+          "pass": true,
+          "orphans": [],
+          "extras": [],
+          "all_dockerfiles": [
+            "nginx-modsec/Dockerfile",
+            "app/Dockerfile"
+          ]
+        }
+      }
+    },
+    {
+      "benchmark": "S7BEN-HARD-002",
+      "checks": {
+        "config_present": {
+          "pass": true,
+          "found": [
+            "benchmark.yaml"
+          ]
+        },
+        "compose_port_convention": {
+          "pass": false,
+          "details": {
+            "inconsistent_mappings": [
+              "8080"
+            ],
+            "analyzed": [
+              {
+                "mapping": "3000:3000",
+                "host_eq_container": true,
+                "ip_bound": false
+              },
+              {
+                "mapping": "8080",
+                "host_eq_container": false,
+                "ip_bound": false
+              }
+            ]
+          }
+        },
+        "compose_ports_found": [
+          "3000:3000",
+          "8080"
+        ],
+        "flag_formats": {
+          "pass": false,
+          "found_formats": {
+            "S7BEN{": 4,
+            "SBEN{": 1
+          },
+          "locations": [
+            {
+              "file": "benchmark.yaml",
+              "line": 47,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "TESTING.md",
+              "line": 41,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "README.md",
+              "line": 37,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "docker-compose.yml",
+              "line": 10,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "app/server.js",
+              "line": 10,
+              "match": "SBEN{"
+            }
+          ],
+          "has_sben": true
+        },
+        "makefile_targets": {
+          "pass": true,
+          "missing_targets": [],
+          "present_optional": [
+            "build",
+            "logs",
+            "clean"
+          ],
+          "all_targets": [
+            "build",
+            "clean",
+            "down",
+            "exploit",
+            "help",
+            "logs",
+            "logs-app",
+            "logs-callback",
+            "reset",
+            "test",
+            "up"
+          ]
+        },
+        "orphaned_dockerfiles": {
+          "pass": true,
+          "orphans": [],
+          "extras": [],
+          "all_dockerfiles": [
+            "callback/Dockerfile",
+            "app/Dockerfile"
+          ]
+        }
+      }
+    },
+    {
+      "benchmark": "S7BEN-HARD-003",
+      "checks": {
+        "config_present": {
+          "pass": true,
+          "found": [
+            "benchmark.yaml"
+          ]
+        },
+        "compose_port_convention": {
+          "pass": false,
+          "details": {
+            "inconsistent_mappings": [
+              "5032:5000",
+              "8080",
+              "8000"
+            ],
+            "analyzed": [
+              {
+                "mapping": "5032:5000",
+                "host_eq_container": false,
+                "ip_bound": false
+              },
+              {
+                "mapping": "8080",
+                "host_eq_container": false,
+                "ip_bound": false
+              },
+              {
+                "mapping": "8000",
+                "host_eq_container": false,
+                "ip_bound": false
+              }
+            ]
+          }
+        },
+        "compose_ports_found": [
+          "5032:5000",
+          "8080",
+          "8000"
+        ],
+        "flag_formats": {
+          "pass": true,
+          "found_formats": {
+            "S7BEN{": 8
+          },
+          "locations": [
+            {
+              "file": "benchmark.yaml",
+              "line": 60,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "TESTING.md",
+              "line": 193,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "TESTING.md",
+              "line": 277,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "README.md",
+              "line": 39,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "docker-compose.yml",
+              "line": 10,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "docker-compose.yml",
+              "line": 31,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "internal/api.py",
+              "line": 12,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "app/app.py",
+              "line": 30,
+              "match": "S7BEN{"
+            }
+          ],
+          "has_sben": false
+        },
+        "makefile_targets": {
+          "pass": true,
+          "missing_targets": [],
+          "present_optional": [
+            "build",
+            "logs",
+            "clean"
+          ],
+          "all_targets": [
+            "build",
+            "clean",
+            "down",
+            "exploit",
+            "help",
+            "logs",
+            "logs-app",
+            "logs-internal",
+            "logs-metadata",
+            "reset",
+            "test",
+            "up"
+          ]
+        },
+        "orphaned_dockerfiles": {
+          "pass": true,
+          "orphans": [],
+          "extras": [],
+          "all_dockerfiles": [
+            "internal/Dockerfile",
+            "app/Dockerfile",
+            "metadata/Dockerfile"
+          ]
+        }
+      }
+    },
+    {
+      "benchmark": "S7BEN-HARD-004",
+      "checks": {
+        "config_present": {
+          "pass": true,
+          "found": [
+            "benchmark.yaml"
+          ]
+        },
+        "compose_port_convention": {
+          "pass": false,
+          "details": {
+            "inconsistent_mappings": [
+              "5000"
+            ],
+            "analyzed": [
+              {
+                "mapping": "80:80",
+                "host_eq_container": true,
+                "ip_bound": false
+              },
+              {
+                "mapping": "5000",
+                "host_eq_container": false,
+                "ip_bound": false
+              }
+            ]
+          }
+        },
+        "compose_ports_found": [
+          "80:80",
+          "5000"
+        ],
+        "flag_formats": {
+          "pass": true,
+          "found_formats": {
+            "S7BEN{": 5
+          },
+          "locations": [
+            {
+              "file": "benchmark.yaml",
+              "line": 38,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "TESTING.md",
+              "line": 134,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "README.md",
+              "line": 81,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "docker-compose.yml",
+              "line": 34,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "app/app.py",
+              "line": 26,
+              "match": "S7BEN{"
+            }
+          ],
+          "has_sben": false
+        },
+        "makefile_targets": {
+          "pass": true,
+          "missing_targets": [],
+          "present_optional": [
+            "build",
+            "logs",
+            "clean"
+          ],
+          "all_targets": [
+            "build",
+            "clean",
+            "down",
+            "exploit",
+            "help",
+            "logs",
+            "reset",
+            "test",
+            "up"
+          ]
+        },
+        "orphaned_dockerfiles": {
+          "pass": true,
+          "orphans": [],
+          "extras": [],
+          "all_dockerfiles": [
+            "app/Dockerfile"
+          ]
+        }
+      }
+    },
+    {
+      "benchmark": "S7BEN-HARD-010",
+      "checks": {
+        "config_present": {
+          "pass": true,
+          "found": [
+            "benchmark.yaml"
+          ]
+        },
+        "compose_port_convention": {
+          "pass": false,
+          "details": {
+            "inconsistent_mappings": [
+              "5034:5000"
+            ],
+            "analyzed": [
+              {
+                "mapping": "5034:5000",
+                "host_eq_container": false,
+                "ip_bound": false
+              }
+            ]
+          }
+        },
+        "compose_ports_found": [
+          "5034:5000"
+        ],
+        "flag_formats": {
+          "pass": true,
+          "found_formats": {
+            "S7BEN{": 5
+          },
+          "locations": [
+            {
+              "file": "benchmark.yaml",
+              "line": 35,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "TESTING.md",
+              "line": 228,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "TESTING.md",
+              "line": 446,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "app/app.py",
+              "line": 208,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "app/app.py",
+              "line": 210,
+              "match": "S7BEN{"
+            }
+          ],
+          "has_sben": false
+        },
+        "makefile_targets": {
+          "pass": true,
+          "missing_targets": [],
+          "present_optional": [
+            "build",
+            "clean"
+          ],
+          "all_targets": [
+            "build",
+            "clean",
+            "down",
+            "reset",
+            "test",
+            "up"
+          ]
+        },
+        "orphaned_dockerfiles": {
+          "pass": true,
+          "orphans": [],
+          "extras": [],
+          "all_dockerfiles": [
+            "app/Dockerfile"
+          ]
+        }
+      }
+    },
+    {
+      "benchmark": "S7BEN-HARD-011",
+      "checks": {
+        "config_present": {
+          "pass": true,
+          "found": [
+            "benchmark.yaml"
+          ]
+        },
+        "compose_port_convention": {
+          "pass": false,
+          "details": {
+            "inconsistent_mappings": [
+              "5035:5000"
+            ],
+            "analyzed": [
+              {
+                "mapping": "5035:5000",
+                "host_eq_container": false,
+                "ip_bound": false
+              }
+            ]
+          }
+        },
+        "compose_ports_found": [
+          "5035:5000"
+        ],
+        "flag_formats": {
+          "pass": true,
+          "found_formats": {
+            "S7BEN{": 4
+          },
+          "locations": [
+            {
+              "file": "benchmark.yaml",
+              "line": 35,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "TESTING.md",
+              "line": 93,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "TESTING.md",
+              "line": 158,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "app/app.py",
+              "line": 115,
+              "match": "S7BEN{"
+            }
+          ],
+          "has_sben": false
+        },
+        "makefile_targets": {
+          "pass": true,
+          "missing_targets": [],
+          "present_optional": [
+            "build",
+            "clean"
+          ],
+          "all_targets": [
+            "build",
+            "clean",
+            "down",
+            "reset",
+            "test",
+            "up"
+          ]
+        },
+        "orphaned_dockerfiles": {
+          "pass": true,
+          "orphans": [],
+          "extras": [],
+          "all_dockerfiles": [
+            "app/Dockerfile"
+          ]
+        }
+      }
+    },
+    {
+      "benchmark": "S7BEN-HARD-012",
+      "checks": {
+        "config_present": {
+          "pass": true,
+          "found": [
+            "benchmark.yaml"
+          ]
+        },
+        "compose_port_convention": {
+          "pass": false,
+          "details": {
+            "inconsistent_mappings": [
+              "5036:5000"
+            ],
+            "analyzed": [
+              {
+                "mapping": "5036:5000",
+                "host_eq_container": false,
+                "ip_bound": false
+              }
+            ]
+          }
+        },
+        "compose_ports_found": [
+          "5036:5000"
+        ],
+        "flag_formats": {
+          "pass": true,
+          "found_formats": {
+            "S7BEN{": 4
+          },
+          "locations": [
+            {
+              "file": "TESTING.md",
+              "line": 187,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "TESTING.md",
+              "line": 434,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "TESTING.md",
+              "line": 455,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "app/app.py",
+              "line": 155,
+              "match": "S7BEN{"
+            }
+          ],
+          "has_sben": false
+        },
+        "makefile_targets": {
+          "pass": true,
+          "missing_targets": [],
+          "present_optional": [
+            "build",
+            "clean"
+          ],
+          "all_targets": [
+            "build",
+            "clean",
+            "down",
+            "reset",
+            "test",
+            "up"
+          ]
+        },
+        "orphaned_dockerfiles": {
+          "pass": true,
+          "orphans": [],
+          "extras": [],
+          "all_dockerfiles": [
+            "app/Dockerfile"
+          ]
+        }
+      }
+    },
+    {
+      "benchmark": "S7BEN-HARD-013",
+      "checks": {
+        "config_present": {
+          "pass": true,
+          "found": [
+            "benchmark.yaml"
+          ]
+        },
+        "compose_port_convention": {
+          "pass": false,
+          "details": {
+            "inconsistent_mappings": [
+              "5037:5000"
+            ],
+            "analyzed": [
+              {
+                "mapping": "5037:5000",
+                "host_eq_container": false,
+                "ip_bound": false
+              }
+            ]
+          }
+        },
+        "compose_ports_found": [
+          "5037:5000"
+        ],
+        "flag_formats": {
+          "pass": true,
+          "found_formats": {
+            "S7BEN{": 3
+          },
+          "locations": [
+            {
+              "file": "TESTING.md",
+              "line": 164,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "TESTING.md",
+              "line": 332,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "app/app.py",
+              "line": 182,
+              "match": "S7BEN{"
+            }
+          ],
+          "has_sben": false
+        },
+        "makefile_targets": {
+          "pass": true,
+          "missing_targets": [],
+          "present_optional": [
+            "build",
+            "clean"
+          ],
+          "all_targets": [
+            "build",
+            "clean",
+            "down",
+            "reset",
+            "test",
+            "up"
+          ]
+        },
+        "orphaned_dockerfiles": {
+          "pass": true,
+          "orphans": [],
+          "extras": [],
+          "all_dockerfiles": [
+            "app/Dockerfile"
+          ]
+        }
+      }
+    },
+    {
+      "benchmark": "S7BEN-HARD-014",
+      "checks": {
+        "config_present": {
+          "pass": true,
+          "found": [
+            "benchmark.yaml"
+          ]
+        },
+        "compose_port_convention": {
+          "pass": true,
+          "details": {
+            "inconsistent_mappings": [],
+            "analyzed": []
+          }
+        },
+        "compose_ports_found": [],
+        "flag_formats": {
+          "pass": true,
+          "found_formats": {
+            "S7BEN{": 5
+          },
+          "locations": [
+            {
+              "file": "benchmark.yaml",
+              "line": 22,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "phase6b-test-results.md",
+              "line": 2,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "phase6b-test-results.md",
+              "line": 3,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "README.md",
+              "line": 20,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "app/app.py",
+              "line": 9,
+              "match": "S7BEN{"
+            }
+          ],
+          "has_sben": false
+        },
+        "makefile_targets": {
+          "pass": true,
+          "missing_targets": [],
+          "present_optional": [
+            "clean"
+          ],
+          "all_targets": [
+            "clean",
+            "down",
+            "test",
+            "up"
+          ]
+        },
+        "orphaned_dockerfiles": {
+          "pass": true,
+          "orphans": [],
+          "extras": [],
+          "all_dockerfiles": [
+            "app/Dockerfile"
+          ]
+        }
+      }
+    },
+    {
+      "benchmark": "S7BEN-HARD-015",
+      "checks": {
+        "config_present": {
+          "pass": true,
+          "found": [
+            "benchmark.yaml"
+          ]
+        },
+        "compose_port_convention": {
+          "pass": true,
+          "details": {
+            "inconsistent_mappings": [],
+            "analyzed": []
+          }
+        },
+        "compose_ports_found": [],
+        "flag_formats": {
+          "pass": true,
+          "found_formats": {
+            "S7BEN{": 5
+          },
+          "locations": [
+            {
+              "file": "benchmark.yaml",
+              "line": 9,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "phase6b-test-results.md",
+              "line": 2,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "phase6b-test-results.md",
+              "line": 3,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "README.md",
+              "line": 14,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "app/app.py",
+              "line": 6,
+              "match": "S7BEN{"
+            }
+          ],
+          "has_sben": false
+        },
+        "makefile_targets": {
+          "pass": true,
+          "missing_targets": [],
+          "present_optional": [
+            "clean"
+          ],
+          "all_targets": [
+            "clean",
+            "down",
+            "test",
+            "up"
+          ]
+        },
+        "orphaned_dockerfiles": {
+          "pass": true,
+          "orphans": [],
+          "extras": [],
+          "all_dockerfiles": [
+            "app/Dockerfile"
+          ]
+        }
+      }
+    },
+    {
+      "benchmark": "S7BEN-HARD-016",
+      "checks": {
+        "config_present": {
+          "pass": true,
+          "found": [
+            "benchmark.yaml"
+          ]
+        },
+        "compose_port_convention": {
+          "pass": true,
+          "details": {
+            "inconsistent_mappings": [],
+            "analyzed": []
+          }
+        },
+        "compose_ports_found": [],
+        "flag_formats": {
+          "pass": true,
+          "found_formats": {
+            "S7BEN{": 4
+          },
+          "locations": [
+            {
+              "file": "benchmark.yaml",
+              "line": 8,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "phase6b-test-results.md",
+              "line": 2,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "phase6b-test-results.md",
+              "line": 3,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "app/app.py",
+              "line": 6,
+              "match": "S7BEN{"
+            }
+          ],
+          "has_sben": false
+        },
+        "makefile_targets": {
+          "pass": true,
+          "missing_targets": [],
+          "present_optional": [
+            "clean"
+          ],
+          "all_targets": [
+            "clean",
+            "down",
+            "test",
+            "up"
+          ]
+        },
+        "orphaned_dockerfiles": {
+          "pass": true,
+          "orphans": [],
+          "extras": [],
+          "all_dockerfiles": [
+            "app/Dockerfile"
+          ]
+        }
+      }
+    },
+    {
+      "benchmark": "S7BEN-HARD-017",
+      "checks": {
+        "config_present": {
+          "pass": true,
+          "found": [
+            "benchmark.yaml"
+          ]
+        },
+        "compose_port_convention": {
+          "pass": true,
+          "details": {
+            "inconsistent_mappings": [],
+            "analyzed": []
+          }
+        },
+        "compose_ports_found": [],
+        "flag_formats": {
+          "pass": true,
+          "found_formats": {
+            "S7BEN{": 4
+          },
+          "locations": [
+            {
+              "file": "benchmark.yaml",
+              "line": 8,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "phase6b-test-results.md",
+              "line": 2,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "phase6b-test-results.md",
+              "line": 3,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "app/app.py",
+              "line": 6,
+              "match": "S7BEN{"
+            }
+          ],
+          "has_sben": false
+        },
+        "makefile_targets": {
+          "pass": true,
+          "missing_targets": [],
+          "present_optional": [
+            "clean"
+          ],
+          "all_targets": [
+            "clean",
+            "down",
+            "test",
+            "up"
+          ]
+        },
+        "orphaned_dockerfiles": {
+          "pass": true,
+          "orphans": [],
+          "extras": [],
+          "all_dockerfiles": [
+            "app/Dockerfile"
+          ]
+        }
+      }
+    },
+    {
+      "benchmark": "S7BEN-HARD-018",
+      "checks": {
+        "config_present": {
+          "pass": true,
+          "found": [
+            "benchmark.yaml"
+          ]
+        },
+        "compose_port_convention": {
+          "pass": true,
+          "details": {
+            "inconsistent_mappings": [],
+            "analyzed": []
+          }
+        },
+        "compose_ports_found": [],
+        "flag_formats": {
+          "pass": true,
+          "found_formats": {
+            "S7BEN{": 3
+          },
+          "locations": [
+            {
+              "file": "benchmark.yaml",
+              "line": 9,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "phase6b-test-results.md",
+              "line": 3,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "app/app.py",
+              "line": 6,
+              "match": "S7BEN{"
+            }
+          ],
+          "has_sben": false
+        },
+        "makefile_targets": {
+          "pass": true,
+          "missing_targets": [],
+          "present_optional": [
+            "clean"
+          ],
+          "all_targets": [
+            "clean",
+            "down",
+            "test",
+            "up"
+          ]
+        },
+        "orphaned_dockerfiles": {
+          "pass": true,
+          "orphans": [],
+          "extras": [],
+          "all_dockerfiles": [
+            "app/Dockerfile"
+          ]
+        }
+      }
+    },
+    {
+      "benchmark": "S7BEN-HARD-019",
+      "checks": {
+        "config_present": {
+          "pass": true,
+          "found": [
+            "benchmark.yaml"
+          ]
+        },
+        "compose_port_convention": {
+          "pass": true,
+          "details": {
+            "inconsistent_mappings": [],
+            "analyzed": []
+          }
+        },
+        "compose_ports_found": [],
+        "flag_formats": {
+          "pass": true,
+          "found_formats": {
+            "S7BEN{": 4
+          },
+          "locations": [
+            {
+              "file": "phase6b-test-results.md",
+              "line": 1,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "phase6b-test-results.md",
+              "line": 2,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "phase6b-test-results.md",
+              "line": 3,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "app/app.py",
+              "line": 5,
+              "match": "S7BEN{"
+            }
+          ],
+          "has_sben": false
+        },
+        "makefile_targets": {
+          "pass": true,
+          "missing_targets": [],
+          "present_optional": [],
+          "all_targets": [
+            "down",
+            "test",
+            "up"
+          ]
+        },
+        "orphaned_dockerfiles": {
+          "pass": true,
+          "orphans": [],
+          "extras": [],
+          "all_dockerfiles": [
+            "app/Dockerfile"
+          ]
+        }
+      }
+    },
+    {
+      "benchmark": "S7BEN-MED-001",
+      "checks": {
+        "config_present": {
+          "pass": true,
+          "found": [
+            "benchmark.yaml"
+          ]
+        },
+        "compose_port_convention": {
+          "pass": false,
+          "details": {
+            "inconsistent_mappings": [
+              "5010:5000"
+            ],
+            "analyzed": [
+              {
+                "mapping": "5010:5000",
+                "host_eq_container": false,
+                "ip_bound": false
+              }
+            ]
+          }
+        },
+        "compose_ports_found": [
+          "5010:5000"
+        ],
+        "flag_formats": {
+          "pass": true,
+          "found_formats": {
+            "S7BEN{": 7
+          },
+          "locations": [
+            {
+              "file": "benchmark.yaml",
+              "line": 27,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "TESTING.md",
+              "line": 186,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "TESTING.md",
+              "line": 353,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "TESTING.md",
+              "line": 426,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "TESTING.md",
+              "line": 522,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "app/app.py",
+              "line": 56,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "app/app.py",
+              "line": 67,
+              "match": "S7BEN{"
+            }
+          ],
+          "has_sben": false
+        },
+        "makefile_targets": {
+          "pass": true,
+          "missing_targets": [],
+          "present_optional": [
+            "build",
+            "clean"
+          ],
+          "all_targets": [
+            "build",
+            "clean",
+            "down",
+            "reset",
+            "test",
+            "up"
+          ]
+        },
+        "orphaned_dockerfiles": {
+          "pass": true,
+          "orphans": [],
+          "extras": [],
+          "all_dockerfiles": [
+            "app/Dockerfile"
+          ]
+        }
+      }
+    },
+    {
+      "benchmark": "S7BEN-MED-002",
+      "checks": {
+        "config_present": {
+          "pass": true,
+          "found": [
+            "benchmark.yaml"
+          ]
+        },
+        "compose_port_convention": {
+          "pass": false,
+          "details": {
+            "inconsistent_mappings": [
+              "5011:5000"
+            ],
+            "analyzed": [
+              {
+                "mapping": "5011:5000",
+                "host_eq_container": false,
+                "ip_bound": false
+              }
+            ]
+          }
+        },
+        "compose_ports_found": [
+          "5011:5000"
+        ],
+        "flag_formats": {
+          "pass": true,
+          "found_formats": {
+            "S7BEN{": 6
+          },
+          "locations": [
+            {
+              "file": "benchmark.yaml",
+              "line": 27,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "TESTING.md",
+              "line": 220,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "TESTING.md",
+              "line": 225,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "TESTING.md",
+              "line": 393,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "TESTING.md",
+              "line": 484,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "app/app.py",
+              "line": 37,
+              "match": "S7BEN{"
+            }
+          ],
+          "has_sben": false
+        },
+        "makefile_targets": {
+          "pass": true,
+          "missing_targets": [],
+          "present_optional": [
+            "build",
+            "clean"
+          ],
+          "all_targets": [
+            "build",
+            "clean",
+            "down",
+            "reset",
+            "test",
+            "up"
+          ]
+        },
+        "orphaned_dockerfiles": {
+          "pass": true,
+          "orphans": [],
+          "extras": [],
+          "all_dockerfiles": [
+            "app/Dockerfile"
+          ]
+        }
+      }
+    },
+    {
+      "benchmark": "S7BEN-MED-003",
+      "checks": {
+        "config_present": {
+          "pass": true,
+          "found": [
+            "benchmark.yaml"
+          ]
+        },
+        "compose_port_convention": {
+          "pass": false,
+          "details": {
+            "inconsistent_mappings": [
+              "5012:5000"
+            ],
+            "analyzed": [
+              {
+                "mapping": "5012:5000",
+                "host_eq_container": false,
+                "ip_bound": false
+              }
+            ]
+          }
+        },
+        "compose_ports_found": [
+          "5012:5000"
+        ],
+        "flag_formats": {
+          "pass": true,
+          "found_formats": {
+            "S7BEN{": 4
+          },
+          "locations": [
+            {
+              "file": "benchmark.yaml",
+              "line": 30,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "TESTING.md",
+              "line": 195,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "benchmark.json",
+              "line": 18,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "app/app.py",
+              "line": 135,
+              "match": "S7BEN{"
+            }
+          ],
+          "has_sben": false
+        },
+        "makefile_targets": {
+          "pass": true,
+          "missing_targets": [],
+          "present_optional": [
+            "build",
+            "logs",
+            "clean"
+          ],
+          "all_targets": [
+            "build",
+            "clean",
+            "down",
+            "logs",
+            "reset",
+            "shell",
+            "test",
+            "up"
+          ]
+        },
+        "orphaned_dockerfiles": {
+          "pass": true,
+          "orphans": [],
+          "extras": [],
+          "all_dockerfiles": [
+            "app/Dockerfile"
+          ]
+        }
+      }
+    },
+    {
+      "benchmark": "S7BEN-MED-004",
+      "checks": {
+        "config_present": {
+          "pass": true,
+          "found": [
+            "benchmark.yaml"
+          ]
+        },
+        "compose_port_convention": {
+          "pass": false,
+          "details": {
+            "inconsistent_mappings": [
+              "5013:5000"
+            ],
+            "analyzed": [
+              {
+                "mapping": "5013:5000",
+                "host_eq_container": false,
+                "ip_bound": false
+              }
+            ]
+          }
+        },
+        "compose_ports_found": [
+          "5013:5000"
+        ],
+        "flag_formats": {
+          "pass": true,
+          "found_formats": {
+            "S7BEN{": 4
+          },
+          "locations": [
+            {
+              "file": "benchmark.yaml",
+              "line": 31,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "TESTING.md",
+              "line": 113,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "TESTING.md",
+              "line": 221,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "app/app.py",
+              "line": 86,
+              "match": "S7BEN{"
+            }
+          ],
+          "has_sben": false
+        },
+        "makefile_targets": {
+          "pass": true,
+          "missing_targets": [],
+          "present_optional": [
+            "build",
+            "clean"
+          ],
+          "all_targets": [
+            "build",
+            "clean",
+            "down",
+            "reset",
+            "test",
+            "up"
+          ]
+        },
+        "orphaned_dockerfiles": {
+          "pass": true,
+          "orphans": [],
+          "extras": [],
+          "all_dockerfiles": [
+            "app/Dockerfile"
+          ]
+        }
+      }
+    },
+    {
+      "benchmark": "S7BEN-MED-005",
+      "checks": {
+        "config_present": {
+          "pass": true,
+          "found": [
+            "benchmark.yaml"
+          ]
+        },
+        "compose_port_convention": {
+          "pass": false,
+          "details": {
+            "inconsistent_mappings": [
+              "5014:5000"
+            ],
+            "analyzed": [
+              {
+                "mapping": "5014:5000",
+                "host_eq_container": false,
+                "ip_bound": false
+              }
+            ]
+          }
+        },
+        "compose_ports_found": [
+          "5014:5000"
+        ],
+        "flag_formats": {
+          "pass": true,
+          "found_formats": {
+            "S7BEN{": 5
+          },
+          "locations": [
+            {
+              "file": "benchmark.yaml",
+              "line": 30,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "TESTING.md",
+              "line": 169,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "TESTING.md",
+              "line": 411,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "TESTING.md",
+              "line": 432,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "app/app.py",
+              "line": 131,
+              "match": "S7BEN{"
+            }
+          ],
+          "has_sben": false
+        },
+        "makefile_targets": {
+          "pass": true,
+          "missing_targets": [],
+          "present_optional": [
+            "build",
+            "clean"
+          ],
+          "all_targets": [
+            "build",
+            "clean",
+            "down",
+            "reset",
+            "test",
+            "up"
+          ]
+        },
+        "orphaned_dockerfiles": {
+          "pass": true,
+          "orphans": [],
+          "extras": [],
+          "all_dockerfiles": [
+            "app/Dockerfile"
+          ]
+        }
+      }
+    },
+    {
+      "benchmark": "S7BEN-MED-006",
+      "checks": {
+        "config_present": {
+          "pass": true,
+          "found": [
+            "benchmark.yaml"
+          ]
+        },
+        "compose_port_convention": {
+          "pass": false,
+          "details": {
+            "inconsistent_mappings": [
+              "5015:5000"
+            ],
+            "analyzed": [
+              {
+                "mapping": "5015:5000",
+                "host_eq_container": false,
+                "ip_bound": false
+              }
+            ]
+          }
+        },
+        "compose_ports_found": [
+          "5015:5000"
+        ],
+        "flag_formats": {
+          "pass": true,
+          "found_formats": {
+            "S7BEN{": 4
+          },
+          "locations": [
+            {
+              "file": "TESTING.md",
+              "line": 186,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "TESTING.md",
+              "line": 453,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "TESTING.md",
+              "line": 475,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "app/app.py",
+              "line": 126,
+              "match": "S7BEN{"
+            }
+          ],
+          "has_sben": false
+        },
+        "makefile_targets": {
+          "pass": true,
+          "missing_targets": [],
+          "present_optional": [
+            "build",
+            "clean"
+          ],
+          "all_targets": [
+            "build",
+            "clean",
+            "down",
+            "reset",
+            "test",
+            "up"
+          ]
+        },
+        "orphaned_dockerfiles": {
+          "pass": true,
+          "orphans": [],
+          "extras": [],
+          "all_dockerfiles": [
+            "app/Dockerfile"
+          ]
+        }
+      }
+    },
+    {
+      "benchmark": "S7BEN-MED-007",
+      "checks": {
+        "config_present": {
+          "pass": true,
+          "found": [
+            "benchmark.yaml"
+          ]
+        },
+        "compose_port_convention": {
+          "pass": false,
+          "details": {
+            "inconsistent_mappings": [
+              "5016:5000"
+            ],
+            "analyzed": [
+              {
+                "mapping": "5016:5000",
+                "host_eq_container": false,
+                "ip_bound": false
+              }
+            ]
+          }
+        },
+        "compose_ports_found": [
+          "5016:5000"
+        ],
+        "flag_formats": {
+          "pass": true,
+          "found_formats": {
+            "S7BEN{": 6
+          },
+          "locations": [
+            {
+              "file": "benchmark.yaml",
+              "line": 28,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "TESTING.md",
+              "line": 312,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "TESTING.md",
+              "line": 526,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "TESTING.md",
+              "line": 612,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "TESTING.md",
+              "line": 731,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "app/app.py",
+              "line": 67,
+              "match": "S7BEN{"
+            }
+          ],
+          "has_sben": false
+        },
+        "makefile_targets": {
+          "pass": true,
+          "missing_targets": [],
+          "present_optional": [
+            "build",
+            "clean"
+          ],
+          "all_targets": [
+            "build",
+            "clean",
+            "down",
+            "reset",
+            "test",
+            "up"
+          ]
+        },
+        "orphaned_dockerfiles": {
+          "pass": true,
+          "orphans": [],
+          "extras": [],
+          "all_dockerfiles": [
+            "app/Dockerfile"
+          ]
+        }
+      }
+    },
+    {
+      "benchmark": "S7BEN-MED-008",
+      "checks": {
+        "config_present": {
+          "pass": true,
+          "found": [
+            "benchmark.yaml"
+          ]
+        },
+        "compose_port_convention": {
+          "pass": true,
+          "details": {
+            "inconsistent_mappings": [],
+            "analyzed": [
+              {
+                "mapping": "5678:5678",
+                "host_eq_container": true,
+                "ip_bound": false
+              }
+            ]
+          }
+        },
+        "compose_ports_found": [
+          "5678:5678"
+        ],
+        "flag_formats": {
+          "pass": false,
+          "found_formats": {
+            "S7BEN{": 1,
+            "SBEN{": 1
+          },
+          "locations": [
+            {
+              "file": "benchmark.yaml",
+              "line": 22,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "app/Dockerfile",
+              "line": 11,
+              "match": "SBEN{"
+            }
+          ],
+          "has_sben": true
+        },
+        "makefile_targets": {
+          "pass": true,
+          "missing_targets": [],
+          "present_optional": [
+            "build",
+            "logs",
+            "clean"
+          ],
+          "all_targets": [
+            "build",
+            "clean",
+            "down",
+            "help",
+            "logs",
+            "test",
+            "up"
+          ]
+        },
+        "orphaned_dockerfiles": {
+          "pass": true,
+          "orphans": [],
+          "extras": [],
+          "all_dockerfiles": [
+            "app/Dockerfile"
+          ]
+        }
+      }
+    },
+    {
+      "benchmark": "S7BEN-MED-009",
+      "checks": {
+        "config_present": {
+          "pass": true,
+          "found": [
+            "benchmark.yaml"
+          ]
+        },
+        "compose_port_convention": {
+          "pass": false,
+          "details": {
+            "inconsistent_mappings": [
+              "5018:5000"
+            ],
+            "analyzed": [
+              {
+                "mapping": "5018:5000",
+                "host_eq_container": false,
+                "ip_bound": false
+              }
+            ]
+          }
+        },
+        "compose_ports_found": [
+          "5018:5000"
+        ],
+        "flag_formats": {
+          "pass": true,
+          "found_formats": {
+            "S7BEN{": 6
+          },
+          "locations": [
+            {
+              "file": "benchmark.yaml",
+              "line": 31,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "TESTING.md",
+              "line": 213,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "TESTING.md",
+              "line": 448,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "TESTING.md",
+              "line": 568,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "TESTING.md",
+              "line": 696,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "app/app.py",
+              "line": 48,
+              "match": "S7BEN{"
+            }
+          ],
+          "has_sben": false
+        },
+        "makefile_targets": {
+          "pass": true,
+          "missing_targets": [],
+          "present_optional": [
+            "build",
+            "clean"
+          ],
+          "all_targets": [
+            "build",
+            "clean",
+            "down",
+            "reset",
+            "test",
+            "up"
+          ]
+        },
+        "orphaned_dockerfiles": {
+          "pass": true,
+          "orphans": [],
+          "extras": [],
+          "all_dockerfiles": [
+            "app/Dockerfile"
+          ]
+        }
+      }
+    },
+    {
+      "benchmark": "S7BEN-MED-010",
+      "checks": {
+        "config_present": {
+          "pass": true,
+          "found": [
+            "benchmark.yaml"
+          ]
+        },
+        "compose_port_convention": {
+          "pass": false,
+          "details": {
+            "inconsistent_mappings": [
+              "5019:5000"
+            ],
+            "analyzed": [
+              {
+                "mapping": "5019:5000",
+                "host_eq_container": false,
+                "ip_bound": false
+              }
+            ]
+          }
+        },
+        "compose_ports_found": [
+          "5019:5000"
+        ],
+        "flag_formats": {
+          "pass": true,
+          "found_formats": {
+            "S7BEN{": 6
+          },
+          "locations": [
+            {
+              "file": "benchmark.yaml",
+              "line": 36,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "TESTING.md",
+              "line": 254,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "TESTING.md",
+              "line": 581,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "TESTING.md",
+              "line": 611,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "TESTING.md",
+              "line": 758,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "app/app.py",
+              "line": 42,
+              "match": "S7BEN{"
+            }
+          ],
+          "has_sben": false
+        },
+        "makefile_targets": {
+          "pass": true,
+          "missing_targets": [],
+          "present_optional": [
+            "build",
+            "clean"
+          ],
+          "all_targets": [
+            "build",
+            "clean",
+            "down",
+            "reset",
+            "test",
+            "test-metadata",
+            "up"
+          ]
+        },
+        "orphaned_dockerfiles": {
+          "pass": true,
+          "orphans": [],
+          "extras": [],
+          "all_dockerfiles": [
+            "app/Dockerfile",
+            "metadata-service/Dockerfile"
+          ]
+        }
+      }
+    },
+    {
+      "benchmark": "S7BEN-MED-011",
+      "checks": {
+        "config_present": {
+          "pass": true,
+          "found": [
+            "benchmark.yaml"
+          ]
+        },
+        "compose_port_convention": {
+          "pass": false,
+          "details": {
+            "inconsistent_mappings": [
+              "5020:5000"
+            ],
+            "analyzed": [
+              {
+                "mapping": "5020:5000",
+                "host_eq_container": false,
+                "ip_bound": false
+              }
+            ]
+          }
+        },
+        "compose_ports_found": [
+          "5020:5000"
+        ],
+        "flag_formats": {
+          "pass": true,
+          "found_formats": {
+            "S7BEN{": 4
+          },
+          "locations": [
+            {
+              "file": "benchmark.yaml",
+              "line": 31,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "TESTING.md",
+              "line": 242,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "benchmark.json",
+              "line": 19,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "app/app.py",
+              "line": 88,
+              "match": "S7BEN{"
+            }
+          ],
+          "has_sben": false
+        },
+        "makefile_targets": {
+          "pass": true,
+          "missing_targets": [],
+          "present_optional": [
+            "build",
+            "logs",
+            "clean"
+          ],
+          "all_targets": [
+            "build",
+            "clean",
+            "down",
+            "logs",
+            "reset",
+            "shell",
+            "test",
+            "up"
+          ]
+        },
+        "orphaned_dockerfiles": {
+          "pass": true,
+          "orphans": [],
+          "extras": [],
+          "all_dockerfiles": [
+            "app/Dockerfile"
+          ]
+        }
+      }
+    },
+    {
+      "benchmark": "S7BEN-MED-012",
+      "checks": {
+        "config_present": {
+          "pass": true,
+          "found": [
+            "benchmark.yaml"
+          ]
+        },
+        "compose_port_convention": {
+          "pass": false,
+          "details": {
+            "inconsistent_mappings": [
+              "5021:5000"
+            ],
+            "analyzed": [
+              {
+                "mapping": "5021:5000",
+                "host_eq_container": false,
+                "ip_bound": false
+              },
+              {
+                "mapping": "5001:5001",
+                "host_eq_container": true,
+                "ip_bound": false
+              }
+            ]
+          }
+        },
+        "compose_ports_found": [
+          "5021:5000",
+          "5001:5001"
+        ],
+        "flag_formats": {
+          "pass": true,
+          "found_formats": {
+            "S7BEN{": 3
+          },
+          "locations": [
+            {
+              "file": "benchmark.yaml",
+              "line": 30,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "benchmark.json",
+              "line": 18,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "app/app.py",
+              "line": 94,
+              "match": "S7BEN{"
+            }
+          ],
+          "has_sben": false
+        },
+        "makefile_targets": {
+          "pass": true,
+          "missing_targets": [],
+          "present_optional": [
+            "build",
+            "logs",
+            "clean"
+          ],
+          "all_targets": [
+            "build",
+            "clean",
+            "down",
+            "logs",
+            "reset",
+            "shell",
+            "shell-registry",
+            "test",
+            "up"
+          ]
+        },
+        "orphaned_dockerfiles": {
+          "pass": true,
+          "orphans": [],
+          "extras": [],
+          "all_dockerfiles": [
+            "mock-registry/Dockerfile",
+            "app/Dockerfile"
+          ]
+        }
+      }
+    },
+    {
+      "benchmark": "S7BEN-MED-013",
+      "checks": {
+        "config_present": {
+          "pass": true,
+          "found": [
+            "benchmark.yaml"
+          ]
+        },
+        "compose_port_convention": {
+          "pass": true,
+          "details": {
+            "inconsistent_mappings": [],
+            "analyzed": []
+          }
+        },
+        "compose_ports_found": [],
+        "flag_formats": {
+          "pass": true,
+          "found_formats": {
+            "S7BEN{": 5
+          },
+          "locations": [
+            {
+              "file": "benchmark.yaml",
+              "line": 9,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "phase6b-test-results.md",
+              "line": 2,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "phase6b-test-results.md",
+              "line": 3,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "README.md",
+              "line": 15,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "app/app.py",
+              "line": 6,
+              "match": "S7BEN{"
+            }
+          ],
+          "has_sben": false
+        },
+        "makefile_targets": {
+          "pass": true,
+          "missing_targets": [],
+          "present_optional": [
+            "clean"
+          ],
+          "all_targets": [
+            "clean",
+            "down",
+            "test",
+            "up"
+          ]
+        },
+        "orphaned_dockerfiles": {
+          "pass": true,
+          "orphans": [],
+          "extras": [],
+          "all_dockerfiles": [
+            "app/Dockerfile"
+          ]
+        }
+      }
+    },
+    {
+      "benchmark": "S7BEN-MED-014",
+      "checks": {
+        "config_present": {
+          "pass": true,
+          "found": [
+            "benchmark.yaml"
+          ]
+        },
+        "compose_port_convention": {
+          "pass": true,
+          "details": {
+            "inconsistent_mappings": [],
+            "analyzed": []
+          }
+        },
+        "compose_ports_found": [],
+        "flag_formats": {
+          "pass": true,
+          "found_formats": {
+            "S7BEN{": 4
+          },
+          "locations": [
+            {
+              "file": "benchmark.yaml",
+              "line": 8,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "phase6b-test-results.md",
+              "line": 2,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "phase6b-test-results.md",
+              "line": 3,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "app/app.py",
+              "line": 7,
+              "match": "S7BEN{"
+            }
+          ],
+          "has_sben": false
+        },
+        "makefile_targets": {
+          "pass": true,
+          "missing_targets": [],
+          "present_optional": [
+            "clean"
+          ],
+          "all_targets": [
+            "clean",
+            "down",
+            "test",
+            "up"
+          ]
+        },
+        "orphaned_dockerfiles": {
+          "pass": true,
+          "orphans": [],
+          "extras": [],
+          "all_dockerfiles": [
+            "app/Dockerfile"
+          ]
+        }
+      }
+    },
+    {
+      "benchmark": "S7BEN-MED-015",
+      "checks": {
+        "config_present": {
+          "pass": true,
+          "found": [
+            "benchmark.yaml"
+          ]
+        },
+        "compose_port_convention": {
+          "pass": true,
+          "details": {
+            "inconsistent_mappings": [],
+            "analyzed": []
+          }
+        },
+        "compose_ports_found": [],
+        "flag_formats": {
+          "pass": true,
+          "found_formats": {
+            "S7BEN{": 4
+          },
+          "locations": [
+            {
+              "file": "phase6b-test-results.md",
+              "line": 1,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "phase6b-test-results.md",
+              "line": 2,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "phase6b-test-results.md",
+              "line": 3,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "app/app.py",
+              "line": 5,
+              "match": "S7BEN{"
+            }
+          ],
+          "has_sben": false
+        },
+        "makefile_targets": {
+          "pass": true,
+          "missing_targets": [],
+          "present_optional": [],
+          "all_targets": [
+            "down",
+            "test",
+            "up"
+          ]
+        },
+        "orphaned_dockerfiles": {
+          "pass": true,
+          "orphans": [],
+          "extras": [],
+          "all_dockerfiles": [
+            "app/Dockerfile"
+          ]
+        }
+      }
+    },
+    {
+      "benchmark": "S7BEN-MED-016",
+      "checks": {
+        "config_present": {
+          "pass": true,
+          "found": [
+            "benchmark.yaml"
+          ]
+        },
+        "compose_port_convention": {
+          "pass": true,
+          "details": {
+            "inconsistent_mappings": [],
+            "analyzed": []
+          }
+        },
+        "compose_ports_found": [],
+        "flag_formats": {
+          "pass": true,
+          "found_formats": {
+            "S7BEN{": 4
+          },
+          "locations": [
+            {
+              "file": "phase6b-test-results.md",
+              "line": 1,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "phase6b-test-results.md",
+              "line": 2,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "phase6b-test-results.md",
+              "line": 3,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "app/app.py",
+              "line": 5,
+              "match": "S7BEN{"
+            }
+          ],
+          "has_sben": false
+        },
+        "makefile_targets": {
+          "pass": true,
+          "missing_targets": [],
+          "present_optional": [],
+          "all_targets": [
+            "down",
+            "test",
+            "up"
+          ]
+        },
+        "orphaned_dockerfiles": {
+          "pass": true,
+          "orphans": [],
+          "extras": [],
+          "all_dockerfiles": [
+            "app/Dockerfile"
+          ]
+        }
+      }
+    },
+    {
+      "benchmark": "S7BEN-VHARD-001",
+      "checks": {
+        "config_present": {
+          "pass": true,
+          "found": [
+            "benchmark.yaml"
+          ]
+        },
+        "compose_port_convention": {
+          "pass": true,
+          "details": {
+            "inconsistent_mappings": [],
+            "analyzed": [
+              {
+                "mapping": "80:80",
+                "host_eq_container": true,
+                "ip_bound": false
+              }
+            ]
+          }
+        },
+        "compose_ports_found": [
+          "80:80"
+        ],
+        "flag_formats": {
+          "pass": false,
+          "found_formats": {
+            "S7BEN{": 6,
+            "SBEN{": 1
+          },
+          "locations": [
+            {
+              "file": "benchmark.yaml",
+              "line": 173,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "benchmark.yaml",
+              "line": 193,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "TESTING.md",
+              "line": 375,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "TESTING.md",
+              "line": 633,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "README.md",
+              "line": 193,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "api-service/app.py",
+              "line": 164,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "postgres-db/init.sql",
+              "line": 42,
+              "match": "SBEN{"
+            }
+          ],
+          "has_sben": true
+        },
+        "makefile_targets": {
+          "pass": true,
+          "missing_targets": [],
+          "present_optional": [
+            "build",
+            "logs",
+            "clean"
+          ],
+          "all_targets": [
+            "build",
+            "clean",
+            "down",
+            "help",
+            "logs",
+            "logs-api",
+            "logs-auth",
+            "logs-db",
+            "logs-nginx",
+            "logs-redis",
+            "logs-worker",
+            "quick-test",
+            "reset",
+            "shell-api",
+            "shell-auth",
+            "shell-db",
+            "shell-nginx",
+            "shell-redis",
+            "shell-worker",
+            "test",
+            "up"
+          ]
+        },
+        "orphaned_dockerfiles": {
+          "pass": true,
+          "orphans": [],
+          "extras": [],
+          "all_dockerfiles": [
+            "api-service/Dockerfile",
+            "nginx-gateway/Dockerfile",
+            "auth-service/Dockerfile",
+            "worker-service/Dockerfile"
+          ]
+        }
+      }
+    },
+    {
+      "benchmark": "S7BEN-VHARD-002",
+      "checks": {
+        "config_present": {
+          "pass": true,
+          "found": [
+            "benchmark.yaml"
+          ]
+        },
+        "compose_port_convention": {
+          "pass": false,
+          "details": {
+            "inconsistent_mappings": [
+              "80:5000"
+            ],
+            "analyzed": [
+              {
+                "mapping": "80:5000",
+                "host_eq_container": false,
+                "ip_bound": false
+              }
+            ]
+          }
+        },
+        "compose_ports_found": [
+          "80:5000"
+        ],
+        "flag_formats": {
+          "pass": false,
+          "found_formats": {
+            "S7BEN{": 9,
+            "SBEN{": 1
+          },
+          "locations": [
+            {
+              "file": "benchmark.yaml",
+              "line": 92,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "benchmark.yaml",
+              "line": 98,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "TESTING.md",
+              "line": 262,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "TESTING.md",
+              "line": 496,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "TESTING.md",
+              "line": 500,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "README.md",
+              "line": 66,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "README.md",
+              "line": 71,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "docker-compose.yml",
+              "line": 62,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "admin-panel/index.js",
+              "line": 10,
+              "match": "SBEN{"
+            },
+            {
+              "file": "metadata-service/app.py",
+              "line": 37,
+              "match": "S7BEN{"
+            }
+          ],
+          "has_sben": true
+        },
+        "makefile_targets": {
+          "pass": false,
+          "missing_targets": [
+            "up",
+            "down"
+          ],
+          "present_optional": [
+            "build",
+            "logs",
+            "restart",
+            "clean"
+          ],
+          "all_targets": [
+            "build",
+            "check-deps",
+            "clean",
+            "exploit",
+            "get-creds",
+            "get-flag1",
+            "help",
+            "logs",
+            "logs-admin",
+            "logs-api",
+            "logs-metadata",
+            "logs-web",
+            "rebuild",
+            "restart",
+            "shell-admin",
+            "shell-api",
+            "shell-metadata",
+            "shell-web",
+            "ssrf-decimal",
+            "ssrf-hex",
+            "start",
+            "status",
+            "stop",
+            "test",
+            "verify"
+          ]
+        },
+        "orphaned_dockerfiles": {
+          "pass": true,
+          "orphans": [],
+          "extras": [],
+          "all_dockerfiles": [
+            "internal-api/Dockerfile",
+            "web-app/Dockerfile",
+            "admin-panel/Dockerfile",
+            "metadata-service/Dockerfile"
+          ]
+        }
+      }
+    },
+    {
+      "benchmark": "S7BEN-VHARD-003",
+      "checks": {
+        "config_present": {
+          "pass": true,
+          "found": [
+            "benchmark.yaml"
+          ]
+        },
+        "compose_port_convention": {
+          "pass": false,
+          "details": {
+            "inconsistent_mappings": [
+              "5052:3000",
+              "5053:5000"
+            ],
+            "analyzed": [
+              {
+                "mapping": "5052:3000",
+                "host_eq_container": false,
+                "ip_bound": false
+              },
+              {
+                "mapping": "5053:5000",
+                "host_eq_container": false,
+                "ip_bound": false
+              }
+            ]
+          }
+        },
+        "compose_ports_found": [
+          "5052:3000",
+          "5053:5000"
+        ],
+        "flag_formats": {
+          "pass": false,
+          "found_formats": {
+            "S7BEN{": 13,
+            "SBEN{": 1
+          },
+          "locations": [
+            {
+              "file": "benchmark.yaml",
+              "line": 150,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "benchmark.yaml",
+              "line": 156,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "benchmark.yaml",
+              "line": 162,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "TESTING.md",
+              "line": 126,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "TESTING.md",
+              "line": 313,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "TESTING.md",
+              "line": 366,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "TESTING.md",
+              "line": 376,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "TESTING.md",
+              "line": 391,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "TESTING.md",
+              "line": 395,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "docker-compose.yml",
+              "line": 21,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "docker-compose.yml",
+              "line": 65,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "docker-compose.yml",
+              "line": 108,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "web-app/index.js",
+              "line": 13,
+              "match": "SBEN{"
+            },
+            {
+              "file": "workstation/app.py",
+              "line": 13,
+              "match": "S7BEN{"
+            }
+          ],
+          "has_sben": true
+        },
+        "makefile_targets": {
+          "pass": true,
+          "missing_targets": [],
+          "present_optional": [
+            "build",
+            "logs",
+            "restart",
+            "clean"
+          ],
+          "all_targets": [
+            "asrep-roast",
+            "build",
+            "clean",
+            "clean-cookies",
+            "db-creds",
+            "down",
+            "enum-ldap",
+            "enum-spns",
+            "enum-users",
+            "file-admin-notes",
+            "file-db-config",
+            "file-shares",
+            "get-flags",
+            "help",
+            "kerberoast",
+            "login-admin",
+            "login-alice",
+            "logs",
+            "logs-dc",
+            "restart",
+            "shell-db",
+            "shell-dc",
+            "shell-file",
+            "shell-web",
+            "shell-ws",
+            "test",
+            "up",
+            "verify",
+            "web-info",
+            "web-services",
+            "workstation",
+            "workstation-tools"
+          ]
+        },
+        "orphaned_dockerfiles": {
+          "pass": true,
+          "orphans": [],
+          "extras": [],
+          "all_dockerfiles": [
+            "web-app/Dockerfile",
+            "domain-controller/Dockerfile",
+            "file-server/Dockerfile",
+            "database-server/Dockerfile",
+            "workstation/Dockerfile"
+          ]
+        }
+      }
+    },
+    {
+      "benchmark": "S7BEN-VHARD-004",
+      "checks": {
+        "config_present": {
+          "pass": true,
+          "found": [
+            "benchmark.yaml"
+          ]
+        },
+        "compose_port_convention": {
+          "pass": true,
+          "details": {
+            "inconsistent_mappings": [],
+            "analyzed": [
+              {
+                "mapping": "8080:8080",
+                "host_eq_container": true,
+                "ip_bound": false
+              }
+            ]
+          }
+        },
+        "compose_ports_found": [
+          "8080:8080"
+        ],
+        "flag_formats": {
+          "pass": false,
+          "found_formats": {
+            "S7BEN{": 15,
+            "SBEN{": 3
+          },
+          "locations": [
+            {
+              "file": "benchmark.yaml",
+              "line": 105,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "benchmark.yaml",
+              "line": 110,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "benchmark.yaml",
+              "line": 115,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "TESTING.md",
+              "line": 250,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "TESTING.md",
+              "line": 300,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "TESTING.md",
+              "line": 314,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "TESTING.md",
+              "line": 338,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "TESTING.md",
+              "line": 343,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "TESTING.md",
+              "line": 345,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "README.md",
+              "line": 47,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "README.md",
+              "line": 48,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "README.md",
+              "line": 49,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "docker-compose.yml",
+              "line": 12,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "docker-compose.yml",
+              "line": 31,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "docker-compose.yml",
+              "line": 48,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "internal-api/Dockerfile",
+              "line": 16,
+              "match": "SBEN{"
+            },
+            {
+              "file": "web-app/Dockerfile",
+              "line": 28,
+              "match": "SBEN{"
+            },
+            {
+              "file": "victim-app/Dockerfile",
+              "line": 7,
+              "match": "SBEN{"
+            }
+          ],
+          "has_sben": true
+        },
+        "makefile_targets": {
+          "pass": true,
+          "missing_targets": [],
+          "present_optional": [
+            "build",
+            "logs",
+            "restart",
+            "clean"
+          ],
+          "all_targets": [
+            "build",
+            "clean",
+            "down",
+            "help",
+            "login",
+            "logs",
+            "restart",
+            "session",
+            "test",
+            "up",
+            "webapp"
+          ]
+        },
+        "orphaned_dockerfiles": {
+          "pass": true,
+          "orphans": [],
+          "extras": [],
+          "all_dockerfiles": [
+            "internal-api/Dockerfile",
+            "web-app/Dockerfile",
+            "victim-app/Dockerfile"
+          ]
+        }
+      }
+    },
+    {
+      "benchmark": "S7BEN-VHARD-005",
+      "checks": {
+        "config_present": {
+          "pass": true,
+          "found": [
+            "benchmark.yaml"
+          ]
+        },
+        "compose_port_convention": {
+          "pass": false,
+          "details": {
+            "inconsistent_mappings": [
+              "5054:5000"
+            ],
+            "analyzed": [
+              {
+                "mapping": "5054:5000",
+                "host_eq_container": false,
+                "ip_bound": false
+              }
+            ]
+          }
+        },
+        "compose_ports_found": [
+          "5054:5000"
+        ],
+        "flag_formats": {
+          "pass": true,
+          "found_formats": {
+            "S7BEN{": 19
+          },
+          "locations": [
+            {
+              "file": "benchmark.yaml",
+              "line": 112,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "benchmark.yaml",
+              "line": 117,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "benchmark.yaml",
+              "line": 122,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "TESTING.md",
+              "line": 287,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "TESTING.md",
+              "line": 425,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "TESTING.md",
+              "line": 554,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "TESTING.md",
+              "line": 697,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "TESTING.md",
+              "line": 703,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "TESTING.md",
+              "line": 709,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "README.md",
+              "line": 71,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "README.md",
+              "line": 72,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "README.md",
+              "line": 73,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "docker-compose.yml",
+              "line": 16,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "docker-compose.yml",
+              "line": 40,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "docker-compose.yml",
+              "line": 59,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "web-app/entrypoint.sh",
+              "line": 4,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "web-app/app.py",
+              "line": 289,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "worker-service/entrypoint.sh",
+              "line": 4,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "worker-service/tasks.py",
+              "line": 106,
+              "match": "S7BEN{"
+            }
+          ],
+          "has_sben": false
+        },
+        "makefile_targets": {
+          "pass": true,
+          "missing_targets": [],
+          "present_optional": [
+            "build",
+            "logs",
+            "clean"
+          ],
+          "all_targets": [
+            "build",
+            "clean",
+            "down",
+            "help",
+            "logs",
+            "redis",
+            "test",
+            "up",
+            "webapp",
+            "worker"
+          ]
+        },
+        "orphaned_dockerfiles": {
+          "pass": true,
+          "orphans": [],
+          "extras": [],
+          "all_dockerfiles": [
+            "web-app/Dockerfile",
+            "worker-service/Dockerfile"
+          ]
+        }
+      }
+    },
+    {
+      "benchmark": "S7BEN-VHARD-006",
+      "checks": {
+        "config_present": {
+          "pass": true,
+          "found": [
+            "benchmark.yaml"
+          ]
+        },
+        "compose_port_convention": {
+          "pass": true,
+          "details": {
+            "inconsistent_mappings": [],
+            "analyzed": [
+              {
+                "mapping": "4000:4000",
+                "host_eq_container": true,
+                "ip_bound": false
+              }
+            ]
+          }
+        },
+        "compose_ports_found": [
+          "4000:4000"
+        ],
+        "flag_formats": {
+          "pass": false,
+          "found_formats": {
+            "S7BEN{": 14,
+            "SBEN{": 3
+          },
+          "locations": [
+            {
+              "file": "benchmark.yaml",
+              "line": 105,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "benchmark.yaml",
+              "line": 110,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "TESTING.md",
+              "line": 367,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "TESTING.md",
+              "line": 389,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "TESTING.md",
+              "line": 402,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "TESTING.md",
+              "line": 403,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "TESTING.md",
+              "line": 404,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "TESTING.md",
+              "line": 499,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "TESTING.md",
+              "line": 618,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "TESTING.md",
+              "line": 619,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "README.md",
+              "line": 73,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "README.md",
+              "line": 74,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "docker-compose.yml",
+              "line": 15,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "docker-compose.yml",
+              "line": 16,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "postgres-db/init.sql",
+              "line": 46,
+              "match": "SBEN{"
+            },
+            {
+              "file": "postgres-db/init.sql",
+              "line": 47,
+              "match": "SBEN{"
+            },
+            {
+              "file": "postgres-db/init.sql",
+              "line": 48,
+              "match": "SBEN{"
+            }
+          ],
+          "has_sben": true
+        },
+        "makefile_targets": {
+          "pass": true,
+          "missing_targets": [],
+          "present_optional": [
+            "build",
+            "logs",
+            "clean"
+          ],
+          "all_targets": [
+            "api",
+            "build",
+            "clean",
+            "db",
+            "down",
+            "help",
+            "logs",
+            "test",
+            "up"
+          ]
+        },
+        "orphaned_dockerfiles": {
+          "pass": true,
+          "orphans": [],
+          "extras": [],
+          "all_dockerfiles": [
+            "graphql-api/Dockerfile"
+          ]
+        }
+      }
+    },
+    {
+      "benchmark": "S7BEN-VHARD-007",
+      "checks": {
+        "config_present": {
+          "pass": true,
+          "found": [
+            "benchmark.yaml"
+          ]
+        },
+        "compose_port_convention": {
+          "pass": true,
+          "details": {
+            "inconsistent_mappings": [],
+            "analyzed": [
+              {
+                "mapping": "8080:8080",
+                "host_eq_container": true,
+                "ip_bound": false
+              },
+              {
+                "mapping": "8888:8888",
+                "host_eq_container": true,
+                "ip_bound": false
+              }
+            ]
+          }
+        },
+        "compose_ports_found": [
+          "8080:8080",
+          "8888:8888"
+        ],
+        "flag_formats": {
+          "pass": false,
+          "found_formats": {
+            "S7BEN{": 13,
+            "SBEN{": 2
+          },
+          "locations": [
+            {
+              "file": "benchmark.yaml",
+              "line": 112,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "benchmark.yaml",
+              "line": 117,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "benchmark.yaml",
+              "line": 122,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "TESTING.md",
+              "line": 41,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "TESTING.md",
+              "line": 64,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "TESTING.md",
+              "line": 79,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "README.md",
+              "line": 46,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "README.md",
+              "line": 47,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "README.md",
+              "line": 48,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "docker-compose.yml",
+              "line": 14,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "docker-compose.yml",
+              "line": 15,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "docker-compose.yml",
+              "line": 35,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "internal-api/app.py",
+              "line": 79,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "web-app/src/main/java/com/strike7/xxe/XxeApplication.java",
+              "line": 25,
+              "match": "SBEN{"
+            },
+            {
+              "file": "web-app/src/main/java/com/strike7/xxe/XxeApplication.java",
+              "line": 29,
+              "match": "SBEN{"
+            }
+          ],
+          "has_sben": true
+        },
+        "makefile_targets": {
+          "pass": true,
+          "missing_targets": [],
+          "present_optional": [
+            "build",
+            "logs",
+            "clean"
+          ],
+          "all_targets": [
+            "build",
+            "clean",
+            "down",
+            "help",
+            "logs",
+            "test",
+            "up"
+          ]
+        },
+        "orphaned_dockerfiles": {
+          "pass": true,
+          "orphans": [],
+          "extras": [],
+          "all_dockerfiles": [
+            "dtd-server/Dockerfile",
+            "internal-api/Dockerfile",
+            "web-app/Dockerfile"
+          ]
+        }
+      }
+    },
+    {
+      "benchmark": "S7BEN-VHARD-008",
+      "checks": {
+        "config_present": {
+          "pass": true,
+          "found": [
+            "benchmark.yaml"
+          ]
+        },
+        "compose_port_convention": {
+          "pass": true,
+          "details": {
+            "inconsistent_mappings": [],
+            "analyzed": [
+              {
+                "mapping": "3000:3000",
+                "host_eq_container": true,
+                "ip_bound": false
+              },
+              {
+                "mapping": "4000:4000",
+                "host_eq_container": true,
+                "ip_bound": false
+              }
+            ]
+          }
+        },
+        "compose_ports_found": [
+          "3000:3000",
+          "4000:4000"
+        ],
+        "flag_formats": {
+          "pass": false,
+          "found_formats": {
+            "S7BEN{": 29,
+            "SBEN{": 4
+          },
+          "locations": [
+            {
+              "file": "benchmark.yaml",
+              "line": 110,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "benchmark.yaml",
+              "line": 115,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "benchmark.yaml",
+              "line": 120,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "TESTING.md",
+              "line": 80,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "TESTING.md",
+              "line": 159,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "TESTING.md",
+              "line": 163,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "TESTING.md",
+              "line": 317,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "TESTING.md",
+              "line": 321,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "TESTING.md",
+              "line": 368,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "TESTING.md",
+              "line": 410,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "TESTING.md",
+              "line": 419,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "TESTING.md",
+              "line": 456,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "TESTING.md",
+              "line": 461,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "TESTING.md",
+              "line": 495,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "TESTING.md",
+              "line": 505,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "TESTING.md",
+              "line": 515,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "TESTING.md",
+              "line": 570,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "TESTING.md",
+              "line": 571,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "TESTING.md",
+              "line": 572,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "TESTING.md",
+              "line": 573,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "TESTING.md",
+              "line": 604,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "TESTING.md",
+              "line": 605,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "TESTING.md",
+              "line": 606,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "README.md",
+              "line": 68,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "README.md",
+              "line": 69,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "README.md",
+              "line": 70,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "README.md",
+              "line": 71,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "docker-compose.yml",
+              "line": 16,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "docker-compose.yml",
+              "line": 59,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "mongo-db/init.js",
+              "line": 77,
+              "match": "SBEN{"
+            },
+            {
+              "file": "mongo-db/init.js",
+              "line": 86,
+              "match": "SBEN{"
+            },
+            {
+              "file": "mongo-db/init.js",
+              "line": 95,
+              "match": "SBEN{"
+            },
+            {
+              "file": "admin-panel/index.js",
+              "line": 11,
+              "match": "SBEN{"
+            }
+          ],
+          "has_sben": true
+        },
+        "makefile_targets": {
+          "pass": true,
+          "missing_targets": [],
+          "present_optional": [
+            "build",
+            "logs",
+            "restart",
+            "clean"
+          ],
+          "all_targets": [
+            "build",
+            "clean",
+            "down",
+            "health",
+            "help",
+            "logs",
+            "restart",
+            "test",
+            "up"
+          ]
+        },
+        "orphaned_dockerfiles": {
+          "pass": true,
+          "orphans": [],
+          "extras": [],
+          "all_dockerfiles": [
+            "web-app/Dockerfile",
+            "admin-panel/Dockerfile"
+          ]
+        }
+      }
+    },
+    {
+      "benchmark": "S7BEN-VHARD-009",
+      "checks": {
+        "config_present": {
+          "pass": true,
+          "found": [
+            "benchmark.yaml"
+          ]
+        },
+        "compose_port_convention": {
+          "pass": false,
+          "details": {
+            "inconsistent_mappings": [
+              "5058:5000",
+              "8080:80"
+            ],
+            "analyzed": [
+              {
+                "mapping": "5058:5000",
+                "host_eq_container": false,
+                "ip_bound": false
+              },
+              {
+                "mapping": "3000:3000",
+                "host_eq_container": true,
+                "ip_bound": false
+              },
+              {
+                "mapping": "8080:80",
+                "host_eq_container": false,
+                "ip_bound": false
+              }
+            ]
+          }
+        },
+        "compose_ports_found": [
+          "5058:5000",
+          "3000:3000",
+          "8080:80"
+        ],
+        "flag_formats": {
+          "pass": false,
+          "found_formats": {
+            "S7BEN{": 16,
+            "SBEN{": 2
+          },
+          "locations": [
+            {
+              "file": "benchmark.yaml",
+              "line": 124,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "benchmark.yaml",
+              "line": 129,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "benchmark.yaml",
+              "line": 134,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "TESTING.md",
+              "line": 179,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "TESTING.md",
+              "line": 234,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "TESTING.md",
+              "line": 298,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "TESTING.md",
+              "line": 372,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "TESTING.md",
+              "line": 373,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "TESTING.md",
+              "line": 374,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "README.md",
+              "line": 70,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "README.md",
+              "line": 71,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "README.md",
+              "line": 72,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "docker-compose.yml",
+              "line": 10,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "docker-compose.yml",
+              "line": 28,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "docker-compose.yml",
+              "line": 46,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "twig-app/index.php",
+              "line": 9,
+              "match": "SBEN{"
+            },
+            {
+              "file": "nunjucks-app/index.js",
+              "line": 273,
+              "match": "SBEN{"
+            },
+            {
+              "file": "jinja2-app/app.py",
+              "line": 186,
+              "match": "S7BEN{"
+            }
+          ],
+          "has_sben": true
+        },
+        "makefile_targets": {
+          "pass": true,
+          "missing_targets": [],
+          "present_optional": [
+            "build",
+            "logs",
+            "restart",
+            "clean"
+          ],
+          "all_targets": [
+            "build",
+            "clean",
+            "down",
+            "health",
+            "help",
+            "logs",
+            "restart",
+            "test",
+            "up"
+          ]
+        },
+        "orphaned_dockerfiles": {
+          "pass": true,
+          "orphans": [],
+          "extras": [],
+          "all_dockerfiles": [
+            "twig-app/Dockerfile",
+            "nunjucks-app/Dockerfile",
+            "jinja2-app/Dockerfile"
+          ]
+        }
+      }
+    },
+    {
+      "benchmark": "S7BEN-VHARD-010",
+      "checks": {
+        "config_present": {
+          "pass": false,
+          "found": []
+        },
+        "compose_port_convention": {
+          "pass": false,
+          "details": {
+            "inconsistent_mappings": [
+              "8080:80",
+              "8081:80"
+            ],
+            "analyzed": [
+              {
+                "mapping": "8080:80",
+                "host_eq_container": false,
+                "ip_bound": false
+              },
+              {
+                "mapping": "8081:80",
+                "host_eq_container": false,
+                "ip_bound": false
+              }
+            ]
+          }
+        },
+        "compose_ports_found": [
+          "8080:80",
+          "8081:80"
+        ],
+        "flag_formats": {
+          "pass": false,
+          "found_formats": {
+            "S7BEN{": 21,
+            "SBEN{": 3
+          },
+          "locations": [
+            {
+              "file": "TESTING.md",
+              "line": 90,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "TESTING.md",
+              "line": 196,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "TESTING.md",
+              "line": 212,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "TESTING.md",
+              "line": 265,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "TESTING.md",
+              "line": 284,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "TESTING.md",
+              "line": 290,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "TESTING.md",
+              "line": 299,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "TESTING.md",
+              "line": 302,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "TESTING.md",
+              "line": 318,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "TESTING.md",
+              "line": 319,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "TESTING.md",
+              "line": 320,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "TESTING.md",
+              "line": 321,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "README.md",
+              "line": 71,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "README.md",
+              "line": 72,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "README.md",
+              "line": 73,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "README.md",
+              "line": 74,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "docker-compose.yml",
+              "line": 10,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "docker-compose.yml",
+              "line": 11,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "docker-compose.yml",
+              "line": 31,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "docker-compose.yml",
+              "line": 47,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "log-server/index.php",
+              "line": 61,
+              "match": "SBEN{"
+            },
+            {
+              "file": "web-app/Dockerfile",
+              "line": 15,
+              "match": "SBEN{"
+            },
+            {
+              "file": "web-app/Dockerfile",
+              "line": 16,
+              "match": "SBEN{"
+            },
+            {
+              "file": "file-server/internal_flag.txt",
+              "line": 1,
+              "match": "S7BEN{"
+            }
+          ],
+          "has_sben": true
+        },
+        "makefile_targets": {
+          "pass": true,
+          "missing_targets": [],
+          "present_optional": [
+            "build",
+            "logs",
+            "restart",
+            "clean"
+          ],
+          "all_targets": [
+            "build",
+            "clean",
+            "down",
+            "health",
+            "help",
+            "logs",
+            "restart",
+            "test",
+            "up"
+          ]
+        },
+        "orphaned_dockerfiles": {
+          "pass": true,
+          "orphans": [],
+          "extras": [],
+          "all_dockerfiles": [
+            "log-server/Dockerfile",
+            "web-app/Dockerfile",
+            "file-server/Dockerfile"
+          ]
+        }
+      }
+    },
+    {
+      "benchmark": "S7BEN-VHARD-011",
+      "checks": {
+        "config_present": {
+          "pass": true,
+          "found": [
+            "benchmark.yaml"
+          ]
+        },
+        "compose_port_convention": {
+          "pass": true,
+          "details": {
+            "inconsistent_mappings": [],
+            "analyzed": [
+              {
+                "mapping": "8090:8090",
+                "host_eq_container": true,
+                "ip_bound": false
+              }
+            ]
+          }
+        },
+        "compose_ports_found": [
+          "8090:8090"
+        ],
+        "flag_formats": {
+          "pass": true,
+          "found_formats": {
+            "S7BEN{": 6
+          },
+          "locations": [
+            {
+              "file": "benchmark.yaml",
+              "line": 45,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "phase6b-test-results.md",
+              "line": 2,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "phase6b-test-results.md",
+              "line": 3,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "README.md",
+              "line": 51,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "app/app.py",
+              "line": 22,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "app/app.py",
+              "line": 285,
+              "match": "S7BEN{"
+            }
+          ],
+          "has_sben": false
+        },
+        "makefile_targets": {
+          "pass": true,
+          "missing_targets": [],
+          "present_optional": [
+            "build",
+            "logs",
+            "clean"
+          ],
+          "all_targets": [
+            "build",
+            "clean",
+            "down",
+            "logs",
+            "test",
+            "up"
+          ]
+        },
+        "orphaned_dockerfiles": {
+          "pass": true,
+          "orphans": [],
+          "extras": [],
+          "all_dockerfiles": [
+            "app/Dockerfile"
+          ]
+        }
+      }
+    },
+    {
+      "benchmark": "S7BEN-VHARD-012",
+      "checks": {
+        "config_present": {
+          "pass": true,
+          "found": [
+            "benchmark.yaml"
+          ]
+        },
+        "compose_port_convention": {
+          "pass": true,
+          "details": {
+            "inconsistent_mappings": [],
+            "analyzed": [
+              {
+                "mapping": "8091:8091",
+                "host_eq_container": true,
+                "ip_bound": false
+              },
+              {
+                "mapping": "8092:8092",
+                "host_eq_container": true,
+                "ip_bound": false
+              }
+            ]
+          }
+        },
+        "compose_ports_found": [
+          "8091:8091",
+          "8092:8092"
+        ],
+        "flag_formats": {
+          "pass": true,
+          "found_formats": {
+            "S7BEN{": 6
+          },
+          "locations": [
+            {
+              "file": "benchmark.yaml",
+              "line": 48,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "phase6b-test-results.md",
+              "line": 2,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "phase6b-test-results.md",
+              "line": 3,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "README.md",
+              "line": 39,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "app/app.py",
+              "line": 20,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "app/app.py",
+              "line": 266,
+              "match": "S7BEN{"
+            }
+          ],
+          "has_sben": false
+        },
+        "makefile_targets": {
+          "pass": true,
+          "missing_targets": [],
+          "present_optional": [
+            "build",
+            "logs",
+            "clean"
+          ],
+          "all_targets": [
+            "build",
+            "clean",
+            "down",
+            "logs",
+            "test",
+            "up"
+          ]
+        },
+        "orphaned_dockerfiles": {
+          "pass": true,
+          "orphans": [],
+          "extras": [],
+          "all_dockerfiles": [
+            "oauth-provider/Dockerfile",
+            "app/Dockerfile"
+          ]
+        }
+      }
+    },
+    {
+      "benchmark": "S7BEN-VHARD-013",
+      "checks": {
+        "config_present": {
+          "pass": true,
+          "found": [
+            "benchmark.yaml"
+          ]
+        },
+        "compose_port_convention": {
+          "pass": true,
+          "details": {
+            "inconsistent_mappings": [],
+            "analyzed": []
+          }
+        },
+        "compose_ports_found": [],
+        "flag_formats": {
+          "pass": true,
+          "found_formats": {
+            "S7BEN{": 5
+          },
+          "locations": [
+            {
+              "file": "benchmark.yaml",
+              "line": 9,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "phase6b-test-results.md",
+              "line": 2,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "phase6b-test-results.md",
+              "line": 3,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "README.md",
+              "line": 13,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "app/app.py",
+              "line": 7,
+              "match": "S7BEN{"
+            }
+          ],
+          "has_sben": false
+        },
+        "makefile_targets": {
+          "pass": true,
+          "missing_targets": [],
+          "present_optional": [
+            "clean"
+          ],
+          "all_targets": [
+            "clean",
+            "down",
+            "test",
+            "up"
+          ]
+        },
+        "orphaned_dockerfiles": {
+          "pass": true,
+          "orphans": [],
+          "extras": [],
+          "all_dockerfiles": [
+            "app/Dockerfile"
+          ]
+        }
+      }
+    },
+    {
+      "benchmark": "S7BEN-VHARD-014",
+      "checks": {
+        "config_present": {
+          "pass": true,
+          "found": [
+            "benchmark.yaml"
+          ]
+        },
+        "compose_port_convention": {
+          "pass": true,
+          "details": {
+            "inconsistent_mappings": [],
+            "analyzed": []
+          }
+        },
+        "compose_ports_found": [],
+        "flag_formats": {
+          "pass": true,
+          "found_formats": {
+            "S7BEN{": 5
+          },
+          "locations": [
+            {
+              "file": "benchmark.yaml",
+              "line": 9,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "phase6b-test-results.md",
+              "line": 2,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "phase6b-test-results.md",
+              "line": 3,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "README.md",
+              "line": 6,
+              "match": "S7BEN{"
+            },
+            {
+              "file": "app/app.py",
+              "line": 7,
+              "match": "S7BEN{"
+            }
+          ],
+          "has_sben": false
+        },
+        "makefile_targets": {
+          "pass": true,
+          "missing_targets": [],
+          "present_optional": [
+            "clean"
+          ],
+          "all_targets": [
+            "clean",
+            "down",
+            "test",
+            "up"
+          ]
+        },
+        "orphaned_dockerfiles": {
+          "pass": true,
+          "orphans": [],
+          "extras": [],
+          "all_dockerfiles": [
+            "app/Dockerfile"
+          ]
+        }
+      }
+    }
+  ]
+}

