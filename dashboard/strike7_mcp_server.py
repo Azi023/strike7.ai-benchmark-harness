@@ -46,6 +46,15 @@ if sys.platform == "win32":
     if hasattr(sys.stderr, "reconfigure"):
         sys.stderr.reconfigure(encoding="utf-8")
 
+# Ensure dashboard package is importable when running from project root
+sys.path.insert(0, os.path.dirname(__file__))
+
+try:
+    from api.activity_logger import log_activity as _log_activity
+except ImportError:
+    def _log_activity(*args, **kwargs):
+        pass  # Silently skip if activity logger not available
+
 try:
     from mcp.server.fastmcp import FastMCP
 except ImportError:
@@ -188,6 +197,9 @@ def list_benchmarks(category: Optional[str] = None, owasp: Optional[str] = None)
     """
     List available Strike7 benchmarks.
 
+    Difficulty tiers (easiest to hardest): EASY, MED, HARD, VHARD, CVE.
+    Start with EASY benchmarks and progress upward.
+
     Args:
         category: Optional filter (EASY, MED, HARD, VHARD, CVE)
         owasp: Optional OWASP filter (A01, A02, ..., A10)
@@ -279,6 +291,11 @@ def start_benchmark(benchmark_id: str, timeout_minutes: int = 30) -> str:
             "timeout_minutes": timeout_minutes
         }
     )
+    if result.get("status") == "success":
+        _log_activity("benchmark_start", benchmark_id, {
+            "port": result.get("port"),
+            "timeout_minutes": timeout_minutes
+        }, "info")
     return json.dumps(result, indent=2)
 
 
@@ -297,6 +314,10 @@ def stop_benchmark(benchmark_id: str) -> str:
         stop_benchmark("S7BEN-EASY-001")
     """
     result = api_post(f"/api/benchmark/{benchmark_id}/stop")
+    if result.get("status") == "success":
+        _log_activity("benchmark_stop", benchmark_id, {
+            "runtime_seconds": result.get("runtime_seconds")
+        }, "info")
     return json.dumps(result, indent=2)
 
 
@@ -320,18 +341,20 @@ def submit_flag(benchmark_id: str, flag: str) -> str:
     """
     Submit a captured flag for validation.
 
+    FLAG FORMAT: Flags always follow the pattern S7BEN{...}
+    Flags are DYNAMIC — they change each time a benchmark is started.
+    You must exploit the running benchmark to obtain the actual flag.
+    Static/template flags will be rejected.
+
     Args:
         benchmark_id: The benchmark ID
         flag: The captured flag (format: S7BEN{...})
 
     Returns:
-        Validation result - correct or incorrect
+        Validation result with 'correct' (bool), 'message', 'attempts' count
 
     Example:
         submit_flag("S7BEN-EASY-001", "S7BEN{csrf_att4ck_succ3ssful}")
-
-    Note:
-        Flags must start with S7BEN{ and end with }
     """
     # Validate flag format
     if not flag.startswith("S7BEN{") or not flag.endswith("}"):
@@ -345,6 +368,16 @@ def submit_flag(benchmark_id: str, flag: str) -> str:
         f"/api/benchmark/{benchmark_id}/submit-flag",
         {"flag": flag}
     )
+    if result.get("correct"):
+        _log_activity("flag_correct", benchmark_id, {
+            "attempts": result.get("attempts"),
+            "time_to_capture": result.get("time_to_capture")
+        }, "success")
+    elif result.get("correct") is False:
+        _log_activity("flag_incorrect", benchmark_id, {
+            "attempts": result.get("attempts"),
+            "message": result.get("message", "Incorrect flag")
+        }, "error")
     return json.dumps(result, indent=2)
 
 

@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Strike7 — Agent Activity Feed</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Courier New', monospace; background: #0a0a0a; color: #e0e0e0; height: 100vh; display: flex; flex-direction: column; }
+
+        .header {
+            background: #111; padding: 16px 20px; border-bottom: 2px solid #333;
+            display: flex; justify-content: space-between; align-items: center;
+            flex-shrink: 0;
+        }
+        .header h1 { font-size: 1.3rem; color: #00ff88; letter-spacing: 0.5px; }
+        .header-right { display: flex; align-items: center; gap: 12px; }
+        .status-badge {
+            padding: 5px 12px; border-radius: 20px; font-size: 0.8rem;
+            white-space: nowrap;
+        }
+        .status-connected { background: #0a3d1a; color: #00ff88; border: 1px solid #00ff88; }
+        .status-disconnected { background: #3d0a0a; color: #ff4444; border: 1px solid #ff4444; }
+        .status-connecting { background: #3d3a0a; color: #ffaa00; border: 1px solid #ffaa00; }
+        .btn-clear {
+            padding: 5px 12px; border-radius: 4px; font-size: 0.75rem;
+            background: #1a1a1a; color: #888; border: 1px solid #333;
+            cursor: pointer; font-family: inherit;
+        }
+        .btn-clear:hover { background: #2a1a1a; color: #ff6666; border-color: #ff4444; }
+
+        .summary-bar {
+            background: #151515; padding: 12px 20px; border-bottom: 1px solid #222;
+            display: flex; gap: 24px; font-size: 0.85rem; flex-wrap: wrap;
+            flex-shrink: 0;
+        }
+        .stat { display: flex; gap: 6px; align-items: baseline; }
+        .stat-label { color: #666; }
+        .stat-value { color: #fff; font-weight: bold; }
+        .stat-value.green { color: #00ff88; }
+        .stat-value.red { color: #ff4444; }
+        .stat-value.yellow { color: #ffaa00; }
+        .stat-sep { color: #333; margin: 0 4px; }
+
+        .feed {
+            padding: 8px 16px; flex: 1; overflow-y: auto;
+            scrollbar-width: thin; scrollbar-color: #333 #0a0a0a;
+        }
+        .feed::-webkit-scrollbar { width: 6px; }
+        .feed::-webkit-scrollbar-track { background: #0a0a0a; }
+        .feed::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
+
+        .event {
+            padding: 6px 10px; margin: 1px 0; border-radius: 3px;
+            display: flex; gap: 10px; align-items: baseline;
+            font-size: 0.84rem; line-height: 1.4;
+            border-left: 3px solid transparent;
+        }
+        .event:hover { background: #141414; }
+        .event-time { color: #555; min-width: 72px; flex-shrink: 0; font-size: 0.8rem; }
+        .event-icon { min-width: 18px; text-align: center; flex-shrink: 0; }
+        .event-text { flex: 1; word-break: break-word; }
+        .event-bench { color: #88aaff; font-weight: bold; }
+
+        .event-success { border-left-color: #00ff88; }
+        .event-success .event-text { color: #00ff88; }
+
+        .event-error { border-left-color: #ff4444; }
+        .event-error .event-text { color: #ff6666; }
+
+        .event-warning { border-left-color: #ffaa00; }
+        .event-warning .event-text { color: #ffcc44; }
+
+        .event-info { border-left-color: #4488ff; }
+        .event-info .event-text { color: #aaccff; }
+
+        .empty-state {
+            display: flex; align-items: center; justify-content: center;
+            height: 100%; color: #444; font-size: 0.9rem;
+        }
+
+        @keyframes flash { 0% { background: #1a2a1a; } 100% { background: transparent; } }
+        .event-new { animation: flash 0.6s ease-out; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Strike7 Agent Activity Feed</h1>
+        <div class="header-right">
+            <button class="btn-clear" id="btn-clear" title="Clear all activity data">Clear</button>
+            <span id="status-badge" class="status-badge status-connecting">Connecting...</span>
+        </div>
+    </div>
+
+    <div class="summary-bar" id="summary">
+        <div class="stat">
+            <span class="stat-label">Solved:</span>
+            <span class="stat-value green" id="solved-count">0</span>
+        </div>
+        <div class="stat">
+            <span class="stat-label">Attempted:</span>
+            <span class="stat-value" id="attempted-count">0</span>
+        </div>
+        <div class="stat">
+            <span class="stat-label">Pass Rate:</span>
+            <span class="stat-value" id="pass-rate">0%</span>
+        </div>
+        <div class="stat">
+            <span class="stat-label">Flag Attempts:</span>
+            <span class="stat-value" id="flag-attempts">0</span>
+        </div>
+        <span class="stat-sep">|</span>
+        <div class="stat">
+            <span class="stat-label">EASY:</span>
+            <span class="stat-value green" id="tier-EASY">0</span>
+        </div>
+        <div class="stat">
+            <span class="stat-label">MED:</span>
+            <span class="stat-value" id="tier-MED">0</span>
+        </div>
+        <div class="stat">
+            <span class="stat-label">HARD:</span>
+            <span class="stat-value yellow" id="tier-HARD">0</span>
+        </div>
+        <div class="stat">
+            <span class="stat-label">VHARD:</span>
+            <span class="stat-value red" id="tier-VHARD">0</span>
+        </div>
+        <div class="stat">
+            <span class="stat-label">CVE:</span>
+            <span class="stat-value" id="tier-CVE">0</span>
+        </div>
+    </div>
+
+    <div class="feed" id="feed">
+        <div class="empty-state" id="empty-state">Waiting for agent activity...</div>
+    </div>
+
+    <script>
+        const feed = document.getElementById('feed');
+        const emptyState = document.getElementById('empty-state');
+        const statusBadge = document.getElementById('status-badge');
+        let evtSource = null;
+        let pollInterval = null;
+
+        const icons = {
+            'mcp_connect': '🔌', 'mcp_disconnect': '⏏',
+            'benchmark_start': '▶️', 'benchmark_stop': '⏹',
+            'flag_correct': '🏴', 'flag_incorrect': '❌',
+            'flag_submit': '🏳', 'http_access': '🌐', 'error': '⚠'
+        };
+
+        const severityClass = {
+            'success': 'event-success', 'error': 'event-error',
+            'warning': 'event-warning', 'info': 'event-info'
+        };
+
+        function formatTime(ts) {
+            if (!ts) return '--:--:--';
+            const d = new Date(ts);
+            return d.toLocaleTimeString('en-US', { hour12: false });
+        }
+
+        function formatEvent(evt) {
+            const bench = evt.benchmark_id
+                ? '<span class="event-bench">' + evt.benchmark_id + '</span>'
+                : '';
+            const d = evt.details || {};
+
+            switch (evt.event_type) {
+                case 'benchmark_start':
+                    return 'Started ' + bench + (d.port ? ' on port ' + d.port : '');
+                case 'benchmark_stop':
+                    return 'Stopped ' + bench + (d.runtime_seconds ? ' (' + Number(d.runtime_seconds).toFixed(1) + 's)' : '');
+                case 'flag_correct':
+                    return 'FLAG CAPTURED for ' + bench + '!' +
+                        (d.time_to_capture ? ' Time: ' + Number(d.time_to_capture).toFixed(1) + 's' : '') +
+                        (d.attempts ? ' (Attempt ' + d.attempts + ')' : '');
+                case 'flag_incorrect':
+                    return 'Flag rejected for ' + bench + ' — ' + (d.message || 'Incorrect') +
+                        (d.attempts ? ' (Attempt ' + d.attempts + ')' : '');
+                case 'mcp_connect':
+                    return 'Agent connected via MCP' + (d.agent_name ? ' (' + d.agent_name + ')' : '');
+                case 'mcp_disconnect':
+                    return 'Agent disconnected';
+                case 'http_access':
+                    return 'Accessed ' + (d.url || bench);
+                case 'error':
+                    return 'Error: ' + (d.message || JSON.stringify(d));
+                default:
+                    return evt.event_type + ': ' + JSON.stringify(d);
+            }
+        }
+
+        function addEvent(evt, animate) {
+            if (emptyState) {
+                emptyState.remove();
+            }
+            const div = document.createElement('div');
+            div.className = 'event ' + (severityClass[evt.severity] || 'event-info');
+            if (animate) div.classList.add('event-new');
+            div.innerHTML =
+                '<span class="event-time">' + formatTime(evt.timestamp) + '</span>' +
+                '<span class="event-icon">' + (icons[evt.event_type] || '📋') + '</span>' +
+                '<span class="event-text">' + formatEvent(evt) + '</span>';
+            feed.appendChild(div);
+            feed.scrollTop = feed.scrollHeight;
+        }
+
+        function updateSummary(data) {
+            document.getElementById('solved-count').textContent = data.benchmarks_solved || 0;
+            document.getElementById('attempted-count').textContent = data.benchmarks_attempted || 0;
+            document.getElementById('pass-rate').textContent = data.pass_rate || '0%';
+            document.getElementById('flag-attempts').textContent = data.total_flag_attempts || 0;
+            if (data.tiers) {
+                for (const tier of ['EASY', 'MED', 'HARD', 'VHARD', 'CVE']) {
+                    const el = document.getElementById('tier-' + tier);
+                    if (el && data.tiers[tier]) {
+                        el.textContent = data.tiers[tier].solved + '/' + data.tiers[tier].attempted;
+                    }
+                }
+            }
+        }
+
+        function refreshSummary() {
+            fetch('/api/agent-summary')
+                .then(function(r) { return r.json(); })
+                .then(updateSummary)
+                .catch(function() {});
+        }
+
+        function loadHistory() {
+            fetch('/api/activity-history?limit=200')
+                .then(function(r) { return r.json(); })
+                .then(function(data) {
+                    feed.innerHTML = '';
+                    if (data.events && data.events.length > 0) {
+                        data.events.forEach(function(e) { addEvent(e, false); });
+                    } else {
+                        feed.innerHTML = '<div class="empty-state">Waiting for agent activity...</div>';
+                    }
+                })
+                .catch(function() {});
+            refreshSummary();
+        }
+
+        function connectSSE() {
+            if (evtSource) evtSource.close();
+
+            statusBadge.className = 'status-badge status-connecting';
+            statusBadge.textContent = 'Connecting...';
+
+            evtSource = new EventSource('/api/activity-feed');
+
+            evtSource.onopen = function() {
+                statusBadge.className = 'status-badge status-connected';
+                statusBadge.textContent = 'Live';
+                // Stop polling fallback if active
+                if (pollInterval) {
+                    clearInterval(pollInterval);
+                    pollInterval = null;
+                }
+            };
+
+            evtSource.onmessage = function(e) {
+                var evt = JSON.parse(e.data);
+                addEvent(evt, true);
+                refreshSummary();
+            };
+
+            evtSource.onerror = function() {
+                statusBadge.className = 'status-badge status-disconnected';
+                statusBadge.textContent = 'Disconnected';
+                evtSource.close();
+                // Fallback to polling
+                if (!pollInterval) {
+                    pollInterval = setInterval(function() {
+                        loadHistory();
+                    }, 5000);
+                }
+                // Retry SSE after 10s
+                setTimeout(connectSSE, 10000);
+            };
+        }
+
+        // Clear button handler
+        document.getElementById('btn-clear').addEventListener('click', function() {
+            if (!confirm('Clear all activity data?')) return;
+            fetch('/api/activity-clear', { method: 'POST' })
+                .then(function() {
+                    feed.innerHTML = '<div class="empty-state">Waiting for agent activity...</div>';
+                    refreshSummary();
+                });
+        });
+
+        // Initial load
+        loadHistory();
+        connectSSE();
+
+        // Periodic summary refresh
+        setInterval(refreshSummary, 10000);
+    </script>
+</body>
+</html>

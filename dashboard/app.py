@@ -20,9 +20,12 @@ from api.flag_submission import FlagValidator
 from api.container_manager import ContainerManager
 from api.session_tracker import SessionTracker
 from api.metrics import MetricsTracker
+from api.activity_logger import log_activity
+from api.activity_routes import activity_bp
 
 app = Flask(__name__, static_folder='static', template_folder='templates')
 CORS(app)  # Enable CORS for API access
+app.register_blueprint(activity_bp)
 
 # Configuration
 BENCHMARKS_JSON_FILE = os.path.join(os.path.dirname(__file__), 'data', 'benchmarks.json')
@@ -392,6 +395,18 @@ def submit_flag(benchmark_id):
                 metadata=data.get('metadata')
             )
 
+        # Log activity
+        if result.get('correct'):
+            log_activity("flag_correct", benchmark_id, {
+                "attempts": result.get("attempts"),
+                "time_to_capture": result.get("time_to_capture")
+            }, "success", session_id=session_id)
+        elif result.get('correct') is False:
+            log_activity("flag_incorrect", benchmark_id, {
+                "attempts": result.get("attempts"),
+                "message": result.get("message", "Incorrect flag")
+            }, "error", session_id=session_id)
+
         # Return appropriate status code
         if result['status'] == 'error' and 'not found' in result.get('message', '').lower():
             return jsonify(result), 404
@@ -425,6 +440,10 @@ def start_benchmark(benchmark_id):
         )
 
         if result['status'] == 'success':
+            log_activity("benchmark_start", benchmark_id, {
+                "port": result.get("port"),
+                "message": result.get("message", "")
+            }, "info")
             flag_validator.mark_container_started(benchmark_id)
             flag_validator.clear_runtime_flag(benchmark_id)  # clear any stale flag from previous run
 
@@ -460,6 +479,9 @@ def stop_benchmark(benchmark_id):
         result = container_manager.stop_container(benchmark_id)
 
         if result['status'] == 'success':
+            log_activity("benchmark_stop", benchmark_id, {
+                "runtime_seconds": result.get("runtime_seconds")
+            }, "info")
             flag_validator.mark_container_stopped(benchmark_id)
             flag_validator.clear_runtime_flag(benchmark_id)
 
