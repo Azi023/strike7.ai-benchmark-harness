@@ -1,0 +1,54 @@
+name: Deploy Dashboard
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Deploy to VPS via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: 22
+          script_stop: true
+          script: |
+            set -e
+            cd /opt/strike7.ai-benchmark-harness
+
+            # Keep local changes off main; fail fast if VPS checkout is dirty.
+            if [ -n "$(git status --porcelain)" ]; then
+              echo "Working tree is dirty on VPS. Commit/stash before deploy."
+              exit 1
+            fi
+
+            git fetch origin main
+            git checkout main
+            git pull --ff-only origin main
+
+            systemctl restart strike7-dashboard
+            sleep 3
+            systemctl is-active --quiet strike7-dashboard
+
+            # Basic API health verification
+            curl -fsS http://localhost:5500/api/health >/dev/null
+
+      - name: Post-deploy status
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: 22
+          script: |
+            systemctl --no-pager --full status strike7-dashboard | head -n 25
+            journalctl -u strike7-dashboard -n 30 --no-pager
