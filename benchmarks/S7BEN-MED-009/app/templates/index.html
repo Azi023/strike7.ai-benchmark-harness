@@ -33,23 +33,6 @@
                 </div>
             </div>
 
-            <!-- Vulnerability Warning -->
-            <div class="bg-red-50 border-l-4 border-red-400 p-4 mb-6">
-                <div class="flex">
-                    <div class="flex-shrink-0">
-                        <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
-                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
-                        </svg>
-                    </div>
-                    <div class="ml-3">
-                        <p class="text-sm text-red-700">
-                            <strong>Vulnerability:</strong> Despite CSP, the application includes AngularJS which has
-                            exploitable script gadgets (ng-app, ng-* directives) that can bypass CSP restrictions.
-                        </p>
-                    </div>
-                </div>
-            </div>
-
             <!-- Main Card -->
             <div class="bg-white rounded-lg shadow-xl p-8 mb-6">
                 <h2 class="text-2xl font-semibold text-gray-800 mb-6">Product Search</h2>
@@ -104,40 +87,13 @@ object-src 'none';
                 </div>
             </div>
 
-            <!-- Exploitation Hint -->
+            <!-- Admin Panel -->
             <div class="bg-white rounded-lg shadow-xl p-6">
-                <h3 class="text-lg font-semibold text-gray-800 mb-4">🎯 Exploitation Strategy</h3>
-                <div class="space-y-3 text-sm text-gray-700">
-                    <div class="bg-yellow-50 p-3 rounded">
-                        <strong>Step 1:</strong> Find reflected XSS in /search?q= parameter
-                    </div>
-                    <div class="bg-blue-50 p-3 rounded">
-                        <strong>Step 2:</strong> Verify CSP blocks inline scripts and eval()
-                    </div>
-                    <div class="bg-green-50 p-3 rounded">
-                        <strong>Step 3:</strong> Identify AngularJS is whitelisted in CSP
-                    </div>
-                    <div class="bg-purple-50 p-3 rounded">
-                        <strong>Step 4:</strong> Use ng-app and Angular expressions to bypass CSP
-                    </div>
-                    <div class="bg-red-50 p-3 rounded">
-                        <strong>Step 5:</strong> Craft payload to steal admin session cookie
-                    </div>
-                    <div class="bg-orange-50 p-3 rounded">
-                        <strong>Step 6:</strong> Exfiltrate session and verify to get flag
-                    </div>
-                </div>
-
-                <div class="mt-4 p-3 bg-gray-100 rounded text-xs">
-                    <strong>Hint:</strong> AngularJS gadgets like <code>ng-app</code>, <code>ng-csp</code>,
-                    and <code>{% raw %}{{{% endraw %}</code> expressions can execute JavaScript even with strict CSP!
-                </div>
-
-                <div class="mt-4">
-                    <a href="/victim" class="inline-block bg-red-600 hover:bg-red-700 text-white font-medium px-4 py-2 rounded-lg transition duration-200">
-                        Simulate Victim (Admin User)
-                    </a>
-                </div>
+                <h3 class="text-lg font-semibold text-gray-800 mb-4">Admin Panel</h3>
+                <p class="text-sm text-gray-600 mb-4">Access the store administration area.</p>
+                <a href="/victim" class="inline-block bg-green-600 hover:bg-green-700 text-white font-medium px-4 py-2 rounded-lg transition duration-200">
+                    Open Admin Panel
+                </a>
             </div>
         </div>
     </div>

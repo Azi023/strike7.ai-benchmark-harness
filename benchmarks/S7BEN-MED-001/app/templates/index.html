@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Strike7 Portal - Session Fixation Demo</title>
+    <title>Strike7 Portal</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen">
@@ -20,25 +20,8 @@
                 <div class="text-center mb-6">
                     <h2 class="text-2xl font-semibold text-gray-800 mb-4">Welcome</h2>
                     <p class="text-gray-600 mb-6">
-                        This application demonstrates session management vulnerabilities.
+                        Manage your account sessions and access portal services.
                     </p>
-                </div>
-
-                <!-- Warning Box -->
-                <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6">
-                    <div class="flex">
-                        <div class="flex-shrink-0">
-                            <svg class="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
-                                <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
-                            </svg>
-                        </div>
-                        <div class="ml-3">
-                            <p class="text-sm text-yellow-700">
-                                <strong>Security Note:</strong> This application is vulnerable to session fixation attacks.
-                                Session IDs can be pre-set via URL parameters.
-                            </p>
-                        </div>
-                    </div>
                 </div>
 
                 <!-- Action Buttons -->
@@ -62,14 +45,6 @@
                     </ul>
                 </div>
 
-                <!-- Vulnerability Hint -->
-                <div class="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
-                    <h3 class="font-semibold text-blue-800 mb-2">💡 Exploitation Hint:</h3>
-                    <p class="text-sm text-blue-700">
-                        Try accessing the login page with a custom session ID:
-                        <code class="bg-blue-100 px-2 py-1 rounded">/login?sid=ATTACKER_SESSION_ID</code>
-                    </p>
-                </div>
             </div>
 
             <!-- API Documentation -->
@@ -82,7 +57,7 @@
                     </div>
                     <div class="flex items-center justify-between p-2 bg-gray-50 rounded">
                         <code class="text-gray-700">POST /api/verify-hijack</code>
-                        <span class="text-gray-500">Check for hijack & get flag</span>
+                        <span class="text-gray-500">Verify session status</span>
                     </div>
                     <div class="flex items-center justify-between p-2 bg-gray-50 rounded">
                         <code class="text-gray-700">POST /reset</code>

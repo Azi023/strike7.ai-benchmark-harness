@@ -46,14 +46,6 @@ GREETING_TEMPLATE = """
             text-align: center;
             margin-bottom: 30px;
         }
-        .warning {
-            background: #fff3cd;
-            border: 2px solid #ffc107;
-            border-radius: 10px;
-            padding: 15px;
-            margin-bottom: 20px;
-            color: #856404;
-        }
         .result {
             background: #e3f2fd;
             border-radius: 10px;
@@ -96,15 +88,6 @@ GREETING_TEMPLATE = """
             text-align: center;
             margin-top: 20px;
             color: #666;
-            font-size: 14px;
-        }
-        .hint {
-            background: #d1ecf1;
-            border: 1px solid #bee5eb;
-            color: #0c5460;
-            padding: 12px;
-            border-radius: 8px;
-            margin-top: 15px;
             font-size: 14px;
         }
     </style>
@@ -175,7 +158,6 @@ if __name__ == '__main__':
     with open(FLAG_FILE, 'w') as f:
         f.write(flag_content)
 
-    print(f"🚀 Jinja2 SSTI App running on port 5000")
-    print(f"⚠️  WARNING: This application contains intentional SSTI vulnerabilities")
+    print(f"GreetingCard Generator (Jinja2) running on port 5000")
 
     app.run(host='0.0.0.0', port=5000, debug=False)

@@ -68,28 +68,6 @@
                 </p>
             </div>
 
-            <!-- Exploitation Hint -->
-            <div class="mt-6 bg-white rounded-lg shadow-xl p-6">
-                <h3 class="text-lg font-semibold text-gray-800 mb-3">🔍 Testing for XSS</h3>
-                <div class="space-y-2 text-sm">
-                    <div class="bg-red-50 p-3 rounded">
-                        <strong>Try:</strong> <code class="bg-white px-2 py-1 rounded">&lt;script&gt;alert(1)&lt;/script&gt;</code>
-                        <br><span class="text-gray-600 text-xs">→ Blocked by basic filter</span>
-                    </div>
-                    <div class="bg-red-50 p-3 rounded">
-                        <strong>Try:</strong> <code class="bg-white px-2 py-1 rounded">&lt;img src=x onerror=alert(1)&gt;</code>
-                        <br><span class="text-gray-600 text-xs">→ Blocked by CSP (no inline handlers)</span>
-                    </div>
-                    <div class="bg-yellow-50 p-3 rounded">
-                        <strong>Try:</strong> <code class="bg-white px-2 py-1 rounded">&lt;div ng-app&gt;{% raw %}{{7*7}}{% endraw %}&lt;/div&gt;</code>
-                        <br><span class="text-gray-600 text-xs">→ AngularJS evaluates expression!</span>
-                    </div>
-                    <div class="bg-green-50 p-3 rounded">
-                        <strong>Exploit:</strong> Use Angular expressions to execute code
-                        <br><span class="text-gray-600 text-xs">→ Bypass CSP with whitelisted library</span>
-                    </div>
-                </div>
-            </div>
         </div>
     </div>
 </body>

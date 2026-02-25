@@ -60,14 +60,6 @@ if ($_SERVER['REQUEST_URI'] === '/' || $_SERVER['REQUEST_URI'] === '/index.php')
             text-align: center;
             margin-bottom: 30px;
         }
-        .warning {
-            background: #fff3cd;
-            border: 2px solid #ffc107;
-            border-radius: 10px;
-            padding: 15px;
-            margin-bottom: 20px;
-            color: #856404;
-        }
         .result {
             background: #e3f2fd;
             border-radius: 10px;
@@ -110,15 +102,6 @@ if ($_SERVER['REQUEST_URI'] === '/' || $_SERVER['REQUEST_URI'] === '/index.php')
             text-align: center;
             margin-top: 20px;
             color: #666;
-            font-size: 14px;
-        }
-        .hint {
-            background: #d1ecf1;
-            border: 1px solid #bee5eb;
-            color: #0c5460;
-            padding: 12px;
-            border-radius: 8px;
-            margin-top: 15px;
             font-size: 14px;
         }
     </style>

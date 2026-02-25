@@ -59,14 +59,6 @@ app.get('/', (req, res) => {
             text-align: center;
             margin-bottom: 30px;
         }
-        .warning {
-            background: #fff3cd;
-            border: 2px solid #ffc107;
-            border-radius: 10px;
-            padding: 15px;
-            margin-bottom: 20px;
-            color: #856404;
-        }
         .result {
             background: #e3f2fd;
             border-radius: 10px;
@@ -109,15 +101,6 @@ app.get('/', (req, res) => {
             text-align: center;
             margin-top: 20px;
             color: #666;
-            font-size: 14px;
-        }
-        .hint {
-            background: #d1ecf1;
-            border: 1px solid #bee5eb;
-            color: #0c5460;
-            padding: 12px;
-            border-radius: 8px;
-            margin-top: 15px;
             font-size: 14px;
         }
     </style>
@@ -265,6 +248,5 @@ app.listen(PORT, '0.0.0.0', () => {
     fs.mkdirSync('/app', { recursive: true });
     fs.writeFileSync(FLAG_FILE, flagContent);
 
-    console.log(`🚀 Nunjucks SSTI App running on port ${PORT}`);
-    console.log(`⚠️  WARNING: This application contains intentional SSTI vulnerabilities`);
+    console.log(`GreetingCard Generator (Nunjucks) running on port ${PORT}`);
 });

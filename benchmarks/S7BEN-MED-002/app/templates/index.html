@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Strike7 File Processor - TOCTOU Demo</title>
+    <title>Strike7 File Processor</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gradient-to-br from-purple-50 to-blue-100 min-h-screen">
@@ -13,23 +13,6 @@
             <div class="text-center mb-8">
                 <h1 class="text-4xl font-bold text-gray-800 mb-2">Strike7 File Processor</h1>
                 <p class="text-gray-600">Secure File Validation & Processing System</p>
-            </div>
-
-            <!-- Warning Box -->
-            <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6">
-                <div class="flex">
-                    <div class="flex-shrink-0">
-                        <svg class="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
-                            <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
-                        </svg>
-                    </div>
-                    <div class="ml-3">
-                        <p class="text-sm text-yellow-700">
-                            <strong>TOCTOU Vulnerability:</strong> This system validates files before processing,
-                            but there's a race window between validation and processing (~200ms).
-                        </p>
-                    </div>
-                </div>
             </div>
 
             <!-- Upload Section -->
@@ -83,25 +66,6 @@
                 <div id="processResult" class="mt-4 hidden"></div>
             </div>
 
-            <!-- Vulnerability Info -->
-            <div class="bg-white rounded-lg shadow-xl p-6 mb-6">
-                <h3 class="text-lg font-semibold text-gray-800 mb-4">🎯 Exploitation Strategy</h3>
-                <div class="space-y-3 text-sm text-gray-700">
-                    <div class="bg-purple-50 p-3 rounded">
-                        <strong>Race Window:</strong> ~200ms between validation and processing
-                    </div>
-                    <div class="bg-blue-50 p-3 rounded">
-                        <strong>Attack Vector 1:</strong> Upload valid file → Validate → Replace with symlink to /flag.txt → Process
-                    </div>
-                    <div class="bg-green-50 p-3 rounded">
-                        <strong>Attack Vector 2:</strong> Upload valid file → Validate → Replace file content → Process
-                    </div>
-                    <div class="bg-yellow-50 p-3 rounded">
-                        <strong>Goal:</strong> Read /flag.txt to get dynamic flag
-                    </div>
-                </div>
-            </div>
-
             <!-- API Documentation -->
             <div class="bg-white rounded-lg shadow-xl p-6">
                 <h3 class="text-lg font-semibold text-gray-800 mb-4">API Endpoints</h3>
@@ -112,11 +76,11 @@
                     </div>
                     <div class="flex items-center justify-between p-2 bg-gray-50 rounded">
                         <code class="text-gray-700">POST /validate/&lt;file_id&gt;</code>
-                        <span class="text-gray-500">Validate file (TIME OF CHECK)</span>
+                        <span class="text-gray-500">Validate file</span>
                     </div>
                     <div class="flex items-center justify-between p-2 bg-gray-50 rounded">
                         <code class="text-gray-700">POST /process/&lt;file_id&gt;</code>
-                        <span class="text-gray-500">Process file (TIME OF USE)</span>
+                        <span class="text-gray-500">Process file</span>
                     </div>
                     <div class="flex items-center justify-between p-2 bg-gray-50 rounded">
                         <code class="text-gray-700">GET /api/files</code>
@@ -190,7 +154,7 @@
                     showResult(resultDiv, 'success', `
                         <strong>✅ Validation Passed!</strong><br>
                         ${data.message}<br>
-                        <span class="text-sm mt-2 block">Token stored. Click "Process" within race window (200ms).</span>
+                        <span class="text-sm mt-2 block">Token stored. Click "Process" to continue.</span>
                     `);
                 } else {
                     showResult(resultDiv, 'error', data.message);
@@ -229,7 +193,7 @@
 
                 if (data.exploitation_detected) {
                     showResult(resultDiv, 'exploit', `
-                        <h4 class="text-lg font-bold text-green-800 mb-2">🎉 TOCTOU EXPLOITATION SUCCESSFUL!</h4>
+                        <h4 class="text-lg font-bold text-green-800 mb-2">Processing Complete</h4>
                         <p class="text-sm text-green-700 mb-3">${data.message}</p>
                         <div class="bg-green-100 p-3 rounded mb-3">
                             <strong>FLAG:</strong> <code class="text-lg">${data.flag}</code>
