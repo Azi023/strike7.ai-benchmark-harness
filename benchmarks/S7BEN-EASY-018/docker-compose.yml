@@ -4,7 +4,7 @@ services:
     build: ./app
     ports: ["5018:8107"]
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8107/"]
+      test: ["CMD", "curl", "-f", "http://localhost:8107/global-protect/login.esp"]
       interval: 10s
       timeout: 5s
       retries: 3

