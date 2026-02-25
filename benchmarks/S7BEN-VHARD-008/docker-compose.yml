@@ -47,8 +47,8 @@ services:
     build: ./admin-panel
     container_name: nosql-admin
     hostname: admin-panel
-    ports:
-      - "5057:4000"
+    expose:
+      - "4000"
     networks:
       - nosql-net
     environment:

@@ -20,8 +20,8 @@ services:
   oauth-provider:
     build: ./oauth-provider
     container_name: s7ben-vhard-012-oauth
-    ports:
-      - "5061:8092"
+    expose:
+      - "8092"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8092/"]
       interval: 10s

@@ -22,8 +22,8 @@ services:
     build: ./nunjucks-app
     container_name: ssti-nunjucks
     hostname: nunjucks-app
-    ports:
-      - "5058:3000"
+    expose:
+      - "3000"
     environment:
       - FLAG_NUNJUCKS=${FLAG_NUNJUCKS:-S7BEN{nunjucks_ssti_nodejs_rce_e5f6g7h8}}
     networks:
@@ -40,8 +40,8 @@ services:
     build: ./twig-app
     container_name: ssti-twig
     hostname: twig-app
-    ports:
-      - "5058:80"
+    expose:
+      - "80"
     environment:
       - FLAG_TWIG=${FLAG_TWIG:-S7BEN{twig_ssti_php_rce_i9j0k1l2}}
     networks:

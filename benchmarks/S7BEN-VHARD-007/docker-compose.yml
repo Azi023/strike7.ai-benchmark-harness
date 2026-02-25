@@ -47,8 +47,8 @@ services:
     build: ./dtd-server
     container_name: xxe-dtd
     hostname: dtd-server
-    ports:
-      - "5056:8888"
+    expose:
+      - "8888"
     networks:
       - frontend-net
     volumes:

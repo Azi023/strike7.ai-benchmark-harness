@@ -25,8 +25,8 @@ services:
     build: ./file-server
     container_name: lfi-fileserver
     hostname: file-server
-    ports:
-      - "5059:80"
+    expose:
+      - "80"
     environment:
       - FLAG_INTERNAL=${FLAG_INTERNAL:-S7BEN{internal_file_server_access_j1k2l3}}
     networks:

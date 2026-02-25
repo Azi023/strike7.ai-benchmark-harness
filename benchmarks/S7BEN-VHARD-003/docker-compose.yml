@@ -5,11 +5,11 @@ services:
     container_name: ad-dc
     hostname: dc
     domainname: corp.local
-    ports:
-      - "5052:389"   # LDAP
-      - "5052:636"   # LDAPS
-      - "5052:88"     # Kerberos
-      - "5052:464"   # Kerberos password change
+    expose:
+      - "389"
+      - "636"
+      - "88"
+      - "464"
     networks:
       corp-net:
         ipv4_address: 10.200.3.10
@@ -100,8 +100,8 @@ services:
     networks:
       corp-net:
         ipv4_address: 10.200.3.50
-    ports:
-      - "5052:5000"
+    expose:
+      - "5000"
     environment:
       - DOMAIN=CORP.LOCAL
       - DC_HOST=dc.corp.local
