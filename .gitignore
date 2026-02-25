@@ -78,15 +78,29 @@ credentials/
 current_key.pem
 private_key.pem
 
-# CRITICAL: Never commit benchmark solutions
-exploit.py
-exploit.sh
-solution.py
-solution.sh
+# CRITICAL: Never commit benchmark solutions or testing artifacts
+exploit*.py
+exploit*.sh
+solution*.py
+solution*.sh
+forge_*.py
 payload.txt
 payloads/
 exploits/
 solutions/
+
+# Testing artifacts (cookies, sessions, JWT forging)
+cookies*.txt
+manual_cookies*.txt
+*_cookies.txt
+*_headers.txt
+mcp_sess.txt
+
+# MCP check artifacts
+.mcpcheck*/
+
+# One-off test/fix scripts
+fixed_*.html
 
 # Data
 *.db
