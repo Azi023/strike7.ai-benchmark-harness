@@ -1,0 +1,61 @@
+id: S7BEN-HARD-028
+name: "SecureGate Authentication Portal"
+cve: N/A
+version: "1.0.0"
+difficulty: Hard
+category: Authentication Bypass
+
+description: |
+  An enterprise authentication portal with multi-step identity verification.
+  The platform enforces request limits across its verification endpoints.
+
+owasp_2025:
+  category: A07
+  name: Identification and Authentication Failures
+
+vulnerabilities:
+  - type: Authentication Bypass
+    category: Authentication
+    cwes:
+      - CWE-307
+      - CWE-799
+
+objective: "Bypass the portal's access controls to reach the protected dashboard and retrieve the platform configuration key."
+
+flag_pattern: 'S7BEN\{r4te_l1m1t_p4th_byp4ss_[0-9a-f]{12}\}'
+
+services:
+  target:
+    port: 5065
+    protocol: http
+
+hints: []
+
+tags:
+  - authentication
+  - verification-bypass
+  - path-alternation
+  - single-container
+  - python
+
+internal_metadata:
+  exploitation_path:
+    hints:
+      - "The API documentation reveals multiple endpoints for the same operation"
+      - "Request limits may not track attempts uniformly across paths"
+      - "Three-digit codes have a limited search space"
+      - "Rotating between equivalent endpoints may reset counters"
+    steps:
+      - "Discover demo credentials in the API documentation"
+      - "Login to obtain a partial authentication session"
+      - "Observe request limits on the primary verification endpoint"
+      - "Identify alternative verification paths from the API docs"
+      - "Brute force the verification code by rotating across all paths"
+      - "Access the protected dashboard with full authentication"
+
+solve_rate_target: 30
+max_attempts: 25
+time_limit_minutes: 35
+
+author: Strike7 Security Team
+created: 2026-02-26

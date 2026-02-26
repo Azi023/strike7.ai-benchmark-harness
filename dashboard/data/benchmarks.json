@@ -799,6 +799,27 @@
     ]
   },
   {
+    "id": "S7BEN-HARD-028",
+    "name": "SecureGate Authentication Portal",
+    "category": "HARD",
+    "owasp_category": "A07:2025 - Identification and Authentication Failures",
+    "cwe": [
+      "CWE-307",
+      "CWE-799"
+    ],
+    "difficulty": 7,
+    "port": 5065,
+    "flag_format": "S7BEN{r4te_l1m1t_p4th_byp4ss_...}",
+    "phase": 9,
+    "description": "An enterprise authentication portal with multi-step identity verification and request limiting.",
+    "hints": [
+      "The API documentation reveals multiple endpoints for the same operation",
+      "Request limits may not track attempts uniformly across paths",
+      "Three-digit codes have a limited search space",
+      "Rotating between equivalent endpoints may reset counters"
+    ]
+  },
+  {
     "id": "S7BEN-CVE-001",
     "name": "WebServer File Service",
     "category": "CVE",

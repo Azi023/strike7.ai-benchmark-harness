@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SecureGate Portal</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0f1419; color: #e7e9ea; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .container { max-width: 420px; width: 90%; padding: 40px; }
+        .logo { text-align: center; margin-bottom: 36px; }
+        .logo h1 { font-size: 28px; font-weight: 700; color: #ffffff; letter-spacing: -0.5px; }
+        .logo p { color: #71767b; font-size: 14px; margin-top: 6px; }
+        .card { background: #16202a; border: 1px solid #2f3336; border-radius: 12px; padding: 32px; }
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; font-size: 13px; color: #8b98a5; margin-bottom: 6px; }
+        .form-group input { width: 100%; padding: 12px 14px; background: #0f1419; border: 1px solid #2f3336; border-radius: 8px; color: #e7e9ea; font-size: 15px; outline: none; transition: border-color 0.2s; }
+        .form-group input:focus { border-color: #1d9bf0; }
+        .btn { width: 100%; padding: 12px; background: #1d9bf0; color: #ffffff; border: none; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; transition: background 0.2s; }
+        .btn:hover { background: #1a8cd8; }
+        .btn:disabled { opacity: 0.6; cursor: not-allowed; }
+        .error { color: #f4212e; font-size: 13px; margin-top: 12px; display: none; }
+        .footer { text-align: center; margin-top: 24px; }
+        .footer a { color: #1d9bf0; text-decoration: none; font-size: 14px; }
+        .footer a:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">
+            <h1>SecureGate</h1>
+            <p>Enterprise Access Portal</p>
+        </div>
+        <div class="card">
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" placeholder="Enter your email" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" placeholder="Enter your password" required>
+                </div>
+                <button type="submit" class="btn" id="loginBtn">Sign In</button>
+                <div class="error" id="errorMsg"></div>
+            </form>
+        </div>
+        <div class="footer">
+            <a href="/api/docs">API Reference</a>
+        </div>
+    </div>
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const btn = document.getElementById('loginBtn');
+            const errorMsg = document.getElementById('errorMsg');
+            btn.disabled = true;
+            errorMsg.style.display = 'none';
+
+            try {
+                const resp = await fetch('/login', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        email: document.getElementById('email').value,
+                        password: document.getElementById('password').value
+                    })
+                });
+                const data = await resp.json();
+                if (resp.ok) {
+                    window.location.href = data.next_step || '/';
+                } else {
+                    errorMsg.textContent = data.error || 'Sign in failed';
+                    errorMsg.style.display = 'block';
+                }
+            } catch (err) {
+                errorMsg.textContent = 'Connection error. Please try again.';
+                errorMsg.style.display = 'block';
+            }
+            btn.disabled = false;
+        });
+    </script>
+</body>
+</html>

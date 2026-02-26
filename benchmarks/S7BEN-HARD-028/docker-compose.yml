@@ -1,0 +1,17 @@
+
+services:
+  app:
+    build: .
+    container_name: securegate-auth-portal
+    hostname: securegate-app
+    ports:
+      - "5065:5000"
+    environment:
+      - FLASK_ENV=production
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+    restart: unless-stopped

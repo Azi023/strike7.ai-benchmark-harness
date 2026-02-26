@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SecureGate - Portal</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0f1419; color: #e7e9ea; min-height: 100vh; }
+        .topbar { background: #16202a; border-bottom: 1px solid #2f3336; padding: 14px 24px; display: flex; justify-content: space-between; align-items: center; }
+        .topbar h1 { font-size: 18px; font-weight: 700; }
+        .topbar .user { color: #8b98a5; font-size: 14px; }
+        .content { max-width: 720px; margin: 40px auto; padding: 0 20px; }
+        .welcome { margin-bottom: 28px; }
+        .welcome h2 { font-size: 22px; margin-bottom: 6px; }
+        .welcome p { color: #71767b; font-size: 14px; }
+        .card { background: #16202a; border: 1px solid #2f3336; border-radius: 10px; padding: 24px; margin-bottom: 16px; }
+        .card h3 { font-size: 15px; color: #1d9bf0; margin-bottom: 10px; }
+        .card p { color: #8b98a5; font-size: 14px; line-height: 1.5; }
+        .flag-display { background: #0f1419; border: 1px solid #2f3336; border-radius: 6px; padding: 16px; margin-top: 12px; font-family: monospace; font-size: 15px; color: #00ba7c; word-break: break-all; }
+        .stats { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 20px; }
+        .stat { background: #16202a; border: 1px solid #2f3336; border-radius: 8px; padding: 16px; text-align: center; }
+        .stat .value { font-size: 24px; font-weight: 700; color: #1d9bf0; }
+        .stat .label { font-size: 12px; color: #71767b; margin-top: 4px; }
+    </style>
+</head>
+<body>
+    <div class="topbar">
+        <h1>SecureGate Portal</h1>
+        <span class="user">{{ user.name }}</span>
+    </div>
+    <div class="content">
+        <div class="welcome">
+            <h2>Welcome, {{ user.name }}</h2>
+            <p>Your session is fully authenticated.</p>
+        </div>
+        <div class="stats">
+            <div class="stat">
+                <div class="value">3</div>
+                <div class="label">Active Projects</div>
+            </div>
+            <div class="stat">
+                <div class="value">12</div>
+                <div class="label">Team Members</div>
+            </div>
+            <div class="stat">
+                <div class="value">97%</div>
+                <div class="label">Uptime</div>
+            </div>
+        </div>
+        <div class="card">
+            <h3>Platform Configuration</h3>
+            <p>System access key for administrative operations:</p>
+            <div class="flag-display">{{ flag }}</div>
+        </div>
+        <div class="card">
+            <h3>Recent Activity</h3>
+            <p>No new notifications at this time.</p>
+        </div>
+    </div>
+</body>
+</html>

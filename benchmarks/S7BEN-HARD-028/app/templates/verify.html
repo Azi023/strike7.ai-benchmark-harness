@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SecureGate - Verification</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0f1419; color: #e7e9ea; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .container { max-width: 420px; width: 90%; padding: 40px; }
+        .logo { text-align: center; margin-bottom: 36px; }
+        .logo h1 { font-size: 28px; font-weight: 700; color: #ffffff; letter-spacing: -0.5px; }
+        .logo p { color: #71767b; font-size: 14px; margin-top: 6px; }
+        .card { background: #16202a; border: 1px solid #2f3336; border-radius: 12px; padding: 32px; text-align: center; }
+        .card p { color: #8b98a5; font-size: 14px; margin-bottom: 20px; }
+        .code-input { width: 120px; padding: 14px; background: #0f1419; border: 1px solid #2f3336; border-radius: 8px; color: #e7e9ea; font-size: 24px; font-family: monospace; text-align: center; letter-spacing: 8px; outline: none; transition: border-color 0.2s; }
+        .code-input:focus { border-color: #1d9bf0; }
+        .btn { width: 100%; padding: 12px; background: #1d9bf0; color: #ffffff; border: none; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; transition: background 0.2s; margin-top: 20px; }
+        .btn:hover { background: #1a8cd8; }
+        .btn:disabled { opacity: 0.6; cursor: not-allowed; }
+        .msg { font-size: 13px; margin-top: 12px; display: none; }
+        .msg.error { color: #f4212e; }
+        .msg.success { color: #00ba7c; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">
+            <h1>SecureGate</h1>
+            <p>Identity Verification</p>
+        </div>
+        <div class="card">
+            <p>Enter the verification code sent to your device.</p>
+            <form id="verifyForm">
+                <input type="text" id="code" name="code" class="code-input" maxlength="3" pattern="[0-9]{3}" placeholder="---" required autofocus>
+                <button type="submit" class="btn" id="verifyBtn">Verify</button>
+                <div class="msg" id="statusMsg"></div>
+            </form>
+        </div>
+    </div>
+    <script>
+        document.getElementById('verifyForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const btn = document.getElementById('verifyBtn');
+            const msg = document.getElementById('statusMsg');
+            btn.disabled = true;
+            msg.style.display = 'none';
+
+            try {
+                const resp = await fetch('/api/v1/verify-otp', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ code: document.getElementById('code').value })
+                });
+                const data = await resp.json();
+                if (resp.ok && data.redirect) {
+                    msg.className = 'msg success';
+                    msg.textContent = data.message || 'Verified';
+                    msg.style.display = 'block';
+                    setTimeout(() => window.location.href = data.redirect, 500);
+                } else {
+                    msg.className = 'msg error';
+                    msg.textContent = data.error || 'Verification failed';
+                    msg.style.display = 'block';
+                }
+            } catch (err) {
+                msg.className = 'msg error';
+                msg.textContent = 'Connection error. Please try again.';
+                msg.style.display = 'block';
+            }
+            btn.disabled = false;
+        });
+    </script>
+</body>
+</html>
