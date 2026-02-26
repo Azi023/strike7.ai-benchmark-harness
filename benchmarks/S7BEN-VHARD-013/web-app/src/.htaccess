@@ -1,0 +1,2 @@
+RewriteEngine On
+RewriteRule ^api/patch-status$ /patch.php [L,QSA]

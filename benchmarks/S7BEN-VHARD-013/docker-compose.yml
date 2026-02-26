@@ -1,0 +1,42 @@
+services:
+  web-app:
+    build: ./web-app
+    container_name: contenthub-web
+    hostname: contenthub-web
+    ports:
+      - "5080:80"
+    networks:
+      - frontend-net
+      - backend-net
+    depends_on:
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:80/health.php"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    container_name: contenthub-redis
+    hostname: redis
+    networks:
+      - backend-net
+    command: redis-server --appendonly yes --protected-mode no
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+    restart: unless-stopped
+
+networks:
+  frontend-net:
+    driver: bridge
+  backend-net:
+    driver: bridge
+    internal: true

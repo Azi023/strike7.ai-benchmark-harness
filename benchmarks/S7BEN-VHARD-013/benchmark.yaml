@@ -1,0 +1,66 @@
+id: S7BEN-VHARD-013
+name: "ContentHub Platform"
+cve: N/A
+version: "1.0.0"
+difficulty: Very Hard
+category: Deserialization
+
+description: |
+  An enterprise content management platform with link preview functionality,
+  session-based authentication, and an integrated SDK for data management.
+
+owasp_2025:
+  category: A08
+  name: Software and Data Integrity Failures
+
+vulnerabilities:
+  - type: Insecure Deserialization
+    category: Data Integrity
+    cwes:
+      - CWE-502
+      - CWE-918
+
+objective: "Exploit the platform's content features to gain unauthorized access and retrieve the configuration key from the server."
+
+flag_pattern: 'S7BEN\{r3d1s_s3ss10n_d3s3r14l1z3_[0-9a-f]{12}\}'
+
+services:
+  target:
+    port: 5080
+    protocol: http
+
+hints: []
+
+tags:
+  - php
+  - multi-stage
+  - session-management
+  - content-preview
+  - internal-services
+  - multi-container
+
+internal_metadata:
+  exploitation_path:
+    hints:
+      - "The link preview feature accepts more than just HTTP URLs"
+      - "Session data is stored in an external key-value store"
+      - "The status endpoint reveals how sessions are managed"
+      - "The SDK classes have cleanup methods that run automatically"
+      - "The gopher protocol allows sending raw TCP data"
+      - "The session key prefix and format can be used to inject crafted data"
+    steps:
+      - "Discover demo credentials from the API reference documentation"
+      - "Login and check the status endpoint for session configuration details"
+      - "Test the link preview feature with the gopher protocol to reach internal services"
+      - "Use gopher to send commands to the internal data store and inject a crafted session"
+      - "Identify the SDK class whose cleanup method writes to a file path"
+      - "Craft a serialized object that writes executable content to the uploads directory"
+      - "Trigger the crafted session by visiting a page with the injected session ID"
+      - "Access the written file to execute commands and retrieve the flag"
+
+solve_rate_target: 15
+max_attempts: 25
+time_limit_minutes: 45
+
+author: Strike7 Security Team
+created: 2026-02-26

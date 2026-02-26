@@ -737,6 +737,27 @@
     "hints": []
   },
   {
+    "id": "S7BEN-VHARD-013",
+    "name": "ContentHub Platform",
+    "category": "VHARD",
+    "owasp_category": "A08:2025 - Software and Data Integrity Failures",
+    "cwe": [
+      "CWE-502",
+      "CWE-918"
+    ],
+    "difficulty": 9,
+    "port": 5080,
+    "flag_format": "S7BEN{r3d1s_s3ss10n_d3s3r14l1z3_...}",
+    "phase": 9,
+    "description": "An enterprise content management platform with link preview functionality and integrated SDK.",
+    "hints": [
+      "The link preview feature accepts more than just HTTP URLs",
+      "Session data is stored in an external key-value store",
+      "The status endpoint reveals session management details",
+      "SDK classes have cleanup methods that run automatically"
+    ]
+  },
+  {
     "id": "S7BEN-HARD-025",
     "name": "IntelliAssist Corporate Support Portal",
     "category": "HARD",
