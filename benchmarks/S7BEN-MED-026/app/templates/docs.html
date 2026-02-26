@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Documentation - PackageForge</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0d1117; color: #c9d1d9; line-height: 1.6; }
+        .header { background: #161b22; border-bottom: 1px solid #30363d; padding: 1rem 2rem; display: flex; align-items: center; justify-content: space-between; }
+        .header h1 { font-size: 1.2rem; color: #58a6ff; }
+        .header a { color: #58a6ff; text-decoration: none; font-size: 0.9rem; }
+        .content { max-width: 900px; margin: 2rem auto; padding: 0 2rem; }
+        h2 { color: #58a6ff; margin: 2rem 0 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid #21262d; }
+        h3 { color: #c9d1d9; margin: 1.5rem 0 0.5rem; }
+        .info-box { background: #161b22; border: 1px solid #30363d; border-radius: 6px; padding: 1rem 1.2rem; margin: 1rem 0; }
+        .info-box p { margin: 0.3rem 0; }
+        .info-box code { background: #0d1117; padding: 0.15rem 0.4rem; border-radius: 3px; font-size: 0.9rem; color: #79c0ff; }
+        .endpoint { background: #161b22; border: 1px solid #30363d; border-radius: 6px; margin: 0.8rem 0; overflow: hidden; }
+        .endpoint-header { padding: 0.7rem 1rem; display: flex; align-items: center; gap: 0.8rem; border-bottom: 1px solid #21262d; }
+        .method { font-weight: 700; font-size: 0.8rem; padding: 0.2rem 0.5rem; border-radius: 3px; font-family: monospace; }
+        .get { background: #1f6feb33; color: #58a6ff; }
+        .post { background: #23863633; color: #3fb950; }
+        .path { font-family: monospace; color: #c9d1d9; }
+        .endpoint-desc { padding: 0.7rem 1rem; color: #8b949e; font-size: 0.9rem; }
+        pre { background: #0d1117; border: 1px solid #30363d; border-radius: 6px; padding: 1rem; overflow-x: auto; font-size: 0.85rem; margin: 0.8rem 0; }
+        code { font-family: 'SFMono-Regular', Consolas, monospace; }
+        .note { color: #8b949e; font-size: 0.9rem; font-style: italic; }
+        ul { margin: 0.5rem 0 0.5rem 1.5rem; }
+        li { margin: 0.3rem 0; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>PackageForge API Documentation</h1>
+        <a href="/">Home</a>
+    </div>
+    <div class="content">
+        <h2>Getting Started</h2>
+        <div class="info-box">
+            <p>Demo account for testing:</p>
+            <p>Username: <code>demo</code> &nbsp; Password: <code>demo2026</code></p>
+        </div>
+        <p>All API endpoints (except login and public pages) require an authenticated session. Send a POST to <code>/api/login</code> first to obtain a session cookie, then include that cookie in subsequent requests.</p>
+
+        <h2>Authentication</h2>
+
+        <div class="endpoint">
+            <div class="endpoint-header">
+                <span class="method post">POST</span>
+                <span class="path">/api/login</span>
+            </div>
+            <div class="endpoint-desc">
+                Authenticate and receive a session cookie.
+                <pre><code>{"username": "string", "password": "string"}</code></pre>
+            </div>
+        </div>
+
+        <div class="endpoint">
+            <div class="endpoint-header">
+                <span class="method post">POST</span>
+                <span class="path">/api/logout</span>
+            </div>
+            <div class="endpoint-desc">Clear the current session.</div>
+        </div>
+
+        <h2>Packages</h2>
+
+        <div class="endpoint">
+            <div class="endpoint-header">
+                <span class="method get">GET</span>
+                <span class="path">/api/packages</span>
+            </div>
+            <div class="endpoint-desc">List all registered packages with their latest version and owner.</div>
+        </div>
+
+        <div class="endpoint">
+            <div class="endpoint-header">
+                <span class="method get">GET</span>
+                <span class="path">/api/packages/{name}</span>
+            </div>
+            <div class="endpoint-desc">Get detailed information about a package, including all published versions and their build automation scripts.</div>
+        </div>
+
+        <div class="endpoint">
+            <div class="endpoint-header">
+                <span class="method post">POST</span>
+                <span class="path">/api/packages/{name}/versions</span>
+            </div>
+            <div class="endpoint-desc">
+                Publish a new version of a package. The request body should include version number, description, and optional build automation scripts.
+                <pre><code>{
+  "version": "1.0.1",
+  "description": "Release notes here",
+  "scripts": {
+    "postinstall": "echo 'Setup complete'"
+  }
+}</code></pre>
+            </div>
+        </div>
+
+        <h2>Builds</h2>
+
+        <div class="endpoint">
+            <div class="endpoint-header">
+                <span class="method post">POST</span>
+                <span class="path">/api/builds</span>
+            </div>
+            <div class="endpoint-desc">
+                Trigger a new build. Specify packages to install. The build system installs the latest version of each package and runs any configured build automation scripts.
+                <pre><code>{"packages": ["forge-core", "forge-auth"]}</code></pre>
+            </div>
+        </div>
+
+        <div class="endpoint">
+            <div class="endpoint-header">
+                <span class="method get">GET</span>
+                <span class="path">/api/builds</span>
+            </div>
+            <div class="endpoint-desc">List all builds for the current user.</div>
+        </div>
+
+        <div class="endpoint">
+            <div class="endpoint-header">
+                <span class="method get">GET</span>
+                <span class="path">/api/builds/{id}</span>
+            </div>
+            <div class="endpoint-desc">Get build details including status and execution log.</div>
+        </div>
+
+        <h2>Build Automation Scripts</h2>
+        <p>Packages can define scripts that run automatically during the build process:</p>
+        <ul>
+            <li><strong>postinstall</strong> — Runs after a package is installed during a build. Commonly used for setup tasks, configuration generation, or environment initialization.</li>
+        </ul>
+        <p class="note">Scripts are defined as part of the version metadata when publishing a new version.</p>
+
+        <h2>Version Format</h2>
+        <p>Versions follow semantic versioning: <code>MAJOR.MINOR.PATCH</code> (e.g., <code>1.0.0</code>, <code>2.1.3</code>). The build system always installs the latest available version of each requested package.</p>
+    </div>
+</body>
+</html>

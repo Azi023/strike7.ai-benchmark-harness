@@ -1,0 +1,11 @@
+{
+  "id": "S7BEN-MED-026",
+  "name": "PackageForge Registry",
+  "tier": 2,
+  "difficulty": "Medium",
+  "category": "Supply Chain",
+  "owasp_2025": "A08:2025 - Software and Data Integrity Failures",
+  "cwe": ["CWE-862", "CWE-829"],
+  "port": 5036,
+  "flag_pattern": "S7BEN{supply_ch41n_publ1sh_h1jack_[0-9a-f]{12}}"
+}

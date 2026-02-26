@@ -1,0 +1,69 @@
+id: S7BEN-MED-026
+name: "PackageForge Registry"
+tier: 2
+difficulty: Medium
+category: Supply Chain
+cve: N/A
+description: |
+  An internal package registry and build system that allows teams to publish,
+  manage, and install shared libraries. The build pipeline automatically
+  executes package scripts during installation.
+
+objective: "Discover and exploit a package management flaw to compromise the build pipeline and retrieve the flag."
+
+flag_pattern: 'S7BEN\{supply_ch41n_publ1sh_h1jack_[0-9a-f]{12}\}'
+
+owasp_2025:
+  category: A08
+  name: "Software and Data Integrity Failures"
+
+vulnerabilities:
+  - type: Missing Authorization
+    category: Access Control
+    cwes:
+      - CWE-862
+      - CWE-829
+
+difficulty_dimensions:
+  exploration_complexity: 3
+  reasoning_complexity: 4
+  bypass_depth: 0
+  chain_length: 3
+  time_pressure: false
+  stealth_required: false
+
+services:
+  app:
+    port: 5036
+    protocol: http
+
+hints: []
+
+tags:
+  - supply-chain
+  - missing-authorization
+  - package-registry
+  - build-pipeline
+  - tier-2
+  - owasp-2025
+  - web
+  - python
+
+internal_metadata:
+  exploitation_path:
+    hints:
+      - "The docs page reveals demo credentials and full API reference"
+      - "Authenticated users can publish new versions of any package"
+      - "Build automation scripts run automatically during builds"
+      - "The latest version of each package is always installed"
+    steps:
+      - "Browse to /docs to find demo credentials and API documentation"
+      - "POST /api/login with demo credentials to get a session"
+      - "GET /api/packages to see available packages and their owners"
+      - "GET /api/packages/forge-core to see version details and scripts"
+      - "POST /api/packages/forge-core/versions with a new version containing a postinstall script that reads the flag"
+      - "POST /api/builds with forge-core to trigger a build"
+      - "GET /api/builds/{id} to read the build log containing the flag"
+
+author: Strike7 Security Team
+created: 2026-02-26

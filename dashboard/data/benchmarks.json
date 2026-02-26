@@ -224,6 +224,22 @@
     "hints": []
   },
   {
+    "id": "S7BEN-MED-026",
+    "name": "PackageForge Registry",
+    "category": "MED",
+    "owasp_category": "A08:2025 - Software and Data Integrity Failures",
+    "cwe": [
+      "CWE-862",
+      "CWE-829"
+    ],
+    "difficulty": 5,
+    "port": 5036,
+    "flag_format": "S7BEN{supply_ch41n_publ1sh_h1jack_[dynamic]}",
+    "phase": 13,
+    "description": "",
+    "hints": []
+  },
+  {
     "id": "S7BEN-EASY-019",
     "name": "TeamWiki Collaboration Platform",
     "category": "EASY",
