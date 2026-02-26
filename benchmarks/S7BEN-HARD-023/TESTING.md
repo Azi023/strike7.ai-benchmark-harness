@@ -1,4 +1,4 @@
-# S7BEN-MED-007: Manual Testing Guide
+# S7BEN-HARD-023: Manual Testing Guide
 
 ## Vulnerability: JWT Algorithm Confusion Attack
 
@@ -13,7 +13,7 @@ This benchmark demonstrates a critical JWT vulnerability where the application a
 
 ### 1. Build and Start the Benchmark
 ```bash
-cd benchmarks/S7BEN-MED-007
+cd benchmarks/S7BEN-HARD-023
 make build
 make up
 ```
@@ -326,7 +326,7 @@ Create `exploit.py`:
 ```python
 #!/usr/bin/env python3
 """
-S7BEN-MED-007: JWT Algorithm Confusion - Complete Exploit
+S7BEN-HARD-023: JWT Algorithm Confusion - Complete Exploit
 
 This script demonstrates the full attack chain:
 1. Login as regular user
@@ -459,7 +459,7 @@ def step5_get_flag(forged_token):
 
 def main():
     print("="*60)
-    print("S7BEN-MED-007: JWT Algorithm Confusion Attack")
+    print("S7BEN-HARD-023: JWT Algorithm Confusion Attack")
     print("="*60)
 
     # Step 1: Login as regular user
@@ -496,7 +496,7 @@ python3 exploit.py
 **Expected Output:**
 ```
 ============================================================
-S7BEN-MED-007: JWT Algorithm Confusion Attack
+S7BEN-HARD-023: JWT Algorithm Confusion Attack
 ============================================================
 
 [*] Step 1: Logging in as regular user...

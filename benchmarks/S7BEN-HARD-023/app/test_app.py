@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Tests for S7BEN-MED-007 — JWT Algorithm Confusion Attack benchmark.
+Tests for S7BEN-HARD-023 — JWT Algorithm Confusion Attack benchmark.
 
 Run from the app/ directory:
     pip install -r requirements.txt pytest

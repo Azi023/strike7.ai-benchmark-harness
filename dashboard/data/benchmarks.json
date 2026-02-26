@@ -377,13 +377,13 @@
     "hints": []
   },
   {
-    "id": "S7BEN-MED-007",
+    "id": "S7BEN-HARD-023",
     "name": "SessionVault Auth Service",
-    "category": "MED",
+    "category": "HARD",
     "owasp_category": "A07:2025 - Authentication Failures",
-    "cwe": "CWE-384",
-    "difficulty": 5,
-    "port": 5036,
+    "cwe": "CWE-347",
+    "difficulty": 7,
+    "port": 5060,
     "flag_format": "S7BEN{...}",
     "phase": 2,
     "description": "",
