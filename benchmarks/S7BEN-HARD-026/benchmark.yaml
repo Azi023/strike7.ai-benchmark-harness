@@ -1,0 +1,60 @@
+id: S7BEN-HARD-026
+name: "DevConnect OAuth Platform"
+cve: N/A
+version: "1.0.0"
+difficulty: Hard
+category: Authentication Bypass
+
+description: |
+  A developer tools platform with OAuth2 single sign-on authentication.
+  Multiple interconnected services handle authorization flows and resource access.
+
+owasp_2025:
+  category: A07
+  name: Identification and Authentication Failures
+
+vulnerabilities:
+  - type: Authorization Bypass
+    category: Authentication
+    cwes:
+      - CWE-601
+      - CWE-863
+
+objective: "Gain elevated access to the platform's protected administrative resources."
+
+flag_pattern: 'S7BEN\{oauth_sc0pe_escalat10n_[0-9a-f]{12}\}'
+
+services:
+  target:
+    port: 5063
+    protocol: http
+
+hints: []
+
+tags:
+  - oauth2
+  - authentication-bypass
+  - scope-escalation
+  - error-disclosure
+  - multi-service
+  - python
+
+internal_metadata:
+  exploitation_path:
+    hints:
+      - "Error responses may reveal more than intended"
+      - "OAuth2 has multiple grant types with different security properties"
+      - "Scope validation is critical for authorization"
+      - "Internal services trust tokens issued by the auth server"
+    steps:
+      - "Discover OAuth flow from client-app login redirect"
+      - "Trigger error in callback to extract client credentials"
+      - "Use client_credentials grant with admin scope"
+      - "Use admin token to access protected resource API"
+
+solve_rate_target: 35
+max_attempts: 20
+time_limit_minutes: 30
+
+author: Strike7 Security Team
+created: 2026-02-26

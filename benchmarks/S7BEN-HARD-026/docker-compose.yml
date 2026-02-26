@@ -1,0 +1,75 @@
+
+services:
+  client-app:
+    build: ./client-app
+    container_name: oauth-client-app
+    hostname: client-app
+    ports:
+      - "5063:5000"
+    environment:
+      - FLASK_ENV=production
+      - AUTH_SERVER_URL=http://auth-server:8080
+      - RESOURCE_API_URL=http://resource-api:8000
+      - CLIENT_ID=devconnect-portal
+      - CLIENT_SECRET=dcp-s3cr3t-k3y-2026-xT9mK4
+      - JWT_SECRET=shared-jwt-signing-key-2026
+    networks:
+      - frontend-net
+      - backend-net
+    depends_on:
+      auth-server:
+        condition: service_healthy
+      resource-api:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+    restart: unless-stopped
+
+  auth-server:
+    build: ./auth-server
+    container_name: oauth-auth-server
+    hostname: auth-server
+    expose:
+      - "8080"
+    environment:
+      - JWT_SECRET=shared-jwt-signing-key-2026
+      - CLIENT_ID=devconnect-portal
+      - CLIENT_SECRET=dcp-s3cr3t-k3y-2026-xT9mK4
+    networks:
+      - backend-net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    restart: unless-stopped
+
+  resource-api:
+    build: ./resource-api
+    container_name: oauth-resource-api
+    hostname: resource-api
+    expose:
+      - "8000"
+    environment:
+      - JWT_SECRET=shared-jwt-signing-key-2026
+    networks:
+      - backend-net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    restart: unless-stopped
+
+networks:
+  frontend-net:
+    driver: bridge
+  backend-net:
+    driver: bridge
+    internal: true

@@ -757,6 +757,27 @@
     ]
   },
   {
+    "id": "S7BEN-HARD-026",
+    "name": "DevConnect OAuth Platform",
+    "category": "HARD",
+    "owasp_category": "A07:2025 - Identification and Authentication Failures",
+    "cwe": [
+      "CWE-601",
+      "CWE-863"
+    ],
+    "difficulty": 7,
+    "port": 5063,
+    "flag_format": "S7BEN{oauth_sc0pe_escalat10n_...}",
+    "phase": 9,
+    "description": "A developer tools platform with OAuth2 single sign-on authentication and multi-service architecture.",
+    "hints": [
+      "Error responses may reveal more than intended",
+      "OAuth2 has multiple grant types with different security properties",
+      "Scope validation is critical for authorization",
+      "Internal services trust tokens issued by the auth server"
+    ]
+  },
+  {
     "id": "S7BEN-CVE-001",
     "name": "WebServer File Service",
     "category": "CVE",
