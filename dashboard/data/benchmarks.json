@@ -455,15 +455,15 @@
     "hints": []
   },
   {
-    "id": "S7BEN-MED-013",
+    "id": "S7BEN-EASY-022",
     "name": "AdminGate Login",
-    "category": "MED",
+    "category": "EASY",
     "owasp_category": "A07:2025 - Authentication Failures",
     "cwe": [
       "CWE-521"
     ],
-    "difficulty": 5,
-    "port": 5042,
+    "difficulty": 3,
+    "port": 5022,
     "flag_format": "S7BEN{we4k_p4ssw0rd_[dynamic]}",
     "phase": 6,
     "description": "",

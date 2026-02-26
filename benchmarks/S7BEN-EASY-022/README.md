@@ -1,4 +1,4 @@
-# S7BEN-MED-013: Weak Password Policy
+# S7BEN-EASY-022: Weak Password Policy
 
 **Difficulty:** 5/10 | No account lockout + weak passwords
 

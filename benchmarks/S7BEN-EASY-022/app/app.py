@@ -79,7 +79,7 @@ def admin_panel():
 
 @app.route('/api/telemetry')
 def telemetry():
-    return jsonify({'benchmark': 'S7BEN-MED-013', 'metrics': TELEMETRY})
+    return jsonify({'benchmark': 'S7BEN-EASY-022', 'metrics': TELEMETRY})
 
 
 @app.route('/health')
