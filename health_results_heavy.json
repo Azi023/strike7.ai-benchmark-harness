@@ -1,0 +1,44 @@
+[
+  {
+    "id": "S7BEN-VHARD-001",
+    "status": "STARTED_OK",
+    "port": 5070,
+    "code": "200"
+  },
+  {
+    "id": "S7BEN-VHARD-003",
+    "status": "STARTED_OK",
+    "port": 5072,
+    "code": "200"
+  },
+  {
+    "id": "S7BEN-VHARD-004",
+    "status": "STARTED_OK",
+    "port": 5073,
+    "code": "200"
+  },
+  {
+    "id": "S7BEN-VHARD-007",
+    "status": "STARTED_OK",
+    "port": 5075,
+    "code": "404"
+  },
+  {
+    "id": "S7BEN-VHARD-008",
+    "status": "STARTED_OK",
+    "port": 5076,
+    "code": "200"
+  },
+  {
+    "id": "S7BEN-CVE-003",
+    "status": "STARTED_OK",
+    "port": 5092,
+    "code": "200"
+  },
+  {
+    "id": "S7BEN-CVE-004",
+    "status": "STARTED_OK",
+    "port": 5093,
+    "code": "200"
+  }
+]
