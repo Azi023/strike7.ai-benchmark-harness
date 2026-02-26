@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TeamSync - API Explorer</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, monospace;
+            background: #0f1923;
+            color: #e0e6ed;
+            min-height: 100vh;
+        }
+        .navbar {
+            background: #162332;
+            padding: 14px 32px;
+            border-bottom: 1px solid #1e3a52;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        .navbar a {
+            color: #4caf50;
+            text-decoration: none;
+            font-size: 16px;
+            font-weight: 600;
+        }
+        .navbar span { color: #4a5d6e; }
+        .navbar .page-title { color: #7a8ea0; font-size: 14px; }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 32px 24px;
+        }
+        h2 {
+            font-size: 22px;
+            color: #fff;
+            margin-bottom: 16px;
+        }
+        .section {
+            background: #162332;
+            border: 1px solid #1e3a52;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .section h3 {
+            font-size: 14px;
+            color: #4caf50;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .section p {
+            font-size: 14px;
+            color: #7a8ea0;
+            line-height: 1.6;
+            margin-bottom: 8px;
+        }
+        code {
+            background: #0a1219;
+            color: #4caf50;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 13px;
+        }
+        pre {
+            background: #0a1219;
+            border: 1px solid #1e3a52;
+            border-radius: 6px;
+            padding: 16px;
+            overflow-x: auto;
+            font-size: 13px;
+            color: #a8c4db;
+            line-height: 1.5;
+            margin-top: 8px;
+        }
+        .method {
+            display: inline-block;
+            background: #1b5e20;
+            color: #a5d6a7;
+            padding: 2px 8px;
+            border-radius: 3px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-right: 6px;
+        }
+        .note {
+            font-size: 13px;
+            color: #5a7285;
+            margin-top: 12px;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <a href="/">TeamSync</a>
+        <span>/</span>
+        <span class="page-title">API Explorer</span>
+    </nav>
+    <div class="container">
+        <h2>API Explorer</h2>
+
+        <div class="section">
+            <h3>Endpoint</h3>
+            <p><span class="method">POST</span> <code>/graphql</code></p>
+            <p>Send structured queries to interact with team data, user accounts, and platform settings.</p>
+        </div>
+
+        <div class="section">
+            <h3>Authentication</h3>
+            <p>Include an authorization header with your bearer token for protected operations. Public queries like system health do not require authentication.</p>
+            <pre>Authorization: Bearer &lt;your-token&gt;</pre>
+        </div>
+
+        <div class="section">
+            <h3>Schema Discovery</h3>
+            <p>Explore available types and operations through the built-in schema metadata:</p>
+            <pre>{
+  "query": "{ __schema { types { name fields { name } } } }"
+}</pre>
+        </div>
+
+        <div class="section">
+            <h3>Example: System Health</h3>
+            <pre>{
+  "query": "{ systemHealth { status version uptime } }"
+}</pre>
+        </div>
+
+        <div class="section">
+            <h3>Example: Create Account</h3>
+            <pre>{
+  "query": "mutation { register(username: \"newuser\", email: \"user@example.com\", password: \"securepass\") { token user { id username role } } }"
+}</pre>
+        </div>
+
+        <p class="note">Refer to schema metadata for the full list of available queries and mutations.</p>
+    </div>
+</body>
+</html>

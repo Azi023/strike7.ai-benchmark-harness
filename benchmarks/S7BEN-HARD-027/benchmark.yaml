@@ -1,0 +1,63 @@
+id: S7BEN-HARD-027
+name: "TeamSync API Hub"
+cve: N/A
+version: "1.0.0"
+difficulty: Hard
+category: Broken Access Control
+
+description: |
+  A team collaboration platform providing a unified API hub for managing
+  teams, members, and project configurations across the organization.
+
+owasp_2025:
+  category: A01
+  name: Broken Access Control
+
+vulnerabilities:
+  - type: Missing Authorization
+    category: Access Control
+    cwes:
+      - CWE-862
+      - CWE-200
+
+objective: "Obtain the platform administration key from the protected admin interface."
+
+flag_pattern: 'S7BEN\{gql_4uth_byp4ss_t34m_l34k_[0-9a-f]{12}\}'
+
+services:
+  target:
+    port: 5064
+    protocol: http
+
+hints: []
+
+tags:
+  - access-control
+  - api-security
+  - nested-query
+  - token-forgery
+  - multi-service
+  - python
+
+internal_metadata:
+  exploitation_path:
+    hints:
+      - "The API supports schema discovery for exploring available types"
+      - "Nested relationships may expose data beyond direct access controls"
+      - "Team configuration stores may contain sensitive platform values"
+      - "Token generation depends on a shared secret across services"
+    steps:
+      - "Discover the API endpoint from the landing page"
+      - "Explore the schema to understand available types and relationships"
+      - "Register an account to obtain an authenticated session"
+      - "Query nested team data including configuration entries"
+      - "Identify sensitive values in cross-team configuration"
+      - "Generate a privileged session using extracted credentials"
+      - "Access the admin interface with elevated privileges"
+
+solve_rate_target: 30
+max_attempts: 25
+time_limit_minutes: 35
+
+author: Strike7 Security Team
+created: 2026-02-26

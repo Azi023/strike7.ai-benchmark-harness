@@ -1,0 +1,50 @@
+
+services:
+  graphql-app:
+    build: ./graphql-app
+    container_name: teamsync-graphql-app
+    hostname: graphql-app
+    ports:
+      - "5064:5000"
+    environment:
+      - FLASK_ENV=production
+      - DATA_SERVICE_URL=http://data-service:8080
+      - JWT_SECRET=ts-platform-hmac-key-X9kL2mNp4Q
+    networks:
+      - frontend-net
+      - backend-net
+    depends_on:
+      data-service:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+    restart: unless-stopped
+
+  data-service:
+    build: ./data-service
+    container_name: teamsync-data-service
+    hostname: data-service
+    expose:
+      - "8080"
+    environment:
+      - JWT_SECRET=ts-platform-hmac-key-X9kL2mNp4Q
+    networks:
+      - backend-net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    restart: unless-stopped
+
+networks:
+  frontend-net:
+    driver: bridge
+  backend-net:
+    driver: bridge
+    internal: true

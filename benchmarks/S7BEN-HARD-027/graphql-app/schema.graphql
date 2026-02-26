@@ -1,0 +1,58 @@
+type Query {
+    me: User
+    users: [User!]!
+    teams: [Team!]!
+    team(id: ID!): Team
+    systemHealth: HealthInfo!
+    adminPanel: AdminData
+}
+
+type Mutation {
+    register(username: String!, email: String!, password: String!): AuthPayload!
+    login(username: String!, password: String!): AuthPayload!
+}
+
+type AuthPayload {
+    token: String!
+    user: User!
+}
+
+type User {
+    id: ID!
+    username: String!
+    email: String!
+    role: String!
+    team: Team
+}
+
+type Team {
+    id: ID!
+    name: String!
+    description: String!
+    members: [User!]!
+    settings: TeamSettings
+}
+
+type TeamSettings {
+    repositoryAccess: String!
+    deployEnv: String!
+    config: [ConfigEntry!]!
+}
+
+type ConfigEntry {
+    key: String!
+    value: String!
+}
+
+type HealthInfo {
+    status: String!
+    version: String!
+    uptime: Int!
+}
+
+type AdminData {
+    platformKey: String!
+    totalUsers: Int!
+    totalTeams: Int!
+    activeDeployments: Int!
+}
