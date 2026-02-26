@@ -4,7 +4,7 @@ services:
   app:
     build: .
     ports:
-      - "5080:5000"
+      - "5062:5000"
     environment:
       - FLASK_ENV=production
       - INTERNAL_API_KEY=sk-strike7-a8f3n2k9x4m1

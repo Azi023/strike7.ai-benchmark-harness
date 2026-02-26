@@ -782,15 +782,15 @@
     "hints": []
   },
   {
-    "id": "S7BEN-VHARD-015",
+    "id": "S7BEN-HARD-025",
     "name": "IntelliAssist Corporate Support Portal",
-    "category": "VHARD",
+    "category": "HARD",
     "owasp_category": "A03:2025 - Injection",
     "cwe": [
       "CWE-74"
     ],
-    "difficulty": 9,
-    "port": 5080,
+    "difficulty": 7,
+    "port": 5062,
     "flag_format": "S7BEN{prompt_inj3ct10n_...}",
     "phase": 9,
     "description": "A corporate AI assistant portal that handles customer support requests with multi-layer guardrails.",

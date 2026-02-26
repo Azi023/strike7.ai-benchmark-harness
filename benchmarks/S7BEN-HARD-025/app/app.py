@@ -1,6 +1,6 @@
 """
 IntelliAssist Corporate Support Portal
-S7BEN-VHARD-015 — AI Chatbot Prompt Injection
+S7BEN-HARD-025 — AI Chatbot Prompt Injection
 
 Vulnerability: The deterministic chatbot can be manipulated via indirect prompt
 injection to reveal the internal API key, which is then used to access

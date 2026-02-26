@@ -1,8 +1,8 @@
-id: S7BEN-VHARD-015
+id: S7BEN-HARD-025
 name: IntelliAssist Corporate Support Portal
 category: VHARD
-difficulty: 4
-port: 5080
+difficulty: Hard
+port: 5062
 description: >
   A corporate AI chatbot assistant with prompt injection guardrails protecting
   sensitive internal configuration data. Input guardrails block obvious injection
