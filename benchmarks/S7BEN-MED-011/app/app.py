@@ -105,7 +105,7 @@ def verify_session_cookie(cookie):
             return None
         return data
     except Exception as e:
-        raise ValueError(f"Session decode failed: {e}. Key hint: {SESSION_SECRET[:8]}...")
+        raise ValueError(f"Session decode failed: {e}")
 
 def get_current_user():
     """Get current user from session cookie"""
@@ -185,8 +185,7 @@ def api_cart():
                         "available": PRODUCTS[product_id]['stock'],
                         "requested": quantity,
                         "session_debug": {
-                            "cookie_format": "base64(payload).signature",
-                            "signature_key_prefix": SESSION_SECRET[:4] + "..."
+                            "cookie_format": "base64(payload).signature"
                         }
                     }), 400
                 return jsonify({"error": "Insufficient stock"}), 400
@@ -268,8 +267,6 @@ def validate_session():
             "valid": False,
             "error": str(e),
             "debug_info": {
-                "key_length": len(SESSION_SECRET),
-                "key_preview": SESSION_SECRET[:12] + "...",
                 "algo": "HMAC-SHA256-truncated"
             }
         })
