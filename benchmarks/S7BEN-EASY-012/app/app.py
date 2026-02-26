@@ -15,7 +15,7 @@ except Exception:
 
 @app.route('/')
 def index():
-    return '<h1>S7BEN-HARD-017</h1><p>POST /checkout</p>'
+    return '<h1>S7BEN-EASY-012</h1><p>POST /checkout</p>'
 
 @app.route('/checkout', methods=['POST'])
 def checkout():

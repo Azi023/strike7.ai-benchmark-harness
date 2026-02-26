@@ -1,14 +1,14 @@
 .PHONY: up down test clean build logs
 
 up:
-	@echo "[+] Starting S7BEN-VHARD-011: 2FA Session State Bypass"
+	@echo "[+] Starting S7BEN-EASY-017: 2FA Session State Bypass"
 	docker-compose up --build -d
 	@echo "[*] Waiting for service to be healthy..."
 	@sleep 5
 	@echo "[+] Benchmark running on http://localhost:8090"
 
 down:
-	@echo "[-] Stopping S7BEN-VHARD-011"
+	@echo "[-] Stopping S7BEN-EASY-017"
 	docker-compose down
 
 test:

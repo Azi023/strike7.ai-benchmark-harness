@@ -17,7 +17,7 @@ ORDER_ID = 1
 
 @app.route('/')
 def index():
-    return '<h1>S7BEN-HARD-016</h1><p>POST /order/create</p><p>PUT /order/id/status</p>'
+    return '<h1>S7BEN-EASY-011</h1><p>POST /order/create</p><p>PUT /order/id/status</p>'
 
 @app.route('/order/create', methods=['POST'])
 def create_order():

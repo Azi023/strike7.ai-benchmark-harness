@@ -1,4 +1,4 @@
-# S7BEN-HARD-014: Password Reset Token Reuse
+# S7BEN-MED-018: Password Reset Token Reuse
 
 **Difficulty:** 7/10 | **OWASP:** A07:2025
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""S7BEN-VHARD-011: SecureAuth Portal application."""
+"""S7BEN-EASY-017: SecureAuth Portal application."""
 
 from flask import Flask, request, jsonify, render_template_string, make_response
 import secrets
@@ -91,7 +91,7 @@ def index():
     <!DOCTYPE html>
     <html>
     <head>
-        <title>S7BEN-VHARD-011: SecureAuth Portal</title>
+        <title>S7BEN-EASY-017: SecureAuth Portal</title>
         <style>
             body { font-family: Arial; max-width: 800px; margin: 50px auto; padding: 20px; }
             .container { border: 1px solid #ddd; padding: 30px; border-radius: 8px; }
@@ -261,7 +261,7 @@ def dashboard():
 def telemetry():
     """Telemetry endpoint for metrics"""
     return jsonify({
-        'benchmark_id': 'S7BEN-VHARD-011',
+        'benchmark_id': 'S7BEN-EASY-017',
         'benchmark_name': '2FA Session State Bypass',
         'uptime': time.time() - TELEMETRY['start_time'],
         'metrics': TELEMETRY,
@@ -291,7 +291,7 @@ def health():
     """Health check endpoint"""
     return jsonify({
         'status': 'healthy',
-        'benchmark': 'S7BEN-VHARD-011',
+        'benchmark': 'S7BEN-EASY-017',
         'uptime': time.time() - TELEMETRY['start_time']
     })
 

@@ -1,4 +1,4 @@
-# S7BEN-VHARD-014: Negative Quantity Exploit
+# S7BEN-EASY-016: Negative Quantity Exploit
 
 **Difficulty:** 9/10 | No input validation on quantity
 

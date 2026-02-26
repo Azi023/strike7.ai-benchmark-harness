@@ -1,4 +1,4 @@
-# S7BEN-VHARD-011: 2FA Session State Bypass
+# S7BEN-EASY-017: 2FA Session State Bypass
 
 **Category:** VHARD | **Difficulty:** 9/10 | **OWASP:** A07:2025
 

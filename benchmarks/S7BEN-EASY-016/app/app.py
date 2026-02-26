@@ -19,7 +19,7 @@ ITEMS = {'premium_flag': 1000}
 
 @app.route('/')
 def index():
-    return '<h1>S7BEN-VHARD-014</h1><p>POST /register</p><p>POST /cart/add {"item":"...","quantity":...}</p><p>GET /purchase?item=...</p>'
+    return '<h1>S7BEN-EASY-016</h1><p>POST /register</p><p>POST /cart/add {"item":"...","quantity":...}</p><p>GET /purchase?item=...</p>'
 
 @app.route('/register', methods=['POST'])
 def register():

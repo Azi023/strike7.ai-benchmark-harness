@@ -149,7 +149,7 @@ def profile():
 
 @app.route('/api/telemetry')
 def telemetry():
-    return jsonify({'benchmark': 'S7BEN-HARD-014', 'metrics': TELEMETRY})
+    return jsonify({'benchmark': 'S7BEN-MED-018', 'metrics': TELEMETRY})
 
 
 @app.route('/health')
