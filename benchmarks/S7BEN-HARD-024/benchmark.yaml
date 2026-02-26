@@ -1,7 +1,7 @@
-id: S7BEN-MED-019
+id: S7BEN-HARD-024
 name: "Race Condition Double Spend Attack"
 tier: 1
-difficulty: 5
+difficulty: Hard
 category: vhard
 description: "E-commerce checkout service with concurrent request handling."
 objective: "Obtain the flag by exploiting the checkout service."
@@ -16,7 +16,7 @@ difficulty_dimensions:
   chaining: low
 services:
   app:
-    port: 5047
+    port: 5061
 hints: []
 tags: [race-condition, toctou, double-spend, concurrency, business-logic]
 internal_metadata:

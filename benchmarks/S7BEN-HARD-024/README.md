@@ -1,4 +1,4 @@
-# S7BEN-VHARD-013: Race Condition Double Spend
+# S7BEN-HARD-024: Race Condition Double Spend
 
 **Difficulty:** 9/10 | TOCTOU in checkout process
 

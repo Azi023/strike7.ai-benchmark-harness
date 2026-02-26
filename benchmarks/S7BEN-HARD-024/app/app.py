@@ -21,7 +21,7 @@ TELEMETRY = {'start_time': time.time(), 'race_attacks': 0, 'flag_captured': Fals
 
 @app.route('/')
 def index():
-    return '<html><body><h1>S7BEN-VHARD-013</h1><p>POST /register {"username":"..."}</p><p>POST /checkout {"item_id":1}</p><p>GET /purchases - View purchases</p></body></html>'
+    return '<html><body><h1>S7BEN-HARD-024</h1><p>POST /register {"username":"..."}</p><p>POST /checkout {"item_id":1}</p><p>GET /purchases - View purchases</p></body></html>'
 
 @app.route('/register', methods=['POST'])
 def register():
@@ -70,7 +70,7 @@ def purchases():
 
 @app.route('/api/telemetry')
 def telemetry():
-    return jsonify({'benchmark': 'S7BEN-VHARD-013', 'metrics': TELEMETRY})
+    return jsonify({'benchmark': 'S7BEN-HARD-024', 'metrics': TELEMETRY})
 
 @app.route('/health')
 def health():

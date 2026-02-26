@@ -529,16 +529,16 @@
     "hints": []
   },
   {
-    "id": "S7BEN-MED-019",
+    "id": "S7BEN-HARD-024",
     "name": "CryptoWallet Payment Service",
-    "category": "MED",
+    "category": "HARD",
     "owasp_category": "A04:2025 - Insecure Design",
     "cwe": [
       "CWE-362",
       "CWE-367"
     ],
-    "difficulty": 5,
-    "port": 5047,
+    "difficulty": 8,
+    "port": 5061,
     "flag_format": "S7BEN{r4ce_c0nd1t10n_d0ubl3_sp3nd_[dynamic]}",
     "phase": 6,
     "description": "",

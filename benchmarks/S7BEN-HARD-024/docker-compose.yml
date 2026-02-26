@@ -2,8 +2,8 @@ version: '3.8'
 services:
   app:
     build: ./app
-    container_name: s7ben-med-019
-    ports: ["5047:8096"]
+    container_name: s7ben-hard-024
+    ports: ["5061:8096"]
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8096/"]
       interval: 10s
