@@ -111,16 +111,6 @@ benchmarks:
     difficulty: 3
     phase: 3
 
-  - id: S7BEN-EASY-010
-    name: "Session Fixation via Cookie Injection"
-    category: EASY
-    owasp: "A07:2025 - Authentication Failures"
-    cwe: ["CWE-384"]
-    port: 8094
-    flag_format: "S7BEN{sess10n_f1x4t10n_[dynamic]}"
-    difficulty: 3
-    phase: 6
-
   - id: S7BEN-EASY-011
     name: "Workflow State Manipulation"
     category: EASY

@@ -117,21 +117,6 @@
     "hints": []
   },
   {
-    "id": "S7BEN-EASY-010",
-    "name": "SessionTrack Auth Service",
-    "category": "EASY",
-    "owasp_category": "A07:2025 - Authentication Failures",
-    "cwe": [
-      "CWE-384"
-    ],
-    "difficulty": 3,
-    "port": 5010,
-    "flag_format": "S7BEN{sess10n_f1x4t10n_[dynamic]}",
-    "phase": 6,
-    "description": "",
-    "hints": []
-  },
-  {
     "id": "S7BEN-EASY-011",
     "name": "OrderPipeline Workflow Engine",
     "category": "EASY",
