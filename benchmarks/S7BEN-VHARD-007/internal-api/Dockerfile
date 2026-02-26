@@ -15,8 +15,13 @@ COPY app.py .
 # Create data directory
 RUN mkdir -p /data
 
+# Copy entrypoint script
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
 # Expose port
 EXPOSE 5000
 
-# Run application
+# Use entrypoint for dynamic flag generation
+ENTRYPOINT ["/entrypoint.sh"]
 CMD ["python", "app.py"]

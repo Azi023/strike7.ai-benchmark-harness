@@ -11,8 +11,13 @@ RUN npm install --production
 # Copy application files
 COPY . .
 
+# Copy entrypoint script
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
 # Expose port
 EXPOSE 3000
 
-# Start application
+# Use entrypoint for dynamic flag generation
+ENTRYPOINT ["/entrypoint.sh"]
 CMD ["npm", "start"]

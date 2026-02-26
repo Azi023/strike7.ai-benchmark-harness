@@ -1,6 +1,11 @@
 #!/bin/sh
 set -e
 
+# Generate dynamic flag at runtime
+HEX=$(cat /dev/urandom | tr -dc 'a-f0-9' | head -c 12)
+echo "S7BEN{n8n_rce_${HEX}}" > /flag.txt
+chmod 644 /flag.txt
+
 echo "[*] Starting S7BEN-MED-008: n8n RCE Benchmark"
 echo "[*] n8n version: $(n8n --version 2>/dev/null || echo 'unknown')"
 

@@ -19,7 +19,7 @@ internal_access_count = 0
 start_time = time.time()
 accessed_urls = []
 
-# Security filters (intentionally bypassable)
+# URL validation rules
 BLOCKED_IPS = ['127.0.0.1', 'localhost', '0.0.0.0']
 BLOCKED_RANGES = ['10.', '172.16.', '192.168.', '169.254.']
 ALLOWED_SCHEMES = ['http', 'https']
@@ -57,7 +57,7 @@ def is_safe_url(url):
             filter_blocks += 1
             return False, "Blocked hostname"
 
-        # DNS resolution check (vulnerable to DNS rebinding)
+        # DNS resolution check
         try:
             ip = socket.gethostbyname(hostname)
         except socket.gaierror:
@@ -91,9 +91,7 @@ def health():
 
 @app.route('/fetch', methods=['POST'])
 def fetch_url():
-    """
-    Fetch URL endpoint - vulnerable to SSRF
-    """
+    """Fetch and return content from the specified URL."""
     global request_counter, ssrf_attempts, internal_access_count, accessed_urls
     request_counter += 1
 

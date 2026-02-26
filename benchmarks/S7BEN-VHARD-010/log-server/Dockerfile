@@ -19,8 +19,13 @@ RUN mkdir -p /var/log/apache2 && \
 # Set proper permissions
 RUN chown -R www-data:www-data /var/www/html /var/log/apache2
 
+# Copy entrypoint script
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
 # Expose port
 EXPOSE 80
 
-# Start Apache
+# Use entrypoint for dynamic flag generation
+ENTRYPOINT ["/entrypoint.sh"]
 CMD ["apache2-foreground"]

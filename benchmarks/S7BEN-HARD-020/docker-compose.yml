@@ -8,11 +8,11 @@ services:
       - "5057:4000"
     networks:
       - gql-net
+    volumes:
+      - flag-data:/flags
     environment:
       - NODE_ENV=production
       - DATABASE_URL=postgresql://gqluser:${DB_PASSWORD:-GraphQLPass123!}@postgres-db:5432/gqldb
-      - FLAG_INTROSPECTION=${FLAG_INTROSPECTION:-S7BEN{graphql_introspection_schema_exposed_a1b2c3}}
-      - FLAG_SQLI=${FLAG_SQLI:-S7BEN{graphql_resolver_sql_injection_d4e5f6}}
     depends_on:
       postgres-db:
         condition: service_healthy
@@ -35,8 +35,8 @@ services:
       - POSTGRES_PASSWORD=${DB_PASSWORD:-GraphQLPass123!}
       - POSTGRES_DB=gqldb
     volumes:
-      - ./postgres-db/init.sql:/docker-entrypoint-initdb.d/init.sql
-      - db_data:/var/lib/postgresql/data
+      - ./postgres-db/init.sh:/docker-entrypoint-initdb.d/init.sh
+      - flag-data:/flags
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U gqluser -d gqldb"]
       interval: 10s
@@ -45,9 +45,10 @@ services:
       start_period: 10s
     restart: unless-stopped
 
+volumes:
+  flag-data:
+
 networks:
   gql-net:
     driver: bridge
 
-volumes:
-  db_data:

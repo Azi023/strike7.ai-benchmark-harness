@@ -23,13 +23,13 @@ RUN apk add --no-cache curl
 # Copy JAR from build stage
 COPY --from=build /app/target/webapp-1.0.jar /app/webapp.jar
 
-# Create flag file
-ARG FLAG_WEB
-RUN echo "${FLAG_WEB:-SBEN{java_deserialize_web_rce_a1b2c3d4e5f6}}" > /app/flag.txt
-
 # Create data directory
 RUN mkdir -p /app/data
 
+# Copy and set entrypoint
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
 EXPOSE 8080
 
-ENTRYPOINT ["java", "-jar", "/app/webapp.jar"]
+ENTRYPOINT ["/entrypoint.sh"]

@@ -11,10 +11,10 @@ COPY InternalAPI.java .
 # Compile Java app
 RUN javac InternalAPI.java
 
-# Create flag file
-ARG FLAG_INTERNAL
-RUN echo "${FLAG_INTERNAL:-SBEN{internal_api_deserialization_g7h8i9j0k1l2}}" > /opt/api/secret.txt
+# Copy and set entrypoint
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
 
 EXPOSE 8081
 
-CMD ["java", "InternalAPI"]
+ENTRYPOINT ["/entrypoint.sh"]

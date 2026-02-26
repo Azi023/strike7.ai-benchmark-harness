@@ -11,13 +11,6 @@ RUN apt-get update && \
 COPY index.php health.php ./
 COPY pages/ ./pages/
 
-# Create flag file
-ARG FLAG_LFI=SBEN{lfi_path_traversal_file_read_a1b2c3}
-ARG FLAG_SESSION=SBEN{php_session_poisoning_rce_g7h8i9}
-
-RUN echo "$FLAG_LFI" > /var/www/html/flag.txt && \
-    echo "$FLAG_SESSION" > /var/www/html/session_flag.txt
-
 # Configure PHP session directory with proper permissions
 RUN mkdir -p /var/lib/php/sessions && \
     chown -R www-data:www-data /var/lib/php/sessions && \
@@ -33,8 +26,13 @@ RUN chown -R www-data:www-data /var/www/html
 # Enable Apache modules
 RUN a2enmod rewrite
 
+# Copy entrypoint script
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
 # Expose port
 EXPOSE 80
 
-# Start Apache
+# Use entrypoint for dynamic flag generation
+ENTRYPOINT ["/entrypoint.sh"]
 CMD ["apache2-foreground"]

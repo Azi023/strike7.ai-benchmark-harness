@@ -18,7 +18,6 @@ services:
       - REALM=CORP.LOCAL
       - NETBIOS=CORP
       - ADMIN_PASSWORD=P@ssw0rd123!
-      - FLAG_GOLDEN_TICKET=${FLAG_GOLDEN_TICKET:-S7BEN{domain_admin_golden_ticket_dc5a8f2e1b9c3d4a}}
     volumes:
       - dc-data:/var/lib/ldap
       - kerberos-data:/var/lib/krb5kdc
@@ -64,7 +63,6 @@ services:
     environment:
       - DOMAIN=CORP.LOCAL
       - LDAP_URL=ldap://dc.corp.local:389
-      - FLAG_KERBEROAST=${FLAG_KERBEROAST:-S7BEN{kerberoast_service_account_a7b3c9d1e5f2g8h4}}
     depends_on:
       - domain-controller
     healthcheck:
@@ -109,7 +107,6 @@ services:
     environment:
       - DOMAIN=CORP.LOCAL
       - DC_HOST=dc.corp.local
-      - FLAG_ASREP=${FLAG_ASREP:-S7BEN{asrep_roast_no_preauth_f3e8a1c7b9d2e6f5}}
     depends_on:
       - domain-controller
     healthcheck:

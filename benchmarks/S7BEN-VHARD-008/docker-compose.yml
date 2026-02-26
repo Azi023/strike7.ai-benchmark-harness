@@ -12,7 +12,6 @@ services:
       - NODE_ENV=production
       - MONGODB_URI=mongodb://mongo-db:27017/nosqldb
       - SESSION_SECRET=nosql-secret-key-change-me
-      - FLAG_BYPASS=${FLAG_BYPASS:-S7BEN{nosql_auth_bypass_ne_operator_a1b2c3}}
     depends_on:
       mongo-db:
         condition: service_healthy
@@ -53,7 +52,6 @@ services:
       - nosql-net
     environment:
       - MONGODB_URI=mongodb://mongo-db:27017/nosqldb
-      - FLAG_ADMIN=${FLAG_ADMIN:-S7BEN{nosql_admin_panel_access_j1k2l3}}
     depends_on:
       mongo-db:
         condition: service_healthy

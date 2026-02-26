@@ -1,6 +1,12 @@
 #!/bin/bash
 set -e
 
+# --- Dynamic flag generation ---
+FLAG_GOLDEN_TICKET="S7BEN{domain_admin_golden_ticket_$(cat /dev/urandom | tr -dc 'a-f0-9' | head -c 12)}"
+export FLAG_GOLDEN_TICKET
+echo "$FLAG_GOLDEN_TICKET" > /tmp/flag.txt
+# --- End dynamic flag generation ---
+
 echo "[*] Starting Active Directory Domain Controller (CORP.LOCAL)..."
 echo "[*] Hostname: $(hostname -f)"
 echo "[*] IP Address: $(hostname -i)"

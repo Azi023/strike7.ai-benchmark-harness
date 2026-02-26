@@ -29,8 +29,13 @@ RUN mkdir -p /var/www/html && \
 # Enable Apache mod_rewrite
 RUN a2enmod rewrite
 
+# Copy entrypoint script
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
 # Expose port
 EXPOSE 80
 
-# Start Apache
+# Use entrypoint for dynamic flag generation
+ENTRYPOINT ["/entrypoint.sh"]
 CMD ["apache2-foreground"]

@@ -6,9 +6,6 @@ services:
     hostname: web-app
     ports:
       - "5078:80"
-    environment:
-      - FLAG_LFI=${FLAG_LFI:-S7BEN{lfi_path_traversal_file_read_a1b2c3}}
-      - FLAG_SESSION=${FLAG_SESSION:-S7BEN{php_session_poisoning_rce_g7h8i9}}
     volumes:
       - lfi-logs:/var/log/apache2
     networks:
@@ -27,8 +24,6 @@ services:
     hostname: file-server
     expose:
       - "80"
-    environment:
-      - FLAG_INTERNAL=${FLAG_INTERNAL:-S7BEN{internal_file_server_access_j1k2l3}}
     networks:
       lfi-net:
         ipv4_address: 10.200.10.20
@@ -43,8 +38,6 @@ services:
     build: ./log-server
     container_name: lfi-logserver
     hostname: log-server
-    environment:
-      - FLAG_LOG=${FLAG_LOG:-S7BEN{apache_log_poisoning_rce_d4e5f6}}
     volumes:
       - lfi-logs:/var/log/apache2
     networks:

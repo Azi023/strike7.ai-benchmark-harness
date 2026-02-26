@@ -13,7 +13,6 @@ services:
       - FLASK_ENV=production
       - FLASK_SECRET_KEY=${FLASK_SECRET:-insecure-pickle-secret-key}
       - REDIS_URL=redis://redis-cache:6379/0
-      - FLAG_WEB=${FLAG_WEB:-S7BEN{pickle_session_cookie_rce_f1a2b3c4d5e6}}
     volumes:
       - webapp-data:/app/data
     depends_on:
@@ -36,8 +35,6 @@ services:
     command: redis-server --appendonly yes
     volumes:
       - redis-data:/data
-    environment:
-      - FLAG_CACHE=${FLAG_CACHE:-S7BEN{redis_cache_poisoning_pickle_g7h8i9j0k1l2}}
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 10s
@@ -56,7 +53,6 @@ services:
       - CELERY_BROKER_URL=redis://redis-cache:6379/1
       - CELERY_RESULT_BACKEND=redis://redis-cache:6379/1
       - C_FORCE_ROOT=true
-      - FLAG_WORKER=${FLAG_WORKER:-S7BEN{celery_worker_task_deserialization_m3n4o5p6q7r8}}
     volumes:
       - worker-data:/worker/data
     depends_on:

@@ -15,6 +15,10 @@ RUN npm install
 # Copy application files
 COPY . .
 
+# Copy and set entrypoint
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
 EXPOSE 3000
 
-CMD ["node", "index.js"]
+ENTRYPOINT ["/entrypoint.sh"]

@@ -5,11 +5,8 @@ USER root
 # Install curl for health checks
 RUN apk add --no-cache curl
 
-# Create flag file with a build-time random token
-RUN FLAG_TOKEN=$(head -c 8 /dev/urandom | od -An -tx1 | tr -d ' \n') && \
-    echo "S7BEN{n8n_rce_${FLAG_TOKEN}" > /flag.txt && \
-    echo -n "}" >> /flag.txt && \
-    chmod 644 /flag.txt
+# Create flag file writable by node user
+RUN touch /flag.txt && chown node:node /flag.txt
 
 # Copy custom entrypoint
 COPY entrypoint.sh /custom-entrypoint.sh

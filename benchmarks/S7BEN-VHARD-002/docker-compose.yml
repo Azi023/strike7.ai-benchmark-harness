@@ -62,7 +62,6 @@ services:
       - backend-net
     environment:
       - ADMIN_SECRET=${ADMIN_SECRET:-admin-supersecret-2024}
-      - FLAG=${FLAG:-S7BEN{admin_access_via_ssrf_credentials}}
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:4000/health"]
       interval: 10s

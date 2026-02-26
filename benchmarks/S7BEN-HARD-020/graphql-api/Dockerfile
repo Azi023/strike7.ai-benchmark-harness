@@ -15,8 +15,12 @@ RUN npm install --production
 COPY index.js ./
 COPY schema.graphql ./
 
+# Copy and set entrypoint for dynamic flag generation
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
 # Expose GraphQL port
 EXPOSE 4000
 
-# Run application
-CMD ["node", "index.js"]
+# Run application via entrypoint
+ENTRYPOINT ["/entrypoint.sh"]

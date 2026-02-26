@@ -7,7 +7,6 @@ services:
       - "5052:5000"
     environment:
       - FLASK_ENV=development
-      - FLAG=${FLAG:-S7BEN{ssrf_internal_acc3ss_dns_rebind_789abc}}
       - INTERNAL_API_URL=http://internal-api:8080
     networks:
       - frontend-net
@@ -27,8 +26,6 @@ services:
       - "8080"
     networks:
       - backend-net
-    environment:
-      - FLAG=${FLAG_INTERNAL:-S7BEN{ssrf_internal_acc3ss_dns_rebind_789abc}}
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
       interval: 10s
