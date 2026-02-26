@@ -254,21 +254,6 @@
     "hints": []
   },
   {
-    "id": "S7BEN-EASY-021",
-    "name": "MessageBroker Queue Service",
-    "category": "EASY",
-    "owasp_category": "A08:2025 - Software Data Integrity Failures",
-    "cwe": [
-      "CWE-502"
-    ],
-    "difficulty": 3,
-    "port": 5021,
-    "flag_format": "S7BEN{4ct1v3mq_d3s3r_rc3_[dynamic]}",
-    "phase": 6,
-    "description": "",
-    "hints": []
-  },
-  {
     "id": "S7BEN-HARD-021",
     "name": "TeamAuth Portal",
     "category": "HARD",

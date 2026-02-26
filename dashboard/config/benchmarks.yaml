@@ -207,18 +207,6 @@ benchmarks:
     year: 2024
     cvss: 9.8
 
-  - id: S7BEN-EASY-021
-    name: "ActiveMQ Deserialization RCE (CVE-2023-46604)"
-    category: EASY
-    owasp: "A08:2025 - Software Data Integrity Failures"
-    cwe: ["CWE-502"]
-    port: 8110
-    flag_format: "S7BEN{4ct1v3mq_d3s3r_rc3_[dynamic]}"
-    difficulty: 3
-    phase: 6
-    year: 2023
-    cvss: 10.0
-
   # ===== MEDIUM TIER (001-019) =====
   - id: S7BEN-MED-001
     name: "Session Fixation"
