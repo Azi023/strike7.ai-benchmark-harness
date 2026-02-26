@@ -25,7 +25,7 @@ app.get('/', (req, res) => {
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Nunjucks Template Engine</title>
+    <title>Template Engine</title>
     <style>
         * {
             margin: 0;
@@ -148,7 +148,7 @@ app.get('/greet', (req, res) => {
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Nunjucks Template Engine</title>
+    <title>Template Engine</title>
     <style>
         * {
             margin: 0;
@@ -202,7 +202,7 @@ app.get('/greet', (req, res) => {
 </head>
 <body>
     <div class="container">
-        <h1>Node.js/Nunjucks Template Engine</h1>
+        <h1>Template Engine</h1>
         <div class="result">
             <h2>Greeting Result:</h2>
             <p>${output}</p>
@@ -235,7 +235,7 @@ app.get('/test', (req, res) => {
 app.get('/health', (req, res) => {
     res.json({
         status: 'healthy',
-        engine: 'Nunjucks',
+        engine: 'default',
         language: 'Node.js'
     });
 });
@@ -248,5 +248,5 @@ app.listen(PORT, '0.0.0.0', () => {
     fs.mkdirSync('/app', { recursive: true });
     fs.writeFileSync(FLAG_FILE, flagContent);
 
-    console.log(`GreetingCard Generator (Nunjucks) running on port ${PORT}`);
+    console.log(`GreetingCard Generator running on port ${PORT}`);
 });

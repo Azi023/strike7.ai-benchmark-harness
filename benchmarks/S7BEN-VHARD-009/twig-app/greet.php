@@ -28,7 +28,7 @@ try {
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Twig Template Engine</title>
+    <title>Template Engine</title>
     <style>
         * {
             margin: 0;
@@ -82,7 +82,7 @@ try {
 </head>
 <body>
     <div class="container">
-        <h1>PHP/Twig Template Engine</h1>
+        <h1>Template Engine</h1>
         <div class="result">
             <h2>Greeting Result:</h2>
             <p><?php echo $output; ?></p>

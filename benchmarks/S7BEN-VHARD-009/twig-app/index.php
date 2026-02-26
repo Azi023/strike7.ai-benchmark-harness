@@ -26,7 +26,7 @@ if ($_SERVER['REQUEST_URI'] === '/' || $_SERVER['REQUEST_URI'] === '/index.php')
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Twig Template Engine</title>
+    <title>Template Engine</title>
     <style>
         * {
             margin: 0;

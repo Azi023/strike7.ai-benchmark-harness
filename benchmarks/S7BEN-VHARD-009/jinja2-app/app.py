@@ -12,7 +12,7 @@ GREETING_TEMPLATE = """
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Jinja2 Template Engine</title>
+    <title>Template Engine</title>
     <style>
         * {
             margin: 0;
@@ -148,7 +148,7 @@ def test():
 
 @app.route('/health')
 def health():
-    return {'status': 'healthy', 'engine': 'Jinja2', 'language': 'Python'}, 200
+    return {'status': 'healthy', 'engine': 'default', 'language': 'Python'}, 200
 
 if __name__ == '__main__':
     # Create flag file on startup
@@ -158,6 +158,6 @@ if __name__ == '__main__':
     with open(FLAG_FILE, 'w') as f:
         f.write(flag_content)
 
-    print(f"GreetingCard Generator (Jinja2) running on port 5000")
+    print(f"GreetingCard Generator running on port 5000")
 
     app.run(host='0.0.0.0', port=5000, debug=False)
