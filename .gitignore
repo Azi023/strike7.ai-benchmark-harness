@@ -50,6 +50,7 @@ ehthumbs.db
 Thumbs.db
 .msys*
 *.Zone.Identifier
+*:Zone.Identifier
 
 # Logs & Temp
 *.log
