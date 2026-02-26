@@ -1,8 +1,8 @@
-id: S7BEN-MED-001
+id: S7BEN-HARD-021
 name: "Session Fixation - Pre-Auth Session Persistence"
 cve: N/A
 version: "1.0.0"
-difficulty: Medium
+difficulty: Hard
 category: Identification and Authentication Failures
 
 description: |
@@ -21,7 +21,7 @@ flag_pattern: 'S7BEN\{session_fixation_[0-9a-f]{32}\}'
 
 services:
   target:
-    port: 5030
+    port: 5058
     protocol: http
 
 tags:

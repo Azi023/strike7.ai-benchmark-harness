@@ -1,4 +1,4 @@
-# S7BEN-MED-001: Session Fixation - Pre-Auth Session Persistence
+# S7BEN-HARD-021: Session Fixation - Pre-Auth Session Persistence
 
 ## Overview
 This benchmark demonstrates a session fixation vulnerability where session IDs are not regenerated after authentication, allowing attackers to hijack user sessions by pre-setting the session ID.

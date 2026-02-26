@@ -299,13 +299,13 @@
     "hints": []
   },
   {
-    "id": "S7BEN-MED-001",
+    "id": "S7BEN-HARD-021",
     "name": "TeamAuth Portal",
-    "category": "MED",
+    "category": "HARD",
     "owasp_category": "A07:2025 - Authentication Failures",
     "cwe": "CWE-384",
-    "difficulty": 5,
-    "port": 5030,
+    "difficulty": 7,
+    "port": 5058,
     "flag_format": "S7BEN{session_fixation_<dynamic>}",
     "phase": 2,
     "description": "",

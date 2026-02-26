@@ -1,4 +1,4 @@
-# S7BEN-MED-001: Manual Testing Guide
+# S7BEN-HARD-021: Manual Testing Guide
 
 ## Vulnerability: Session Fixation - Pre-Auth Session Persistence
 
@@ -13,7 +13,7 @@ This benchmark demonstrates a session fixation vulnerability where session IDs a
 
 ### 1. Build and Start the Benchmark
 ```bash
-cd benchmarks/S7BEN-MED-001
+cd benchmarks/S7BEN-HARD-021
 make build
 make up
 ```
@@ -236,7 +236,7 @@ def exploit_session_fixation():
     """
 
     print("="*60)
-    print("S7BEN-MED-001: Session Fixation Exploit")
+    print("S7BEN-HARD-021: Session Fixation Exploit")
     print("="*60)
 
     # Step 1: Attacker creates session with known ID
@@ -328,7 +328,7 @@ python3 exploit.py
 **Expected Output:**
 ```
 ============================================================
-S7BEN-MED-001: Session Fixation Exploit
+S7BEN-HARD-021: Session Fixation Exploit
 ============================================================
 
 [*] Step 1: Creating session with fixed ID: ATTACKER_CONTROLLED_SESSION_999
