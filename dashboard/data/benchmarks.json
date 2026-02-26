@@ -897,6 +897,19 @@
     "hints": []
   },
   {
+    "id": "S7BEN-CVE-010",
+    "name": "JetBrains TeamCity Authentication Bypass",
+    "category": "CVE",
+    "owasp_category": "A07:2025 - Authentication Failures",
+    "cwe": "CWE-288",
+    "difficulty": 9,
+    "port": 5098,
+    "flag_format": "S7BEN{teamcity_cve2024_...}",
+    "phase": 5,
+    "description": "",
+    "hints": []
+  },
+  {
     "id": "S7BEN-CVE-012",
     "name": "ImageProcessor Cloud API",
     "category": "CVE",
