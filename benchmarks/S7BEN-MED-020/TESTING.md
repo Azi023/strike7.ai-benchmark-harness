@@ -1,4 +1,4 @@
-# S7BEN-HARD-010: Manual Testing Guide
+# S7BEN-MED-020: Manual Testing Guide
 
 ## Vulnerability: Blind Time-Based SQL Injection with WAF Bypass
 
@@ -18,7 +18,7 @@ This adversarial benchmark demonstrates blind SQL injection in a production envi
 ## Setup
 
 ```bash
-cd benchmarks/S7BEN-HARD-010
+cd benchmarks/S7BEN-MED-020
 make build
 make up
 make test  # Should output: Health check passed
@@ -268,7 +268,7 @@ curl "http://localhost:5000/api/search?q=test' AND (SeLeCt substr(password,1,1) 
 ```python
 #!/usr/bin/env python3
 """
-Complete automated exploitation for S7BEN-HARD-010
+Complete automated exploitation for S7BEN-MED-020
 """
 import requests
 import time
@@ -347,7 +347,7 @@ def get_flag(username, password):
 
 def main():
     print("="*60)
-    print("S7BEN-HARD-010: Blind SQLi with WAF Bypass")
+    print("S7BEN-MED-020: Blind SQLi with WAF Bypass")
     print("="*60)
 
     # Extract password

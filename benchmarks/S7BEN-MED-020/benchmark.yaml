@@ -1,9 +1,9 @@
-id: S7BEN-HARD-010
+id: S7BEN-MED-020
 name: "Blind Time-Based SQL Injection with WAF"
 tier: 3
 cve: N/A
 version: "1.0.0"
-difficulty: Hard
+difficulty: Medium
 category: Injection
 
 description: |
@@ -35,7 +35,7 @@ difficulty_dimensions:
 
 services:
   target:
-    port: 5054
+    port: 5048
     protocol: http
 
 hints: []

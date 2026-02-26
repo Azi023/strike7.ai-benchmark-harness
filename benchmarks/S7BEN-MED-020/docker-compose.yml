@@ -5,7 +5,7 @@ services:
       args:
         - FLAG_SECRET
     ports:
-      - "5054:5000"
+      - "5048:5000"
     environment:
       - FLAG_SECRET=${FLAG_SECRET:-strike7-sqli-t3-waf-secret}
     volumes:

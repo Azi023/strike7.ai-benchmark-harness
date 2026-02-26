@@ -597,13 +597,13 @@
     "hints": []
   },
   {
-    "id": "S7BEN-HARD-010",
+    "id": "S7BEN-MED-020",
     "name": "DataSearch Enterprise",
-    "category": "HARD",
+    "category": "MED",
     "owasp_category": "A03:2025 - Injection",
     "cwe": "CWE-89",
-    "difficulty": 7,
-    "port": 5054,
+    "difficulty": 5,
+    "port": 5048,
     "flag_format": "S7BEN{...}",
     "phase": 3,
     "description": "",
