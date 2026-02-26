@@ -163,21 +163,6 @@
     "hints": []
   },
   {
-    "id": "S7BEN-EASY-014",
-    "name": "DevOps CI/CD Pipeline",
-    "category": "EASY",
-    "owasp_category": "A05:2025 - Security Misconfiguration",
-    "cwe": [
-      "CWE-250"
-    ],
-    "difficulty": 3,
-    "port": 5014,
-    "flag_format": "S7BEN{d0ck3r_s0ck3t_3sc4p3_[dynamic]}",
-    "phase": 6,
-    "description": "",
-    "hints": []
-  },
-  {
     "id": "S7BEN-EASY-015",
     "name": "NetworkEdge Router Dashboard",
     "category": "EASY",

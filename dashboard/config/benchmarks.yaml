@@ -141,16 +141,6 @@ benchmarks:
     difficulty: 3
     phase: 6
 
-  - id: S7BEN-EASY-014
-    name: "Docker Socket Exposure Container Escape"
-    category: EASY
-    owasp: "A05:2025 - Security Misconfiguration"
-    cwe: ["CWE-250"]
-    port: 8102
-    flag_format: "S7BEN{d0ck3r_s0ck3t_3sc4p3_[dynamic]}"
-    difficulty: 3
-    phase: 6
-
   - id: S7BEN-EASY-015
     name: "Default Credentials"
     category: EASY
