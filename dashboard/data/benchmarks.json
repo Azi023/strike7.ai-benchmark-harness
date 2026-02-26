@@ -470,15 +470,15 @@
     "hints": []
   },
   {
-    "id": "S7BEN-MED-014",
+    "id": "S7BEN-EASY-023",
     "name": "PromoVault Discount Engine",
-    "category": "MED",
+    "category": "EASY",
     "owasp_category": "A04:2025 - Insecure Design",
     "cwe": [
       "CWE-840"
     ],
-    "difficulty": 5,
-    "port": 5043,
+    "difficulty": 3,
+    "port": 5023,
     "flag_format": "S7BEN{c0up0n_reuse_[dynamic]}",
     "phase": 6,
     "description": "",

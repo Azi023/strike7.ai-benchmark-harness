@@ -1,8 +1,8 @@
-id: S7BEN-MED-014
+id: S7BEN-EASY-023
 name: "Coupon Code Reuse"
 cve: N/A
 version: "1.0.0"
-difficulty: Medium
+difficulty: Easy
 category: Business Logic Errors
 
 description: |
@@ -25,7 +25,7 @@ flag_pattern: 'S7BEN\{c0up0n_reuse_[a-z0-9]{8}\}'
 
 services:
   target:
-    port: 5043
+    port: 5023
     protocol: http
 
 hints: []
