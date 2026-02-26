@@ -485,15 +485,15 @@
     "hints": []
   },
   {
-    "id": "S7BEN-MED-015",
+    "id": "S7BEN-EASY-024",
     "name": "DevBridge API Service",
-    "category": "MED",
+    "category": "EASY",
     "owasp_category": "A05:2025 - Security Misconfiguration",
     "cwe": [
       "CWE-489"
     ],
-    "difficulty": 5,
-    "port": 5044,
+    "difficulty": 2,
+    "port": 5024,
     "flag_format": "S7BEN{fl4sk_d3bug_m0d3_[dynamic]}",
     "phase": 6,
     "description": "",

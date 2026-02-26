@@ -1,8 +1,8 @@
-id: S7BEN-MED-015
+id: S7BEN-EASY-024
 name: "Flask Debug Mode in Production"
 cve: N/A
 version: "1.0.0"
-difficulty: Medium
+difficulty: Easy
 category: Security Misconfiguration
 
 description: |
@@ -27,7 +27,7 @@ flag_pattern: 'S7BEN\{debug_m0de_[0-9a-f]{12}\}'
 
 services:
   target:
-    port: 5044
+    port: 5024
     protocol: http
 
 hints: []
