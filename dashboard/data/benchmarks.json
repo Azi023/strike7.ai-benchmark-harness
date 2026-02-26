@@ -610,13 +610,13 @@
     "hints": []
   },
   {
-    "id": "S7BEN-HARD-011",
+    "id": "S7BEN-MED-021",
     "name": "ContentHub CMS",
-    "category": "HARD",
+    "category": "MED",
     "owasp_category": "A03:2025 - Injection",
     "cwe": "CWE-79",
-    "difficulty": 7,
-    "port": 5055,
+    "difficulty": 5,
+    "port": 5049,
     "flag_format": "S7BEN{...}",
     "phase": 3,
     "description": "",

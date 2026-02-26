@@ -1,9 +1,9 @@
-id: S7BEN-HARD-011
+id: S7BEN-MED-021
 name: "XSS with CSP and Framework Gadgets"
 tier: 3
 cve: N/A
 version: "1.0.0"
-difficulty: Hard
+difficulty: Medium
 category: Injection
 
 description: |
@@ -36,7 +36,7 @@ difficulty_dimensions:
 
 services:
   target:
-    port: 5055
+    port: 5049
     protocol: http
 
 hints: []

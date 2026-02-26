@@ -1,4 +1,4 @@
-# S7BEN-HARD-011: Manual Testing Guide
+# S7BEN-MED-021: Manual Testing Guide
 
 ## Vulnerability: XSS with CSP Bypass via AngularJS Gadgets
 
@@ -12,7 +12,7 @@ Adversarial benchmark with strict CSP that blocks inline scripts, but AngularJS 
 ## Setup
 
 ```bash
-cd benchmarks/S7BEN-HARD-011
+cd benchmarks/S7BEN-MED-021
 make build && make up
 ```
 

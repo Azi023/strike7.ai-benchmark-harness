@@ -223,60 +223,6 @@ def api_admin_flag():
 
     return jsonify({"error": "Invalid session"}), 403
 
-@app.route('/api/oracle')
-def oracle():
-    """Ground-truth oracle"""
-    state = track_request('/api/oracle')
-
-    return jsonify({
-        "current_state": {
-            "csp_bypass_successful": state.get('csp_bypass_successful', False),
-            "session_stolen": state.get('session_stolen', False),
-            "callback_received": state.get('callback_received', False),
-            "flag_retrieved": state.get('flag_retrieved', False)
-        }
-    })
-
-@app.route('/api/verify')
-def verify():
-    """Verify successful exploitation"""
-    state = track_request('/api/verify')
-
-    if state.get('csp_bypass_successful') and state.get('callback_received'):
-        flag = generate_flag(ADMIN_SESSION['session_id'], ADMIN_SESSION['username'], 'angular_gadget')
-
-        return jsonify({
-            "exploitation_successful": True,
-            "proof": {
-                "csp_bypassed": True,
-                "callback_received": True,
-                "session_stolen": True,
-                "flag_retrieved": state.get('flag_retrieved', False)
-            },
-            "flag": flag
-        })
-
-    return jsonify({
-        "exploitation_successful": False,
-        "current_state": {
-            "csp_bypass_successful": state.get('csp_bypass_successful', False),
-            "callback_received": state.get('callback_received', False)
-        },
-        "hint": "Complete the required steps"
-    })
-
-@app.route('/api/patch-status', methods=['GET', 'POST'])
-def patch_status():
-    """Toggle vulnerable/patched mode"""
-    state = load_state()
-
-    if request.method == 'POST':
-        data = request.get_json() or {}
-        state['patched'] = data.get('patched', False)
-        save_state(state)
-
-    return jsonify({"patched": state.get('patched', False)})
-
 @app.route('/api/telemetry')
 def telemetry():
     """Return telemetry data"""
@@ -288,9 +234,7 @@ def telemetry():
         "time_elapsed_seconds": round(elapsed, 2),
         "endpoints_accessed": state['telemetry']['endpoints_accessed'],
         "xss_attempts": state['telemetry']['xss_attempts'],
-        "csp_violations": state['telemetry']['csp_violations'],
-        "csp_bypass_successful": state.get('csp_bypass_successful', False),
-        "callback_received": state.get('callback_received', False)
+        "csp_violations": state['telemetry']['csp_violations']
     })
 
 @app.route('/health')
