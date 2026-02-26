@@ -1,7 +1,7 @@
-id: S7BEN-EASY-018
+id: S7BEN-MED-025
 name: "PAN-OS Command Injection"
 tier: 1
-difficulty: 3
+difficulty: Medium
 category: cve
 cve: CVE-2024-3400
 cvss: 10.0
@@ -18,7 +18,7 @@ difficulty_dimensions:
   chaining: low
 services:
   app:
-    port: 5018
+    port: 5043
 hints: []
 tags: [command-injection, pan-os, telemetry, cve]
 internal_metadata:

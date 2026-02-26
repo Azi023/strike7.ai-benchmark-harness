@@ -239,15 +239,15 @@
     "hints": []
   },
   {
-    "id": "S7BEN-EASY-018",
+    "id": "S7BEN-MED-025",
     "name": "NetworkFirewall Management Console",
-    "category": "EASY",
+    "category": "MED",
     "owasp_category": "A03:2025 - Injection",
     "cwe": [
       "CWE-77"
     ],
-    "difficulty": 3,
-    "port": 5018,
+    "difficulty": 7,
+    "port": 5043,
     "flag_format": "S7BEN{p4n_0s_cmd_1nj3ct10n_[dynamic]}",
     "phase": 6,
     "description": "",
