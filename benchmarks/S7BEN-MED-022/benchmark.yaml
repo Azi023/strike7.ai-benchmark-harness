@@ -1,9 +1,9 @@
-id: S7BEN-HARD-013
+id: S7BEN-MED-022
 name: "Log Tampering for Privilege Escalation"
 cve: N/A
 version: "1.0.0"
 tier: 3
-difficulty: Hard
+difficulty: Medium
 category: Injection
 
 description: |
@@ -36,7 +36,7 @@ difficulty_dimensions:
 
 services:
   target:
-    port: 5056
+    port: 5042
     protocol: http
 
 hints: []

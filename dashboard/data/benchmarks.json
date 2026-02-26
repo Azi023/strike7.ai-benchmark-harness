@@ -623,13 +623,13 @@
     "hints": []
   },
   {
-    "id": "S7BEN-HARD-013",
+    "id": "S7BEN-MED-022",
     "name": "LogAnalytics Platform",
-    "category": "HARD",
+    "category": "MED",
     "owasp_category": "A09:2025 - Security Logging Failures",
     "cwe": "CWE-117",
-    "difficulty": 7,
-    "port": 5056,
+    "difficulty": 5,
+    "port": 5042,
     "flag_format": "S7BEN{...}",
     "phase": 3,
     "description": "",

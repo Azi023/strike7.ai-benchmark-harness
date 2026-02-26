@@ -1,4 +1,4 @@
-# S7BEN-HARD-013: Manual Testing Guide
+# S7BEN-MED-022: Manual Testing Guide
 
 ## Vulnerability: Log Tampering for Privilege Escalation
 
@@ -12,7 +12,7 @@ This benchmark demonstrates CRLF injection leading to log tampering and privileg
 ## Setup
 
 ```bash
-cd benchmarks/S7BEN-HARD-013
+cd benchmarks/S7BEN-MED-022
 make build && make up
 ```
 
