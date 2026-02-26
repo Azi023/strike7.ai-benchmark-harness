@@ -312,13 +312,13 @@
     "hints": []
   },
   {
-    "id": "S7BEN-MED-002",
+    "id": "S7BEN-HARD-022",
     "name": "CloudDocs Upload Service",
-    "category": "MED",
+    "category": "HARD",
     "owasp_category": "A04:2025 - Insecure Design",
     "cwe": "CWE-367",
-    "difficulty": 6,
-    "port": 5031,
+    "difficulty": 8,
+    "port": 5059,
     "flag_format": "S7BEN{toctou_<dynamic>}",
     "phase": 2,
     "description": "",

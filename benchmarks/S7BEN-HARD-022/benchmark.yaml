@@ -1,8 +1,8 @@
-id: S7BEN-MED-002
+id: S7BEN-HARD-022
 name: "TOCTOU - File Operation Race Condition"
 cve: N/A
 version: "1.0.0"
-difficulty: Medium
+difficulty: Hard
 category: Insecure Design
 
 description: |
@@ -21,7 +21,7 @@ flag_pattern: 'S7BEN\{toctou_file_race_[0-9a-f]{32}\}'
 
 services:
   target:
-    port: 5031
+    port: 5059
     protocol: http
 
 tags:

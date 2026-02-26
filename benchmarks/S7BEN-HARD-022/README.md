@@ -1,4 +1,4 @@
-# S7BEN-MED-002: TOCTOU - File Operation Race Condition
+# S7BEN-HARD-022: TOCTOU - File Operation Race Condition
 
 ## Overview
 This benchmark demonstrates a Time-of-Check to Time-of-Use (TOCTOU) vulnerability in a file processing service where files can be replaced or symlinked between validation and processing.

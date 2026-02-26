@@ -1,4 +1,4 @@
-# S7BEN-MED-002: Manual Testing Guide
+# S7BEN-HARD-022: Manual Testing Guide
 
 ## Vulnerability: TOCTOU - File Operation Race Condition
 
@@ -13,7 +13,7 @@ This benchmark demonstrates a Time-of-Check to Time-of-Use (TOCTOU) race conditi
 
 ### 1. Build and Start the Benchmark
 ```bash
-cd benchmarks/S7BEN-MED-002
+cd benchmarks/S7BEN-HARD-022
 make build
 make up
 ```
@@ -151,7 +151,7 @@ Create `exploit_symlink.sh`:
 URL="http://localhost:5000"
 
 echo "============================================================"
-echo "S7BEN-MED-002: TOCTOU Symlink Exploit"
+echo "S7BEN-HARD-022: TOCTOU Symlink Exploit"
 echo "============================================================"
 
 # Step 1: Upload valid file
@@ -248,7 +248,7 @@ CONTAINER_NAME = "sben-400-03-app-1"  # Adjust if needed
 
 def exploit_toctou():
     print("="*60)
-    print("S7BEN-MED-002: TOCTOU File Race Exploit")
+    print("S7BEN-HARD-022: TOCTOU File Race Exploit")
     print("="*60)
 
     # Step 1: Create and upload benign file
