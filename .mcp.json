@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "strike7": {
+      "command": "python3",
+      "args": ["/home/atheeque/workspace/strike7-benchmarks/dashboard/strike7_mcp_server.py"],
+      "env": {
+        "STRIKE7_API_URL": "http://139.59.80.137:5500"
+      }
+    }
+  }
+}

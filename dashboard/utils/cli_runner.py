@@ -295,7 +295,10 @@ def run_benchmark_automated(benchmark_id, provider, model_name,
 
     # ---- Step 2: Start container ----
     try:
-        start_resp = requests.post(f"{url}/api/benchmark/{benchmark_id}/start")
+        start_resp = requests.post(
+            f"{url}/api/benchmark/{benchmark_id}/start",
+            json={},
+        )
         start_resp.raise_for_status()
     except Exception as e:
         logger.error("Failed to start container for %s: %s", benchmark_id, e)
@@ -389,7 +392,7 @@ def run_benchmark_automated(benchmark_id, provider, model_name,
 
         # ---- Step 9: Stop container ----
         try:
-            requests.post(f"{url}/api/benchmark/{benchmark_id}/stop")
+            requests.post(f"{url}/api/benchmark/{benchmark_id}/stop", json={})
         except Exception as e:
             logger.warning("Failed to stop container for %s: %s", benchmark_id, e)
 
