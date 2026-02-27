@@ -608,6 +608,18 @@ class TestCreateRun:
         assert result['run']['failure_reason'] == 'timeout'
         assert result['run']['loop_detected'] == 1
 
+    def test_create_run_invalid_token_source(self, client, sample_run):
+        sample_run['token_source'] = 'made_up_source'
+        resp = _post_run(client, sample_run)
+        assert resp.status_code == 400
+        assert 'token_source' in resp.get_json()['errors'][0]
+
+    def test_create_run_valid_token_source_exact(self, client, sample_run):
+        sample_run['token_source'] = 'exact'
+        resp = _post_run(client, sample_run)
+        assert resp.status_code == 201
+        assert resp.get_json()['run']['token_source'] == 'exact'
+
 
 class TestListRuns:
     """GET /api/comparison/runs"""

@@ -58,11 +58,12 @@ def _ensure_db():
 def _calculate_cost_for_run(data, conn):
     """Calculate cost_usd from token counts and model pricing.
 
-    Uses exact calculation when input/output tokens are both provided,
-    or heuristic split when only total_tokens is available.
+    Delegates to token_estimator.calculate_cost() — single source of truth.
 
     Returns (cost_usd, cost_source) tuple.
     """
+    from utils.token_estimator import calculate_cost
+
     total_tokens = data.get('total_tokens')
     input_tokens = data.get('input_tokens')
     output_tokens = data.get('output_tokens')
@@ -71,32 +72,8 @@ def _calculate_cost_for_run(data, conn):
     if not total_tokens and not (input_tokens and output_tokens):
         return None, 'unavailable'
 
-    row = conn.execute(
-        "SELECT provider, input_cost_per_1m, output_cost_per_1m "
-        "FROM benchmark_models WHERE model_name = ?",
-        (model_name,)
-    ).fetchone()
-
-    if not row:
-        return None, 'unavailable'
-
-    input_cost_per_1m = row['input_cost_per_1m'] or 0.0
-    output_cost_per_1m = row['output_cost_per_1m'] or 0.0
-
-    if input_tokens is not None and output_tokens is not None:
-        cost = (input_tokens / 1_000_000 * input_cost_per_1m) + \
-               (output_tokens / 1_000_000 * output_cost_per_1m)
-        return round(cost, 6), 'exact'
-
-    # Heuristic split based on provider
-    from utils.token_estimator import INPUT_OUTPUT_SPLIT
-    provider = row['provider']
-    input_ratio, _ = INPUT_OUTPUT_SPLIT.get(provider, (0.65, 0.35))
-    est_input = int(total_tokens * input_ratio)
-    est_output = total_tokens - est_input
-    cost = (est_input / 1_000_000 * input_cost_per_1m) + \
-           (est_output / 1_000_000 * output_cost_per_1m)
-    return round(cost, 6), 'estimated'
+    result = calculate_cost(total_tokens, input_tokens, output_tokens, model_name)
+    return result.get('cost_usd'), result.get('cost_source', 'unavailable')
 
 
 def _validate_run_data(data):
@@ -136,6 +113,15 @@ def _validate_run_data(data):
                     errors.append("attempt_number must be >= 1")
             except (TypeError, ValueError):
                 errors.append(f"attempt_number must be an integer, got: '{attempt}'")
+
+        token_source = data.get('token_source')
+        if token_source is not None:
+            from utils.provider_config import VALID_TOKEN_SOURCES
+            if token_source not in VALID_TOKEN_SOURCES:
+                errors.append(
+                    f"Invalid token_source: '{token_source}'. "
+                    f"Must be one of: {', '.join(sorted(VALID_TOKEN_SOURCES))}"
+                )
 
     return errors
 
