@@ -113,6 +113,10 @@
                 <p>Record benchmark runs to see model performance:</p>
                 <pre class="code-hint">./scripts/run_comparison.sh S7BEN-EASY-001 google gemini-2.5-flash</pre>
             </div>
+            <div class="leaderboard-controls">
+                <button id="btn-group-model" class="group-btn active">By Model</button>
+                <button id="btn-group-product" class="group-btn">By Product</button>
+            </div>
             <div class="table-wrapper">
                 <table id="leaderboard-table" class="leaderboard-table">
                     <thead>
@@ -178,6 +182,14 @@
                 <div class="chart-card">
                     <h3>Efficiency: Cost vs Pass Rate</h3>
                     <canvas id="efficiencyChart"></canvas>
+                </div>
+                <div class="chart-card">
+                    <h3>Failure Funnel by Stage</h3>
+                    <canvas id="failureFunnelChart"></canvas>
+                </div>
+                <div class="chart-card">
+                    <h3>Top Failure Reasons</h3>
+                    <canvas id="failureReasonChart"></canvas>
                 </div>
             </div>
         </div>

@@ -2381,3 +2381,172 @@ class TestContextManager:
             conn.execute("SELECT 1")
         except sqlite3.ProgrammingError:
             pass  # Expected: closed connection
+
+
+# ---------------------------------------------------------------------------
+# Failure Analysis Tests
+# ---------------------------------------------------------------------------
+
+class TestFailureAnalysis:
+    """Tests for GET /api/comparison/failure-analysis endpoint."""
+
+    def _insert_failure_run(self, client, benchmark_id, failure_stage, failure_reason, **kwargs):
+        """Helper to insert a failed run with failure metadata."""
+        data = {
+            'benchmark_id': benchmark_id,
+            'difficulty_tier': kwargs.get('difficulty_tier', 'MED'),
+            'provider': kwargs.get('provider', 'google'),
+            'model_name': kwargs.get('model_name', 'gemini-2.5-flash'),
+            'flag_captured': 0,
+            'total_duration_s': kwargs.get('total_duration_s', 60.0),
+            'failure_stage': failure_stage,
+            'failure_reason': failure_reason,
+            'product_name': kwargs.get('product_name', 'strike7-cyberchat'),
+        }
+        return _post_run(client, data)
+
+    def test_failure_analysis_returns_structure(self, client):
+        """Endpoint returns expected top-level keys."""
+        resp = client.get('/api/comparison/failure-analysis')
+        assert resp.status_code == 200
+        data = resp.get_json()
+        assert data['status'] == 'success'
+        assert 'stage_funnel' in data
+        assert 'reason_breakdown' in data
+        assert 'total_failures' in data
+
+    def test_failure_analysis_stage_funnel(self, client):
+        """Stage funnel counts failure_stage correctly."""
+        # Insert failures at different stages
+        self._insert_failure_run(client, 'S7BEN-MED-099', 'recon', 'timeout')
+        self._insert_failure_run(client, 'S7BEN-MED-099', 'recon', 'vuln_not_identified')
+        self._insert_failure_run(client, 'S7BEN-MED-099', 'exploitation', 'exploit_failed')
+
+        resp = client.get('/api/comparison/failure-analysis?benchmark_id=S7BEN-MED-099')
+        data = resp.get_json()
+
+        stages = {s['stage']: s['count'] for s in data['stage_funnel']}
+        assert stages.get('recon', 0) >= 2
+        assert stages.get('exploitation', 0) >= 1
+
+    def test_failure_analysis_reason_breakdown(self, client):
+        """Reason breakdown includes reason+stage pairs."""
+        self._insert_failure_run(client, 'S7BEN-MED-098', 'analysis', 'wrong_attack_vector')
+        self._insert_failure_run(client, 'S7BEN-MED-098', 'analysis', 'wrong_attack_vector')
+
+        resp = client.get('/api/comparison/failure-analysis?benchmark_id=S7BEN-MED-098')
+        data = resp.get_json()
+
+        # Find the matching reason entry
+        matching = [r for r in data['reason_breakdown']
+                    if r['reason'] == 'wrong_attack_vector' and r['stage'] == 'analysis']
+        assert len(matching) == 1
+        assert matching[0]['count'] >= 2
+
+    def test_failure_analysis_filters_by_product(self, client):
+        """product_name filter isolates failure data."""
+        self._insert_failure_run(
+            client, 'S7BEN-MED-097', 'recon', 'timeout',
+            product_name='test-product-a',
+        )
+        self._insert_failure_run(
+            client, 'S7BEN-MED-097', 'exploitation', 'exploit_failed',
+            product_name='test-product-b',
+        )
+
+        resp = client.get('/api/comparison/failure-analysis?product_name=test-product-a')
+        data = resp.get_json()
+
+        # Should only see recon failures from product-a
+        stages = {s['stage']: s['count'] for s in data['stage_funnel']}
+        assert stages.get('recon', 0) >= 1
+        # exploitation from product-b should not appear in product-a filter
+        assert 'exploitation' not in stages or stages.get('exploitation', 0) == 0
+
+    def test_failure_analysis_empty_when_all_success(self, client):
+        """All successful runs → empty funnel."""
+        resp = client.get(
+            '/api/comparison/failure-analysis?benchmark_id=S7BEN-NONEXISTENT-999'
+        )
+        data = resp.get_json()
+        assert data['stage_funnel'] == []
+        assert data['reason_breakdown'] == []
+        assert data['total_failures'] == 0
+
+
+# ---------------------------------------------------------------------------
+# PIL View v2 Tests
+# ---------------------------------------------------------------------------
+
+class TestPILViewV2:
+    """Tests for upgraded pil_training_data view with v2 columns."""
+
+    def test_pil_view_has_v2_columns(self, db_path):
+        """PIL view should include product_name, underlying_model, campaign_id,
+        failure_stage, total_duration_s columns."""
+        import sqlite3
+        conn = sqlite3.connect(db_path)
+        conn.row_factory = sqlite3.Row
+        # Query pragma to get column names from view
+        row = conn.execute("SELECT * FROM pil_training_data LIMIT 0").description
+        col_names = [col[0] for col in row] if row else []
+        # Fallback: try fetching a row to get keys
+        if not col_names:
+            cursor = conn.execute("PRAGMA table_info(pil_training_data)")
+            col_names = [r[1] for r in cursor.fetchall()]
+        conn.close()
+
+        for expected in ['product_name', 'underlying_model', 'campaign_id',
+                         'failure_stage', 'total_duration_s']:
+            assert expected in col_names, f"Missing v2 column: {expected}"
+
+    def test_pil_view_includes_failure_stage(self, client, db_path):
+        """Run with failure_stage should appear in PIL view."""
+        data = {
+            'benchmark_id': 'S7BEN-MED-096',
+            'difficulty_tier': 'MED',
+            'provider': 'google',
+            'model_name': 'gemini-2.5-flash',
+            'flag_captured': 0,
+            'total_duration_s': 45.0,  # >30s so it passes filter
+            'failure_stage': 'exploitation',
+            'failure_reason': 'exploit_failed',
+            'product_name': 'test-pil-product',
+        }
+        _post_run(client, data)
+
+        import sqlite3
+        conn = sqlite3.connect(db_path)
+        conn.row_factory = sqlite3.Row
+        rows = conn.execute(
+            "SELECT * FROM pil_training_data WHERE benchmark_id = 'S7BEN-MED-096'"
+        ).fetchall()
+        conn.close()
+
+        assert len(rows) >= 1
+        row = dict(rows[0])
+        assert row['failure_stage'] == 'exploitation'
+        assert row['product_name'] == 'test-pil-product'
+
+    def test_pil_view_filters_trivial_failures(self, client, db_path):
+        """Runs < 30s with flag_captured=0 should be excluded from PIL view."""
+        data = {
+            'benchmark_id': 'S7BEN-MED-095',
+            'difficulty_tier': 'MED',
+            'provider': 'google',
+            'model_name': 'gemini-2.5-flash',
+            'flag_captured': 0,
+            'total_duration_s': 5.0,  # <30s trivial failure
+            'failure_stage': 'recon',
+            'failure_reason': 'container_error',
+        }
+        _post_run(client, data)
+
+        import sqlite3
+        conn = sqlite3.connect(db_path)
+        rows = conn.execute(
+            "SELECT * FROM pil_training_data WHERE benchmark_id = 'S7BEN-MED-095'"
+        ).fetchall()
+        conn.close()
+
+        assert len(rows) == 0, "Trivial failure (<30s) should be excluded from PIL view"

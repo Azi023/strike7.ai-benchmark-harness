@@ -26,6 +26,8 @@ let activeCharts = {};
 let currentSort = { field: 'pass_rate', asc: false };
 let enumsData = { failure_reasons: [], failure_stages: [], difficulty_tiers: [] };
 let campaignsData = [];
+let groupByProduct = false;
+let failureData = { stage_funnel: [], reason_breakdown: [], total_failures: 0 };
 
 // ================================================================
 // Init
@@ -35,6 +37,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     initTabs();
     initFilters();
     initSortHeaders();
+    initLeaderboardToggle();
     loadFiltersFromURL();
     await Promise.all([fetchEnums(), fetchCampaigns()]);
     await refreshAll();
@@ -46,6 +49,7 @@ async function refreshAll() {
         fetchMatrix(),
         fetchModels(),
         fetchRecentRuns(),
+        fetchFailureAnalysis(),
     ]);
     buildLeaderboard();
     renderLeaderboard();
@@ -101,7 +105,7 @@ function getFilters() {
 
 async function onFilterChange() {
     syncFiltersToURL();
-    await Promise.all([fetchSummary(), fetchMatrix(), fetchRecentRuns()]);
+    await Promise.all([fetchSummary(), fetchMatrix(), fetchRecentRuns(), fetchFailureAnalysis()]);
     buildLeaderboard();
     renderLeaderboard();
     renderHeatmap();
@@ -278,17 +282,141 @@ function populateCampaignFilter() {
 }
 
 // ================================================================
+// Failure Analysis
+// ================================================================
+
+async function fetchFailureAnalysis() {
+    try {
+        const q = buildQuery();
+        const res = await fetch(`${API_BASE}/comparison/failure-analysis${q ? '?' + q : ''}`);
+        const data = await res.json();
+        failureData = {
+            stage_funnel: data.stage_funnel || [],
+            reason_breakdown: data.reason_breakdown || [],
+            total_failures: data.total_failures || 0,
+        };
+    } catch (e) {
+        console.error('Failed to fetch failure analysis:', e);
+        failureData = { stage_funnel: [], reason_breakdown: [], total_failures: 0 };
+    }
+}
+
+function renderFailureFunnel() {
+    if (failureData.stage_funnel.length === 0) {
+        if (activeCharts['failureFunnelChart']) {
+            activeCharts['failureFunnelChart'].destroy();
+            delete activeCharts['failureFunnelChart'];
+        }
+        return;
+    }
+
+    const pipelineOrder = ['recon', 'analysis', 'exploitation', 'flag_extraction', 'flag_submission'];
+    const stageMap = {};
+    failureData.stage_funnel.forEach(s => { stageMap[s.stage] = s.count; });
+
+    const labels = pipelineOrder.filter(s => stageMap[s]);
+    const data = labels.map(s => stageMap[s]);
+
+    // Red gradient — pipeline progression
+    const colors = [
+        'rgba(248, 113, 113, 0.5)',
+        'rgba(239, 68, 68, 0.55)',
+        'rgba(220, 38, 38, 0.6)',
+        'rgba(185, 28, 28, 0.65)',
+        'rgba(153, 27, 27, 0.7)',
+    ];
+
+    createOrUpdate('failureFunnelChart', 'bar', {
+        labels: labels.map(s => s.replace('_', ' ')),
+        datasets: [{
+            label: 'Failures',
+            data,
+            backgroundColor: labels.map((_, i) => colors[i % colors.length]),
+            borderColor: labels.map((_, i) => colors[i % colors.length].replace(/[\d.]+\)$/, '1)')),
+            borderWidth: 1,
+        }]
+    }, {
+        indexAxis: 'y',
+        scales: {
+            x: { beginAtZero: true, grid: { color: '#252525' } },
+            y: { grid: { display: false } },
+        },
+        plugins: { legend: { display: false } },
+    });
+}
+
+function renderFailureReasons() {
+    if (failureData.reason_breakdown.length === 0) {
+        if (activeCharts['failureReasonChart']) {
+            activeCharts['failureReasonChart'].destroy();
+            delete activeCharts['failureReasonChart'];
+        }
+        return;
+    }
+
+    // Top 10 reasons sorted by count desc
+    const top = failureData.reason_breakdown
+        .slice()
+        .sort((a, b) => b.count - a.count)
+        .slice(0, 10);
+
+    const labels = top.map(r => r.reason.replace(/_/g, ' '));
+    const data = top.map(r => r.count);
+
+    createOrUpdate('failureReasonChart', 'bar', {
+        labels,
+        datasets: [{
+            label: 'Count',
+            data,
+            backgroundColor: 'rgba(251, 191, 36, 0.5)',
+            borderColor: 'rgba(251, 191, 36, 1)',
+            borderWidth: 1,
+        }]
+    }, {
+        indexAxis: 'y',
+        scales: {
+            x: { beginAtZero: true, grid: { color: '#252525' } },
+            y: { grid: { display: false } },
+        },
+        plugins: { legend: { display: false } },
+    });
+}
+
+// ================================================================
+// Leaderboard Toggle
+// ================================================================
+
+function initLeaderboardToggle() {
+    document.getElementById('btn-group-model').addEventListener('click', () => {
+        groupByProduct = false;
+        document.getElementById('btn-group-model').classList.add('active');
+        document.getElementById('btn-group-product').classList.remove('active');
+        buildLeaderboard();
+        renderLeaderboard();
+    });
+    document.getElementById('btn-group-product').addEventListener('click', () => {
+        groupByProduct = true;
+        document.getElementById('btn-group-product').classList.add('active');
+        document.getElementById('btn-group-model').classList.remove('active');
+        buildLeaderboard();
+        renderLeaderboard();
+    });
+}
+
+// ================================================================
 // Leaderboard
 // ================================================================
 
 function buildLeaderboard() {
-    // Aggregate summaryData by model_name
-    const byModel = {};
+    const groupKey = groupByProduct ? 'product_name' : 'model_name';
+    const byGroup = {};
+
     summaryData.forEach(s => {
-        const key = s.model_name;
-        if (!byModel[key]) {
-            byModel[key] = {
-                model_name: s.model_name,
+        const key = groupByProduct ? s.product_name : s.model_name;
+        if (!key) return; // skip null product_name entries in product mode
+        if (!byGroup[key]) {
+            byGroup[key] = {
+                model_name: groupByProduct ? key : s.model_name,
                 provider: s.provider,
                 product_name: s.product_name || null,
                 total_runs: 0,
@@ -303,7 +431,11 @@ function buildLeaderboard() {
                 cost_count: 0,
             };
         }
-        const m = byModel[key];
+        const m = byGroup[key];
+        // In product mode, provider may vary — use 'mixed' if providers differ
+        if (groupByProduct && m.provider !== s.provider && m.total_runs > 0) {
+            m.provider = 'mixed';
+        }
         m.total_runs += s.total_runs || 0;
         m.successful_runs += s.successful_runs || 0;
         if (s.avg_time_s != null) { m.time_sum += s.avg_time_s * s.total_runs; m.time_count += s.total_runs; }
@@ -312,7 +444,7 @@ function buildLeaderboard() {
         if (s.avg_cost_usd != null) { m.cost_sum += s.avg_cost_usd * s.total_runs; m.cost_count += s.total_runs; }
     });
 
-    leaderboard = Object.values(byModel).map(m => ({
+    leaderboard = Object.values(byGroup).map(m => ({
         model_name: m.model_name,
         provider: m.provider,
         product_name: m.product_name,
@@ -665,6 +797,10 @@ function renderCharts() {
             }
         },
     });
+
+    // Failure charts
+    renderFailureFunnel();
+    renderFailureReasons();
 }
 
 function createOrUpdate(canvasId, type, data, options) {

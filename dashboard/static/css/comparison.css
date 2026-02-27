@@ -801,6 +801,37 @@ body::before {
     }
 }
 
+/* Leaderboard group toggle */
+.leaderboard-controls {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.group-btn {
+    background: #1a1a1a;
+    color: #888;
+    border: 1px solid #333;
+    padding: 6px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-family: var(--s7-font-main);
+    font-size: 0.8rem;
+    font-weight: 500;
+    transition: all 0.15s;
+}
+
+.group-btn:hover {
+    color: var(--s7-text-secondary);
+    border-color: var(--s7-border-hover);
+}
+
+.group-btn.active {
+    background: rgba(139, 92, 246, 0.15);
+    color: #a78bfa;
+    border-color: rgba(139, 92, 246, 0.3);
+}
+
 /* Product label badge */
 .product-label {
     display: inline-block;

@@ -770,6 +770,67 @@ def update_campaign(campaign_id):
 # Prompt rendering endpoint
 # ---------------------------------------------------------------------------
 
+@comparison_bp.route('/api/comparison/failure-analysis', methods=['GET'])
+def get_failure_analysis():
+    """Failure funnel analysis: where agents fail across the attack pipeline.
+
+    Optional filters: provider, model_name, difficulty_tier, benchmark_id,
+                      campaign_id, product_name
+
+    Returns stage funnel counts and top failure reasons with stage context.
+    """
+    where_clause, params = _build_filters()
+
+    with _get_db() as conn:
+        try:
+            # Stage funnel — ordered pipeline counts
+            stage_rows = conn.execute(f"""
+                SELECT failure_stage, COUNT(*) as count
+                FROM model_benchmark_runs
+                WHERE flag_captured = 0 AND failure_stage IS NOT NULL AND {where_clause}
+                GROUP BY failure_stage
+            """, params).fetchall()
+
+            # Reason breakdown — with stage context
+            reason_rows = conn.execute(f"""
+                SELECT failure_reason, failure_stage, COUNT(*) as count
+                FROM model_benchmark_runs
+                WHERE flag_captured = 0 AND failure_reason IS NOT NULL AND {where_clause}
+                GROUP BY failure_reason, failure_stage
+                ORDER BY count DESC
+            """, params).fetchall()
+
+            # Total failures count
+            total_failures = conn.execute(f"""
+                SELECT COUNT(*) FROM model_benchmark_runs
+                WHERE flag_captured = 0 AND {where_clause}
+            """, params).fetchone()[0]
+
+            # Build stage funnel in pipeline order
+            stage_counts = {r['failure_stage']: r['count'] for r in stage_rows}
+            pipeline_order = ['recon', 'analysis', 'exploitation', 'flag_extraction', 'flag_submission']
+            stage_funnel = [
+                {'stage': stage, 'count': stage_counts.get(stage, 0)}
+                for stage in pipeline_order
+                if stage_counts.get(stage, 0) > 0
+            ]
+
+            reason_breakdown = [
+                {'reason': r['failure_reason'], 'stage': r['failure_stage'], 'count': r['count']}
+                for r in reason_rows
+            ]
+
+            return jsonify({
+                'status': 'success',
+                'stage_funnel': stage_funnel,
+                'reason_breakdown': reason_breakdown,
+                'total_failures': total_failures,
+            })
+
+        except Exception as e:
+            return jsonify({'status': 'error', 'message': str(e)}), 500
+
+
 @comparison_bp.route('/api/comparison/prompt', methods=['GET'])
 def get_prompt():
     """Render a provider-tuned benchmark prompt with all variables filled in.

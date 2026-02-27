@@ -116,6 +116,8 @@ def _migrate_v1(conn):
     # --- PIL (Prediction Intelligence Layer) training data export ---
     # Filters: successful captures + runs lasting >30s (excludes trivial failures/instant timeouts)
     # Consumer: ML pipeline for benchmark difficulty prediction (not yet implemented)
+    # Note: includes v2 columns (product_name etc.) — safe for fresh DBs since
+    # _migrate_v2 ALTER TABLEs run before this view is queried.
     conn.execute("""
         CREATE VIEW IF NOT EXISTS pil_training_data AS
         SELECT
@@ -124,6 +126,8 @@ def _migrate_v1(conn):
             r.flag_captured, r.time_to_flag_s, r.total_tokens,
             r.steps_taken, r.cost_usd, r.loop_detected,
             r.loop_count, r.failure_reason, r.attempt_number,
+            r.product_name, r.underlying_model, r.campaign_id,
+            r.failure_stage, r.total_duration_s,
             m.input_cost_per_1m, m.output_cost_per_1m
         FROM model_benchmark_runs r
         LEFT JOIN benchmark_models m ON r.model_name = m.model_name
@@ -182,6 +186,24 @@ def _migrate_v2(conn):
         WHERE model_name IN ('claude-sonnet-4.5','gemini-2.5-flash','gemini-2.5-pro',
                              'claude-opus-4.6','gpt-4.1-mini','gpt-4.1')
         AND product_name IS NULL
+    """)
+
+    # --- Upgrade PIL view to include v2 columns ---
+    conn.execute("DROP VIEW IF EXISTS pil_training_data")
+    conn.execute("""
+        CREATE VIEW pil_training_data AS
+        SELECT
+            r.benchmark_id, r.difficulty_tier, r.vuln_category,
+            r.provider, r.model_name, r.model_tier,
+            r.flag_captured, r.time_to_flag_s, r.total_tokens,
+            r.steps_taken, r.cost_usd, r.loop_detected,
+            r.loop_count, r.failure_reason, r.attempt_number,
+            r.product_name, r.underlying_model, r.campaign_id,
+            r.failure_stage, r.total_duration_s,
+            m.input_cost_per_1m, m.output_cost_per_1m
+        FROM model_benchmark_runs r
+        LEFT JOIN benchmark_models m ON r.model_name = m.model_name
+        WHERE r.flag_captured = 1 OR r.total_duration_s > 30
     """)
 
 
