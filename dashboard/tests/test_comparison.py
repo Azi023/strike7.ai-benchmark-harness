@@ -936,3 +936,59 @@ class TestPromptEndpoint:
         data = resp.get_json()
         # If benchmark exists in registry, port should be a number, not "PORT"
         assert 'PORT' not in data['prompt'] or 'S7BEN-EASY-001' not in data.get('benchmark_name', '')
+
+
+# ---------------------------------------------------------------------------
+# Phase 3: Comparison Dashboard Route Tests
+# ---------------------------------------------------------------------------
+
+class TestComparisonDashboard:
+    """Tests for /comparison dashboard route and page serving."""
+
+    def test_comparison_route_exists(self, client):
+        """GET /comparison should return 200."""
+        resp = client.get('/comparison')
+        assert resp.status_code == 200
+
+    def test_comparison_returns_html(self, client):
+        """GET /comparison should serve HTML content."""
+        resp = client.get('/comparison')
+        assert b'<!DOCTYPE html>' in resp.data
+        assert b'MODEL COMPARISON' in resp.data
+
+    def test_comparison_loads_css(self, client):
+        """Comparison page should reference comparison.css."""
+        resp = client.get('/comparison')
+        assert b'comparison.css' in resp.data
+
+    def test_comparison_loads_js(self, client):
+        """Comparison page should reference comparison.js."""
+        resp = client.get('/comparison')
+        assert b'comparison.js' in resp.data
+
+    def test_comparison_has_tabs(self, client):
+        """Comparison page should have leaderboard, heatmap, and charts tabs."""
+        resp = client.get('/comparison')
+        assert b'LEADERBOARD' in resp.data
+        assert b'HEATMAP' in resp.data
+        assert b'CHARTS' in resp.data
+
+    def test_comparison_has_nav_back(self, client):
+        """Comparison page should have navigation back to main dashboard."""
+        resp = client.get('/comparison')
+        assert b'href="/"' in resp.data
+
+    def test_comparison_css_served(self, client):
+        """Static CSS file should be accessible."""
+        resp = client.get('/static/css/comparison.css')
+        assert resp.status_code == 200
+
+    def test_comparison_js_served(self, client):
+        """Static JS file should be accessible."""
+        resp = client.get('/static/js/comparison.js')
+        assert resp.status_code == 200
+
+    def test_main_dashboard_has_comparison_link(self, client):
+        """Main dashboard should link to /comparison."""
+        resp = client.get('/')
+        assert b'/comparison' in resp.data

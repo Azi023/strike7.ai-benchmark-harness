@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Strike7 — Model Comparison</title>
+    <link rel="stylesheet" href="/static/css/comparison.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+        rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <h1>
+                    <span class="logo-text">STRIKE7</span>
+                    <span class="logo-suffix">MODEL COMPARISON</span>
+                </h1>
+                <p class="subtitle">Multi-Model Benchmark Performance Analysis</p>
+            </div>
+            <div class="header-stats">
+                <div class="stat-card">
+                    <span class="stat-value" id="total-runs">0</span>
+                    <span class="stat-label">Total Runs</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-value" id="models-tested">0</span>
+                    <span class="stat-label">Models Tested</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-value" id="overall-pass-rate">0%</span>
+                    <span class="stat-label">Overall Pass Rate</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-value" id="total-cost">$0.00</span>
+                    <span class="stat-label">Total Cost</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Navigation -->
+        <nav class="nav-bar">
+            <a href="/" class="nav-link">Dashboard</a>
+            <span class="nav-sep">/</span>
+            <span class="nav-current">Model Comparison</span>
+            <span class="nav-sep">/</span>
+            <a href="/agent-feed" class="nav-link">Agent Feed</a>
+        </nav>
+
+        <!-- Filter Bar -->
+        <div class="filter-bar">
+            <div class="filter-group">
+                <label>Provider</label>
+                <select id="filter-provider">
+                    <option value="">All Providers</option>
+                    <option value="google">Google (Gemini)</option>
+                    <option value="anthropic">Anthropic (Claude)</option>
+                    <option value="openai">OpenAI (GPT/Codex)</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>Tier</label>
+                <select id="filter-tier">
+                    <option value="">All Tiers</option>
+                    <option value="EASY">EASY</option>
+                    <option value="MED">MED</option>
+                    <option value="HARD">HARD</option>
+                    <option value="VHARD">VHARD</option>
+                    <option value="CVE">CVE</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>Benchmark</label>
+                <select id="filter-benchmark">
+                    <option value="">All Benchmarks</option>
+                </select>
+            </div>
+            <button id="btn-reset-filters" class="btn-reset">Reset</button>
+            <button id="btn-refresh" class="btn-refresh">Refresh</button>
+        </div>
+
+        <!-- Tabs -->
+        <div class="tabs">
+            <button class="tab-btn active" data-tab="leaderboard">LEADERBOARD</button>
+            <button class="tab-btn" data-tab="heatmap">HEATMAP</button>
+            <button class="tab-btn" data-tab="charts">CHARTS</button>
+        </div>
+
+        <!-- Leaderboard Tab -->
+        <div id="leaderboard-tab" class="tab-content active">
+            <div id="leaderboard-empty" class="empty-state" style="display:none;">
+                <div class="empty-icon">&#x2694;</div>
+                <h3>No comparison runs yet</h3>
+                <p>Record benchmark runs to see model performance:</p>
+                <pre class="code-hint">./scripts/run_comparison.sh S7BEN-EASY-001 google gemini-2.5-flash</pre>
+            </div>
+            <div class="table-wrapper">
+                <table id="leaderboard-table" class="leaderboard-table">
+                    <thead>
+                        <tr>
+                            <th class="col-rank">#</th>
+                            <th class="col-model sortable" data-sort="model_name">Model</th>
+                            <th class="col-provider sortable" data-sort="provider">Provider</th>
+                            <th class="col-runs sortable" data-sort="total_runs">Runs</th>
+                            <th class="col-pass sortable active-sort" data-sort="pass_rate">Pass Rate</th>
+                            <th class="col-time sortable" data-sort="avg_time_s">Avg Time</th>
+                            <th class="col-tokens sortable" data-sort="avg_tokens">Avg Tokens</th>
+                            <th class="col-steps sortable" data-sort="avg_steps">Avg Steps</th>
+                            <th class="col-cost sortable" data-sort="avg_cost_usd">Avg Cost</th>
+                        </tr>
+                    </thead>
+                    <tbody id="leaderboard-body">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Heatmap Tab -->
+        <div id="heatmap-tab" class="tab-content">
+            <div id="heatmap-empty" class="empty-state" style="display:none;">
+                <div class="empty-icon">&#x1F5FA;</div>
+                <h3>No matrix data available</h3>
+                <p>Run benchmarks across multiple models to generate the capability heatmap.</p>
+            </div>
+            <div class="heatmap-controls">
+                <span id="heatmap-info" class="heatmap-info"></span>
+                <div class="heatmap-legend">
+                    <span class="legend-item"><span class="legend-swatch swatch-pass"></span>Passed</span>
+                    <span class="legend-item"><span class="legend-swatch swatch-fail"></span>Failed</span>
+                    <span class="legend-item"><span class="legend-swatch swatch-partial"></span>Partial</span>
+                    <span class="legend-item"><span class="legend-swatch swatch-none"></span>Not Tested</span>
+                </div>
+            </div>
+            <div class="heatmap-wrapper">
+                <div id="heatmap-grid" class="heatmap-grid"></div>
+            </div>
+        </div>
+
+        <!-- Charts Tab -->
+        <div id="charts-tab" class="tab-content">
+            <div id="charts-empty" class="empty-state" style="display:none;">
+                <div class="empty-icon">&#x1F4CA;</div>
+                <h3>No chart data available</h3>
+                <p>Record comparison runs to visualize model performance.</p>
+            </div>
+            <div class="charts-grid">
+                <div class="chart-card">
+                    <h3>Pass Rate by Model</h3>
+                    <canvas id="passRateChart"></canvas>
+                </div>
+                <div class="chart-card">
+                    <h3>Avg Time to Flag (seconds)</h3>
+                    <canvas id="timeChart"></canvas>
+                </div>
+                <div class="chart-card">
+                    <h3>Avg Cost per Run (USD)</h3>
+                    <canvas id="costChart"></canvas>
+                </div>
+                <div class="chart-card">
+                    <h3>Efficiency: Cost vs Pass Rate</h3>
+                    <canvas id="efficiencyChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Runs -->
+        <div class="recent-runs-section">
+            <h3>Recent Runs</h3>
+            <div id="recent-runs-empty" class="empty-state-inline" style="display:none;">
+                No runs recorded yet.
+            </div>
+            <div class="table-wrapper">
+                <table id="recent-runs-table" class="recent-runs-table">
+                    <thead>
+                        <tr>
+                            <th>Time</th>
+                            <th>Benchmark</th>
+                            <th>Model</th>
+                            <th>Result</th>
+                            <th>Duration</th>
+                            <th>Tokens</th>
+                            <th>Cost</th>
+                        </tr>
+                    </thead>
+                    <tbody id="recent-runs-body">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tooltip -->
+    <div id="cell-tooltip" class="cell-tooltip"></div>
+
+    <script src="/static/js/comparison.js"></script>
+</body>
+
+</html>

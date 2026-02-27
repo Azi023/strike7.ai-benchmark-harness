@@ -117,6 +117,11 @@ def index():
     """Serve the main dashboard page"""
     return send_from_directory('templates', 'index.html')
 
+@app.route('/comparison')
+def comparison():
+    """Serve the model comparison dashboard"""
+    return send_from_directory('templates', 'comparison.html')
+
 @app.route('/api/benchmarks', methods=['GET'])
 def get_benchmarks():
     """
