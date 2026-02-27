@@ -42,13 +42,17 @@ QUIET=false
 DRY_RUN=false
 NOTES=""
 
-shift 3 2>/dev/null || shift $# 2>/dev/null
+shift 3
 while [[ $# -gt 0 ]]; do
     case "$1" in
-        --attempt)   ATTEMPT="$2"; shift 2 ;;
+        --attempt)
+            [[ -n "${2:-}" ]] || { echo "Error: --attempt requires a value"; exit 1; }
+            ATTEMPT="$2"; shift 2 ;;
         --quiet)     QUIET=true; shift ;;
         --dry-run)   DRY_RUN=true; shift ;;
-        --notes)     NOTES="$2"; shift 2 ;;
+        --notes)
+            [[ -n "${2:-}" ]] || { echo "Error: --notes requires a value"; exit 1; }
+            NOTES="$2"; shift 2 ;;
         *)           echo "Unknown option: $1"; exit 1 ;;
     esac
 done
@@ -80,7 +84,8 @@ print(json.dumps(result, indent=2))
 )
 
 export DASHBOARD_DIR BENCHMARK_ID PROVIDER MODEL_NAME STRIKE7_URL
-export RUN_NOTES="$NOTES"
+# TODO: wire ATTEMPT and RUN_NOTES into run_benchmark_automated when it supports them
+export ATTEMPT RUN_NOTES="$NOTES"
 if [ "$DRY_RUN" = true ]; then
     export DRY_RUN=true
 else
@@ -108,16 +113,27 @@ else
     echo "================================================================"
     echo ""
 
-    RESULT=$("${PYTHON_CMD[@]}")
+    if ! RESULT=$("${PYTHON_CMD[@]}"); then
+        echo "  ERROR: Benchmark automation failed."
+        echo "$RESULT"
+        exit 1
+    fi
 
-    # Parse and display result
-    STATUS=$(echo "$RESULT" | python3 -c "import sys,json; print(json.load(sys.stdin).get('status','error'))")
-    FLAG=$(echo "$RESULT" | python3 -c "import sys,json; print('YES' if json.load(sys.stdin).get('flag_captured') else 'NO')")
-    TOKENS=$(echo "$RESULT" | python3 -c "import sys,json; print(json.load(sys.stdin).get('total_tokens', 0))")
-    DURATION=$(echo "$RESULT" | python3 -c "import sys,json; print(json.load(sys.stdin).get('total_duration_s', 0))")
-    COST=$(echo "$RESULT" | python3 -c "import sys,json; c=json.load(sys.stdin).get('cost_usd'); print(f'\${c:.4f}' if c else 'N/A')")
-    RUN_ID=$(echo "$RESULT" | python3 -c "import sys,json; print(json.load(sys.stdin).get('run_id', 'unknown'))")
-    FAIL=$(echo "$RESULT" | python3 -c "import sys,json; print(json.load(sys.stdin).get('failure_reason') or '-')")
+    # Parse all fields in a single Python invocation (tab-separated)
+    PARSED=$(echo "$RESULT" | python3 -c "
+import sys, json
+d = json.load(sys.stdin)
+status = d.get('status', 'error')
+flag = 'YES' if d.get('flag_captured') else 'NO'
+tokens = d.get('total_tokens', 0)
+duration = d.get('total_duration_s', 0)
+c = d.get('cost_usd')
+cost = f'\${c:.4f}' if c else 'N/A'
+run_id = d.get('run_id', 'unknown')
+fail = d.get('failure_reason') or '-'
+print(f'{status}\t{flag}\t{tokens}\t{duration}\t{cost}\t{run_id}\t{fail}')
+")
+    IFS=$'\t' read -r STATUS FLAG TOKENS DURATION COST RUN_ID FAIL <<< "$PARSED"
 
     echo ""
     echo "================================================================"
