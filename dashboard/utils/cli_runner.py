@@ -26,7 +26,7 @@ from datetime import datetime, timezone
 import requests
 
 from utils.provider_config import get_cli_command, get_timeout, PROVIDERS, TIER_TIMEOUTS
-from utils.token_estimator import parse_cli_output, calculate_cost, _empty_result
+from utils.token_estimator import parse_cli_output, _empty_result
 from api.activity_logger import query_events_in_window, extract_flag_result
 
 logger = logging.getLogger(__name__)

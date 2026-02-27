@@ -250,21 +250,26 @@ class TestIntegrationAutomatedRun:
 
     @pytest.fixture(scope='class', autouse=True)
     def setup_db(self):
-        """Create a temporary DB shared across all tests in this class."""
-        fd, path = tempfile.mkstemp(suffix='.db', prefix='test_integration_')
-        os.close(fd)
-        old_db_path = os.environ.get('COMPARISON_DB_PATH')
-        os.environ['COMPARISON_DB_PATH'] = path
-        yield path
-        if old_db_path is not None:
-            os.environ['COMPARISON_DB_PATH'] = old_db_path
+        """Use existing COMPARISON_DB_PATH if set, otherwise create a temp DB.
+
+        This avoids DB fixture conflicts when test_comparison.py runs in the
+        same session (it uses a session-scoped fixture that sets the env var).
+        """
+        existing = os.environ.get('COMPARISON_DB_PATH')
+        if existing and os.path.exists(existing):
+            # Reuse DB created by test_comparison.py session fixture
+            yield existing
         else:
+            fd, path = tempfile.mkstemp(suffix='.db', prefix='test_integration_')
+            os.close(fd)
+            os.environ['COMPARISON_DB_PATH'] = path
+            yield path
             os.environ.pop('COMPARISON_DB_PATH', None)
-        os.unlink(path)
+            os.unlink(path)
 
     @pytest.fixture(scope='class')
     def flask_client(self, setup_db):
-        """Flask test client with fresh DB."""
+        """Flask test client using the shared DB."""
         from app import app as flask_app
         flask_app.config['TESTING'] = True
         return flask_app.test_client()
