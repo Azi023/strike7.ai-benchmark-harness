@@ -229,7 +229,8 @@ body::before {
 }
 
 .btn-reset,
-.btn-refresh {
+.btn-refresh,
+.btn-report {
     padding: 0.5rem 1rem;
     border-radius: 4px;
     font-size: 0.8rem;
@@ -258,6 +259,22 @@ body::before {
 .btn-refresh:hover {
     background: var(--s7-accent);
     color: #fff;
+}
+
+.btn-report {
+    background: rgba(16, 185, 129, 0.1);
+    color: #10B981;
+    border-color: #10B981;
+}
+
+.btn-report:hover {
+    background: #10B981;
+    color: #fff;
+}
+
+.btn-report:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
 }
 
 /* ================================================================

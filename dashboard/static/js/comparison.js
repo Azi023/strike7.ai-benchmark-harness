@@ -91,6 +91,7 @@ function initFilters() {
     document.getElementById('filter-campaign').addEventListener('change', onFilterChange);
     document.getElementById('btn-reset-filters').addEventListener('click', resetFilters);
     document.getElementById('btn-refresh').addEventListener('click', refreshAll);
+    document.getElementById('btn-generate-report').addEventListener('click', generateReport);
 }
 
 function getFilters() {
@@ -279,6 +280,41 @@ function populateCampaignFilter() {
         select.appendChild(opt);
     });
     select.value = current;
+}
+
+// ================================================================
+// Report Generation
+// ================================================================
+
+async function generateReport() {
+    const btn = document.getElementById('btn-generate-report');
+    const original = btn.textContent;
+    btn.textContent = 'Generating...';
+    btn.disabled = true;
+
+    try {
+        const q = buildQuery({ format: 'markdown', compare_previous: 'true' });
+        const res = await fetch(`${API_BASE}/comparison/report${q ? '?' + q : ''}`);
+
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+        const blob = await res.blob();
+        const url = URL.createObjectURL(blob);
+        const date = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `Strike7_Report_${date}.md`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    } catch (e) {
+        console.error('Failed to generate report:', e);
+        alert('Failed to generate report. Check console for details.');
+    } finally {
+        btn.textContent = original;
+        btn.disabled = false;
+    }
 }
 
 // ================================================================

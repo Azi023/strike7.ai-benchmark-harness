@@ -2550,3 +2550,218 @@ class TestPILViewV2:
         conn.close()
 
         assert len(rows) == 0, "Trivial failure (<30s) should be excluded from PIL view"
+
+
+# ---------------------------------------------------------------------------
+# Report Generation Tests
+# ---------------------------------------------------------------------------
+
+class TestReportGenerationUnit:
+    """Unit tests for utils/report_generator.py — pure functions, no Flask."""
+
+    def test_generate_report_empty_runs(self):
+        """Empty runs should produce a valid report with zero stats."""
+        from utils.report_generator import generate_report
+        report = generate_report(runs=[], benchmarks_meta=[])
+        assert '# Strike7' in report
+        assert '0/0' in report or 'Overall Pass Rate' in report
+
+    def test_generate_report_with_runs(self):
+        """Report with runs should contain all major sections."""
+        from utils.report_generator import generate_report
+        runs = [
+            {'run_id': 'a1', 'benchmark_id': 'S7BEN-EASY-001', 'flag_captured': 1,
+             'total_duration_s': 30.0, 'steps_taken': 4, 'total_tokens': 1000,
+             'cost_usd': 0.01, 'run_timestamp': '2026-01-01T00:00:00'},
+            {'run_id': 'a2', 'benchmark_id': 'S7BEN-EASY-002', 'flag_captured': 0,
+             'total_duration_s': 120.0, 'steps_taken': 10, 'total_tokens': 5000,
+             'cost_usd': 0.05, 'run_timestamp': '2026-01-01T00:01:00',
+             'failure_reason': 'timeout', 'failure_stage': 'exploitation'},
+        ]
+        meta = [
+            {'id': 'S7BEN-EASY-001', 'name': 'Test App 1', 'owasp_category': 'A01:2025 - Broken Access Control'},
+            {'id': 'S7BEN-EASY-002', 'name': 'Test App 2', 'owasp_category': 'A03:2025 - Injection'},
+        ]
+        report = generate_report(runs=runs, benchmarks_meta=meta)
+
+        # All major sections should be present
+        assert '## Executive Summary' in report
+        assert '## Test Coverage' in report
+        assert '## Per-Benchmark Breakdown' in report
+        assert '## Performance by Outcome' in report
+        assert '## Vulnerability Category Analysis' in report
+        assert '## Speed Profile' in report
+        assert '## Efficiency Metrics' in report
+        assert '## Appendix: Run Metadata' in report
+        # Correct pass rate
+        assert '50.0%' in report
+        assert '1/2' in report
+
+    def test_per_benchmark_table_sorting(self):
+        """Benchmarks should be sorted by tier then number."""
+        from utils.report_generator import _per_benchmark_table
+        runs = [
+            {'benchmark_id': 'S7BEN-MED-003', 'flag_captured': 1, 'total_duration_s': 10, 'steps_taken': 2},
+            {'benchmark_id': 'S7BEN-EASY-001', 'flag_captured': 0, 'total_duration_s': 60, 'steps_taken': 8},
+            {'benchmark_id': 'S7BEN-EASY-005', 'flag_captured': 1, 'total_duration_s': 20, 'steps_taken': 3},
+        ]
+        table = _per_benchmark_table(runs, [], None)
+        # EASY should come before MED
+        easy_pos = table.index('S7BEN-EASY-001')
+        med_pos = table.index('S7BEN-MED-003')
+        assert easy_pos < med_pos
+
+    def test_vulnerability_analysis_grouping(self):
+        """Runs should be grouped by OWASP category."""
+        from utils.report_generator import _vulnerability_analysis
+        runs = [
+            {'benchmark_id': 'S7BEN-EASY-001', 'flag_captured': 1, 'vuln_category': 'A01'},
+            {'benchmark_id': 'S7BEN-EASY-002', 'flag_captured': 0, 'vuln_category': 'A01'},
+            {'benchmark_id': 'S7BEN-MED-001', 'flag_captured': 1, 'vuln_category': 'A03'},
+        ]
+        result = _vulnerability_analysis(runs, [])
+        assert 'A01' in result
+        assert 'A03' in result
+        assert '50.0%' in result  # A01: 1/2
+        assert '100.0%' in result  # A03: 1/1
+
+    def test_regression_improvements(self):
+        """FAIL→PASS should be detected as improvement."""
+        from utils.report_generator import _regression_analysis
+        current = [{'benchmark_id': 'S7BEN-EASY-001', 'flag_captured': 1, 'total_duration_s': 30}]
+        previous = [{'benchmark_id': 'S7BEN-EASY-001', 'flag_captured': 0, 'total_duration_s': 90}]
+        result = _regression_analysis(current, previous)
+        assert 'Improvements' in result
+        assert 'S7BEN-EASY-001' in result
+
+    def test_regression_regressions(self):
+        """PASS→FAIL should be flagged as regression."""
+        from utils.report_generator import _regression_analysis
+        current = [{'benchmark_id': 'S7BEN-EASY-001', 'flag_captured': 0, 'total_duration_s': 120}]
+        previous = [{'benchmark_id': 'S7BEN-EASY-001', 'flag_captured': 1, 'total_duration_s': 30}]
+        result = _regression_analysis(current, previous)
+        assert 'Regressions' in result
+        assert 'S7BEN-EASY-001' in result
+
+    def test_regression_no_previous(self):
+        """No previous runs should produce empty string gracefully."""
+        from utils.report_generator import _regression_analysis
+        result = _regression_analysis([{'benchmark_id': 'X', 'flag_captured': 1}], None)
+        assert result == ''
+
+    def test_coverage_table_zero_division(self):
+        """Empty runs should not crash coverage table."""
+        from utils.report_generator import _coverage_table
+        result = _coverage_table([], None)
+        assert '0' in result
+        assert '## Test Coverage' in result
+
+    def test_data_gaps_detection(self):
+        """Missing tokens/cost should be flagged."""
+        from utils.report_generator import _data_gaps
+        runs = [
+            {'run_id': '1', 'flag_captured': 1, 'total_tokens': None, 'cost_usd': None},
+            {'run_id': '2', 'flag_captured': 0, 'total_tokens': 100, 'cost_usd': 0.01,
+             'failure_reason': None, 'failure_stage': None},
+        ]
+        result = _data_gaps(runs)
+        assert 'No token data' in result
+        assert 'No cost data' in result
+        assert 'No failure_reason' in result
+
+    def test_helper_fmt_time(self):
+        from utils.report_generator import _fmt_time
+        assert _fmt_time(45) == '45s'
+        assert _fmt_time(125) == '2m 5s'
+        assert _fmt_time(None) == '--'
+        assert _fmt_time(0) == '0s'
+
+    def test_helper_fmt_pct(self):
+        from utils.report_generator import _fmt_pct
+        assert _fmt_pct(0.5) == '50.0%'
+        assert _fmt_pct(1.0) == '100.0%'
+        assert _fmt_pct(None) == '--'
+
+    def test_helper_benchmark_sort_key(self):
+        from utils.report_generator import _benchmark_sort_key
+        keys = [_benchmark_sort_key(b) for b in
+                ['S7BEN-MED-003', 'S7BEN-EASY-001', 'S7BEN-HARD-010']]
+        assert keys[1] < keys[0] < keys[2]  # EASY < MED < HARD
+
+
+class TestReportGenerationIntegration:
+    """Integration tests for /api/comparison/report endpoint."""
+
+    def _seed_report_runs(self, client):
+        """Seed several runs for report testing."""
+        runs = [
+            {'benchmark_id': 'S7BEN-EASY-001', 'difficulty_tier': 'EASY',
+             'provider': 'google', 'model_name': 'gemini-2.5-flash',
+             'flag_captured': 1, 'total_duration_s': 25.0, 'steps_taken': 4,
+             'product_name': 'test-product', 'total_tokens': 1000, 'cost_usd': 0.01},
+            {'benchmark_id': 'S7BEN-EASY-002', 'difficulty_tier': 'EASY',
+             'provider': 'google', 'model_name': 'gemini-2.5-flash',
+             'flag_captured': 0, 'total_duration_s': 100.0, 'steps_taken': 12,
+             'product_name': 'test-product', 'total_tokens': 5000, 'cost_usd': 0.05,
+             'failure_reason': 'timeout', 'failure_stage': 'exploitation'},
+            {'benchmark_id': 'S7BEN-MED-003', 'difficulty_tier': 'MED',
+             'provider': 'anthropic', 'model_name': 'claude-sonnet-4.5',
+             'flag_captured': 1, 'total_duration_s': 45.0, 'steps_taken': 6,
+             'product_name': 'other-product', 'total_tokens': 3000, 'cost_usd': 0.03},
+        ]
+        for run in runs:
+            _post_run(client, run)
+
+    def test_report_endpoint_json(self, client, db_path):
+        """Default format should return JSON with report_markdown."""
+        self._seed_report_runs(client)
+        res = client.get('/api/comparison/report')
+        assert res.status_code == 200
+        data = json.loads(res.data)
+        assert data['status'] == 'success'
+        assert 'report_markdown' in data
+        assert '# Strike7' in data['report_markdown']
+        assert 'generated_at' in data
+        assert data['runs_included'] > 0
+
+    def test_report_endpoint_markdown(self, client, db_path):
+        """format=markdown should return text/markdown attachment."""
+        res = client.get('/api/comparison/report?format=markdown')
+        assert res.status_code == 200
+        assert 'text/markdown' in res.content_type
+        assert 'attachment' in res.headers.get('Content-Disposition', '')
+        assert b'# Strike7' in res.data
+
+    def test_report_endpoint_product_filter(self, client, db_path):
+        """Product filter should narrow report to matching runs only."""
+        res = client.get('/api/comparison/report?product_name=test-product')
+        data = json.loads(res.data)
+        md = data['report_markdown']
+        assert 'test-product' in md
+        # Should not include the anthropic run which is other-product
+        assert 'claude-sonnet-4.5' not in md or 'other-product' not in md
+
+    def test_report_endpoint_tier_filter(self, client, db_path):
+        """Tier filter should only include matching tier benchmarks."""
+        res = client.get('/api/comparison/report?difficulty_tier=EASY')
+        data = json.loads(res.data)
+        md = data['report_markdown']
+        assert 'S7BEN-EASY' in md
+
+    def test_report_endpoint_compare_previous(self, client, db_path):
+        """compare_previous should include regression section when applicable."""
+        res = client.get(
+            '/api/comparison/report?product_name=test-product&compare_previous=true'
+        )
+        data = json.loads(res.data)
+        assert data['status'] == 'success'
+        # Report should be generated (regression section may or may not appear
+        # depending on whether there are distinct previous runs)
+        assert '# Strike7' in data['report_markdown']
+
+    def test_report_endpoint_empty(self, client, db_path):
+        """Non-matching filter should return report with no-data message."""
+        res = client.get('/api/comparison/report?product_name=nonexistent-product-xyz')
+        data = json.loads(res.data)
+        assert data['status'] == 'success'
+        assert 'No Data' in data['report_markdown'] or 'no benchmark runs' in data['report_markdown'].lower()

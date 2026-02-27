@@ -4,13 +4,14 @@ Flask Blueprint for multi-model benchmark comparison endpoints.
 Provides CRUD for comparison runs, model registry, summary aggregation,
 campaign management, and capability matrix generation.
 """
+import json as _json
 import sqlite3
 import os
 import uuid
 from contextlib import contextmanager
 from datetime import datetime, timezone
 
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, jsonify, request, Response
 from api.activity_logger import log_activity
 
 comparison_bp = Blueprint('comparison', __name__)
@@ -856,7 +857,6 @@ def get_prompt():
     port = None
     benchmark_name = None
     try:
-        import json as _json
         benchmarks_path = os.path.join(os.path.dirname(__file__), '..', 'data', 'benchmarks.json')
         if os.path.exists(benchmarks_path):
             with open(benchmarks_path, 'r') as f:
@@ -925,6 +925,161 @@ def get_tool_calls():
             'status': 'error',
             'message': f'Failed to read tool call log: {e}',
         }), 500
+
+
+# ---------------------------------------------------------------------------
+# Report generation endpoint
+# ---------------------------------------------------------------------------
+
+@comparison_bp.route('/api/comparison/report', methods=['GET'])
+def generate_report_endpoint():
+    """Generate a markdown benchmark performance report.
+
+    Query params: standard filters + compare_campaign_id, compare_previous, format
+    """
+    from utils.report_generator import generate_report
+
+    fmt = request.args.get('format', 'json')
+    compare_campaign_id = request.args.get('compare_campaign_id')
+    compare_previous = request.args.get('compare_previous', '').lower() == 'true'
+
+    where_clause, params = _build_filters()
+
+    with _get_db() as conn:
+        try:
+            # 1) Current runs
+            columns = ", ".join(_LIST_COLUMNS)
+            rows = conn.execute(
+                f"SELECT {columns} FROM model_benchmark_runs "
+                f"WHERE {where_clause} ORDER BY run_timestamp DESC LIMIT ?",
+                params + [MAX_LIMIT]
+            ).fetchall()
+            runs = [dict(r) for r in rows]
+
+            if not runs:
+                if fmt == 'markdown':
+                    return Response(
+                        '# No Data\n\nNo benchmark runs match the current filters.\n',
+                        mimetype='text/markdown',
+                        headers={'Content-Disposition': 'attachment; filename=Strike7_Report.md'},
+                    )
+                return jsonify({
+                    'status': 'success',
+                    'report_markdown': '# No Data\n\nNo benchmark runs match the current filters.\n',
+                    'generated_at': datetime.now(timezone.utc).isoformat(),
+                    'runs_included': 0,
+                })
+
+            # 2) Previous runs for regression comparison
+            previous_runs = None
+            if compare_campaign_id:
+                prev_rows = conn.execute(
+                    f"SELECT {columns} FROM model_benchmark_runs "
+                    f"WHERE campaign_id = ? ORDER BY run_timestamp DESC LIMIT ?",
+                    [compare_campaign_id, MAX_LIMIT]
+                ).fetchall()
+                previous_runs = [dict(r) for r in prev_rows]
+
+            elif compare_previous:
+                # For each benchmark_id, find most recent prior run with same product_name
+                current_ids = {r['run_id'] for r in runs}
+                product_name = request.args.get('product_name')
+
+                if product_name:
+                    prev_rows = conn.execute(f"""
+                        SELECT {columns} FROM (
+                            SELECT {columns},
+                                ROW_NUMBER() OVER (
+                                    PARTITION BY benchmark_id
+                                    ORDER BY run_timestamp DESC
+                                ) as rn
+                            FROM model_benchmark_runs
+                            WHERE product_name = ?
+                        ) sub
+                        WHERE rn = 1
+                    """, [product_name]).fetchall()
+                    previous_runs = [
+                        dict(r) for r in prev_rows
+                        if dict(r)['run_id'] not in current_ids
+                    ]
+
+            # 3) Load benchmarks metadata
+            benchmarks_meta = []
+            benchmarks_path = os.path.join(
+                os.path.dirname(__file__), '..', 'data', 'benchmarks.json'
+            )
+            if os.path.exists(benchmarks_path):
+                with open(benchmarks_path, 'r') as f:
+                    benchmarks_meta = _json.load(f)
+
+            # 4) Failure data (inline query matching failure-analysis endpoint)
+            stage_rows = conn.execute(f"""
+                SELECT failure_stage, COUNT(*) as count
+                FROM model_benchmark_runs
+                WHERE flag_captured = 0 AND failure_stage IS NOT NULL AND {where_clause}
+                GROUP BY failure_stage
+            """, params).fetchall()
+
+            reason_rows = conn.execute(f"""
+                SELECT failure_reason, failure_stage, COUNT(*) as count
+                FROM model_benchmark_runs
+                WHERE flag_captured = 0 AND failure_reason IS NOT NULL AND {where_clause}
+                GROUP BY failure_reason, failure_stage
+                ORDER BY count DESC
+            """, params).fetchall()
+
+            failure_data = {
+                'stage_funnel': [dict(r) for r in stage_rows],
+                'reason_breakdown': [dict(r) for r in reason_rows],
+            }
+
+            # 5) Campaign info if filtered
+            campaign_info = None
+            campaign_id = request.args.get('campaign_id')
+            if campaign_id:
+                camp_row = conn.execute(
+                    "SELECT * FROM benchmark_campaigns WHERE campaign_id = ?",
+                    (campaign_id,)
+                ).fetchone()
+                if camp_row:
+                    campaign_info = dict(camp_row)
+
+            # 6) Build filters dict for header
+            filters = {
+                'product_name': request.args.get('product_name'),
+                'provider': request.args.get('provider'),
+                'model_name': request.args.get('model_name'),
+                'difficulty_tier': request.args.get('difficulty_tier'),
+            }
+
+            # 7) Generate report
+            report_md = generate_report(
+                runs=runs,
+                benchmarks_meta=benchmarks_meta,
+                failure_data=failure_data,
+                previous_runs=previous_runs,
+                filters=filters,
+                campaign_info=campaign_info,
+            )
+
+            if fmt == 'markdown':
+                timestamp = datetime.now(timezone.utc).strftime('%Y%m%d_%H%M')
+                filename = f"Strike7_Report_{timestamp}.md"
+                return Response(
+                    report_md,
+                    mimetype='text/markdown',
+                    headers={'Content-Disposition': f'attachment; filename={filename}'},
+                )
+
+            return jsonify({
+                'status': 'success',
+                'report_markdown': report_md,
+                'generated_at': datetime.now(timezone.utc).isoformat(),
+                'runs_included': len(runs),
+            })
+
+        except Exception as e:
+            return jsonify({'status': 'error', 'message': str(e)}), 500
 
 
 # ---------------------------------------------------------------------------
