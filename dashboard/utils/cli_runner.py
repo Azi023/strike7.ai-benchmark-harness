@@ -322,9 +322,11 @@ def run_benchmark_automated(benchmark_id, provider, model_name,
 
     try:
         # ---- Step 5: Wait with timeout ----
+        stderr_output = ''
         try:
             stdout_bytes, stderr_bytes = proc.communicate(timeout=timeout_s)
             raw_output = stdout_bytes.decode('utf-8', errors='replace')
+            stderr_output = stderr_bytes.decode('utf-8', errors='replace')
             returncode = proc.returncode
         except subprocess.TimeoutExpired:
             logger.warning("Process timed out after %ds for %s", timeout_s, benchmark_id)
@@ -334,6 +336,7 @@ def run_benchmark_automated(benchmark_id, provider, model_name,
             try:
                 stdout_bytes, stderr_bytes = proc.communicate(timeout=5)
                 raw_output = stdout_bytes.decode('utf-8', errors='replace')
+                stderr_output = stderr_bytes.decode('utf-8', errors='replace')
             except Exception:
                 raw_output = ''
 
@@ -341,12 +344,21 @@ def run_benchmark_automated(benchmark_id, provider, model_name,
         end_time_iso = end_time.isoformat()
         total_duration_s = (end_time - start_time).total_seconds()
 
+        # Log stderr for diagnostics (may contain error messages from CLI)
+        if stderr_output:
+            logger.info("CLI stderr for %s: %s", benchmark_id, stderr_output[:500])
+
         # ---- Step 6: Parse output ----
         parsed_metrics = parse_cli_output(provider, raw_output) if raw_output else _empty_result()
 
-        # Check for process error
+        # Check for process error — extract reason from stderr if available
         if returncode is not None and returncode != 0 and not failure_reason:
-            failure_reason = f'exit_code_{returncode}'
+            if '429' in stderr_output or 'RESOURCE_EXHAUSTED' in stderr_output:
+                failure_reason = 'rate_limited'
+            elif 'Cannot use both' in stderr_output:
+                failure_reason = 'cli_arg_error'
+            else:
+                failure_reason = f'exit_code_{returncode}'
 
         # ---- Step 7: Query Activity Logger ----
         try:
