@@ -351,6 +351,135 @@ class TestTokenEstimator:
         assert parse_claude_usage("no data") is None
         assert parse_claude_usage(None) is None
 
+    # --- JSON parser tests ---
+
+    def test_parse_gemini_json_full(self):
+        from utils.token_estimator import parse_gemini_json
+        data = {
+            'stats': {
+                'models': {
+                    'gemini-2.5-flash': {
+                        'tokens': {'prompt': 1500, 'candidates': 800, 'cached': 200, 'thoughts': 100, 'tool': 50},
+                        'api': {'totalLatencyMs': 4500, 'totalRequests': 5}
+                    }
+                },
+                'tools': {'totalCalls': 12, 'totalSuccess': 11, 'totalFail': 1, 'totalDurationMs': 3200}
+            },
+            'response': 'Found flag S7BEN{test}'
+        }
+        result = parse_gemini_json(data)
+        assert result['input_tokens'] == 1500
+        assert result['output_tokens'] == 800
+        assert result['total_tokens'] == 2300
+        assert result['cached_tokens'] == 200
+        assert result['tool_calls'] == 12
+        assert result['duration_ms'] == 4500
+        assert result['token_source'] == 'exact'
+
+    def test_parse_gemini_json_empty_stats(self):
+        from utils.token_estimator import parse_gemini_json
+        result = parse_gemini_json({'response': 'hello', 'stats': {}})
+        assert result['total_tokens'] == 0
+        assert result['token_source'] == 'unavailable'
+
+    def test_parse_gemini_json_none(self):
+        from utils.token_estimator import parse_gemini_json
+        result = parse_gemini_json(None)
+        assert result['total_tokens'] == 0
+        assert result['token_source'] == 'unavailable'
+
+    def test_parse_claude_json_full(self):
+        from utils.token_estimator import parse_claude_json
+        data = {
+            'type': 'result', 'subtype': 'success', 'session_id': 'abc-123',
+            'total_cost_usd': 0.0034, 'is_error': False,
+            'duration_ms': 2847, 'duration_api_ms': 1923, 'num_turns': 4,
+            'result': 'Found the flag',
+            'usage': {'input_tokens': 5000, 'output_tokens': 2000, 'cache_creation_input_tokens': 100, 'cache_read_input_tokens': 300}
+        }
+        result = parse_claude_json(data)
+        assert result['input_tokens'] == 5000
+        assert result['output_tokens'] == 2000
+        assert result['total_tokens'] == 7000
+        assert result['cost_usd'] == 0.0034
+        assert result['duration_ms'] == 2847
+        assert result['num_turns'] == 4
+        assert result['token_source'] == 'exact'
+
+    def test_parse_claude_json_error_result(self):
+        from utils.token_estimator import parse_claude_json
+        data = {'type': 'result', 'subtype': 'error', 'is_error': True, 'duration_ms': 500, 'usage': {'input_tokens': 100, 'output_tokens': 0}}
+        result = parse_claude_json(data)
+        assert result['is_error'] is True
+        assert result['input_tokens'] == 100
+        assert result['token_source'] == 'exact'
+
+    def test_parse_claude_json_none(self):
+        from utils.token_estimator import parse_claude_json
+        result = parse_claude_json(None)
+        assert result['total_tokens'] == 0
+        assert result['token_source'] == 'unavailable'
+
+    def test_parse_codex_jsonl_full(self):
+        from utils.token_estimator import parse_codex_jsonl
+        events = [
+            '{"type": "thread.started"}',
+            '{"type": "turn.started"}',
+            '{"type": "item.completed"}',
+            '{"type": "item.completed"}',
+            '{"type": "token_count", "input_tokens": 500, "output_tokens": 200, "reasoning_tokens": 50, "total_tokens": 750}',
+            '{"type": "turn.completed"}',
+            '{"type": "turn.started"}',
+            '{"type": "item.completed"}',
+            '{"type": "token_count", "input_tokens": 900, "output_tokens": 400, "reasoning_tokens": 100, "total_tokens": 1400}',
+            '{"type": "turn.completed"}',
+        ]
+        result = parse_codex_jsonl(events)
+        assert result['input_tokens'] == 900
+        assert result['output_tokens'] == 400
+        assert result['total_tokens'] == 1400
+        assert result['num_turns'] == 2
+        assert result['tool_calls'] == 3
+        assert result['token_source'] == 'exact'
+
+    def test_parse_codex_jsonl_no_token_counts(self):
+        from utils.token_estimator import parse_codex_jsonl
+        events = ['{"type": "turn.started"}', '{"type": "turn.completed"}']
+        result = parse_codex_jsonl(events)
+        assert result['total_tokens'] == 0
+        assert result['token_source'] == 'unavailable'
+
+    def test_parse_codex_jsonl_empty(self):
+        from utils.token_estimator import parse_codex_jsonl
+        result = parse_codex_jsonl([])
+        assert result['total_tokens'] == 0
+
+    def test_parse_cli_output_dispatcher_google(self):
+        from utils.token_estimator import parse_cli_output
+        import json
+        data = {'stats': {'models': {'m': {'tokens': {'prompt': 10, 'candidates': 5}}}}}
+        result = parse_cli_output('google', json.dumps(data))
+        assert result['token_source'] in ('exact', 'unavailable')
+
+    def test_parse_cli_output_dispatcher_unknown(self):
+        from utils.token_estimator import parse_cli_output
+        result = parse_cli_output('unknown_provider', '{}')
+        assert result['token_source'] == 'unavailable'
+
+    # --- Backward compat: renamed text parsers ---
+
+    def test_parse_gemini_text_still_works(self):
+        from utils.token_estimator import parse_gemini_text
+        output = "Token count: 1234 input, 567 output\nDone."
+        result = parse_gemini_text(output)
+        assert result['input_tokens'] == 1234
+
+    def test_parse_claude_text_still_works(self):
+        from utils.token_estimator import parse_claude_text
+        output = "Total input tokens: 5,000\nTotal output tokens: 2,000\n"
+        result = parse_claude_text(output)
+        assert result['input_tokens'] == 5000
+
 
 # ---------------------------------------------------------------------------
 # API Endpoint Tests: Runs
