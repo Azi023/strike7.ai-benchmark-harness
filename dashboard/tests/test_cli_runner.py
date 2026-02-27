@@ -239,3 +239,131 @@ class TestRunBenchmarkAutomated:
         assert result['status'] == 'dry_run'
         assert 'command' in result
         assert 'gemini' in result['command'][0]
+
+
+class TestIntegrationAutomatedRun:
+    """Integration test: full workflow with mock CLI + real Flask API.
+
+    Validates the complete chain:
+    prompt render -> CLI parse -> record build -> API POST -> verify stored data
+    """
+
+    @pytest.fixture(scope='class', autouse=True)
+    def setup_db(self):
+        """Create a temporary DB shared across all tests in this class."""
+        fd, path = tempfile.mkstemp(suffix='.db', prefix='test_integration_')
+        os.close(fd)
+        old_db_path = os.environ.get('COMPARISON_DB_PATH')
+        os.environ['COMPARISON_DB_PATH'] = path
+        yield path
+        if old_db_path is not None:
+            os.environ['COMPARISON_DB_PATH'] = old_db_path
+        else:
+            os.environ.pop('COMPARISON_DB_PATH', None)
+        os.unlink(path)
+
+    @pytest.fixture(scope='class')
+    def flask_client(self, setup_db):
+        """Flask test client with fresh DB."""
+        from app import app as flask_app
+        flask_app.config['TESTING'] = True
+        return flask_app.test_client()
+
+    def test_full_automated_flow(self, flask_client, mock_claude_output):
+        """End-to-end: parse CLI output -> build record -> POST -> verify."""
+        from utils.token_estimator import parse_cli_output
+        from utils.cli_runner import build_run_record
+
+        # 1. Parse mock CLI output
+        parsed = parse_cli_output('anthropic', mock_claude_output)
+        assert parsed['token_source'] == 'exact'
+        assert parsed['input_tokens'] == 8000
+        assert parsed['output_tokens'] == 3500
+        assert parsed['cost_usd'] == 0.0245
+
+        # 2. Build run record
+        flag_result = {
+            'flag_captured': True,
+            'time_to_flag_s': 15.2,
+            'flag_attempts': 1,
+        }
+        record = build_run_record(
+            benchmark_id='S7BEN-EASY-001',
+            provider='anthropic',
+            model_name='claude-sonnet-4.5',
+            parsed_metrics=parsed,
+            flag_result=flag_result,
+            total_duration_s=30.0,
+            prompt_hash='integration-test-hash-abc',
+            raw_output=mock_claude_output,
+        )
+
+        # 3. Verify record fields before POST
+        assert record['execution_method'] == 'cli_automated'
+        assert record['token_source'] == 'exact'
+        assert record['cost_usd'] == 0.0245
+        assert record['cost_source'] == 'exact'
+        assert record['flag_captured'] == 1
+        assert 'S7BEN{REDACTED}' in record['agent_transcript']
+        assert 'test_flag_456' not in record['agent_transcript']
+
+        # 4. POST via real Flask API
+        resp = flask_client.post(
+            '/api/comparison/runs',
+            data=json.dumps(record),
+            content_type='application/json',
+        )
+        assert resp.status_code == 201, f"POST failed: {resp.get_json()}"
+        run_id = resp.get_json()['run']['run_id']
+
+        # 5. GET and verify stored data
+        get_resp = flask_client.get(f'/api/comparison/runs/{run_id}')
+        assert get_resp.status_code == 200
+        run = get_resp.get_json()['run']
+
+        assert run['flag_captured'] == 1
+        assert run['input_tokens'] == 8000
+        assert run['output_tokens'] == 3500
+        assert run['token_source'] == 'exact'
+        assert run['cost_usd'] == 0.0245
+        assert run['execution_method'] == 'cli_automated'
+        assert 'S7BEN{REDACTED}' in run['agent_transcript']
+        assert 'test_flag_456' not in run['agent_transcript']
+
+        # 6. Cleanup
+        flask_client.delete(f'/api/comparison/runs/{run_id}?confirm=true')
+
+    def test_failed_run_records_correctly(self, flask_client):
+        """Verify a failed/timeout run is recorded with correct failure_reason."""
+        from utils.token_estimator import _empty_result
+        from utils.cli_runner import build_run_record
+
+        record = build_run_record(
+            benchmark_id='S7BEN-HARD-023',
+            provider='openai',
+            model_name='gpt-4.1',
+            parsed_metrics=_empty_result(),
+            flag_result={'flag_captured': False, 'time_to_flag_s': None, 'flag_attempts': 0},
+            total_duration_s=1200.0,
+            prompt_hash='timeout-test-hash',
+            raw_output='',
+            failure_reason='timeout',
+        )
+
+        resp = flask_client.post(
+            '/api/comparison/runs',
+            data=json.dumps(record),
+            content_type='application/json',
+        )
+        assert resp.status_code == 201
+        run_id = resp.get_json()['run']['run_id']
+
+        get_resp = flask_client.get(f'/api/comparison/runs/{run_id}')
+        run = get_resp.get_json()['run']
+
+        assert run['flag_captured'] == 0
+        assert run['failure_reason'] == 'timeout'
+        assert run['total_duration_s'] == 1200.0
+        assert run['execution_method'] == 'cli_automated'
+
+        flask_client.delete(f'/api/comparison/runs/{run_id}?confirm=true')
