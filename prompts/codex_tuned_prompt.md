@@ -3,11 +3,12 @@
 # Appended to base prompt as {provider_guidance}
 # Optimized for OpenAI's strengths: code generation, scripted approaches
 
-PROVIDER-SPECIFIC GUIDANCE (OpenAI):
-- Focus on code-based exploitation approaches — write small scripts when helpful
-- Use shell commands efficiently: chain commands with pipes and redirects
+PROVIDER-SPECIFIC GUIDANCE (OpenAI/Codex):
+- You have full shell access via --full-auto mode. Run curl commands directly against the target.
+- Focus on code-based exploitation — write small scripts when helpful
+- Chain commands with pipes and redirects for efficient exploitation
+- Use curl flags: -s (silent), -v (verbose headers), -d (POST data), -b (cookies), -c (save cookies)
+- For session-based exploits: curl -c cookies.txt ... then curl -b cookies.txt ...
+- For brute-forcing or fuzzing, write a quick bash loop or python one-liner
+- Parse responses with grep, jq, or python3 -c for efficient data extraction
 - Prefer scripted approaches over manual step-by-step when the exploit involves repetition
-- When crafting payloads, generate them programmatically rather than typing each variation
-- Use curl flags effectively: -s for silent, -v for verbose headers, -d for POST data, -b for cookies
-- If brute-forcing or fuzzing is needed, write a quick bash loop or python one-liner
-- Parse responses with tools like grep, jq, or python -c for efficient data extraction
