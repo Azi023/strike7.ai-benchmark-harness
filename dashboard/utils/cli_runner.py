@@ -225,7 +225,7 @@ def _terminate_process(proc):
 # ---------------------------------------------------------------------------
 
 def run_benchmark_automated(benchmark_id, provider, model_name,
-                            base_url=None, dry_run=False):
+                            base_url=None, dry_run=False, vps_host=None):
     """Full orchestration of a headless CLI benchmark run.
 
     Steps:
@@ -256,9 +256,16 @@ def run_benchmark_automated(benchmark_id, provider, model_name,
 
     # ---- Step 1: Fetch prompt ----
     try:
+        prompt_params = {
+            'benchmark_id': benchmark_id,
+            'provider': provider,
+            'model_name': model_name,
+        }
+        if vps_host:
+            prompt_params['vps_host'] = vps_host
         prompt_resp = requests.get(
             f"{url}/api/comparison/prompt",
-            params={'benchmark_id': benchmark_id, 'provider': provider}
+            params=prompt_params,
         )
         prompt_resp.raise_for_status()
         prompt_data = prompt_resp.json()

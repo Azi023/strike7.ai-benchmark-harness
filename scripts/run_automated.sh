@@ -19,6 +19,7 @@
 #   --quiet         Only output final JSON result (for piping to jq)
 #   --dry-run       Show the CLI command without executing
 #   --notes "..."   Attach notes to the run record
+#   --vps-host IP   Target host for prompts (default: auto from STRIKE7_URL)
 #
 # Environment:
 #   STRIKE7_URL  — Dashboard API URL (default: http://localhost:5500)
@@ -41,6 +42,7 @@ ATTEMPT=1
 QUIET=false
 DRY_RUN=false
 NOTES=""
+VPS_HOST=""
 
 shift 3
 while [[ $# -gt 0 ]]; do
@@ -53,6 +55,9 @@ while [[ $# -gt 0 ]]; do
         --notes)
             [[ -n "${2:-}" ]] || { echo "Error: --notes requires a value"; exit 1; }
             NOTES="$2"; shift 2 ;;
+        --vps-host)
+            [[ -n "${2:-}" ]] || { echo "Error: --vps-host requires a value"; exit 1; }
+            VPS_HOST="$2"; shift 2 ;;
         *)           echo "Unknown option: $1"; exit 1 ;;
     esac
 done
@@ -78,12 +83,13 @@ result = run_benchmark_automated(
     model_name=os.environ['MODEL_NAME'],
     base_url=os.environ.get('STRIKE7_URL') or None,
     dry_run=os.environ.get('DRY_RUN') == 'true',
+    vps_host=os.environ.get('VPS_HOST') or None,
 )
 print(json.dumps(result, indent=2))
 "
 )
 
-export DASHBOARD_DIR BENCHMARK_ID PROVIDER MODEL_NAME STRIKE7_URL
+export DASHBOARD_DIR BENCHMARK_ID PROVIDER MODEL_NAME STRIKE7_URL VPS_HOST="$VPS_HOST"
 # TODO: wire ATTEMPT and RUN_NOTES into run_benchmark_automated when it supports them
 export ATTEMPT RUN_NOTES="$NOTES"
 if [ "$DRY_RUN" = true ]; then
