@@ -516,6 +516,45 @@ def get_prompt():
 
 
 # ---------------------------------------------------------------------------
+# Tool call log endpoint (reads JSONL written by MCP server)
+# ---------------------------------------------------------------------------
+
+@comparison_bp.route('/api/comparison/tool-calls', methods=['GET'])
+def get_tool_calls():
+    """Query tool call log entries from the persistent JSONL file.
+
+    Query params:
+        benchmark_id: Filter by benchmark_id found in tool params
+        tool_name:    Filter by exact tool name
+        since:        ISO 8601 timestamp — only entries at or after this time
+        limit:        Max entries to return (default 100, max 1000)
+    """
+    from utils.tool_call_logger import read_jsonl_entries
+
+    limit = min(request.args.get('limit', 100, type=int), 1000)
+
+    try:
+        entries = read_jsonl_entries(
+            benchmark_id=request.args.get('benchmark_id'),
+            tool_name=request.args.get('tool_name'),
+            since=request.args.get('since'),
+            limit=limit,
+        )
+
+        return jsonify({
+            'status': 'success',
+            'tool_calls': entries,
+            'total': len(entries),
+        })
+
+    except (IOError, OSError) as e:
+        return jsonify({
+            'status': 'error',
+            'message': f'Failed to read tool call log: {e}',
+        }), 500
+
+
+# ---------------------------------------------------------------------------
 # Model registry endpoints
 # ---------------------------------------------------------------------------
 

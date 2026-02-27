@@ -36,6 +36,8 @@ import subprocess
 import json
 import time
 import functools
+import inspect
+import re
 from typing import Optional
 from datetime import datetime, timezone
 import sys
@@ -195,38 +197,75 @@ def api_post(endpoint: str, data: dict = None) -> dict:
 # TOOL CALL LOGGING
 # ============================================
 
-# In-memory log of recent tool calls (ring buffer)
+# Utility functions live in utils/tool_call_logger.py so they're
+# independently testable (this module requires MCP SDK at import time).
+try:
+    from utils.tool_call_logger import (
+        sanitize_params as _sanitize_params,
+        write_jsonl_entry as _write_jsonl_entry,
+    )
+except ImportError:
+    from dashboard.utils.tool_call_logger import (
+        sanitize_params as _sanitize_params,
+        write_jsonl_entry as _write_jsonl_entry,
+    )
+
+# In-memory ring buffer (read cache for get_tool_call_log())
 _TOOL_CALL_LOG = []
 _TOOL_CALL_LOG_MAX = 500
 
 
 def log_tool_call(func):
-    """Decorator that logs tool call name, duration, and timestamp.
+    """Decorator that logs tool call metrics to JSONL file and in-memory buffer.
 
     Applied below @mcp.tool() so FastMCP sees the wrapped function.
-    Logs are stored in-memory and accessible via get_tool_call_log().
+    Captures: tool_name, sanitized params, duration_ms, success, error.
+    In-memory buffer remains accessible via get_tool_call_log().
     """
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
+        # Build complete params dict by binding args to the function signature
+        try:
+            sig = inspect.signature(func)
+            bound = sig.bind(*args, **kwargs)
+            bound.apply_defaults()
+            raw_params = dict(bound.arguments)
+        except (TypeError, ValueError):
+            raw_params = kwargs or {}
+
+        sanitized_params = _sanitize_params(raw_params)
+
         start = time.monotonic()
         error = None
+        success = True
         try:
             result = func(*args, **kwargs)
             return result
         except Exception as e:
             error = str(e)
+            success = False
             raise
         finally:
             duration_ms = round((time.monotonic() - start) * 1000, 2)
+            timestamp = datetime.now(timezone.utc).isoformat()
+
             entry = {
                 'tool_name': func.__name__,
-                'timestamp': datetime.now(timezone.utc).isoformat(),
+                'timestamp': timestamp,
                 'duration_ms': duration_ms,
+                'success': success,
                 'error': error,
+                'params': sanitized_params,
             }
+
+            # In-memory ring buffer (backward-compatible read cache)
             _TOOL_CALL_LOG.append(entry)
             if len(_TOOL_CALL_LOG) > _TOOL_CALL_LOG_MAX:
                 _TOOL_CALL_LOG.pop(0)
+
+            # Persistent JSONL log
+            _write_jsonl_entry(entry)
+
             print(
                 f"[TOOL] {func.__name__} completed in {duration_ms}ms"
                 + (f" (error: {error})" if error else ""),
@@ -237,7 +276,7 @@ def log_tool_call(func):
 
 
 def get_tool_call_log(limit=50):
-    """Return recent tool call log entries."""
+    """Return recent tool call log entries from in-memory buffer."""
     return list(reversed(_TOOL_CALL_LOG[-limit:]))
 
 

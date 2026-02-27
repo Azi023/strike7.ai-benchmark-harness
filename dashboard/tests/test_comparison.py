@@ -992,3 +992,401 @@ class TestComparisonDashboard:
         """Main dashboard should link to /comparison."""
         resp = client.get('/')
         assert b'/comparison' in resp.data
+
+
+# ---------------------------------------------------------------------------
+# Tool Call Logger: Sanitization Tests
+# ---------------------------------------------------------------------------
+
+class TestSanitizeParams:
+    """Unit tests for utils/tool_call_logger.sanitize_params"""
+
+    def test_redacts_flag_param(self):
+        from utils.tool_call_logger import sanitize_params
+        result = sanitize_params({'benchmark_id': 'S7BEN-EASY-001', 'flag': 'S7BEN{secret_flag}'})
+        assert result['flag'] == '[REDACTED]'
+        assert result['benchmark_id'] == 'S7BEN-EASY-001'
+
+    def test_truncates_long_command(self):
+        from utils.tool_call_logger import sanitize_params
+        long_cmd = 'curl -s ' + 'A' * 300
+        result = sanitize_params({'command': long_cmd})
+        assert len(result['command']) < len(long_cmd)
+        assert result['command'].endswith('...[truncated]')
+        # First 200 chars preserved
+        assert result['command'][:200] == long_cmd[:200]
+
+    def test_short_command_not_truncated(self):
+        from utils.tool_call_logger import sanitize_params
+        cmd = 'curl -s http://localhost:5000/'
+        result = sanitize_params({'command': cmd})
+        assert result['command'] == cmd
+
+    def test_scrubs_flag_pattern_from_strings(self):
+        from utils.tool_call_logger import sanitize_params
+        result = sanitize_params({
+            'command': 'echo S7BEN{captured_this} >> /tmp/out',
+            'benchmark_id': 'S7BEN-EASY-001',
+        })
+        assert 'captured_this' not in result['command']
+        assert 'S7BEN{[REDACTED]}' in result['command']
+        # benchmark_id is not a flag pattern (no closing brace match issue)
+        assert result['benchmark_id'] == 'S7BEN-EASY-001'
+
+    def test_empty_params(self):
+        from utils.tool_call_logger import sanitize_params
+        assert sanitize_params({}) == {}
+        assert sanitize_params(None) == {}
+
+    def test_non_string_values_passed_through(self):
+        from utils.tool_call_logger import sanitize_params
+        result = sanitize_params({'timeout': 30, 'verbose': True})
+        assert result == {'timeout': 30, 'verbose': True}
+
+    def test_multiple_flags_in_one_string(self):
+        from utils.tool_call_logger import sanitize_params
+        result = sanitize_params({
+            'command': 'echo S7BEN{flag1} and S7BEN{flag2}',
+        })
+        assert result['command'] == 'echo S7BEN{[REDACTED]} and S7BEN{[REDACTED]}'
+
+
+# ---------------------------------------------------------------------------
+# Tool Call Logger: JSONL Write/Read Tests
+# ---------------------------------------------------------------------------
+
+class TestJsonlWriteRead:
+    """Tests for write_jsonl_entry and read_jsonl_entries"""
+
+    @pytest.fixture
+    def jsonl_path(self, tmp_path):
+        """Temporary JSONL file path."""
+        return str(tmp_path / 'test_tool_calls.jsonl')
+
+    def test_write_creates_file(self, jsonl_path):
+        from utils.tool_call_logger import write_jsonl_entry
+        entry = {
+            'tool_name': 'test_tool',
+            'timestamp': '2026-02-27T10:00:00+00:00',
+            'duration_ms': 42.5,
+            'success': True,
+            'error': None,
+            'params': {'benchmark_id': 'S7BEN-EASY-001'},
+        }
+        write_jsonl_entry(entry, log_path=jsonl_path)
+        assert os.path.exists(jsonl_path)
+
+    def test_write_then_read(self, jsonl_path):
+        from utils.tool_call_logger import write_jsonl_entry, read_jsonl_entries
+        entries = [
+            {
+                'tool_name': 'start_benchmark',
+                'timestamp': '2026-02-27T10:00:00+00:00',
+                'duration_ms': 100,
+                'success': True,
+                'error': None,
+                'params': {'benchmark_id': 'S7BEN-EASY-001'},
+            },
+            {
+                'tool_name': 'execute_command',
+                'timestamp': '2026-02-27T10:01:00+00:00',
+                'duration_ms': 200,
+                'success': True,
+                'error': None,
+                'params': {'command': 'curl -s http://localhost:5001/'},
+            },
+        ]
+        for e in entries:
+            write_jsonl_entry(e, log_path=jsonl_path)
+
+        result = read_jsonl_entries(log_path=jsonl_path)
+        assert len(result) == 2
+        assert result[0]['tool_name'] == 'start_benchmark'
+        assert result[1]['tool_name'] == 'execute_command'
+
+    def test_read_missing_file(self, tmp_path):
+        from utils.tool_call_logger import read_jsonl_entries
+        result = read_jsonl_entries(log_path=str(tmp_path / 'nonexistent.jsonl'))
+        assert result == []
+
+    def test_read_skips_malformed_lines(self, jsonl_path):
+        from utils.tool_call_logger import read_jsonl_entries
+        with open(jsonl_path, 'w') as f:
+            f.write('{"tool_name": "good", "timestamp": "2026-02-27T10:00:00"}\n')
+            f.write('this is not json\n')
+            f.write('{"tool_name": "also_good", "timestamp": "2026-02-27T10:01:00"}\n')
+            f.write('')  # empty line
+            f.write('{"incomplete json\n')  # partial write
+
+        result = read_jsonl_entries(log_path=jsonl_path)
+        assert len(result) == 2
+        assert result[0]['tool_name'] == 'good'
+        assert result[1]['tool_name'] == 'also_good'
+
+    def test_filter_by_benchmark_id(self, jsonl_path):
+        from utils.tool_call_logger import write_jsonl_entry, read_jsonl_entries
+        write_jsonl_entry({
+            'tool_name': 'start_benchmark',
+            'timestamp': '2026-02-27T10:00:00+00:00',
+            'params': {'benchmark_id': 'S7BEN-EASY-001'},
+        }, log_path=jsonl_path)
+        write_jsonl_entry({
+            'tool_name': 'start_benchmark',
+            'timestamp': '2026-02-27T10:01:00+00:00',
+            'params': {'benchmark_id': 'S7BEN-MED-001'},
+        }, log_path=jsonl_path)
+
+        result = read_jsonl_entries(
+            log_path=jsonl_path, benchmark_id='S7BEN-EASY-001'
+        )
+        assert len(result) == 1
+        assert result[0]['params']['benchmark_id'] == 'S7BEN-EASY-001'
+
+    def test_filter_by_tool_name(self, jsonl_path):
+        from utils.tool_call_logger import write_jsonl_entry, read_jsonl_entries
+        write_jsonl_entry({
+            'tool_name': 'start_benchmark',
+            'timestamp': '2026-02-27T10:00:00+00:00',
+            'params': {},
+        }, log_path=jsonl_path)
+        write_jsonl_entry({
+            'tool_name': 'execute_command',
+            'timestamp': '2026-02-27T10:01:00+00:00',
+            'params': {},
+        }, log_path=jsonl_path)
+
+        result = read_jsonl_entries(log_path=jsonl_path, tool_name='execute_command')
+        assert len(result) == 1
+        assert result[0]['tool_name'] == 'execute_command'
+
+    def test_filter_by_since(self, jsonl_path):
+        from utils.tool_call_logger import write_jsonl_entry, read_jsonl_entries
+        write_jsonl_entry({
+            'tool_name': 'old_call',
+            'timestamp': '2026-02-27T08:00:00+00:00',
+            'params': {},
+        }, log_path=jsonl_path)
+        write_jsonl_entry({
+            'tool_name': 'new_call',
+            'timestamp': '2026-02-27T12:00:00+00:00',
+            'params': {},
+        }, log_path=jsonl_path)
+
+        result = read_jsonl_entries(
+            log_path=jsonl_path, since='2026-02-27T10:00:00'
+        )
+        assert len(result) == 1
+        assert result[0]['tool_name'] == 'new_call'
+
+    def test_limit_returns_most_recent(self, jsonl_path):
+        from utils.tool_call_logger import write_jsonl_entry, read_jsonl_entries
+        for i in range(10):
+            write_jsonl_entry({
+                'tool_name': f'tool_{i}',
+                'timestamp': f'2026-02-27T10:{i:02d}:00+00:00',
+                'params': {},
+            }, log_path=jsonl_path)
+
+        result = read_jsonl_entries(log_path=jsonl_path, limit=3)
+        assert len(result) == 3
+        assert result[0]['tool_name'] == 'tool_7'
+        assert result[2]['tool_name'] == 'tool_9'
+
+
+# ---------------------------------------------------------------------------
+# Tool Call Logger: Rotation Tests
+# ---------------------------------------------------------------------------
+
+class TestJsonlRotation:
+    """Tests for JSONL file rotation logic."""
+
+    def test_rotation_triggers_when_over_max(self, tmp_path):
+        from utils.tool_call_logger import (
+            write_jsonl_entry, JSONL_MAX_LINES,
+            _JSONL_ROTATION_CHECK_INTERVAL,
+        )
+        import utils.tool_call_logger as logger_mod
+
+        log_path = str(tmp_path / 'rotation_test.jsonl')
+
+        # Write more than JSONL_MAX_LINES directly to file
+        with open(log_path, 'w') as f:
+            for i in range(JSONL_MAX_LINES + 100):
+                f.write(json.dumps({'i': i}) + '\n')
+
+        # Force the rotation check by setting counter to threshold - 1
+        logger_mod._jsonl_write_count = _JSONL_ROTATION_CHECK_INTERVAL - 1
+
+        # This write should trigger rotation
+        write_jsonl_entry({'tool_name': 'trigger'}, log_path=log_path)
+
+        with open(log_path, 'r') as f:
+            lines = f.readlines()
+
+        # Should have been truncated to ~half + the trigger entry
+        assert len(lines) <= (JSONL_MAX_LINES // 2) + 1
+
+    def test_no_rotation_below_max(self, tmp_path):
+        from utils.tool_call_logger import (
+            _JSONL_ROTATION_CHECK_INTERVAL,
+        )
+        import utils.tool_call_logger as logger_mod
+
+        log_path = str(tmp_path / 'no_rotation.jsonl')
+
+        # Write a small file
+        with open(log_path, 'w') as f:
+            for i in range(100):
+                f.write(json.dumps({'i': i}) + '\n')
+
+        # Force rotation check
+        logger_mod._jsonl_write_count = _JSONL_ROTATION_CHECK_INTERVAL - 1
+        from utils.tool_call_logger import write_jsonl_entry
+        write_jsonl_entry({'tool_name': 'trigger'}, log_path=log_path)
+
+        with open(log_path, 'r') as f:
+            lines = f.readlines()
+
+        # Should NOT have been truncated (101 lines total)
+        assert len(lines) == 101
+
+
+# ---------------------------------------------------------------------------
+# Tool Call API Endpoint Tests
+# ---------------------------------------------------------------------------
+
+class TestToolCallsEndpoint:
+    """GET /api/comparison/tool-calls"""
+
+    @pytest.fixture(autouse=True)
+    def setup_jsonl(self, tmp_path, monkeypatch):
+        """Create a temp JSONL file and point the endpoint at it."""
+        self.jsonl_path = str(tmp_path / 'test_tool_calls.jsonl')
+        monkeypatch.setenv('TOOL_CALL_LOG_PATH', self.jsonl_path)
+
+        # Also patch the module-level constant in case it was already imported
+        import utils.tool_call_logger as logger_mod
+        monkeypatch.setattr(logger_mod, 'TOOL_CALL_LOG_PATH', self.jsonl_path)
+
+        # Write test data
+        entries = [
+            {
+                'tool_name': 'start_benchmark',
+                'timestamp': '2026-02-27T10:00:00+00:00',
+                'duration_ms': 150.5,
+                'success': True,
+                'error': None,
+                'params': {'benchmark_id': 'S7BEN-EASY-001', 'timeout_minutes': 30},
+            },
+            {
+                'tool_name': 'execute_command',
+                'timestamp': '2026-02-27T10:01:00+00:00',
+                'duration_ms': 2500.0,
+                'success': True,
+                'error': None,
+                'params': {'command': 'curl -s http://localhost:5001/', 'timeout': 30},
+            },
+            {
+                'tool_name': 'submit_flag',
+                'timestamp': '2026-02-27T10:02:00+00:00',
+                'duration_ms': 80.3,
+                'success': True,
+                'error': None,
+                'params': {'benchmark_id': 'S7BEN-EASY-001', 'flag': '[REDACTED]'},
+            },
+            {
+                'tool_name': 'start_benchmark',
+                'timestamp': '2026-02-27T10:05:00+00:00',
+                'duration_ms': 200.0,
+                'success': True,
+                'error': None,
+                'params': {'benchmark_id': 'S7BEN-MED-001', 'timeout_minutes': 30},
+            },
+        ]
+        with open(self.jsonl_path, 'w') as f:
+            for entry in entries:
+                f.write(json.dumps(entry) + '\n')
+
+    def test_returns_all_entries(self, client):
+        resp = client.get('/api/comparison/tool-calls')
+        data = resp.get_json()
+
+        assert resp.status_code == 200
+        assert data['status'] == 'success'
+        assert data['total'] == 4
+
+    def test_filter_by_benchmark_id(self, client):
+        resp = client.get('/api/comparison/tool-calls?benchmark_id=S7BEN-EASY-001')
+        data = resp.get_json()
+
+        assert resp.status_code == 200
+        assert data['total'] == 2  # start_benchmark + submit_flag
+        for entry in data['tool_calls']:
+            assert entry['params']['benchmark_id'] == 'S7BEN-EASY-001'
+
+    def test_filter_by_tool_name(self, client):
+        resp = client.get('/api/comparison/tool-calls?tool_name=execute_command')
+        data = resp.get_json()
+
+        assert resp.status_code == 200
+        assert data['total'] == 1
+        assert data['tool_calls'][0]['tool_name'] == 'execute_command'
+
+    def test_filter_by_since(self, client):
+        resp = client.get('/api/comparison/tool-calls?since=2026-02-27T10:03:00')
+        data = resp.get_json()
+
+        assert resp.status_code == 200
+        assert data['total'] == 1
+        assert data['tool_calls'][0]['params']['benchmark_id'] == 'S7BEN-MED-001'
+
+    def test_limit_param(self, client):
+        resp = client.get('/api/comparison/tool-calls?limit=2')
+        data = resp.get_json()
+
+        assert resp.status_code == 200
+        assert data['total'] == 2
+        # Should be the 2 most recent
+        assert data['tool_calls'][0]['tool_name'] == 'submit_flag'
+        assert data['tool_calls'][1]['tool_name'] == 'start_benchmark'
+
+    def test_limit_capped_at_1000(self, client):
+        resp = client.get('/api/comparison/tool-calls?limit=5000')
+        data = resp.get_json()
+
+        assert resp.status_code == 200
+        assert data['total'] == 4  # Only 4 entries exist
+
+    def test_missing_file_returns_empty(self, client, monkeypatch):
+        import utils.tool_call_logger as logger_mod
+        monkeypatch.setattr(logger_mod, 'TOOL_CALL_LOG_PATH', '/tmp/nonexistent.jsonl')
+
+        resp = client.get('/api/comparison/tool-calls')
+        data = resp.get_json()
+
+        assert resp.status_code == 200
+        assert data['total'] == 0
+        assert data['tool_calls'] == []
+
+    def test_combined_filters(self, client):
+        resp = client.get(
+            '/api/comparison/tool-calls'
+            '?benchmark_id=S7BEN-EASY-001&tool_name=start_benchmark'
+        )
+        data = resp.get_json()
+
+        assert resp.status_code == 200
+        assert data['total'] == 1
+        assert data['tool_calls'][0]['tool_name'] == 'start_benchmark'
+        assert data['tool_calls'][0]['params']['benchmark_id'] == 'S7BEN-EASY-001'
+
+    def test_entry_has_expected_fields(self, client):
+        resp = client.get('/api/comparison/tool-calls?limit=1')
+        data = resp.get_json()
+
+        entry = data['tool_calls'][0]
+        assert 'tool_name' in entry
+        assert 'timestamp' in entry
+        assert 'duration_ms' in entry
+        assert 'success' in entry
+        assert 'params' in entry
