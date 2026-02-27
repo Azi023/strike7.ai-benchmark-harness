@@ -61,7 +61,7 @@ PROVIDERS = {
 # ---------------------------------------------------------------------------
 
 TIER_TIMEOUTS = {
-    'EASY':  {'max_turns': 15,  'timeout_s': 120},    # 2 min, 15 turns
+    'EASY':  {'max_turns': 20,  'timeout_s': 180},    # 3 min, 20 turns
     'MED':   {'max_turns': 30,  'timeout_s': 600},    # 10 min, 30 turns
     'HARD':  {'max_turns': 50,  'timeout_s': 1200},   # 20 min, 50 turns
     'VHARD': {'max_turns': 80,  'timeout_s': 1800},   # 30 min, 80 turns
