@@ -10,6 +10,7 @@ import uuid
 from datetime import datetime, timezone
 
 from flask import Blueprint, jsonify, request
+from api.activity_logger import log_activity
 
 comparison_bp = Blueprint('comparison', __name__)
 
@@ -195,6 +196,9 @@ def create_run():
         ))
         conn.commit()
 
+        # Sync to activity logger so /agent-feed sees these runs
+        _log_run_activity(data, run_id, flag_captured, cost_usd)
+
         # Fetch the created run to return
         row = conn.execute(
             "SELECT * FROM model_benchmark_runs WHERE run_id = ?", (run_id,)
@@ -213,6 +217,81 @@ def create_run():
     except Exception as e:
         conn.close()
         return jsonify({'status': 'error', 'message': str(e)}), 500
+
+
+def _log_run_activity(data, run_id, flag_captured, cost_usd):
+    """Emit activity events for a comparison run so /agent-feed sees it."""
+    benchmark_id = data['benchmark_id']
+    model_label = f"{data.get('provider', '?').upper()}:{data.get('model_name', '?')}"
+    session_id = f"comparison-{run_id}"
+
+    # benchmark_start
+    log_activity('benchmark_start', benchmark_id, {
+        'port': data.get('container_port'),
+        'model': data.get('model_name'),
+        'provider': data.get('provider'),
+        'source': 'comparison',
+    }, severity='info', session_id=session_id)
+
+    # flag result
+    if flag_captured:
+        log_activity('flag_correct', benchmark_id, {
+            'time_to_capture': data.get('time_to_flag_s'),
+            'attempts': data.get('attempt_number', 1),
+            'model': data.get('model_name'),
+            'provider': data.get('provider'),
+            'cost_usd': cost_usd,
+            'total_tokens': data.get('total_tokens'),
+            'source': 'comparison',
+        }, severity='success', session_id=session_id)
+    else:
+        log_activity('flag_incorrect', benchmark_id, {
+            'message': data.get('failure_reason', 'Flag not captured'),
+            'attempts': data.get('attempt_number', 1),
+            'model': data.get('model_name'),
+            'provider': data.get('provider'),
+            'cost_usd': cost_usd,
+            'total_tokens': data.get('total_tokens'),
+            'source': 'comparison',
+        }, severity='error', session_id=session_id)
+
+    # benchmark_stop
+    log_activity('benchmark_stop', benchmark_id, {
+        'runtime_seconds': data.get('total_duration_s'),
+        'model': data.get('model_name'),
+        'provider': data.get('provider'),
+        'source': 'comparison',
+    }, severity='info', session_id=session_id)
+
+
+@comparison_bp.route('/api/comparison/sync-activity', methods=['POST'])
+def sync_activity():
+    """Backfill activity logger with all existing comparison runs.
+
+    One-time sync: reads model_benchmark_runs and emits corresponding
+    flag_correct / flag_incorrect events so /agent-feed is up to date.
+    """
+    conn = _get_db()
+    try:
+        rows = conn.execute(
+            "SELECT * FROM model_benchmark_runs ORDER BY run_timestamp ASC"
+        ).fetchall()
+        conn.close()
+    except Exception as e:
+        conn.close()
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
+    synced = 0
+    for row in rows:
+        r = dict(row)
+        _log_run_activity(r, r['run_id'], r['flag_captured'], r.get('cost_usd'))
+        synced += 1
+
+    return jsonify({
+        'status': 'success',
+        'message': f'Synced {synced} runs to activity logger',
+        'synced': synced,
+    })
 
 
 @comparison_bp.route('/api/comparison/runs', methods=['GET'])

@@ -74,6 +74,16 @@
         .event-info { border-left-color: #4488ff; }
         .event-info .event-text { color: #aaccff; }
 
+        .model-badge {
+            display: inline-block; padding: 1px 6px; border-radius: 3px;
+            font-size: 0.72rem; font-weight: bold; letter-spacing: 0.3px;
+            background: #1a1a2e; color: #8888ff; border: 1px solid #444;
+            margin-left: 6px; vertical-align: baseline;
+        }
+        .event-detail { color: #666; font-size: 0.78rem; margin-left: 4px; }
+        .cost-tag { color: #ffaa00; }
+        .token-tag { color: #888; }
+
         .empty-state {
             display: flex; align-items: center; justify-content: center;
             height: 100%; color: #444; font-size: 0.9rem;
@@ -147,7 +157,8 @@
             'mcp_connect': '🔌', 'mcp_disconnect': '⏏',
             'benchmark_start': '▶️', 'benchmark_stop': '⏹',
             'flag_correct': '🏴', 'flag_incorrect': '❌',
-            'flag_submit': '🏳', 'http_access': '🌐', 'error': '⚠'
+            'flag_submit': '🏳', 'http_access': '🌐', 'error': '⚠',
+            'agent_run_complete': '✅', 'agent_run_failed': '💥'
         };
 
         const severityClass = {
@@ -161,6 +172,20 @@
             return d.toLocaleTimeString('en-US', { hour12: false });
         }
 
+        function modelBadge(d) {
+            if (!d.model) return '';
+            var label = d.model.toUpperCase();
+            if (label.length > 24) label = label.substring(0, 24);
+            return ' <span class="model-badge">' + label + '</span>';
+        }
+
+        function costTag(d) {
+            var parts = [];
+            if (d.cost_usd != null) parts.push('<span class="cost-tag">$' + Number(d.cost_usd).toFixed(4) + '</span>');
+            if (d.total_tokens) parts.push('<span class="token-tag">' + Number(d.total_tokens).toLocaleString() + ' tok</span>');
+            return parts.length ? ' <span class="event-detail">' + parts.join(' · ') + '</span>' : '';
+        }
+
         function formatEvent(evt) {
             const bench = evt.benchmark_id
                 ? '<span class="event-bench">' + evt.benchmark_id + '</span>'
@@ -169,16 +194,22 @@
 
             switch (evt.event_type) {
                 case 'benchmark_start':
-                    return 'Started ' + bench + (d.port ? ' on port ' + d.port : '');
+                    return 'Started ' + bench + (d.port ? ' on port ' + d.port : '') + modelBadge(d);
                 case 'benchmark_stop':
-                    return 'Stopped ' + bench + (d.runtime_seconds ? ' (' + Number(d.runtime_seconds).toFixed(1) + 's)' : '');
+                    return 'Stopped ' + bench + (d.runtime_seconds ? ' (' + Number(d.runtime_seconds).toFixed(1) + 's)' : '') + modelBadge(d);
                 case 'flag_correct':
                     return 'FLAG CAPTURED for ' + bench + '!' +
                         (d.time_to_capture ? ' Time: ' + Number(d.time_to_capture).toFixed(1) + 's' : '') +
-                        (d.attempts ? ' (Attempt ' + d.attempts + ')' : '');
+                        (d.attempts ? ' (Attempt ' + d.attempts + ')' : '') +
+                        modelBadge(d) + costTag(d);
                 case 'flag_incorrect':
                     return 'Flag rejected for ' + bench + ' — ' + (d.message || 'Incorrect') +
-                        (d.attempts ? ' (Attempt ' + d.attempts + ')' : '');
+                        (d.attempts ? ' (Attempt ' + d.attempts + ')' : '') +
+                        modelBadge(d) + costTag(d);
+                case 'agent_run_complete':
+                    return 'Run complete for ' + bench + modelBadge(d) + costTag(d);
+                case 'agent_run_failed':
+                    return 'Run failed for ' + bench + ' — ' + (d.message || 'Unknown') + modelBadge(d);
                 case 'mcp_connect':
                     return 'Agent connected via MCP' + (d.agent_name ? ' (' + d.agent_name + ')' : '');
                 case 'mcp_disconnect':
