@@ -22,10 +22,12 @@ from api.session_tracker import SessionTracker
 from api.metrics import MetricsTracker
 from api.activity_logger import log_activity
 from api.activity_routes import activity_bp
+from api.comparison_routes import comparison_bp
 
 app = Flask(__name__, static_folder='static', template_folder='templates')
 CORS(app)  # Enable CORS for API access
 app.register_blueprint(activity_bp)
+app.register_blueprint(comparison_bp)
 
 # Configuration
 BENCHMARKS_JSON_FILE = os.path.join(os.path.dirname(__file__), 'data', 'benchmarks.json')

@@ -34,7 +34,10 @@ Usage:
 
 import subprocess
 import json
+import time
+import functools
 from typing import Optional
+from datetime import datetime, timezone
 import sys
 import os
 
@@ -189,10 +192,61 @@ def api_post(endpoint: str, data: dict = None) -> dict:
         }
 
 # ============================================
+# TOOL CALL LOGGING
+# ============================================
+
+# In-memory log of recent tool calls (ring buffer)
+_TOOL_CALL_LOG = []
+_TOOL_CALL_LOG_MAX = 500
+
+
+def log_tool_call(func):
+    """Decorator that logs tool call name, duration, and timestamp.
+
+    Applied below @mcp.tool() so FastMCP sees the wrapped function.
+    Logs are stored in-memory and accessible via get_tool_call_log().
+    """
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        start = time.monotonic()
+        error = None
+        try:
+            result = func(*args, **kwargs)
+            return result
+        except Exception as e:
+            error = str(e)
+            raise
+        finally:
+            duration_ms = round((time.monotonic() - start) * 1000, 2)
+            entry = {
+                'tool_name': func.__name__,
+                'timestamp': datetime.now(timezone.utc).isoformat(),
+                'duration_ms': duration_ms,
+                'error': error,
+            }
+            _TOOL_CALL_LOG.append(entry)
+            if len(_TOOL_CALL_LOG) > _TOOL_CALL_LOG_MAX:
+                _TOOL_CALL_LOG.pop(0)
+            print(
+                f"[TOOL] {func.__name__} completed in {duration_ms}ms"
+                + (f" (error: {error})" if error else ""),
+                file=sys.stderr,
+            )
+
+    return wrapper
+
+
+def get_tool_call_log(limit=50):
+    """Return recent tool call log entries."""
+    return list(reversed(_TOOL_CALL_LOG[-limit:]))
+
+
+# ============================================
 # TOOLS - Actions the AI agent can perform
 # ============================================
 
 @mcp.tool()
+@log_tool_call
 def list_benchmarks(category: Optional[str] = None, owasp: Optional[str] = None) -> str:
     """
     List available Strike7 benchmarks.
@@ -248,6 +302,7 @@ def list_benchmarks(category: Optional[str] = None, owasp: Optional[str] = None)
 
 
 @mcp.tool()
+@log_tool_call
 def get_benchmark_details(benchmark_id: str) -> str:
     """
     Get detailed information about a specific benchmark.
@@ -266,6 +321,7 @@ def get_benchmark_details(benchmark_id: str) -> str:
 
 
 @mcp.tool()
+@log_tool_call
 def start_benchmark(benchmark_id: str, timeout_minutes: int = 30) -> str:
     """
     Start a Strike7 benchmark container.
@@ -300,6 +356,7 @@ def start_benchmark(benchmark_id: str, timeout_minutes: int = 30) -> str:
 
 
 @mcp.tool()
+@log_tool_call
 def stop_benchmark(benchmark_id: str) -> str:
     """
     Stop a running benchmark container.
@@ -322,6 +379,7 @@ def stop_benchmark(benchmark_id: str) -> str:
 
 
 @mcp.tool()
+@log_tool_call
 def get_container_status() -> str:
     """
     Get status of all running benchmark containers.
@@ -337,6 +395,7 @@ def get_container_status() -> str:
 
 
 @mcp.tool()
+@log_tool_call
 def submit_flag(benchmark_id: str, flag: str) -> str:
     """
     Submit a captured flag for validation.
@@ -382,6 +441,7 @@ def submit_flag(benchmark_id: str, flag: str) -> str:
 
 
 @mcp.tool()
+@log_tool_call
 def execute_command(command: str, timeout: int = 30) -> str:
     """
     Execute a shell command for reconnaissance or exploitation.
@@ -445,6 +505,7 @@ def execute_command(command: str, timeout: int = 30) -> str:
 
 
 @mcp.tool()
+@log_tool_call
 def get_statistics() -> str:
     """
     Get Strike7 benchmark statistics.
@@ -460,6 +521,7 @@ def get_statistics() -> str:
 
 
 @mcp.tool()
+@log_tool_call
 def start_session(agent_id: str) -> str:
     """
     Start a new evaluation session for tracking progress.
@@ -478,6 +540,7 @@ def start_session(agent_id: str) -> str:
 
 
 @mcp.tool()
+@log_tool_call
 def get_metrics(agent_id: Optional[str] = None) -> str:
     """
     Get evaluation metrics dashboard.
@@ -501,6 +564,7 @@ def get_metrics(agent_id: Optional[str] = None) -> str:
 
 
 @mcp.tool()
+@log_tool_call
 def health_check() -> str:
     """
     Check if Strike7 API is accessible and healthy.
