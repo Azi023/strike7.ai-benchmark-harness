@@ -174,3 +174,88 @@ def clear_activity():
     conn.execute("DELETE FROM agent_sessions")
     conn.commit()
     conn.close()
+
+
+def query_events_in_window(benchmark_id, start_time, end_time, event_types=None):
+    """Query agent_activity events within a time window for a specific benchmark.
+
+    Args:
+        benchmark_id: The benchmark ID to filter on.
+        start_time: ISO-format start timestamp (inclusive).
+        end_time: ISO-format end timestamp (inclusive).
+        event_types: Optional list of event_type strings to filter on.
+
+    Returns:
+        List of event dicts ordered by id ASC, each with keys:
+        timestamp, session_id, event_type, benchmark_id, details (parsed), severity.
+    """
+    conn = sqlite3.connect(DB_PATH)
+    conn.row_factory = sqlite3.Row
+
+    if event_types:
+        placeholders = ','.join('?' for _ in event_types)
+        query = f"""
+            SELECT timestamp, session_id, event_type, benchmark_id, details, severity
+            FROM agent_activity
+            WHERE benchmark_id = ? AND timestamp >= ? AND timestamp <= ?
+              AND event_type IN ({placeholders})
+            ORDER BY id ASC
+        """
+        params = [benchmark_id, start_time, end_time] + list(event_types)
+    else:
+        query = """
+            SELECT timestamp, session_id, event_type, benchmark_id, details, severity
+            FROM agent_activity
+            WHERE benchmark_id = ? AND timestamp >= ? AND timestamp <= ?
+            ORDER BY id ASC
+        """
+        params = [benchmark_id, start_time, end_time]
+
+    rows = conn.execute(query, params).fetchall()
+    conn.close()
+
+    events = []
+    for r in rows:
+        events.append({
+            "timestamp": r["timestamp"],
+            "session_id": r["session_id"],
+            "event_type": r["event_type"],
+            "benchmark_id": r["benchmark_id"],
+            "details": json.loads(r["details"]) if r["details"] else {},
+            "severity": r["severity"],
+        })
+    return events
+
+
+def extract_flag_result(events):
+    """Extract flag capture results from a list of event dicts.
+
+    Scans for flag_correct and flag_incorrect events to determine
+    whether the flag was captured, how long it took, and how many
+    attempts were made.
+
+    Args:
+        events: List of event dicts (from query_events_in_window).
+
+    Returns:
+        Dict with keys: flag_captured (bool), time_to_flag_s (float|None),
+        flag_attempts (int).
+    """
+    result = {
+        'flag_captured': False,
+        'time_to_flag_s': None,
+        'flag_attempts': 0,
+    }
+
+    for event in events:
+        event_type = event.get('event_type', '')
+        details = event.get('details', {})
+
+        if event_type == 'flag_correct':
+            result['flag_captured'] = True
+            result['time_to_flag_s'] = details.get('time_to_capture')
+            result['flag_attempts'] = details.get('attempts', 0)
+        elif event_type == 'flag_incorrect':
+            result['flag_attempts'] = details.get('attempts', 0)
+
+    return result

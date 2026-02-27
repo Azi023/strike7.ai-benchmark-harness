@@ -16,6 +16,7 @@ import os
 import sys
 import tempfile
 import uuid
+from datetime import datetime
 
 import pytest
 
@@ -1531,3 +1532,83 @@ class TestToolCallsEndpoint:
         assert 'duration_ms' in entry
         assert 'success' in entry
         assert 'params' in entry
+
+
+# ---------------------------------------------------------------------------
+# Activity Logger: Time-Window Query Tests
+# ---------------------------------------------------------------------------
+
+class TestActivityLoggerTimeWindow:
+    """Tests for time-window correlation query (Issue #4)."""
+
+    def test_query_events_in_window(self):
+        from api.activity_logger import log_activity, query_events_in_window
+        import time
+
+        bench_id = f'S7BEN-EASY-TEST-{uuid.uuid4().hex[:6]}'
+        start_time = datetime.utcnow().isoformat() + 'Z'
+        time.sleep(0.05)
+
+        log_activity('benchmark_start', bench_id, {'port': 5001}, 'info')
+        log_activity('flag_correct', bench_id, {'attempts': 1, 'time_to_capture': 12.5}, 'success')
+        time.sleep(0.05)
+        end_time = datetime.utcnow().isoformat() + 'Z'
+
+        events = query_events_in_window(bench_id, start_time, end_time)
+
+        assert len(events) == 2
+        assert events[0]['event_type'] == 'benchmark_start'
+        assert events[1]['event_type'] == 'flag_correct'
+
+    def test_query_events_excludes_other_benchmarks(self):
+        from api.activity_logger import log_activity, query_events_in_window
+        import time
+
+        bench_a = f'S7BEN-EASY-A-{uuid.uuid4().hex[:6]}'
+        bench_b = f'S7BEN-EASY-B-{uuid.uuid4().hex[:6]}'
+
+        start_time = datetime.utcnow().isoformat() + 'Z'
+        time.sleep(0.05)
+        log_activity('flag_correct', bench_a, {}, 'success')
+        log_activity('flag_correct', bench_b, {}, 'success')
+        time.sleep(0.05)
+        end_time = datetime.utcnow().isoformat() + 'Z'
+
+        events = query_events_in_window(bench_a, start_time, end_time)
+        assert len(events) == 1
+        assert events[0]['benchmark_id'] == bench_a
+
+    def test_query_events_empty_window(self):
+        from api.activity_logger import query_events_in_window
+        events = query_events_in_window(
+            'S7BEN-NONEXISTENT', '2020-01-01T00:00:00Z', '2020-01-01T00:01:00Z'
+        )
+        assert events == []
+
+    def test_extract_flag_result(self):
+        from api.activity_logger import extract_flag_result
+        events = [
+            {'event_type': 'benchmark_start', 'details': {'port': 5001}},
+            {'event_type': 'flag_correct', 'details': {'attempts': 2, 'time_to_capture': 15.3}},
+        ]
+        result = extract_flag_result(events)
+
+        assert result['flag_captured'] is True
+        assert result['time_to_flag_s'] == 15.3
+        assert result['flag_attempts'] == 2
+
+    def test_extract_flag_result_no_capture(self):
+        from api.activity_logger import extract_flag_result
+        events = [
+            {'event_type': 'benchmark_start', 'details': {}},
+            {'event_type': 'flag_incorrect', 'details': {'attempts': 3}},
+        ]
+        result = extract_flag_result(events)
+
+        assert result['flag_captured'] is False
+        assert result['time_to_flag_s'] is None
+
+    def test_extract_flag_result_empty(self):
+        from api.activity_logger import extract_flag_result
+        result = extract_flag_result([])
+        assert result['flag_captured'] is False
