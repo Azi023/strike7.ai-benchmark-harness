@@ -25,7 +25,7 @@ from api.activity_routes import activity_bp
 from api.comparison_routes import comparison_bp
 
 app = Flask(__name__, static_folder='static', template_folder='templates')
-CORS(app)  # Enable CORS for API access
+CORS(app, origins=["http://139.59.80.137:5500", "http://localhost:5500", "http://127.0.0.1:5500"])
 app.register_blueprint(activity_bp)
 app.register_blueprint(comparison_bp)
 

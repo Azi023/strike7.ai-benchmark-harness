@@ -6,6 +6,11 @@ Uses a schema_version table for future migration support.
 
 Run standalone:  python dashboard/init_comparison_db.py
 Also auto-initialized on import by comparison_routes.py
+
+SCHEMA_CHANGELOG:
+  v1 — Initial schema: benchmark_models, model_benchmark_runs, pil_training_data view
+  v2 — Product evaluation framework: product_name/underlying_model/campaign_id/failure_stage
+       columns on runs; benchmark_campaigns table; campaign+product indexes; data backfill
 """
 import sqlite3
 import os
@@ -15,7 +20,7 @@ DB_PATH = os.environ.get(
     os.path.join(os.path.dirname(__file__), 'data', 'model_benchmarks.db')
 )
 
-CURRENT_SCHEMA_VERSION = 1
+CURRENT_SCHEMA_VERSION = 2
 
 
 def _get_schema_version(conn):
@@ -40,10 +45,9 @@ def _apply_migrations(conn):
         """)
         conn.execute("INSERT INTO schema_version (version) VALUES (1)")
 
-    # Future migrations:
-    # if version < 2:
-    #     _migrate_v2(conn)
-    #     conn.execute("UPDATE schema_version SET version = 2")
+    if version < 2:
+        _migrate_v2(conn)
+        conn.execute("UPDATE schema_version SET version = 2")
 
 
 def _migrate_v1(conn):
@@ -124,6 +128,60 @@ def _migrate_v1(conn):
         FROM model_benchmark_runs r
         LEFT JOIN benchmark_models m ON r.model_name = m.model_name
         WHERE r.flag_captured = 1 OR r.total_duration_s > 30
+    """)
+
+
+def _migrate_v2(conn):
+    """Version 2: Product evaluation framework.
+
+    Adds product/campaign tracking columns to runs, creates campaigns table,
+    and backfills product_name for existing data.
+    """
+
+    # --- New columns on model_benchmark_runs ---
+    for col_def in [
+        "product_name TEXT",
+        "underlying_model TEXT",
+        "campaign_id TEXT",
+        "failure_stage TEXT",
+    ]:
+        try:
+            conn.execute(f"ALTER TABLE model_benchmark_runs ADD COLUMN {col_def}")
+        except sqlite3.OperationalError:
+            pass  # Column already exists (idempotent)
+
+    # --- Campaign management table ---
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS benchmark_campaigns (
+            campaign_id      TEXT PRIMARY KEY,
+            campaign_name    TEXT NOT NULL,
+            product_name     TEXT NOT NULL,
+            product_version  TEXT,
+            underlying_model TEXT,
+            started_at       TEXT NOT NULL,
+            completed_at     TEXT,
+            status           TEXT DEFAULT 'running',
+            target_tier      TEXT,
+            target_benchmarks TEXT,
+            config           TEXT,
+            notes            TEXT
+        )
+    """)
+
+    # --- New indexes ---
+    conn.execute("CREATE INDEX IF NOT EXISTS idx_runs_campaign ON model_benchmark_runs(campaign_id)")
+    conn.execute("CREATE INDEX IF NOT EXISTS idx_runs_product ON model_benchmark_runs(product_name)")
+
+    # --- Backfill product_name for existing data ---
+    conn.execute("""
+        UPDATE model_benchmark_runs SET product_name = 'strike7-cyberchat'
+        WHERE model_name = 'strike7-cyberchat' AND product_name IS NULL
+    """)
+    conn.execute("""
+        UPDATE model_benchmark_runs SET product_name = 'strike7-cli-runner'
+        WHERE model_name IN ('claude-sonnet-4.5','gemini-2.5-flash','gemini-2.5-pro',
+                             'claude-opus-4.6','gpt-4.1-mini','gpt-4.1')
+        AND product_name IS NULL
     """)
 
 

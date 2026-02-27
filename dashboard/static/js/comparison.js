@@ -24,6 +24,8 @@ let runsData = [];
 let leaderboard = [];
 let activeCharts = {};
 let currentSort = { field: 'pass_rate', asc: false };
+let enumsData = { failure_reasons: [], failure_stages: [], difficulty_tiers: [] };
+let campaignsData = [];
 
 // ================================================================
 // Init
@@ -33,6 +35,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     initTabs();
     initFilters();
     initSortHeaders();
+    loadFiltersFromURL();
+    await Promise.all([fetchEnums(), fetchCampaigns()]);
     await refreshAll();
 });
 
@@ -50,6 +54,8 @@ async function refreshAll() {
     renderRecentRuns();
     updateHeaderStats();
     populateBenchmarkFilter();
+    populateProductFilter();
+    populateCampaignFilter();
 }
 
 // ================================================================
@@ -77,6 +83,8 @@ function initFilters() {
     document.getElementById('filter-provider').addEventListener('change', onFilterChange);
     document.getElementById('filter-tier').addEventListener('change', onFilterChange);
     document.getElementById('filter-benchmark').addEventListener('change', onFilterChange);
+    document.getElementById('filter-product').addEventListener('change', onFilterChange);
+    document.getElementById('filter-campaign').addEventListener('change', onFilterChange);
     document.getElementById('btn-reset-filters').addEventListener('click', resetFilters);
     document.getElementById('btn-refresh').addEventListener('click', refreshAll);
 }
@@ -86,10 +94,13 @@ function getFilters() {
         provider: document.getElementById('filter-provider').value,
         tier: document.getElementById('filter-tier').value,
         benchmark: document.getElementById('filter-benchmark').value,
+        product: document.getElementById('filter-product').value,
+        campaign: document.getElementById('filter-campaign').value,
     };
 }
 
 async function onFilterChange() {
+    syncFiltersToURL();
     await Promise.all([fetchSummary(), fetchMatrix(), fetchRecentRuns()]);
     buildLeaderboard();
     renderLeaderboard();
@@ -103,7 +114,25 @@ function resetFilters() {
     document.getElementById('filter-provider').value = '';
     document.getElementById('filter-tier').value = '';
     document.getElementById('filter-benchmark').value = '';
+    document.getElementById('filter-product').value = '';
+    document.getElementById('filter-campaign').value = '';
     onFilterChange();
+}
+
+function syncFiltersToURL() {
+    const f = getFilters();
+    const params = new URLSearchParams();
+    Object.entries(f).forEach(([k, v]) => { if (v) params.set(k, v); });
+    window.history.replaceState({}, '', params.toString() ? '?' + params : location.pathname);
+}
+
+function loadFiltersFromURL() {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('provider')) document.getElementById('filter-provider').value = params.get('provider');
+    if (params.get('tier')) document.getElementById('filter-tier').value = params.get('tier');
+    if (params.get('product')) document.getElementById('filter-product').value = params.get('product');
+    if (params.get('campaign')) document.getElementById('filter-campaign').value = params.get('campaign');
+    // benchmark is populated after data loads, will be set via populateBenchmarkFilter
 }
 
 function populateBenchmarkFilter() {
@@ -142,6 +171,8 @@ function buildQuery(extra) {
     if (f.provider) params.set('provider', f.provider);
     if (f.tier) params.set('difficulty_tier', f.tier);
     if (f.benchmark) params.set('benchmark_id', f.benchmark);
+    if (f.product) params.set('product_name', f.product);
+    if (f.campaign) params.set('campaign_id', f.campaign);
     if (extra) Object.entries(extra).forEach(([k, v]) => params.set(k, v));
     return params.toString();
 }
@@ -192,6 +223,60 @@ async function fetchRecentRuns() {
     }
 }
 
+async function fetchEnums() {
+    try {
+        const res = await fetch(`${API_BASE}/comparison/enums`);
+        const data = await res.json();
+        enumsData = data;
+    } catch (e) {
+        console.error('Failed to fetch enums:', e);
+    }
+}
+
+async function fetchCampaigns() {
+    try {
+        const res = await fetch(`${API_BASE}/comparison/campaigns`);
+        const data = await res.json();
+        campaignsData = data.campaigns || [];
+    } catch (e) {
+        console.error('Failed to fetch campaigns:', e);
+        campaignsData = [];
+    }
+}
+
+function populateProductFilter() {
+    const select = document.getElementById('filter-product');
+    const current = select.value;
+    const products = new Set();
+
+    runsData.forEach(r => { if (r.product_name) products.add(r.product_name); });
+    summaryData.forEach(s => { if (s.product_name) products.add(s.product_name); });
+    campaignsData.forEach(c => { if (c.product_name) products.add(c.product_name); });
+
+    while (select.options.length > 1) select.remove(1);
+    [...products].sort().forEach(name => {
+        const opt = document.createElement('option');
+        opt.value = name;
+        opt.textContent = name;
+        select.appendChild(opt);
+    });
+    select.value = current;
+}
+
+function populateCampaignFilter() {
+    const select = document.getElementById('filter-campaign');
+    const current = select.value;
+
+    while (select.options.length > 1) select.remove(1);
+    campaignsData.forEach(c => {
+        const opt = document.createElement('option');
+        opt.value = c.campaign_id;
+        opt.textContent = `${c.campaign_name} (${c.total_runs || 0} runs)`;
+        select.appendChild(opt);
+    });
+    select.value = current;
+}
+
 // ================================================================
 // Leaderboard
 // ================================================================
@@ -205,6 +290,7 @@ function buildLeaderboard() {
             byModel[key] = {
                 model_name: s.model_name,
                 provider: s.provider,
+                product_name: s.product_name || null,
                 total_runs: 0,
                 successful_runs: 0,
                 time_sum: 0,
@@ -229,6 +315,7 @@ function buildLeaderboard() {
     leaderboard = Object.values(byModel).map(m => ({
         model_name: m.model_name,
         provider: m.provider,
+        product_name: m.product_name,
         total_runs: m.total_runs,
         pass_rate: m.total_runs > 0 ? m.successful_runs / m.total_runs : 0,
         avg_time_s: m.time_count > 0 ? m.time_sum / m.time_count : null,
@@ -290,9 +377,13 @@ function renderLeaderboard() {
         const passClass = getPassRateClass(m.pass_rate);
         const providerClass = `provider-${m.provider}`;
 
+        const productLabel = m.product_name && m.product_name !== m.model_name
+            ? `<span class="product-label">${esc(m.product_name)}</span> `
+            : '';
+
         return `<tr>
             <td class="col-rank ${rankClass}">${rank}</td>
-            <td class="col-model"><span class="model-name">${esc(m.model_name)}</span></td>
+            <td class="col-model">${productLabel}<span class="model-name">${esc(m.model_name)}</span></td>
             <td class="col-provider"><span class="provider-badge ${providerClass}">${esc(m.provider)}</span></td>
             <td class="col-runs mono-val">${m.total_runs}</td>
             <td class="col-pass"><span class="pass-rate ${passClass}">${(m.pass_rate * 100).toFixed(1)}%</span></td>
@@ -617,10 +708,14 @@ function renderRecentRuns() {
         const cost = r.cost_usd != null ? '$' + r.cost_usd.toFixed(4) : '—';
         const providerClass = `provider-${r.provider}`;
 
+        const productTag = r.product_name && r.product_name !== r.model_name
+            ? `<span class="product-label">${esc(r.product_name)}</span> `
+            : '';
+
         return `<tr>
             <td class="mono-val" style="font-size:0.78rem;">${ts}</td>
             <td class="mono-val">${esc(r.benchmark_id)}</td>
-            <td><span class="provider-badge ${providerClass}">${esc(r.provider)}</span> ${esc(r.model_name)}</td>
+            <td>${productTag}<span class="provider-badge ${providerClass}">${esc(r.provider)}</span> ${esc(r.model_name)}</td>
             <td>${result}</td>
             <td class="mono-val">${duration}</td>
             <td class="mono-val">${tokens}</td>

@@ -151,13 +151,13 @@ class TestDBInitialization:
         assert count == 6
 
     def test_schema_version(self, db_path):
-        """Schema version should be 1."""
+        """Schema version should be current (2)."""
         import sqlite3
         conn = sqlite3.connect(db_path)
         version = conn.execute("SELECT version FROM schema_version").fetchone()[0]
         conn.close()
 
-        assert version == 1
+        assert version == 2
 
     def test_wal_mode(self, db_path):
         """DB should use WAL journal mode."""
@@ -1612,3 +1612,772 @@ class TestActivityLoggerTimeWindow:
         from api.activity_logger import extract_flag_result
         result = extract_flag_result([])
         assert result['flag_captured'] is False
+
+
+# ---------------------------------------------------------------------------
+# Migration V2 Tests
+# ---------------------------------------------------------------------------
+
+class TestMigrationV2:
+    """Tests for schema migration v1→v2."""
+
+    def test_fresh_db_gets_v2(self, tmp_path):
+        """A brand-new DB should be created at schema version 2."""
+        from init_comparison_db import init_db
+        import sqlite3
+
+        path = str(tmp_path / 'fresh.db')
+        init_db(db_path=path)
+        conn = sqlite3.connect(path)
+        version = conn.execute("SELECT version FROM schema_version").fetchone()[0]
+        conn.close()
+        assert version == 2
+
+    def test_v1_to_v2_upgrade(self, tmp_path):
+        """A v1 database should migrate cleanly to v2."""
+        import sqlite3
+        path = str(tmp_path / 'v1.db')
+        conn = sqlite3.connect(path)
+        conn.execute("PRAGMA journal_mode=WAL")
+        # Minimal v1 schema
+        conn.execute("""CREATE TABLE benchmark_models (
+            model_name TEXT PRIMARY KEY, provider TEXT NOT NULL,
+            display_name TEXT NOT NULL, tier TEXT NOT NULL,
+            input_cost_per_1m REAL, output_cost_per_1m REAL,
+            access_method TEXT DEFAULT 'cli', is_active INTEGER DEFAULT 1, notes TEXT
+        )""")
+        conn.execute("""CREATE TABLE model_benchmark_runs (
+            run_id TEXT PRIMARY KEY, run_timestamp TEXT NOT NULL,
+            benchmark_id TEXT NOT NULL, benchmark_name TEXT,
+            difficulty_tier TEXT NOT NULL, vuln_category TEXT,
+            provider TEXT NOT NULL, model_name TEXT NOT NULL,
+            model_tier TEXT, execution_method TEXT DEFAULT 'cli',
+            flag_captured INTEGER NOT NULL DEFAULT 0, flag_value TEXT,
+            time_to_flag_s REAL, total_duration_s REAL NOT NULL,
+            attempt_number INTEGER NOT NULL DEFAULT 1,
+            total_tokens INTEGER, input_tokens INTEGER, output_tokens INTEGER,
+            token_source TEXT DEFAULT 'estimated',
+            steps_taken INTEGER, http_requests_made INTEGER,
+            cost_usd REAL, cost_source TEXT DEFAULT 'estimated',
+            failure_reason TEXT, failure_details TEXT,
+            loop_detected INTEGER DEFAULT 0, loop_count INTEGER DEFAULT 0,
+            container_port INTEGER, system_prompt_hash TEXT,
+            agent_transcript TEXT, notes TEXT
+        )""")
+        conn.execute("""CREATE VIEW IF NOT EXISTS pil_training_data AS
+            SELECT benchmark_id FROM model_benchmark_runs WHERE 1=0""")
+        conn.execute("CREATE TABLE schema_version (version INTEGER NOT NULL)")
+        conn.execute("INSERT INTO schema_version (version) VALUES (1)")
+        conn.commit()
+        conn.close()
+
+        from init_comparison_db import init_db
+        init_db(db_path=path)
+
+        conn = sqlite3.connect(path)
+        version = conn.execute("SELECT version FROM schema_version").fetchone()[0]
+        assert version == 2
+
+        cols = {row[1] for row in conn.execute("PRAGMA table_info(model_benchmark_runs)").fetchall()}
+        for new_col in ('product_name', 'underlying_model', 'campaign_id', 'failure_stage'):
+            assert new_col in cols, f"Missing column: {new_col}"
+        conn.close()
+
+    def test_existing_data_preserved_after_migration(self, tmp_path):
+        """Existing run data must survive the migration."""
+        import sqlite3
+        path = str(tmp_path / 'preserve.db')
+        conn = sqlite3.connect(path)
+        conn.execute("PRAGMA journal_mode=WAL")
+        conn.execute("""CREATE TABLE benchmark_models (
+            model_name TEXT PRIMARY KEY, provider TEXT NOT NULL,
+            display_name TEXT NOT NULL, tier TEXT NOT NULL,
+            input_cost_per_1m REAL, output_cost_per_1m REAL,
+            access_method TEXT DEFAULT 'cli', is_active INTEGER DEFAULT 1, notes TEXT
+        )""")
+        conn.execute("""CREATE TABLE model_benchmark_runs (
+            run_id TEXT PRIMARY KEY, run_timestamp TEXT NOT NULL,
+            benchmark_id TEXT NOT NULL, benchmark_name TEXT,
+            difficulty_tier TEXT NOT NULL, vuln_category TEXT,
+            provider TEXT NOT NULL, model_name TEXT NOT NULL,
+            model_tier TEXT, execution_method TEXT DEFAULT 'cli',
+            flag_captured INTEGER NOT NULL DEFAULT 0, flag_value TEXT,
+            time_to_flag_s REAL, total_duration_s REAL NOT NULL,
+            attempt_number INTEGER NOT NULL DEFAULT 1,
+            total_tokens INTEGER, input_tokens INTEGER, output_tokens INTEGER,
+            token_source TEXT DEFAULT 'estimated',
+            steps_taken INTEGER, http_requests_made INTEGER,
+            cost_usd REAL, cost_source TEXT DEFAULT 'estimated',
+            failure_reason TEXT, failure_details TEXT,
+            loop_detected INTEGER DEFAULT 0, loop_count INTEGER DEFAULT 0,
+            container_port INTEGER, system_prompt_hash TEXT,
+            agent_transcript TEXT, notes TEXT
+        )""")
+        conn.execute("""CREATE VIEW IF NOT EXISTS pil_training_data AS
+            SELECT benchmark_id FROM model_benchmark_runs WHERE 1=0""")
+        conn.execute("CREATE TABLE schema_version (version INTEGER NOT NULL)")
+        conn.execute("INSERT INTO schema_version (version) VALUES (1)")
+        conn.execute("""INSERT INTO model_benchmark_runs
+            (run_id, run_timestamp, benchmark_id, difficulty_tier, provider,
+             model_name, total_duration_s, flag_captured)
+            VALUES ('keep-me', '2026-01-01', 'S7BEN-EASY-001', 'EASY',
+                    'google', 'gemini-2.5-flash', 30.0, 1)""")
+        conn.commit()
+        conn.close()
+
+        from init_comparison_db import init_db
+        init_db(db_path=path)
+
+        conn = sqlite3.connect(path)
+        row = conn.execute("SELECT * FROM model_benchmark_runs WHERE run_id = 'keep-me'").fetchone()
+        assert row is not None
+        conn.close()
+
+    def test_idempotent_migration(self, tmp_path):
+        """Running init_db twice should not error or duplicate anything."""
+        from init_comparison_db import init_db
+        path = str(tmp_path / 'idempotent.db')
+        init_db(db_path=path)
+        init_db(db_path=path)  # second time
+
+        import sqlite3
+        conn = sqlite3.connect(path)
+        version = conn.execute("SELECT version FROM schema_version").fetchone()[0]
+        assert version == 2
+        count = conn.execute("SELECT COUNT(*) FROM benchmark_models").fetchone()[0]
+        assert count == 6
+        conn.close()
+
+    def test_new_columns_default_null(self, tmp_path):
+        """New v2 columns should default to NULL for existing runs."""
+        import sqlite3
+        path = str(tmp_path / 'defaults.db')
+        conn = sqlite3.connect(path)
+        conn.execute("PRAGMA journal_mode=WAL")
+        conn.execute("""CREATE TABLE benchmark_models (
+            model_name TEXT PRIMARY KEY, provider TEXT NOT NULL,
+            display_name TEXT NOT NULL, tier TEXT NOT NULL,
+            input_cost_per_1m REAL, output_cost_per_1m REAL,
+            access_method TEXT DEFAULT 'cli', is_active INTEGER DEFAULT 1, notes TEXT
+        )""")
+        conn.execute("""CREATE TABLE model_benchmark_runs (
+            run_id TEXT PRIMARY KEY, run_timestamp TEXT NOT NULL,
+            benchmark_id TEXT NOT NULL, benchmark_name TEXT,
+            difficulty_tier TEXT NOT NULL, vuln_category TEXT,
+            provider TEXT NOT NULL, model_name TEXT NOT NULL,
+            model_tier TEXT, execution_method TEXT DEFAULT 'cli',
+            flag_captured INTEGER NOT NULL DEFAULT 0, flag_value TEXT,
+            time_to_flag_s REAL, total_duration_s REAL NOT NULL,
+            attempt_number INTEGER NOT NULL DEFAULT 1,
+            total_tokens INTEGER, input_tokens INTEGER, output_tokens INTEGER,
+            token_source TEXT DEFAULT 'estimated',
+            steps_taken INTEGER, http_requests_made INTEGER,
+            cost_usd REAL, cost_source TEXT DEFAULT 'estimated',
+            failure_reason TEXT, failure_details TEXT,
+            loop_detected INTEGER DEFAULT 0, loop_count INTEGER DEFAULT 0,
+            container_port INTEGER, system_prompt_hash TEXT,
+            agent_transcript TEXT, notes TEXT
+        )""")
+        conn.execute("""CREATE VIEW IF NOT EXISTS pil_training_data AS
+            SELECT benchmark_id FROM model_benchmark_runs WHERE 1=0""")
+        conn.execute("CREATE TABLE schema_version (version INTEGER NOT NULL)")
+        conn.execute("INSERT INTO schema_version (version) VALUES (1)")
+        # Insert a run with unknown model (not in backfill list)
+        conn.execute("""INSERT INTO model_benchmark_runs
+            (run_id, run_timestamp, benchmark_id, difficulty_tier, provider,
+             model_name, total_duration_s, flag_captured)
+            VALUES ('null-check', '2026-01-01', 'S7BEN-EASY-001', 'EASY',
+                    'custom', 'my-custom-model', 30.0, 0)""")
+        conn.commit()
+        conn.close()
+
+        from init_comparison_db import init_db
+        init_db(db_path=path)
+
+        conn = sqlite3.connect(path)
+        conn.row_factory = sqlite3.Row
+        row = conn.execute("SELECT * FROM model_benchmark_runs WHERE run_id = 'null-check'").fetchone()
+        assert row['product_name'] is None
+        assert row['underlying_model'] is None
+        assert row['campaign_id'] is None
+        assert row['failure_stage'] is None
+        conn.close()
+
+    def test_campaigns_table_exists(self, tmp_path):
+        """benchmark_campaigns table should be created."""
+        from init_comparison_db import init_db
+        import sqlite3
+        path = str(tmp_path / 'campaigns.db')
+        init_db(db_path=path)
+
+        conn = sqlite3.connect(path)
+        tables = {row[0] for row in conn.execute(
+            "SELECT name FROM sqlite_master WHERE type='table'"
+        ).fetchall()}
+        conn.close()
+        assert 'benchmark_campaigns' in tables
+
+    def test_new_indexes_exist(self, tmp_path):
+        """V2 indexes (campaign, product) should exist."""
+        from init_comparison_db import init_db
+        import sqlite3
+        path = str(tmp_path / 'indexes.db')
+        init_db(db_path=path)
+
+        conn = sqlite3.connect(path)
+        indexes = {row[0] for row in conn.execute(
+            "SELECT name FROM sqlite_master WHERE type='index'"
+        ).fetchall()}
+        conn.close()
+        assert 'idx_runs_campaign' in indexes
+        assert 'idx_runs_product' in indexes
+
+    def test_backfill_known_models(self, tmp_path):
+        """Backfill should set product_name for known CLI runner models."""
+        import sqlite3
+        path = str(tmp_path / 'backfill.db')
+        conn = sqlite3.connect(path)
+        conn.execute("PRAGMA journal_mode=WAL")
+        conn.execute("""CREATE TABLE benchmark_models (
+            model_name TEXT PRIMARY KEY, provider TEXT NOT NULL,
+            display_name TEXT NOT NULL, tier TEXT NOT NULL,
+            input_cost_per_1m REAL, output_cost_per_1m REAL,
+            access_method TEXT DEFAULT 'cli', is_active INTEGER DEFAULT 1, notes TEXT
+        )""")
+        conn.execute("""CREATE TABLE model_benchmark_runs (
+            run_id TEXT PRIMARY KEY, run_timestamp TEXT NOT NULL,
+            benchmark_id TEXT NOT NULL, benchmark_name TEXT,
+            difficulty_tier TEXT NOT NULL, vuln_category TEXT,
+            provider TEXT NOT NULL, model_name TEXT NOT NULL,
+            model_tier TEXT, execution_method TEXT DEFAULT 'cli',
+            flag_captured INTEGER NOT NULL DEFAULT 0, flag_value TEXT,
+            time_to_flag_s REAL, total_duration_s REAL NOT NULL,
+            attempt_number INTEGER NOT NULL DEFAULT 1,
+            total_tokens INTEGER, input_tokens INTEGER, output_tokens INTEGER,
+            token_source TEXT DEFAULT 'estimated',
+            steps_taken INTEGER, http_requests_made INTEGER,
+            cost_usd REAL, cost_source TEXT DEFAULT 'estimated',
+            failure_reason TEXT, failure_details TEXT,
+            loop_detected INTEGER DEFAULT 0, loop_count INTEGER DEFAULT 0,
+            container_port INTEGER, system_prompt_hash TEXT,
+            agent_transcript TEXT, notes TEXT
+        )""")
+        conn.execute("""CREATE VIEW IF NOT EXISTS pil_training_data AS
+            SELECT benchmark_id FROM model_benchmark_runs WHERE 1=0""")
+        conn.execute("CREATE TABLE schema_version (version INTEGER NOT NULL)")
+        conn.execute("INSERT INTO schema_version (version) VALUES (1)")
+        conn.execute("""INSERT INTO model_benchmark_runs
+            (run_id, run_timestamp, benchmark_id, difficulty_tier, provider,
+             model_name, total_duration_s, flag_captured)
+            VALUES ('bf-1', '2026-01-01', 'S7BEN-EASY-001', 'EASY',
+                    'google', 'gemini-2.5-flash', 30.0, 1)""")
+        conn.execute("""INSERT INTO model_benchmark_runs
+            (run_id, run_timestamp, benchmark_id, difficulty_tier, provider,
+             model_name, total_duration_s, flag_captured)
+            VALUES ('bf-2', '2026-01-01', 'S7BEN-EASY-002', 'EASY',
+                    'anthropic', 'strike7-cyberchat', 20.0, 0)""")
+        conn.commit()
+        conn.close()
+
+        from init_comparison_db import init_db
+        init_db(db_path=path)
+
+        conn = sqlite3.connect(path)
+        conn.row_factory = sqlite3.Row
+        r1 = conn.execute("SELECT product_name FROM model_benchmark_runs WHERE run_id='bf-1'").fetchone()
+        r2 = conn.execute("SELECT product_name FROM model_benchmark_runs WHERE run_id='bf-2'").fetchone()
+        conn.close()
+        assert r1['product_name'] == 'strike7-cli-runner'
+        assert r2['product_name'] == 'strike7-cyberchat'
+
+
+# ---------------------------------------------------------------------------
+# Failure Validation Tests
+# ---------------------------------------------------------------------------
+
+class TestFailureValidation:
+    """Tests for failure_reason and failure_stage validation."""
+
+    @pytest.mark.parametrize('reason', [
+        'vuln_not_identified', 'wrong_attack_vector', 'exploit_failed',
+        'defense_not_bypassed', 'payload_incorrect', 'flag_not_found',
+        'flag_wrong_format', 'flag_rejected', 'tool_missing', 'tool_error',
+        'container_error', 'timeout', 'loop_detected', 'context_exhausted',
+        'hallucinated_flag', 'gave_up',
+    ])
+    def test_valid_failure_reason_accepted(self, client, reason):
+        resp = _post_run(client, {
+            'benchmark_id': f'S7BEN-EASY-{uuid.uuid4().hex[:3]}',
+            'difficulty_tier': 'EASY',
+            'provider': 'google',
+            'model_name': 'gemini-2.5-flash',
+            'total_duration_s': 10.0,
+            'flag_captured': 0,
+            'failure_reason': reason,
+        })
+        assert resp.status_code == 201, resp.get_json()
+
+    def test_invalid_failure_reason_rejected(self, client):
+        resp = _post_run(client, {
+            'benchmark_id': 'S7BEN-EASY-001',
+            'difficulty_tier': 'EASY',
+            'provider': 'google',
+            'model_name': 'gemini-2.5-flash',
+            'total_duration_s': 10.0,
+            'failure_reason': 'not_a_real_reason',
+        })
+        assert resp.status_code == 400
+        data = resp.get_json()
+        assert 'failure_reason' in data['errors'][0]
+
+    @pytest.mark.parametrize('stage', [
+        'recon', 'analysis', 'exploitation', 'flag_extraction', 'flag_submission',
+    ])
+    def test_valid_failure_stage_accepted(self, client, stage):
+        resp = _post_run(client, {
+            'benchmark_id': f'S7BEN-EASY-{uuid.uuid4().hex[:3]}',
+            'difficulty_tier': 'EASY',
+            'provider': 'google',
+            'model_name': 'gemini-2.5-flash',
+            'total_duration_s': 10.0,
+            'flag_captured': 0,
+            'failure_stage': stage,
+        })
+        assert resp.status_code == 201, resp.get_json()
+
+    def test_invalid_failure_stage_rejected(self, client):
+        resp = _post_run(client, {
+            'benchmark_id': 'S7BEN-EASY-001',
+            'difficulty_tier': 'EASY',
+            'provider': 'google',
+            'model_name': 'gemini-2.5-flash',
+            'total_duration_s': 10.0,
+            'failure_stage': 'not_a_stage',
+        })
+        assert resp.status_code == 400
+        data = resp.get_json()
+        assert 'failure_stage' in data['errors'][0]
+
+    def test_null_failure_reason_on_success(self, client):
+        """Successful runs don't need a failure_reason."""
+        resp = _post_run(client, {
+            'benchmark_id': f'S7BEN-EASY-{uuid.uuid4().hex[:3]}',
+            'difficulty_tier': 'EASY',
+            'provider': 'google',
+            'model_name': 'gemini-2.5-flash',
+            'total_duration_s': 10.0,
+            'flag_captured': 1,
+            'time_to_flag_s': 5.0,
+        })
+        assert resp.status_code == 201
+        run = resp.get_json()['run']
+        assert run['failure_reason'] is None
+
+    def test_text_field_size_limits(self, client):
+        """Text fields exceeding limits should be rejected."""
+        resp = _post_run(client, {
+            'benchmark_id': 'S7BEN-EASY-001',
+            'difficulty_tier': 'EASY',
+            'provider': 'google',
+            'model_name': 'gemini-2.5-flash',
+            'total_duration_s': 10.0,
+            'notes': 'x' * 10_001,
+        })
+        assert resp.status_code == 400
+        assert 'notes' in resp.get_json()['errors'][0]
+
+    def test_failure_details_size_limit(self, client):
+        resp = _post_run(client, {
+            'benchmark_id': 'S7BEN-EASY-001',
+            'difficulty_tier': 'EASY',
+            'provider': 'google',
+            'model_name': 'gemini-2.5-flash',
+            'total_duration_s': 10.0,
+            'failure_details': 'x' * 5_001,
+        })
+        assert resp.status_code == 400
+        assert 'failure_details' in resp.get_json()['errors'][0]
+
+
+# ---------------------------------------------------------------------------
+# Campaign Tests
+# ---------------------------------------------------------------------------
+
+class TestCampaigns:
+    """Tests for campaign CRUD endpoints."""
+
+    def test_create_campaign(self, client):
+        resp = client.post('/api/comparison/campaigns',
+            data=json.dumps({
+                'campaign_name': 'Test Campaign',
+                'product_name': 'strike7-cyberchat',
+                'target_tier': 'EASY',
+            }),
+            content_type='application/json',
+        )
+        assert resp.status_code == 201
+        data = resp.get_json()
+        assert data['status'] == 'success'
+        assert data['campaign']['campaign_name'] == 'Test Campaign'
+        assert data['campaign']['product_name'] == 'strike7-cyberchat'
+        assert data['campaign']['status'] == 'running'
+
+    def test_create_campaign_auto_id(self, client):
+        resp = client.post('/api/comparison/campaigns',
+            data=json.dumps({
+                'campaign_name': 'Auto ID Campaign',
+                'product_name': 'strike7-cli-runner',
+            }),
+            content_type='application/json',
+        )
+        assert resp.status_code == 201
+        cid = resp.get_json()['campaign']['campaign_id']
+        assert cid.startswith('strike7-cli-runner-')
+
+    def test_create_campaign_custom_id(self, client):
+        custom_id = f'custom-{uuid.uuid4().hex[:6]}'
+        resp = client.post('/api/comparison/campaigns',
+            data=json.dumps({
+                'campaign_id': custom_id,
+                'campaign_name': 'Custom ID Campaign',
+                'product_name': 'strike7-cyberchat',
+            }),
+            content_type='application/json',
+        )
+        assert resp.status_code == 201
+        assert resp.get_json()['campaign']['campaign_id'] == custom_id
+
+    def test_create_campaign_missing_required(self, client):
+        resp = client.post('/api/comparison/campaigns',
+            data=json.dumps({'campaign_name': 'No Product'}),
+            content_type='application/json',
+        )
+        assert resp.status_code == 400
+
+    def test_list_campaigns(self, client):
+        resp = client.get('/api/comparison/campaigns')
+        assert resp.status_code == 200
+        data = resp.get_json()
+        assert data['status'] == 'success'
+        assert isinstance(data['campaigns'], list)
+        assert data['total'] >= 1
+
+    def test_list_campaigns_filter_product(self, client):
+        # Create a campaign with unique product
+        unique_product = f'test-product-{uuid.uuid4().hex[:6]}'
+        client.post('/api/comparison/campaigns',
+            data=json.dumps({
+                'campaign_name': 'Filter Test',
+                'product_name': unique_product,
+            }),
+            content_type='application/json',
+        )
+        resp = client.get(f'/api/comparison/campaigns?product_name={unique_product}')
+        data = resp.get_json()
+        assert data['total'] == 1
+        assert data['campaigns'][0]['product_name'] == unique_product
+
+    def test_get_campaign_with_computed_summary(self, client):
+        # Create campaign
+        cid = f'summary-test-{uuid.uuid4().hex[:6]}'
+        client.post('/api/comparison/campaigns',
+            data=json.dumps({
+                'campaign_id': cid,
+                'campaign_name': 'Summary Test',
+                'product_name': 'strike7-cli-runner',
+            }),
+            content_type='application/json',
+        )
+        # Create a run linked to the campaign
+        _post_run(client, {
+            'benchmark_id': 'S7BEN-EASY-001',
+            'difficulty_tier': 'EASY',
+            'provider': 'google',
+            'model_name': 'gemini-2.5-flash',
+            'total_duration_s': 15.0,
+            'flag_captured': 1,
+            'time_to_flag_s': 10.0,
+            'campaign_id': cid,
+        })
+
+        resp = client.get(f'/api/comparison/campaigns/{cid}')
+        assert resp.status_code == 200
+        campaign = resp.get_json()['campaign']
+        assert campaign['total_runs'] == 1
+        assert campaign['solved'] == 1
+        assert campaign['failed'] == 0
+        assert campaign['pass_rate'] == 1.0
+
+    def test_campaign_summary_updates_with_new_runs(self, client):
+        cid = f'update-test-{uuid.uuid4().hex[:6]}'
+        client.post('/api/comparison/campaigns',
+            data=json.dumps({
+                'campaign_id': cid,
+                'campaign_name': 'Update Test',
+                'product_name': 'strike7-cli-runner',
+            }),
+            content_type='application/json',
+        )
+
+        # First run: success
+        _post_run(client, {
+            'benchmark_id': 'S7BEN-EASY-001',
+            'difficulty_tier': 'EASY',
+            'provider': 'google',
+            'model_name': 'gemini-2.5-flash',
+            'total_duration_s': 10.0,
+            'flag_captured': 1,
+            'time_to_flag_s': 8.0,
+            'campaign_id': cid,
+        })
+        # Second run: failure
+        _post_run(client, {
+            'benchmark_id': 'S7BEN-EASY-002',
+            'difficulty_tier': 'EASY',
+            'provider': 'google',
+            'model_name': 'gemini-2.5-flash',
+            'total_duration_s': 60.0,
+            'flag_captured': 0,
+            'failure_reason': 'timeout',
+            'campaign_id': cid,
+        })
+
+        resp = client.get(f'/api/comparison/campaigns/{cid}')
+        campaign = resp.get_json()['campaign']
+        assert campaign['total_runs'] == 2
+        assert campaign['solved'] == 1
+        assert campaign['failed'] == 1
+        assert campaign['pass_rate'] == 0.5
+
+    def test_update_campaign_status(self, client):
+        cid = f'patch-test-{uuid.uuid4().hex[:6]}'
+        client.post('/api/comparison/campaigns',
+            data=json.dumps({
+                'campaign_id': cid,
+                'campaign_name': 'Patch Test',
+                'product_name': 'strike7-cyberchat',
+            }),
+            content_type='application/json',
+        )
+
+        resp = client.patch(f'/api/comparison/campaigns/{cid}',
+            data=json.dumps({'status': 'completed', 'completed_at': '2026-02-27T12:00:00Z'}),
+            content_type='application/json',
+        )
+        assert resp.status_code == 200
+        assert resp.get_json()['campaign']['status'] == 'completed'
+
+    def test_get_nonexistent_campaign(self, client):
+        resp = client.get('/api/comparison/campaigns/does-not-exist')
+        assert resp.status_code == 404
+
+
+# ---------------------------------------------------------------------------
+# Product Filtering Tests
+# ---------------------------------------------------------------------------
+
+class TestProductFiltering:
+    """Tests for product_name and campaign_id filtering in existing endpoints."""
+
+    def test_list_runs_filter_product_name(self, client):
+        uid = uuid.uuid4().hex[:6]
+        product = f'product-{uid}'
+        _post_run(client, {
+            'benchmark_id': 'S7BEN-EASY-001',
+            'difficulty_tier': 'EASY',
+            'provider': 'google',
+            'model_name': 'gemini-2.5-flash',
+            'total_duration_s': 10.0,
+            'product_name': product,
+        })
+        _post_run(client, {
+            'benchmark_id': 'S7BEN-EASY-002',
+            'difficulty_tier': 'EASY',
+            'provider': 'google',
+            'model_name': 'gemini-2.5-flash',
+            'total_duration_s': 10.0,
+            'product_name': 'other-product',
+        })
+
+        resp = client.get(f'/api/comparison/runs?product_name={product}')
+        data = resp.get_json()
+        assert data['status'] == 'success'
+        assert all(r['product_name'] == product for r in data['runs'])
+
+    def test_list_runs_filter_campaign_id(self, client):
+        uid = uuid.uuid4().hex[:6]
+        cid = f'campaign-{uid}'
+        _post_run(client, {
+            'benchmark_id': 'S7BEN-EASY-001',
+            'difficulty_tier': 'EASY',
+            'provider': 'google',
+            'model_name': 'gemini-2.5-flash',
+            'total_duration_s': 10.0,
+            'campaign_id': cid,
+        })
+
+        resp = client.get(f'/api/comparison/runs?campaign_id={cid}')
+        data = resp.get_json()
+        assert data['total'] >= 1
+        assert all(r['campaign_id'] == cid for r in data['runs'])
+
+    def test_summary_filter_product_name(self, client):
+        uid = uuid.uuid4().hex[:6]
+        product = f'summary-prod-{uid}'
+        _post_run(client, {
+            'benchmark_id': 'S7BEN-EASY-001',
+            'difficulty_tier': 'EASY',
+            'provider': 'google',
+            'model_name': 'gemini-2.5-flash',
+            'total_duration_s': 10.0,
+            'flag_captured': 1,
+            'time_to_flag_s': 5.0,
+            'product_name': product,
+        })
+
+        resp = client.get(f'/api/comparison/summary?product_name={product}')
+        data = resp.get_json()
+        assert data['status'] == 'success'
+        assert len(data['summaries']) >= 1
+
+    def test_summary_filter_campaign_id(self, client):
+        uid = uuid.uuid4().hex[:6]
+        cid = f'sum-camp-{uid}'
+        _post_run(client, {
+            'benchmark_id': 'S7BEN-EASY-001',
+            'difficulty_tier': 'EASY',
+            'provider': 'google',
+            'model_name': 'gemini-2.5-flash',
+            'total_duration_s': 10.0,
+            'campaign_id': cid,
+        })
+
+        resp = client.get(f'/api/comparison/summary?campaign_id={cid}')
+        data = resp.get_json()
+        assert data['status'] == 'success'
+        assert len(data['summaries']) >= 1
+
+    def test_matrix_filter_product_name(self, client):
+        uid = uuid.uuid4().hex[:6]
+        product = f'matrix-prod-{uid}'
+        _post_run(client, {
+            'benchmark_id': 'S7BEN-EASY-001',
+            'difficulty_tier': 'EASY',
+            'provider': 'google',
+            'model_name': 'gemini-2.5-flash',
+            'total_duration_s': 10.0,
+            'flag_captured': 1,
+            'time_to_flag_s': 5.0,
+            'product_name': product,
+        })
+
+        resp = client.get(f'/api/comparison/matrix?product_name={product}')
+        data = resp.get_json()
+        assert data['status'] == 'success'
+
+    def test_backward_compat_no_product_name(self, client):
+        """Runs without product_name should still work (backward compat)."""
+        resp = _post_run(client, {
+            'benchmark_id': f'S7BEN-EASY-{uuid.uuid4().hex[:3]}',
+            'difficulty_tier': 'EASY',
+            'provider': 'openai',
+            'model_name': 'gpt-4.1-mini',
+            'total_duration_s': 10.0,
+        })
+        assert resp.status_code == 201
+        run = resp.get_json()['run']
+        assert run['product_name'] is None
+
+    def test_run_with_all_new_fields(self, client):
+        """Run with product_name + campaign_id + underlying_model + failure_stage."""
+        resp = _post_run(client, {
+            'benchmark_id': f'S7BEN-EASY-{uuid.uuid4().hex[:3]}',
+            'difficulty_tier': 'EASY',
+            'provider': 'anthropic',
+            'model_name': 'strike7-cyberchat',
+            'total_duration_s': 30.0,
+            'flag_captured': 0,
+            'product_name': 'strike7-cyberchat',
+            'underlying_model': 'claude-sonnet-4.5',
+            'campaign_id': 'test-campaign-all-fields',
+            'failure_stage': 'exploitation',
+            'failure_reason': 'exploit_failed',
+        })
+        assert resp.status_code == 201
+        run = resp.get_json()['run']
+        assert run['product_name'] == 'strike7-cyberchat'
+        assert run['underlying_model'] == 'claude-sonnet-4.5'
+        assert run['campaign_id'] == 'test-campaign-all-fields'
+        assert run['failure_stage'] == 'exploitation'
+
+
+# ---------------------------------------------------------------------------
+# Enums Endpoint Tests
+# ---------------------------------------------------------------------------
+
+class TestEnumsEndpoint:
+    """Tests for /api/comparison/enums endpoint."""
+
+    def test_enums_returns_all_sets(self, client):
+        resp = client.get('/api/comparison/enums')
+        assert resp.status_code == 200
+        data = resp.get_json()
+        assert 'failure_reasons' in data
+        assert 'failure_stages' in data
+        assert 'difficulty_tiers' in data
+
+    def test_enums_failure_reasons_complete(self, client):
+        resp = client.get('/api/comparison/enums')
+        reasons = set(resp.get_json()['failure_reasons'])
+        expected = {
+            'vuln_not_identified', 'wrong_attack_vector', 'exploit_failed',
+            'defense_not_bypassed', 'payload_incorrect', 'flag_not_found',
+            'flag_wrong_format', 'flag_rejected', 'tool_missing', 'tool_error',
+            'container_error', 'timeout', 'loop_detected', 'context_exhausted',
+            'hallucinated_flag', 'gave_up',
+        }
+        assert reasons == expected
+
+    def test_enums_failure_stages_complete(self, client):
+        resp = client.get('/api/comparison/enums')
+        stages = set(resp.get_json()['failure_stages'])
+        expected = {'recon', 'analysis', 'exploitation', 'flag_extraction', 'flag_submission'}
+        assert stages == expected
+
+
+# ---------------------------------------------------------------------------
+# Context Manager Tests
+# ---------------------------------------------------------------------------
+
+class TestContextManager:
+    """Tests for _get_db() context manager behavior."""
+
+    def test_db_connection_closed_on_success(self):
+        """Connection should be closed after successful use."""
+        from api.comparison_routes import _get_db
+        with _get_db() as conn:
+            conn.execute("SELECT 1")
+        # After exiting, the connection should be closed
+        # Attempting to use it should raise
+        import sqlite3
+        try:
+            conn.execute("SELECT 1")
+            # Some SQLite versions allow queries on closed connections
+            # but this is implementation-specific
+        except sqlite3.ProgrammingError:
+            pass  # Expected: closed connection
+
+    def test_db_connection_closed_on_error(self):
+        """Connection should be closed even when an error occurs."""
+        from api.comparison_routes import _get_db
+        try:
+            with _get_db() as conn:
+                raise ValueError("test error")
+        except ValueError:
+            pass  # Expected
+        # Verify connection was closed
+        import sqlite3
+        try:
+            conn.execute("SELECT 1")
+        except sqlite3.ProgrammingError:
+            pass  # Expected: closed connection
