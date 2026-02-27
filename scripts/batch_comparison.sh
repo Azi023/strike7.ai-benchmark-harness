@@ -66,15 +66,19 @@ for model_entry in "${MODELS[@]}"; do
     echo "  [$CURRENT/$TOTAL] $provider / $model"
     echo "================================================================"
     echo ""
-    echo "  Switch to your $provider CLI now."
-    read -rp "  Press ENTER when ready (or type 'skip' to skip this model): " RESPONSE
+    if [ "${SKIP_CONFIRM:-}" = "true" ]; then
+        RESPONSE=""
+    else
+        echo "  Press ENTER to run $provider / $model (or type 'skip' to skip):"
+        read -rp "  > " RESPONSE
+    fi
 
     if [ "$RESPONSE" = "skip" ]; then
         echo "  Skipped $provider / $model"
         continue
     fi
 
-    "$SCRIPT_DIR/run_comparison.sh" "$BENCHMARK" "$provider" "$model" 1
+    "$SCRIPT_DIR/run_automated.sh" "$BENCHMARK" "$provider" "$model" --attempt 1 --quiet
 
     echo ""
     echo "  --- $provider / $model complete ---"
