@@ -23,7 +23,7 @@ PROVIDERS = {
     'google': {
         'cli_command': 'gemini',
         'json_flag': '--output-format=json',
-        'auto_approve_flags': ['--sandbox=false'],
+        'auto_approve_flags': ['--yolo'],
         'prompt_flag': '-p',
         'model_flag': '--model',
         'prompt_file': 'gemini_tuned_prompt.md',
@@ -46,7 +46,7 @@ PROVIDERS = {
     'openai': {
         'cli_command': 'codex',
         'json_flag': '--json',
-        'auto_approve_flags': ['--full-auto'],
+        'auto_approve_flags': ['--full-auto', '--sandbox', 'danger-full-access'],
         'prompt_flag': None,  # codex uses: codex exec "prompt"
         'model_flag': '--model',
         'prompt_file': 'codex_tuned_prompt.md',
