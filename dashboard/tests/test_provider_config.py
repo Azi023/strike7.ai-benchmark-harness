@@ -20,7 +20,8 @@ class TestProviderConfig:
         from utils.provider_config import PROVIDERS
         required_keys = {
             'cli_command', 'json_flag', 'auto_approve_flags',
-            'prompt_file', 'chars_per_token', 'input_output_split',
+            'prompt_flag', 'model_flag', 'prompt_file',
+            'chars_per_token', 'input_output_split', 'base_overhead_tokens',
         }
         for provider, config in PROVIDERS.items():
             missing = required_keys - set(config.keys())
@@ -52,11 +53,13 @@ class TestProviderConfig:
         cmd = get_cli_command('anthropic', 'claude-sonnet-4.5', 'test prompt', 'EASY')
         assert cmd[0] == 'claude'
         assert '--output-format=json' in cmd
+        assert '--max-turns' in cmd
 
     def test_get_cli_command_openai(self):
         from utils.provider_config import get_cli_command
         cmd = get_cli_command('openai', 'gpt-4.1', 'test prompt', 'EASY')
         assert cmd[0] == 'codex'
+        assert 'exec' in cmd
 
     def test_get_cli_command_unknown_provider_raises(self):
         from utils.provider_config import get_cli_command
@@ -71,6 +74,17 @@ class TestProviderConfig:
     def test_valid_token_sources(self):
         from utils.provider_config import VALID_TOKEN_SOURCES
         assert 'exact' in VALID_TOKEN_SOURCES
+        assert 'exact_total_only' in VALID_TOKEN_SOURCES
         assert 'estimated' in VALID_TOKEN_SOURCES
+        assert 'parsed' in VALID_TOKEN_SOURCES
         assert 'manual' in VALID_TOKEN_SOURCES
         assert 'unavailable' in VALID_TOKEN_SOURCES
+
+    def test_get_timeout_returns_with_buffer(self):
+        from utils.provider_config import get_timeout, TIER_TIMEOUTS
+        for tier, config in TIER_TIMEOUTS.items():
+            assert get_timeout(tier) == config['timeout_s'] + 30
+
+    def test_get_timeout_unknown_tier_uses_hard_default(self):
+        from utils.provider_config import get_timeout, TIER_TIMEOUTS
+        assert get_timeout('UNKNOWN') == TIER_TIMEOUTS['HARD']['timeout_s'] + 30
