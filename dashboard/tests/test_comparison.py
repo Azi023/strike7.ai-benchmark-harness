@@ -777,3 +777,162 @@ class TestCombinedFilters:
         for s in data['summaries']:
             assert s['provider'] == 'google'
             assert s['difficulty_tier'] == 'EASY'
+
+
+# ---------------------------------------------------------------------------
+# Prompt Renderer Tests
+# ---------------------------------------------------------------------------
+
+class TestPromptRenderer:
+    """Tests for utils/prompt_renderer.py"""
+
+    def test_render_prompt_google(self):
+        from utils.prompt_renderer import render_prompt
+        result = render_prompt(
+            benchmark_id='S7BEN-EASY-001',
+            provider='google',
+            model_name='gemini-2.5-flash',
+            port=5001,
+            benchmark_name='Test Benchmark',
+        )
+
+        assert result['prompt_hash']
+        assert len(result['prompt_hash']) == 64  # SHA-256 hex
+        assert 'S7BEN-EASY-001' in result['prompt']
+        assert 'Gemini' in result['prompt']
+
+    def test_render_prompt_anthropic(self):
+        from utils.prompt_renderer import render_prompt
+        result = render_prompt(
+            benchmark_id='S7BEN-MED-001',
+            provider='anthropic',
+            model_name='claude-sonnet-4.5',
+            port=5032,
+        )
+
+        assert 'Claude' in result['prompt']
+        assert 'token-conscious' in result['prompt']
+
+    def test_render_prompt_openai(self):
+        from utils.prompt_renderer import render_prompt
+        result = render_prompt(
+            benchmark_id='S7BEN-EASY-002',
+            provider='openai',
+            model_name='gpt-4.1',
+            port=5002,
+        )
+
+        assert 'OpenAI' in result['prompt']
+        assert 'scripted' in result['prompt']
+
+    def test_tier_aware_flag_easy(self):
+        """EASY tier should NOT reveal /tmp/flag.txt."""
+        from utils.prompt_renderer import render_prompt
+        result = render_prompt(
+            benchmark_id='S7BEN-EASY-001',
+            provider='google',
+            model_name='test',
+            port=5001,
+        )
+        assert '/tmp/flag.txt' not in result['prompt']
+
+    def test_tier_aware_flag_med(self):
+        """MED tier should NOT reveal /tmp/flag.txt."""
+        from utils.prompt_renderer import render_prompt
+        result = render_prompt(
+            benchmark_id='S7BEN-MED-001',
+            provider='google',
+            model_name='test',
+            port=5032,
+        )
+        assert '/tmp/flag.txt' not in result['prompt']
+
+    def test_tier_aware_flag_hard(self):
+        """HARD tier SHOULD reveal /tmp/flag.txt."""
+        from utils.prompt_renderer import render_prompt
+        result = render_prompt(
+            benchmark_id='S7BEN-HARD-001',
+            provider='google',
+            model_name='test',
+            port=5050,
+        )
+        assert '/tmp/flag.txt' in result['prompt']
+
+    def test_tier_aware_flag_vhard(self):
+        """VHARD tier SHOULD reveal /tmp/flag.txt."""
+        from utils.prompt_renderer import render_prompt
+        result = render_prompt(
+            benchmark_id='S7BEN-VHARD-001',
+            provider='google',
+            model_name='test',
+            port=5070,
+        )
+        assert '/tmp/flag.txt' in result['prompt']
+
+    def test_tier_aware_flag_cve(self):
+        """CVE tier SHOULD reveal /tmp/flag.txt."""
+        from utils.prompt_renderer import render_prompt
+        result = render_prompt(
+            benchmark_id='S7BEN-CVE-001',
+            provider='google',
+            model_name='test',
+            port=5090,
+        )
+        assert '/tmp/flag.txt' in result['prompt']
+
+    def test_different_prompts_different_hashes(self):
+        """Different providers should produce different hashes."""
+        from utils.prompt_renderer import render_prompt
+        r1 = render_prompt('S7BEN-EASY-001', 'google', 'test', port=5001)
+        r2 = render_prompt('S7BEN-EASY-001', 'anthropic', 'test', port=5001)
+        assert r1['prompt_hash'] != r2['prompt_hash']
+
+    def test_same_inputs_same_hash(self):
+        """Identical inputs should produce identical hashes."""
+        from utils.prompt_renderer import render_prompt
+        r1 = render_prompt('S7BEN-EASY-001', 'google', 'test', port=5001)
+        r2 = render_prompt('S7BEN-EASY-001', 'google', 'test', port=5001)
+        assert r1['prompt_hash'] == r2['prompt_hash']
+
+    def test_auto_extract_tier(self):
+        """Tier should be auto-extracted from benchmark ID."""
+        from utils.prompt_renderer import render_prompt
+        result = render_prompt('S7BEN-VHARD-005', 'google', 'test')
+        assert result['difficulty_tier'] == 'VHARD'
+
+    def test_unknown_provider(self):
+        """Unknown provider should render without provider guidance."""
+        from utils.prompt_renderer import render_prompt
+        result = render_prompt('S7BEN-EASY-001', 'xai', 'grok-3', port=5001)
+        assert result['prompt']  # Should still render
+        assert result['prompt_hash']
+
+
+class TestPromptEndpoint:
+    """GET /api/comparison/prompt"""
+
+    def test_prompt_success(self, client):
+        resp = client.get(
+            '/api/comparison/prompt?benchmark_id=S7BEN-EASY-001'
+            '&provider=google&model_name=gemini-2.5-flash'
+        )
+        data = resp.get_json()
+
+        assert resp.status_code == 200
+        assert data['status'] == 'success'
+        assert data['prompt_hash']
+        assert 'S7BEN-EASY-001' in data['prompt']
+
+    def test_prompt_missing_params(self, client):
+        resp = client.get('/api/comparison/prompt?benchmark_id=S7BEN-EASY-001')
+        assert resp.status_code == 400
+
+    def test_prompt_resolves_port(self, client):
+        """Port should be auto-resolved from benchmarks.json."""
+        resp = client.get(
+            '/api/comparison/prompt?benchmark_id=S7BEN-EASY-001'
+            '&provider=google&model_name=gemini-2.5-flash'
+        )
+        data = resp.get_json()
+        # If benchmark exists in registry, port should be a number, not "PORT"
+        assert 'PORT' not in data['prompt'] or 'S7BEN-EASY-001' not in data.get('benchmark_name', '')

@@ -455,6 +455,67 @@ def get_matrix():
 
 
 # ---------------------------------------------------------------------------
+# Prompt rendering endpoint
+# ---------------------------------------------------------------------------
+
+@comparison_bp.route('/api/comparison/prompt', methods=['GET'])
+def get_prompt():
+    """Render a provider-tuned benchmark prompt with all variables filled in.
+
+    Query params: benchmark_id (required), provider (required), model_name (required),
+                  attempt_number, model_tier, vps_host
+    """
+    benchmark_id = request.args.get('benchmark_id')
+    provider = request.args.get('provider')
+    model_name = request.args.get('model_name')
+
+    if not all([benchmark_id, provider, model_name]):
+        return jsonify({
+            'status': 'error',
+            'message': 'Required params: benchmark_id, provider, model_name',
+        }), 400
+
+    attempt_number = request.args.get('attempt_number', 1, type=int)
+    model_tier = request.args.get('model_tier')
+    vps_host = request.args.get('vps_host', 'localhost')
+
+    # Try to resolve port and name from benchmark registry
+    port = None
+    benchmark_name = None
+    try:
+        import json as _json
+        benchmarks_path = os.path.join(os.path.dirname(__file__), '..', 'data', 'benchmarks.json')
+        if os.path.exists(benchmarks_path):
+            with open(benchmarks_path, 'r') as f:
+                benchmarks = _json.load(f)
+            for b in benchmarks:
+                if b.get('id') == benchmark_id:
+                    port = b.get('port')
+                    benchmark_name = b.get('name')
+                    break
+    except Exception:
+        pass  # Non-critical — prompt will use placeholders
+
+    from utils.prompt_renderer import render_prompt
+
+    result = render_prompt(
+        benchmark_id=benchmark_id,
+        provider=provider,
+        model_name=model_name,
+        port=port,
+        benchmark_name=benchmark_name,
+        model_tier=model_tier,
+        attempt_number=attempt_number,
+        vps_host=vps_host,
+    )
+
+    return jsonify({
+        'status': 'success',
+        **result,
+    })
+
+
+# ---------------------------------------------------------------------------
 # Model registry endpoints
 # ---------------------------------------------------------------------------
 
