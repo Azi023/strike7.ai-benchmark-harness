@@ -312,11 +312,17 @@ def run_benchmark_automated(benchmark_id, provider, model_name,
     failure_reason = None
     returncode = None
 
+    # Clean environment: remove vars that prevent nested CLI sessions
+    clean_env = os.environ.copy()
+    for var in ('CLAUDECODE', 'CLAUDE_CODE_SESSION'):
+        clean_env.pop(var, None)
+
     proc = subprocess.Popen(
         cmd,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
         preexec_fn=os.setpgrp,
+        env=clean_env,
     )
     _active_processes.append(proc)
 
