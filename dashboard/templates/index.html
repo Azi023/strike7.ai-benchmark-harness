@@ -5,13 +5,106 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Strike7 Benchmark Dashboard</title>
-    <link rel="stylesheet" href="/static/css/dashboard.css?v=2">
+    <link rel="stylesheet" href="/static/css/dashboard.css?v=3">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
         href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
         rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        /* Orchestrator Tab */
+        .orch-top-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+        @media (max-width: 768px) { .orch-top-row { grid-template-columns: 1fr; } }
+        .orch-worker {
+            display: flex; align-items: center; gap: 1rem;
+            padding: 0.75rem; border: 1px solid var(--s7-border); border-radius: 4px;
+            margin-bottom: 0.5rem; background: var(--s7-bg-secondary);
+        }
+        .orch-worker:last-child { margin-bottom: 0; }
+        .orch-dot {
+            width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;
+        }
+        .orch-dot.healthy { background: #4ADE80; box-shadow: 0 0 6px #4ADE8066; }
+        .orch-dot.unhealthy { background: #F87171; box-shadow: 0 0 6px #F8717166; }
+        .orch-worker-info { flex: 1; }
+        .orch-worker-id {
+            font-family: var(--s7-font-mono); font-size: 0.85rem;
+            color: var(--s7-text-primary); font-weight: 500;
+        }
+        .orch-worker-meta {
+            font-size: 0.75rem; color: var(--s7-text-muted); margin-top: 2px;
+        }
+        .orch-worker-bar {
+            width: 80px; height: 6px; background: var(--s7-bg-input);
+            border-radius: 3px; overflow: hidden;
+        }
+        .orch-worker-bar-fill {
+            height: 100%; background: var(--s7-accent); border-radius: 3px;
+            transition: width 0.3s ease;
+        }
+        /* Port pool */
+        .orch-pool-bar {
+            height: 24px; background: var(--s7-bg-input); border-radius: 4px;
+            overflow: hidden; position: relative; margin-bottom: 0.75rem;
+        }
+        .orch-pool-fill {
+            height: 100%; background: var(--s7-accent); border-radius: 4px;
+            transition: width 0.4s ease; min-width: 2px;
+        }
+        .orch-pool-label {
+            position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            display: flex; align-items: center; justify-content: center;
+            font-family: var(--s7-font-mono); font-size: 0.75rem;
+            color: var(--s7-text-primary); font-weight: 500;
+        }
+        .orch-pool-meta {
+            display: flex; justify-content: space-between;
+            font-size: 0.75rem; color: var(--s7-text-muted);
+        }
+        .orch-stat-row {
+            display: flex; justify-content: space-between; padding: 0.5rem 0;
+            border-bottom: 1px solid var(--s7-border); font-size: 0.85rem;
+        }
+        .orch-stat-row:last-child { border-bottom: none; }
+        .orch-stat-val {
+            font-family: var(--s7-font-mono); color: var(--s7-text-primary);
+        }
+        .orch-stat-key { color: var(--s7-text-muted); }
+        /* Sessions table */
+        .orch-table {
+            width: 100%; border-collapse: collapse; font-size: 0.85rem;
+        }
+        .orch-table th {
+            text-align: left; padding: 0.5rem 0.75rem; color: var(--s7-text-muted);
+            font-weight: 500; font-size: 0.75rem; text-transform: uppercase;
+            letter-spacing: 0.05em; border-bottom: 1px solid var(--s7-border);
+        }
+        .orch-table td {
+            padding: 0.6rem 0.75rem; border-bottom: 1px solid var(--s7-border);
+            color: var(--s7-text-primary); font-family: var(--s7-font-mono);
+            font-size: 0.8rem;
+        }
+        .orch-table tr:last-child td { border-bottom: none; }
+        .orch-table tr:hover td { background: var(--s7-bg-hover); }
+        .orch-badge {
+            display: inline-block; padding: 2px 8px; border-radius: 3px;
+            font-size: 0.7rem; font-weight: 600; text-transform: uppercase;
+        }
+        .orch-badge.running { background: #2D4A3E; color: #4ADE80; }
+        .orch-badge.stopped { background: #3D3A2D; color: #FBBF24; }
+        .orch-badge.expired { background: #4A2D2D; color: #F87171; }
+        .orch-countdown {
+            font-family: var(--s7-font-mono); font-size: 0.8rem;
+        }
+        .orch-countdown.warning { color: #FBBF24; }
+        .orch-countdown.critical { color: #F87171; }
+        .orch-countdown.ok { color: #4ADE80; }
+        .orch-empty {
+            text-align: center; padding: 2rem; color: var(--s7-text-muted);
+            font-size: 0.85rem;
+        }
+    </style>
 </head>
 
 <body>
@@ -136,6 +229,7 @@
                     <button class="tab-btn active" data-tab="benchmarks">BENCHMARKS</button>
                     <button class="tab-btn" data-tab="statistics">STATISTICS</button>
                     <button class="tab-btn" data-tab="visualizations">VISUALIZATIONS</button>
+                    <button class="tab-btn" data-tab="orchestrator">ORCHESTRATOR</button>
                 </div>
 
                 <!-- Benchmarks Tab -->
@@ -193,6 +287,36 @@
                         <div class="section-card">
                             <h3>Phase Distribution</h3>
                             <canvas id="phaseChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <!-- Orchestrator Tab -->
+                <div id="orchestrator-tab" class="tab-content">
+                    <!-- Worker Cards + Stats Row -->
+                    <div class="orch-top-row">
+                        <div class="section-card orch-workers-card">
+                            <h3>Workers</h3>
+                            <div id="orch-workers"></div>
+                        </div>
+                        <div class="section-card orch-stats-card">
+                            <h3>Port Pool</h3>
+                            <div id="orch-port-pool"></div>
+                        </div>
+                    </div>
+
+                    <!-- Active Sessions -->
+                    <div class="section-card" style="margin-top: 1rem;">
+                        <h3>Active Sessions</h3>
+                        <div id="orch-active-sessions">
+                            <p style="color: var(--s7-text-muted);">No active sessions</p>
+                        </div>
+                    </div>
+
+                    <!-- Session History -->
+                    <div class="section-card" style="margin-top: 1rem;">
+                        <h3>Recent Sessions</h3>
+                        <div id="orch-session-history">
+                            <p style="color: var(--s7-text-muted);">Loading...</p>
                         </div>
                     </div>
                 </div>
@@ -306,7 +430,175 @@ curl -X POST http://localhost:5500/api/benchmark/<span class="details-benchmark-
         </div>
     </div>
 
-    <script src="/static/js/dashboard.js?v=2"></script>
+    <script src="/static/js/dashboard.js?v=3"></script>
+    <script>
+    // ── Orchestrator Panel ──────────────────────────────────────────
+    (function() {
+        const ORCH_API = API_BASE.replace('/api', '') + '/api/orchestrator';
+        let orchInterval = null;
+
+        function fmtTime(iso) {
+            if (!iso) return '-';
+            const d = new Date(iso);
+            return d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        }
+
+        function fmtCountdown(expiresAt) {
+            if (!expiresAt) return { text: '-', cls: '' };
+            const remaining = (new Date(expiresAt) - Date.now()) / 1000;
+            if (remaining <= 0) return { text: 'EXPIRED', cls: 'critical' };
+            const m = Math.floor(remaining / 60);
+            const s = Math.floor(remaining % 60);
+            const text = `${m}m ${String(s).padStart(2, '0')}s`;
+            if (remaining < 120) return { text, cls: 'critical' };
+            if (remaining < 300) return { text, cls: 'warning' };
+            return { text, cls: 'ok' };
+        }
+
+        function fmtDuration(startedAt, stoppedAt) {
+            if (!startedAt) return '-';
+            const start = new Date(startedAt);
+            const end = stoppedAt ? new Date(stoppedAt) : new Date();
+            const sec = Math.floor((end - start) / 1000);
+            if (sec < 60) return `${sec}s`;
+            return `${Math.floor(sec / 60)}m ${sec % 60}s`;
+        }
+
+        function renderWorkers(data) {
+            const el = document.getElementById('orch-workers');
+            if (!data.workers || !data.workers.length) {
+                el.innerHTML = '<p class="orch-empty">No workers configured</p>';
+                return;
+            }
+            el.innerHTML = data.workers.map(w => {
+                const pct = w.max_containers ? Math.round((w.active_containers / w.max_containers) * 100) : 0;
+                return `<div class="orch-worker">
+                    <div class="orch-dot ${w.healthy ? 'healthy' : 'unhealthy'}"></div>
+                    <div class="orch-worker-info">
+                        <div class="orch-worker-id">${w.id}</div>
+                        <div class="orch-worker-meta">${w.mode} &middot; ${w.host} &middot; ${w.active_containers}/${w.max_containers} containers</div>
+                    </div>
+                    <div style="text-align:right">
+                        <div class="orch-worker-bar"><div class="orch-worker-bar-fill" style="width:${pct}%"></div></div>
+                        <div style="font-size:0.7rem;color:var(--s7-text-muted);margin-top:2px">${pct}%</div>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        function renderPortPool(statusData, statsData) {
+            const el = document.getElementById('orch-port-pool');
+            const active = statusData.port_pool_active || 0;
+            const range = [5001, 5299]; // fallback
+            const total = (range[1] - range[0]) + 1;
+            const pct = total ? Math.round((active / total) * 100) : 0;
+
+            let html = `
+                <div class="orch-pool-bar">
+                    <div class="orch-pool-fill" style="width:${Math.max(pct, active > 0 ? 1 : 0)}%"></div>
+                    <div class="orch-pool-label">${active} / ${total} ports</div>
+                </div>
+                <div class="orch-pool-meta">
+                    <span>Range: ${range[0]}-${range[1]}</span>
+                    <span>${pct}% utilized</span>
+                </div>`;
+
+            if (statsData) {
+                html += `<div style="margin-top:1rem">`;
+                html += `<div class="orch-stat-row"><span class="orch-stat-key">Total Sessions</span><span class="orch-stat-val">${statsData.total_sessions_last_100 || 0}</span></div>`;
+                html += `<div class="orch-stat-row"><span class="orch-stat-key">Timeout Stops</span><span class="orch-stat-val">${statsData.timeout_stops || 0}</span></div>`;
+                html += `<div class="orch-stat-row"><span class="orch-stat-key">Active Now</span><span class="orch-stat-val">${statsData.active_sessions || 0}</span></div>`;
+                html += `</div>`;
+            }
+            el.innerHTML = html;
+        }
+
+        function renderActiveSessions(data) {
+            const el = document.getElementById('orch-active-sessions');
+            const sessions = data.active_sessions || [];
+            if (!sessions.length) {
+                el.innerHTML = '<p class="orch-empty">No active sessions</p>';
+                return;
+            }
+            let html = `<table class="orch-table">
+                <thead><tr>
+                    <th>Benchmark</th><th>Port</th><th>Tier</th><th>Started</th><th>Time Remaining</th><th>Worker</th>
+                </tr></thead><tbody>`;
+            sessions.forEach(s => {
+                const cd = fmtCountdown(s.expires_at);
+                html += `<tr>
+                    <td>${s.benchmark_id}</td>
+                    <td>${s.port || '-'}</td>
+                    <td><span class="orch-badge running">${s.tier || '-'}</span></td>
+                    <td>${fmtTime(s.started_at)}</td>
+                    <td><span class="orch-countdown ${cd.cls}">${cd.text}</span></td>
+                    <td>${s.worker_id || '-'}</td>
+                </tr>`;
+            });
+            html += '</tbody></table>';
+            el.innerHTML = html;
+        }
+
+        function renderSessionHistory(data) {
+            const el = document.getElementById('orch-session-history');
+            const sessions = data.sessions || [];
+            if (!sessions.length) {
+                el.innerHTML = '<p class="orch-empty">No session history</p>';
+                return;
+            }
+            let html = `<table class="orch-table">
+                <thead><tr>
+                    <th>Benchmark</th><th>Status</th><th>Port</th><th>Duration</th><th>Stop Reason</th><th>Time</th>
+                </tr></thead><tbody>`;
+            sessions.forEach(s => {
+                const badge = s.status === 'running' ? 'running'
+                    : (s.stop_reason === 'timeout_expired' ? 'expired' : 'stopped');
+                html += `<tr>
+                    <td>${s.benchmark_id}</td>
+                    <td><span class="orch-badge ${badge}">${s.status}</span></td>
+                    <td>${s.port || '-'}</td>
+                    <td>${fmtDuration(s.started_at, s.stopped_at)}</td>
+                    <td style="font-family:var(--s7-font-main);color:var(--s7-text-muted)">${s.stop_reason || '-'}</td>
+                    <td>${fmtTime(s.started_at)}</td>
+                </tr>`;
+            });
+            html += '</tbody></table>';
+            el.innerHTML = html;
+        }
+
+        async function pollOrchestrator() {
+            try {
+                const [workers, status, stats, sessions] = await Promise.all([
+                    fetch(`${ORCH_API}/workers`).then(r => r.json()),
+                    fetch(`${ORCH_API}/status`).then(r => r.json()),
+                    fetch(`${ORCH_API}/stats`).then(r => r.json()),
+                    fetch(`${ORCH_API}/sessions?limit=10`).then(r => r.json()),
+                ]);
+                renderWorkers(workers);
+                renderPortPool(status, stats);
+                renderActiveSessions(status);
+                renderSessionHistory(sessions);
+            } catch (e) {
+                console.error('Orchestrator poll error:', e);
+            }
+        }
+
+        // Watch for tab switches — start/stop polling
+        const observer = new MutationObserver(() => {
+            const tab = document.getElementById('orchestrator-tab');
+            if (tab && tab.classList.contains('active')) {
+                if (!orchInterval) {
+                    pollOrchestrator();
+                    orchInterval = setInterval(pollOrchestrator, 5000);
+                }
+            } else {
+                if (orchInterval) { clearInterval(orchInterval); orchInterval = null; }
+            }
+        });
+        const orchTab = document.getElementById('orchestrator-tab');
+        if (orchTab) observer.observe(orchTab, { attributes: true, attributeFilter: ['class'] });
+    })();
+    </script>
 </body>
 
 </html>
