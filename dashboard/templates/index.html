@@ -455,11 +455,20 @@ curl -X POST http://localhost:5500/api/benchmark/<span class="details-benchmark-
             return { text, cls: 'ok' };
         }
 
+        function utcDate(s) {
+            if (!s) return null;
+            // Normalize timezone-naive strings (from SQLite) to UTC
+            if (!s.includes('+') && !s.includes('Z') && !s.includes('-', 10))
+                return new Date(s.replace(' ', 'T') + 'Z');
+            return new Date(s);
+        }
+
         function fmtDuration(startedAt, stoppedAt) {
             if (!startedAt) return '-';
-            const start = new Date(startedAt);
-            const end = stoppedAt ? new Date(stoppedAt) : new Date();
+            const start = utcDate(startedAt);
+            const end = stoppedAt ? utcDate(stoppedAt) : new Date();
             const sec = Math.floor((end - start) / 1000);
+            if (sec < 0) return '-';
             if (sec < 60) return `${sec}s`;
             return `${Math.floor(sec / 60)}m ${sec % 60}s`;
         }

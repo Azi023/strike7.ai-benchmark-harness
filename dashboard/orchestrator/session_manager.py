@@ -125,7 +125,8 @@ class SessionManager:
                     params.append(container_names)
 
                 if status == "stopped":
-                    updates.append("stopped_at = datetime('now')")
+                    updates.append("stopped_at = ?")
+                    params.append(datetime.now(timezone.utc).isoformat())
                     if stop_reason:
                         updates.append("stop_reason = ?")
                         params.append(stop_reason)
@@ -269,11 +270,12 @@ class SessionManager:
         with self._lock:
             conn = self._get_conn()
             try:
+                now_iso = datetime.now(timezone.utc).isoformat()
                 result = conn.execute(
                     "UPDATE sessions SET status = 'stopped', "
-                    "stopped_at = datetime('now'), stop_reason = 'orphaned_on_startup' "
+                    "stopped_at = ?, stop_reason = 'orphaned_on_startup' "
                     "WHERE status = 'provisioning' AND started_at < ?",
-                    (cutoff,)
+                    (now_iso, cutoff)
                 )
                 conn.commit()
                 count = result.rowcount
