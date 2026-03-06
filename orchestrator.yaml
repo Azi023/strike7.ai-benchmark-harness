@@ -1,0 +1,99 @@
+# ============================================================================
+# Strike7 Orchestrator Configuration
+# ============================================================================
+#
+# Phase 0: Single VPS, local Docker driver
+#   → All containers run on the same machine as the control plane
+#   → When you get a second VPS, change mode to "remote" and add workers
+#
+# Environment variable overrides:
+#   S7_ORCHESTRATOR_MODE=local|remote
+#   S7_BENCHMARKS_DIR=/path/to/benchmarks
+#   S7_DOCKER_COMPOSE_CMD=docker-compose
+#   S7_PORT_POOL_START=5001
+#   S7_PORT_POOL_END=5299
+#   S7_MAX_CONTAINERS=15
+#   S7_PUBLIC_HOST=139.59.80.137
+#   S7_DB_PATH=data/orchestrator.db
+# ============================================================================
+
+# Orchestrator mode: "local" (Phase 0) or "remote" (Phase 1+)
+mode: local
+
+# Benchmark source directory
+benchmarks_dir: /opt/strike7.ai-benchmark-harness/benchmarks
+
+# Docker compose command (VPS uses v1: "docker-compose", not "docker compose")
+docker_compose_cmd: docker-compose
+
+# Dashboard port (protected — never allocated to benchmarks)
+dashboard_port: 5500
+
+# Port pool for benchmark containers
+port_pool:
+  start: 5001
+  end: 5299
+  reserved:
+    - 5500   # Dashboard
+    - 3000   # MCP (if used)
+
+# Session timeouts per difficulty tier (seconds)
+timeouts:
+  EASY: 1800       # 30 minutes
+  MED: 3600        # 60 minutes
+  HARD: 7200       # 120 minutes
+  VHARD: 10800     # 180 minutes
+  CVE: 7200        # 120 minutes
+  default: 3600    # Fallback: 60 minutes
+
+# Concurrency limits
+limits:
+  max_containers_per_worker: 15
+  max_containers_global: 30
+  max_per_agent_session: 3
+
+# Health monitoring
+health:
+  check_interval_seconds: 30
+  unhealthy_threshold: 3
+
+# Worker definitions
+# Phase 0: Single local worker
+# Phase 1: Add remote workers here
+workers:
+  - id: local
+    mode: local
+    host: localhost
+    port_range: [5001, 5299]
+    max_containers: 15
+
+  # ──────────────────────────────────────────────────────────────
+  # PHASE 1: Uncomment and configure when you add a second VPS
+  # ──────────────────────────────────────────────────────────────
+  # - id: worker-1
+  #   mode: remote
+  #   host: 10.0.0.2               # Private IP of worker VPS
+  #   ssh_user: root
+  #   ssh_key: /root/.ssh/worker1_key
+  #   port_range: [5001, 5200]
+  #   max_containers: 12
+  #
+  # - id: worker-2
+  #   mode: remote
+  #   host: 10.0.0.3
+  #   ssh_user: root
+  #   ssh_key: /root/.ssh/worker2_key
+  #   port_range: [5001, 5200]
+  #   max_containers: 12
+
+# Proxy configuration (for routing agent traffic to remote workers)
+proxy:
+  enabled: false   # Enable when using remote workers
+  timeout_seconds: 30
+
+# Logging
+log_level: INFO
+log_file: /var/log/strike7/orchestrator.log
+
+# Database for session/port tracking
+db_path: data/orchestrator.db

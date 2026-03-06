@@ -25,9 +25,20 @@ from api.activity_routes import activity_bp
 from api.comparison_routes import comparison_bp
 
 app = Flask(__name__, static_folder='static', template_folder='templates')
-CORS(app, origins=["http://139.59.80.137:5500", "http://localhost:5500", "http://127.0.0.1:5500"])
+CORS(app, origins=["http://139.59.80.137:5500", "http://139.59.80.137", "http://localhost:5500", "http://127.0.0.1:5500"])
 app.register_blueprint(activity_bp)
 app.register_blueprint(comparison_bp)
+
+# Strike7 Orchestrator Integration
+import sys
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+try:
+    from orchestrator.integration import init_orchestrator
+    init_orchestrator(app)
+    print('Orchestrator initialized successfully')
+except Exception as e:
+    print(f'WARNING: Orchestrator init failed: {e}')
+
 
 # Configuration
 BENCHMARKS_JSON_FILE = os.path.join(os.path.dirname(__file__), 'data', 'benchmarks.json')
@@ -429,99 +440,99 @@ def submit_flag(benchmark_id):
         }), 500
 
 
-@app.route('/api/benchmark/<benchmark_id>/start', methods=['POST'])
-def start_benchmark(benchmark_id):
-    """
-    Start a benchmark container
-    Request body: {"force_stop_others": true, "timeout_minutes": 30}
-    """
-    try:
-        data = request.get_json() or {}
-        force_stop_others = data.get('force_stop_others', True)
-        timeout_minutes = data.get('timeout_minutes')
+# [orchestrator-replaced] @app.route('/api/benchmark/<benchmark_id>/start', methods=['POST'])
+# [orchestrator-replaced] def start_benchmark(benchmark_id):
+# [orchestrator-replaced]     """
+# [orchestrator-replaced]     Start a benchmark container
+# [orchestrator-replaced]     Request body: {"force_stop_others": true, "timeout_minutes": 30}
+# [orchestrator-replaced]     """
+# [orchestrator-replaced]     try:
+# [orchestrator-replaced]         data = request.get_json() or {}
+# [orchestrator-replaced]         force_stop_others = data.get('force_stop_others', True)
+# [orchestrator-replaced]         timeout_minutes = data.get('timeout_minutes')
 
-        result = container_manager.start_container(
-            benchmark_id,
-            force_stop_others=force_stop_others,
-            timeout_minutes=timeout_minutes
-        )
+# [orchestrator-replaced]         result = container_manager.start_container(
+# [orchestrator-replaced]             benchmark_id,
+# [orchestrator-replaced]             force_stop_others=force_stop_others,
+# [orchestrator-replaced]             timeout_minutes=timeout_minutes
+# [orchestrator-replaced]         )
 
-        if result['status'] == 'success':
-            log_activity("benchmark_start", benchmark_id, {
-                "port": result.get("port"),
-                "message": result.get("message", "")
-            }, "info")
-            flag_validator.mark_container_started(benchmark_id)
-            flag_validator.clear_runtime_flag(benchmark_id)  # clear any stale flag from previous run
+# [orchestrator-replaced]         if result['status'] == 'success':
+# [orchestrator-replaced]             log_activity("benchmark_start", benchmark_id, {
+# [orchestrator-replaced]                 "port": result.get("port"),
+# [orchestrator-replaced]                 "message": result.get("message", "")
+# [orchestrator-replaced]             }, "info")
+# [orchestrator-replaced]             flag_validator.mark_container_started(benchmark_id)
+# [orchestrator-replaced]             flag_validator.clear_runtime_flag(benchmark_id)  # clear any stale flag from previous run
 
-            # Attempt immediate flag capture (works for env-var / file-based flags)
-            runtime_flag = container_manager.read_runtime_flag(benchmark_id)
-            if runtime_flag:
-                flag_validator.set_runtime_flag(benchmark_id, runtime_flag)
-            else:
-                # Container may still be initializing; retry in background
-                t = threading.Thread(
-                    target=_capture_flag_with_retry,
-                    args=(benchmark_id,),
-                    kwargs={'max_retries': 2, 'delay_seconds': 5},
-                    daemon=True
-                )
-                t.start()
+# [orchestrator-replaced]             # Attempt immediate flag capture (works for env-var / file-based flags)
+# [orchestrator-replaced]             runtime_flag = container_manager.read_runtime_flag(benchmark_id)
+# [orchestrator-replaced]             if runtime_flag:
+# [orchestrator-replaced]                 flag_validator.set_runtime_flag(benchmark_id, runtime_flag)
+# [orchestrator-replaced]             else:
+# [orchestrator-replaced]                 # Container may still be initializing; retry in background
+# [orchestrator-replaced]                 t = threading.Thread(
+# [orchestrator-replaced]                     target=_capture_flag_with_retry,
+# [orchestrator-replaced]                     args=(benchmark_id,),
+# [orchestrator-replaced]                     kwargs={'max_retries': 2, 'delay_seconds': 5},
+# [orchestrator-replaced]                     daemon=True
+# [orchestrator-replaced]                 )
+# [orchestrator-replaced]                 t.start()
 
-        status_code = 200 if result['status'] == 'success' else 400
-        return jsonify(result), status_code
+# [orchestrator-replaced]         status_code = 200 if result['status'] == 'success' else 400
+# [orchestrator-replaced]         return jsonify(result), status_code
 
-    except Exception as e:
-        return jsonify({
-            'status': 'error',
-            'message': str(e),
-            'benchmark_id': benchmark_id
-        }), 500
-
-
-@app.route('/api/benchmark/<benchmark_id>/stop', methods=['POST'])
-def stop_benchmark(benchmark_id):
-    """Stop a benchmark container"""
-    try:
-        result = container_manager.stop_container(benchmark_id)
-
-        if result['status'] == 'success':
-            log_activity("benchmark_stop", benchmark_id, {
-                "runtime_seconds": result.get("runtime_seconds")
-            }, "info")
-            flag_validator.mark_container_stopped(benchmark_id)
-            flag_validator.clear_runtime_flag(benchmark_id)
-
-        status_code = 200 if result['status'] == 'success' else 400
-        return jsonify(result), status_code
-
-    except Exception as e:
-        return jsonify({
-            'status': 'error',
-            'message': str(e),
-            'benchmark_id': benchmark_id
-        }), 500
+# [orchestrator-replaced]     except Exception as e:
+# [orchestrator-replaced]         return jsonify({
+# [orchestrator-replaced]             'status': 'error',
+# [orchestrator-replaced]             'message': str(e),
+# [orchestrator-replaced]             'benchmark_id': benchmark_id
+# [orchestrator-replaced]         }), 500
 
 
-@app.route('/api/containers/status', methods=['GET'])
-def get_containers_status():
-    """Get status of all running containers and system resources"""
-    try:
-        running = container_manager.get_running_containers()
-        system = container_manager.get_system_status()
+# [orchestrator-replaced] @app.route('/api/benchmark/<benchmark_id>/stop', methods=['POST'])
+# [orchestrator-replaced] def stop_benchmark(benchmark_id):
+# [orchestrator-replaced]     """Stop a benchmark container"""
+# [orchestrator-replaced]     try:
+# [orchestrator-replaced]         result = container_manager.stop_container(benchmark_id)
 
-        return jsonify({
-            'running_count': len(running),
-            'max_allowed': container_manager.config['max_concurrent'],
-            'containers': running,
-            'system': system
-        })
+# [orchestrator-replaced]         if result['status'] == 'success':
+# [orchestrator-replaced]             log_activity("benchmark_stop", benchmark_id, {
+# [orchestrator-replaced]                 "runtime_seconds": result.get("runtime_seconds")
+# [orchestrator-replaced]             }, "info")
+# [orchestrator-replaced]             flag_validator.mark_container_stopped(benchmark_id)
+# [orchestrator-replaced]             flag_validator.clear_runtime_flag(benchmark_id)
 
-    except Exception as e:
-        return jsonify({
-            'status': 'error',
-            'message': str(e)
-        }), 500
+# [orchestrator-replaced]         status_code = 200 if result['status'] == 'success' else 400
+# [orchestrator-replaced]         return jsonify(result), status_code
+
+# [orchestrator-replaced]     except Exception as e:
+# [orchestrator-replaced]         return jsonify({
+# [orchestrator-replaced]             'status': 'error',
+# [orchestrator-replaced]             'message': str(e),
+# [orchestrator-replaced]             'benchmark_id': benchmark_id
+# [orchestrator-replaced]         }), 500
+
+
+# [orchestrator-replaced] @app.route('/api/containers/status', methods=['GET'])
+# [orchestrator-replaced] def get_containers_status():
+# [orchestrator-replaced]     """Get status of all running containers and system resources"""
+# [orchestrator-replaced]     try:
+# [orchestrator-replaced]         running = container_manager.get_running_containers()
+# [orchestrator-replaced]         system = container_manager.get_system_status()
+
+# [orchestrator-replaced]         return jsonify({
+# [orchestrator-replaced]             'running_count': len(running),
+# [orchestrator-replaced]             'max_allowed': container_manager.config['max_concurrent'],
+# [orchestrator-replaced]             'containers': running,
+# [orchestrator-replaced]             'system': system
+# [orchestrator-replaced]         })
+
+# [orchestrator-replaced]     except Exception as e:
+# [orchestrator-replaced]         return jsonify({
+# [orchestrator-replaced]             'status': 'error',
+# [orchestrator-replaced]             'message': str(e)
+# [orchestrator-replaced]         }), 500
 
 
 @app.route('/api/containers/stop-all', methods=['POST'])
