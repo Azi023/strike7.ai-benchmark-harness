@@ -386,11 +386,14 @@ def start_benchmark(benchmark_id: str, timeout_minutes: int = 30) -> str:
             "timeout_minutes": timeout_minutes
         }
     )
-    if result.get("status") == "success":
+    if result.get("status") == "started":
         _log_activity("benchmark_start", benchmark_id, {
             "port": result.get("port"),
+            "session_id": result.get("session_id"),
             "timeout_minutes": timeout_minutes
         }, "info")
+        # Surface orchestrator session data for the agent
+        result["access_url"] = f"http://localhost:{result['port']}" if result.get("port") else None
     return json.dumps(result, indent=2)
 
 
@@ -410,10 +413,44 @@ def stop_benchmark(benchmark_id: str) -> str:
         stop_benchmark("S7BEN-EASY-001")
     """
     result = api_post(f"/api/benchmark/{benchmark_id}/stop")
-    if result.get("status") == "success":
-        _log_activity("benchmark_stop", benchmark_id, {
-            "runtime_seconds": result.get("runtime_seconds")
-        }, "info")
+    if result.get("status") == "stopped":
+        _log_activity("benchmark_stop", benchmark_id, {}, "info")
+        # Fetch final session info from orchestrator
+        session_info = api_get(f"/api/orchestrator/status/{benchmark_id}")
+        if "error" not in session_info and session_info.get("session"):
+            result["session"] = session_info["session"]
+    return json.dumps(result, indent=2)
+
+
+@mcp.tool()
+@log_tool_call
+def get_benchmark_session(benchmark_id: str) -> str:
+    """
+    Get the current session status for a benchmark, including time remaining.
+
+    Args:
+        benchmark_id: The benchmark ID (e.g., "S7BEN-EASY-001")
+
+    Returns:
+        Session status with running state, port, session_id, time remaining
+
+    Example:
+        get_benchmark_session("S7BEN-EASY-001")
+    """
+    result = api_get(f"/api/orchestrator/status/{benchmark_id}")
+
+    if "error" not in result and result.get("running") and result.get("expires_at"):
+        try:
+            expires = datetime.fromisoformat(result["expires_at"])
+            now = datetime.now(timezone.utc)
+            remaining = (expires - now).total_seconds()
+            result["time_remaining_seconds"] = max(0, int(remaining))
+            result["time_remaining_human"] = (
+                f"{int(remaining // 60)}m {int(remaining % 60)}s" if remaining > 0 else "expired"
+            )
+        except (ValueError, TypeError):
+            pass
+
     return json.dumps(result, indent=2)
 
 
@@ -811,6 +848,7 @@ def print_server_info():
     print("  • get_benchmark_details - Get benchmark info", file=sys.stderr)
     print("  • start_benchmark      - Start container", file=sys.stderr)
     print("  • stop_benchmark       - Stop container", file=sys.stderr)
+    print("  • get_benchmark_session- Session status & time remaining", file=sys.stderr)
     print("  • get_container_status - Check running containers", file=sys.stderr)
     print("  • submit_flag          - Validate captured flag", file=sys.stderr)
     print("  • execute_command      - Run shell commands", file=sys.stderr)
@@ -903,7 +941,7 @@ if __name__ == "__main__":
                     "transport": "sse",
                     "api_url": STRIKE7_API_URL,
                     "dashboard_status": dashboard_health.get("status", "unknown"),
-                    "tools_available": 11,
+                    "tools_available": 12,
                     "sse_endpoint":      f"{ext_base}{prefix}/sse",
                     "messages_endpoint": f"{ext_base}{prefix}/messages/",
                     "health_endpoint":   f"{ext_base}{prefix}/health",
