@@ -48,12 +48,13 @@ def provision():
     if not benchmark_id:
         return jsonify({"error": "benchmark_id required"}), 400
 
+    timeout_min = data.get("timeout_minutes")
     result = orch.provision(
         benchmark_id=benchmark_id,
         agent_id=data.get("agent_id"),
         force_stop_others=data.get("force_stop_others", True),
         preferred_port=data.get("preferred_port"),
-        timeout_override=data.get("timeout_minutes", None),
+        timeout_override=int(timeout_min) * 60 if timeout_min else None,
     )
 
     status_code = 200 if result.get("success") else 500
@@ -195,12 +196,13 @@ def compat_start(benchmark_id):
         return jsonify({"error": "Orchestrator not initialized"}), 503
 
     data = request.get_json(force=True, silent=True) or {}
+    timeout_min = data.get("timeout_minutes")
 
     result = orch.provision(
         benchmark_id=benchmark_id,
         agent_id=data.get("agent_id"),
         force_stop_others=data.get("force_stop_others", True),
-        timeout_override=data.get("timeout_minutes"),
+        timeout_override=int(timeout_min) * 60 if timeout_min else None,
     )
 
     # Transform to existing dashboard response format
