@@ -569,6 +569,11 @@ class OrchestratorService:
 
     def _build_url(self, worker_id: str, port: int) -> str:
         """Build the URL for accessing a benchmark."""
+        # If proxy is enabled, route through control plane
+        control_host = os.environ.get("S7_PUBLIC_HOST", "64.227.163.82")
+        if self.config._config.get("proxy", {}).get("enabled", False):
+            return f"http://{control_host}/benchmark/{port}"
+        # Otherwise direct to worker
         host = self._get_worker_host(worker_id)
         return f"http://{host}:{port}"
 
