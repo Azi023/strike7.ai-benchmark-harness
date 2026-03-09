@@ -3,9 +3,7 @@
 // Vanilla JS, Chart.js 4.4.0, fetch() API
 // ================================================================
 
-const API_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-    ? 'http://localhost:5500/api'
-    : `${window.location.protocol}//${window.location.hostname}:5500/api`;
+const API_BASE = `${window.location.origin}/api`;
 
 // Provider colors for charts and badges
 const PROVIDER_COLORS = {
