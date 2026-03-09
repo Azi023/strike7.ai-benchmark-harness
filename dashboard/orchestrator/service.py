@@ -513,28 +513,28 @@ class OrchestratorService:
             if not active_sessions:
                 continue
 
-            # Get actual running containers from Docker
-            result = ws.driver.container_list()
-            if not result.success:
-                continue
-
-            running_names = set()
-            for line in result.stdout.strip().split("\n"):
-                if not line.strip():
-                    continue
-                try:
-                    data = json.loads(line)
-                    running_names.add(data.get("Names", "").lower())
-                except json.JSONDecodeError:
-                    continue
-
-            # Check each active session
             for sess in active_sessions:
-                bench_id = sess["benchmark_id"].lower()
-                # Check if any container with this benchmark's project name is running
-                is_running = any(bench_id in name for name in running_names)
+                bench_id = sess["benchmark_id"]
+                bench_dir = _get_benchmark_dir(self.config.benchmarks_dir, bench_id)
+                if not bench_dir:
+                    continue
 
-                if not is_running:
+                # Use compose ps to check if the benchmark's containers are running.
+                # This works regardless of custom container_name directives because
+                # docker-compose tracks containers by project label, not name.
+                result = ws.driver.compose_ps(
+                    project_dir=bench_dir,
+                    project_name=bench_id.lower(),
+                )
+
+                has_running = False
+                if result.success and result.stdout:
+                    for line in result.stdout.strip().split("\n"):
+                        if "Up" in line or "running" in line.lower():
+                            has_running = True
+                            break
+
+                if not has_running:
                     logger.warning(f"Session {sess['session_id']} for "
                                     f"{sess['benchmark_id']} has no running containers "
                                     f"— marking as stopped")
