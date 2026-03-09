@@ -1,9 +1,11 @@
 // Strike7 Dashboard JavaScript - SOC Theme
 
-// Detect API base URL (use current host or fallback to localhost)
+// Detect API base URL
+// When behind nginx (port 80), use relative path to avoid CORS issues.
+// Only use explicit :5500 for local development on localhost.
 const API_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
     ? 'http://localhost:5500/api'
-    : `${window.location.protocol}//${window.location.hostname}:5500/api`;
+    : `${window.location.origin}/api`;
 
 // SOC Color Palette
 const COLORS = {
