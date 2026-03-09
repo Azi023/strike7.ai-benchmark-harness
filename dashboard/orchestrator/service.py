@@ -557,6 +557,10 @@ class OrchestratorService:
         ws = self.workers.get(worker_id)
         if not ws:
             return "localhost"
+        # Use public_host if available (for external-facing URLs)
+        public_host = ws.config.get("public_host")
+        if public_host:
+            return public_host
         host = ws.config.get("host", "localhost")
         # For local worker, return the VPS public IP or 0.0.0.0
         if host == "localhost" and ws.config.get("mode") == "local":
