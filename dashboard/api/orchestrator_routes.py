@@ -55,6 +55,9 @@ def provision():
         force_stop_others=data.get("force_stop_others", True),
         preferred_port=data.get("preferred_port"),
         timeout_override=int(timeout_min) * 60 if timeout_min else None,
+        model_name=data.get("model_name"),
+        provider=data.get("provider"),
+        product=data.get("product"),
     )
 
     status_code = 200 if result.get("success") else 500
@@ -203,6 +206,9 @@ def compat_start(benchmark_id):
         agent_id=data.get("agent_id"),
         force_stop_others=data.get("force_stop_others", True),
         timeout_override=int(timeout_min) * 60 if timeout_min else None,
+        model_name=data.get("model_name"),
+        provider=data.get("provider"),
+        product=data.get("product"),
     )
 
     # Transform to existing dashboard response format
@@ -214,6 +220,7 @@ def compat_start(benchmark_id):
             "port": result.get("port"),
             "url": result.get("url"),
             "session_id": result.get("session_id"),
+            "run_id": result.get("run_id"),
             "expires_at": result.get("expires_at"),
         })
     else:
@@ -281,4 +288,27 @@ def compat_container_status():
         "max_allowed": orch.config._config.get("limits", {}).get("max_containers_per_worker", 15),
         "containers": containers,
         "system": {}
+    })
+
+
+# ── Run Tracking Endpoints ───────────────────────────────────────────────
+
+@orchestrator_bp.route("/api/comparison/runs/<run_id>/detail", methods=["GET"])
+def run_detail(run_id):
+    """Get full run details including steps and flag attempts."""
+    orch = get_orchestrator()
+    if not orch:
+        return jsonify({"error": "Orchestrator not initialized"}), 503
+
+    run = orch.run_tracker.get_run(run_id)
+    if not run:
+        return jsonify({"error": "Run not found"}), 404
+
+    steps = orch.run_tracker.get_run_steps(run_id)
+    flags = orch.run_tracker.get_run_flags(run_id)
+
+    return jsonify({
+        "run": run,
+        "steps": steps,
+        "flag_attempts": flags,
     })

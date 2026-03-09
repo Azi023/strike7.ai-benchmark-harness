@@ -24,6 +24,7 @@ from typing import Dict, List, Optional, Tuple
 from .config import OrchestratorConfig
 from .docker_driver import DockerDriver, LocalDriver, SSHDriver, create_driver
 from .port_pool import PortPool
+from .run_tracker import RunTracker
 from .session_manager import SessionManager
 
 logger = logging.getLogger("s7.orchestrator.service")
@@ -115,6 +116,10 @@ class OrchestratorService:
         self.sessions = SessionManager(db_path=db_path)
         self.sessions.cleanup_orphaned()
 
+        # Run tracker: bridges orchestrator sessions to comparison DB
+        comparison_db = os.path.join(os.path.dirname(db_path), "model_benchmarks.db")
+        self.run_tracker = RunTracker(db_path=comparison_db)
+
         # Initialize workers
         self.workers: Dict[str, WorkerState] = {}
         for wc in config.workers:
@@ -168,7 +173,10 @@ class OrchestratorService:
     def provision(self, benchmark_id: str, agent_id: str = None,
                   force_stop_others: bool = True,
                   preferred_port: int = None,
-                  timeout_override: int = None) -> Dict:
+                  timeout_override: int = None,
+                  model_name: str = None,
+                  provider: str = None,
+                  product: str = None) -> Dict:
         """
         Provision (start) a benchmark.
 
@@ -279,15 +287,31 @@ class OrchestratorService:
             # Update session to running
             self.sessions.update_status(session_id, "running")
 
+            # Create a tracked run if model info provided
+            run_id = None
+            if model_name or provider:
+                run_id = self.run_tracker.create_run(
+                    session_id=session_id,
+                    benchmark_id=benchmark_id,
+                    model_name=model_name,
+                    provider=provider,
+                    product=product,
+                    agent_id=agent_id,
+                    difficulty_tier=tier,
+                    port=port,
+                    worker_id=worker.id,
+                )
+
             host = self._get_worker_host(worker.id)
             url = self._build_url(worker.id, port)
 
             logger.info(f"✅ {benchmark_id} provisioned: session={session_id}, "
-                         f"port={port}, url={url}")
+                         f"port={port}, url={url}, run_id={run_id}")
 
             return {
                 "success": True,
                 "session_id": session_id,
+                "run_id": run_id,
                 "benchmark_id": benchmark_id,
                 "worker_id": worker.id,
                 "port": port,
@@ -333,6 +357,11 @@ class OrchestratorService:
                 if not result.success:
                     logger.warning(f"compose_down partial failure for {benchmark_id}: "
                                     f"{result.stderr[:200]}")
+
+        # Finalize any active run for this benchmark
+        active_run = self.run_tracker.get_active_run_for_benchmark(benchmark_id)
+        if active_run and active_run.get("run_id"):
+            self.run_tracker.finalize_run(active_run["run_id"], stop_reason=reason)
 
         # Release port
         if session and session.get("port"):

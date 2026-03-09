@@ -413,6 +413,16 @@ def submit_flag(benchmark_id):
                 metadata=data.get('metadata')
             )
 
+        # Record flag attempt in run tracker
+        orch = app.config.get("ORCHESTRATOR")
+        if orch and hasattr(orch, 'run_tracker'):
+            active_run = orch.run_tracker.get_active_run_for_benchmark(benchmark_id)
+            if active_run and active_run.get("run_id"):
+                result_str = "correct" if result.get('correct') else "incorrect"
+                orch.run_tracker.add_flag_attempt(
+                    active_run["run_id"], benchmark_id, submitted_flag, result_str
+                )
+
         # Log activity
         if result.get('correct'):
             log_activity("flag_correct", benchmark_id, {
