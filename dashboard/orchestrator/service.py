@@ -17,6 +17,7 @@ import os
 import json
 import threading
 import time
+import uuid
 import logging
 from datetime import datetime, timezone
 from typing import Dict, List, Optional, Tuple
@@ -206,19 +207,36 @@ class OrchestratorService:
         # Check if already running
         existing = self.sessions.get_active_session_for_benchmark(benchmark_id)
         if existing:
-            logger.info(f"{benchmark_id} already has active session {existing['session_id']}")
-            return {
-                "success": True,
-                "session_id": existing["session_id"],
-                "benchmark_id": benchmark_id,
-                "worker_id": existing["worker_id"],
-                "port": existing["port"],
-                "host": self._get_worker_host(existing["worker_id"]),
-                "url": self._build_url(existing["worker_id"], existing["port"]),
-                "expires_at": existing["expires_at"],
-                "already_running": True,
-                "error": None,
-            }
+            # Only reuse if same agent/model is requesting
+            existing_run = self.run_tracker.get_active_run_for_benchmark(benchmark_id)
+            same_agent = (
+                existing_run
+                and existing_run.get("model_name") == RunTracker.normalize_model_name(model_name)
+                and existing_run.get("provider") == (provider or "unknown")
+            )
+
+            if same_agent:
+                logger.info(f"{benchmark_id} already running for same model — reusing session")
+                return {
+                    "success": True,
+                    "session_id": existing["session_id"],
+                    "benchmark_id": benchmark_id,
+                    "worker_id": existing["worker_id"],
+                    "port": existing["port"],
+                    "host": self._get_worker_host(existing["worker_id"]),
+                    "url": self._build_url(existing["worker_id"], existing["port"]),
+                    "expires_at": existing["expires_at"],
+                    "run_id": existing_run.get("run_id") if existing_run else None,
+                    "already_running": True,
+                    "error": None,
+                }
+            else:
+                # Different agent — fall through to provision a new instance
+                logger.info(
+                    f"{benchmark_id} running for different model "
+                    f"({existing_run.get('model_name') if existing_run else '?'}) "
+                    f"— provisioning concurrent instance"
+                )
 
         # Optionally stop other benchmarks (current safety daemon behavior)
         if force_stop_others:
@@ -268,10 +286,18 @@ class OrchestratorService:
             # Override port in docker-compose via environment
             os.environ["S7_HOST_PORT"] = str(port)
 
+            # Use unique project name if this benchmark already has an active
+            # session (concurrent instance for a different agent)
+            project_name = benchmark_id.lower()
+            if existing:
+                project_suffix = uuid.uuid4().hex[:6]
+                project_name = f"{benchmark_id.lower()}-{project_suffix}"
+
             result = worker.driver.compose_up(
                 project_dir=bench_dir,
-                project_name=benchmark_id.lower(),
+                project_name=project_name,
                 detach=True,
+                env_overrides={"S7_HOST_PORT": str(port)},
             )
 
             if not result.success:
@@ -284,29 +310,49 @@ class OrchestratorService:
                     session_id=session_id
                 )
 
-            # Update session to running
-            self.sessions.update_status(session_id, "running")
+            # Update session to running, storing project name for deprovision
+            self.sessions.update_status(
+                session_id, "running",
+                container_names=project_name,
+            )
 
-            # Create a tracked run if model info provided
-            run_id = None
-            if model_name or provider:
-                run_id = self.run_tracker.create_run(
-                    session_id=session_id,
-                    benchmark_id=benchmark_id,
-                    model_name=model_name,
-                    provider=provider,
-                    product=product,
-                    agent_id=agent_id,
-                    difficulty_tier=tier,
-                    port=port,
-                    worker_id=worker.id,
-                )
+            # Always create a tracked run (default to "unknown" if no model info)
+            run_id = self.run_tracker.create_run(
+                session_id=session_id,
+                benchmark_id=benchmark_id,
+                model_name=model_name or "unknown",
+                provider=provider or "unknown",
+                product=product or "unknown",
+                agent_id=agent_id,
+                difficulty_tier=tier,
+                port=port,
+                worker_id=worker.id,
+            )
 
             host = self._get_worker_host(worker.id)
             url = self._build_url(worker.id, port)
 
             logger.info(f"✅ {benchmark_id} provisioned: session={session_id}, "
                          f"port={port}, url={url}, run_id={run_id}")
+
+            # Log to activity feed
+            try:
+                from api.activity_logger import log_activity
+                log_activity(
+                    event_type="benchmark_started",
+                    benchmark_id=benchmark_id,
+                    details={
+                        "model": model_name or "unknown",
+                        "provider": provider or "unknown",
+                        "product": product or "unknown",
+                        "port": port,
+                        "run_id": run_id,
+                        "url": url,
+                    },
+                    session_id=session_id,
+                )
+            except Exception as e:
+                logger.warning(f"Activity log failed: {e}")
 
             return {
                 "success": True,
@@ -329,18 +375,34 @@ class OrchestratorService:
             logger.error(f"Provision failed for {benchmark_id}: {e}")
             return self._error(str(e), session_id=session_id)
 
-    def deprovision(self, benchmark_id: str, reason: str = "user_requested") -> Dict:
+    def deprovision(self, benchmark_id: str = None,
+                    session_id: str = None,
+                    reason: str = "user_requested") -> Dict:
         """
         Deprovision (stop) a benchmark.
 
-        1. Find active session
+        1. Find active session (by session_id or benchmark_id)
         2. Stop containers
         3. Release port
         4. Update session
-        """
-        logger.info(f"Deprovisioning {benchmark_id} (reason={reason})")
 
-        session = self.sessions.get_active_session_for_benchmark(benchmark_id)
+        When concurrent instances of the same benchmark exist, use
+        session_id to target a specific one.
+        """
+        # Look up session
+        session = None
+        if session_id:
+            session = self.sessions.get_session(session_id)
+            if session and not benchmark_id:
+                benchmark_id = session["benchmark_id"]
+
+        if not session and benchmark_id:
+            session = self.sessions.get_active_session_for_benchmark(benchmark_id)
+
+        if not benchmark_id:
+            return self._error("benchmark_id or session_id required")
+
+        logger.info(f"Deprovisioning {benchmark_id} (reason={reason})")
 
         # Resolve benchmark directory
         bench_dir = _get_benchmark_dir(self.config.benchmarks_dir, benchmark_id)
@@ -350,18 +412,47 @@ class OrchestratorService:
             worker_id = session["worker_id"] if session else "local"
             worker = self.workers.get(worker_id)
             if worker:
+                # Use stored project name if available (supports concurrent instances)
+                project_name = (session.get("container_names")
+                                if session else None) or benchmark_id.lower()
                 result = worker.driver.compose_down(
                     project_dir=bench_dir,
-                    project_name=benchmark_id.lower(),
+                    project_name=project_name,
                 )
                 if not result.success:
                     logger.warning(f"compose_down partial failure for {benchmark_id}: "
                                     f"{result.stderr[:200]}")
 
-        # Finalize any active run for this benchmark
-        active_run = self.run_tracker.get_active_run_for_benchmark(benchmark_id)
+        # Finalize the active run — prefer session-based lookup for concurrent instances
+        active_run = None
+        if session and session.get("session_id"):
+            active_run = self.run_tracker.get_active_run_by_session(session["session_id"])
+        if not active_run:
+            active_run = self.run_tracker.get_active_run_for_benchmark(benchmark_id)
         if active_run and active_run.get("run_id"):
             self.run_tracker.finalize_run(active_run["run_id"], stop_reason=reason)
+
+        # Log to activity feed (before releasing session info)
+        try:
+            from api.activity_logger import log_activity
+            run_result = "captured" if (active_run and active_run.get("flag_captured")) else "failed"
+            steps = active_run.get("total_steps", 0) if active_run else 0
+            log_activity(
+                event_type="benchmark_stopped",
+                benchmark_id=benchmark_id,
+                details={
+                    "reason": reason,
+                    "result": run_result,
+                    "steps": steps,
+                    "model": active_run.get("model_name") if active_run else None,
+                    "provider": active_run.get("provider") if active_run else None,
+                    "run_id": active_run.get("run_id") if active_run else None,
+                    "duration_s": active_run.get("total_duration_s") if active_run else None,
+                },
+                session_id=session["session_id"] if session else None,
+            )
+        except Exception as e:
+            logger.warning(f"Activity log failed: {e}")
 
         # Release port
         if session and session.get("port"):
@@ -551,9 +642,10 @@ class OrchestratorService:
                 # Use compose ps to check if the benchmark's containers are running.
                 # This works regardless of custom container_name directives because
                 # docker-compose tracks containers by project label, not name.
+                project_name = sess.get("container_names") or bench_id.lower()
                 result = ws.driver.compose_ps(
                     project_dir=bench_dir,
-                    project_name=bench_id.lower(),
+                    project_name=project_name,
                 )
 
                 has_running = False

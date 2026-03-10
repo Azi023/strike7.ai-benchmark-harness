@@ -47,7 +47,8 @@ class DockerDriver(ABC):
 
     @abstractmethod
     def compose_up(self, project_dir: str, project_name: str = None,
-                   detach: bool = True) -> DockerResult:
+                   detach: bool = True,
+                   env_overrides: Dict = None) -> DockerResult:
         """Start containers with docker-compose up."""
         pass
 
@@ -137,7 +138,9 @@ class LocalDriver(DockerDriver):
             return DockerResult(success=False, error=str(e))
 
     def compose_up(self, project_dir: str, project_name: str = None,
-                   detach: bool = True) -> DockerResult:
+                   detach: bool = True,
+                   env_overrides: Dict = None) -> DockerResult:
+        # env_overrides are already in os.environ for LocalDriver (set by caller)
         cmd = [self.compose_cmd]
         if project_name:
             cmd.extend(["-p", project_name])
@@ -303,8 +306,15 @@ class SSHDriver(DockerDriver):
             return DockerResult(success=False, error=str(e))
 
     def compose_up(self, project_dir: str, project_name: str = None,
-                   detach: bool = True) -> DockerResult:
-        cmd = f"cd {shlex.quote(project_dir)} && {self.compose_cmd}"
+                   detach: bool = True,
+                   env_overrides: Dict = None) -> DockerResult:
+        # Prepend env var exports so docker-compose picks them up on the remote host
+        env_prefix = ""
+        if env_overrides:
+            env_prefix = " ".join(
+                f"{k}={shlex.quote(str(v))}" for k, v in env_overrides.items()
+            ) + " "
+        cmd = f"cd {shlex.quote(project_dir)} && {env_prefix}{self.compose_cmd}"
         if project_name:
             cmd += f" -p {shlex.quote(project_name)}"
         cmd += " up"

@@ -19,9 +19,26 @@ logger = logging.getLogger("s7.orchestrator.run_tracker")
 
 
 class RunTracker:
+    # Canonical model names — prevents duplicate entries from variant spellings
+    _MODEL_ALIASES = {
+        "claude-sonnet-4-5": "claude-sonnet-4.5",
+        "claude_sonnet_4.5": "claude-sonnet-4.5",
+        "claude-sonnet-4_5": "claude-sonnet-4.5",
+        "gemini-2-5-flash": "gemini-2.5-flash",
+        "gemini-2-5-pro": "gemini-2.5-pro",
+    }
+
     def __init__(self, db_path: str):
         self.db_path = db_path
         self._init_db()
+
+    @classmethod
+    def normalize_model_name(cls, name: str) -> str:
+        """Normalize model names to prevent duplicates."""
+        if not name:
+            return "unknown"
+        name = name.lower().strip()
+        return cls._MODEL_ALIASES.get(name, name)
 
     def _get_conn(self):
         conn = sqlite3.connect(self.db_path)
@@ -104,6 +121,7 @@ class RunTracker:
         """Create a new run when a benchmark is provisioned with model info."""
         run_id = f"run_{uuid.uuid4().hex[:12]}"
         now = datetime.now(timezone.utc).isoformat()
+        model_name = self.normalize_model_name(model_name)
 
         conn = self._get_conn()
         try:
@@ -111,10 +129,10 @@ class RunTracker:
                 """
                 INSERT INTO model_benchmark_runs
                 (run_id, session_id, benchmark_id, provider, model_name, product,
-                 difficulty_tier, port, worker_id, status,
+                 product_name, difficulty_tier, port, worker_id, status,
                  run_timestamp, execution_method,
                  flag_captured, total_duration_s, attempt_number)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'running', ?, 'orchestrator',
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'running', ?, 'orchestrator',
                         0, 0, 1)
             """,
                 (
@@ -122,7 +140,8 @@ class RunTracker:
                     session_id,
                     benchmark_id,
                     provider or "unknown",
-                    model_name or "unknown",
+                    model_name,
+                    product or "unknown",
                     product or "unknown",
                     difficulty_tier or "UNKNOWN",
                     port,
@@ -277,11 +296,14 @@ class RunTracker:
                 except Exception:
                     pass
 
-            # Count steps
+            # Count steps — update both total_steps and steps_taken
+            # (steps_taken is used by comparison summary queries)
             step_count = conn.execute(
                 "SELECT COUNT(*) as cnt FROM run_steps WHERE run_id = ?", (run_id,)
             ).fetchone()["cnt"]
             updates["total_steps"] = step_count
+            updates["steps_taken"] = step_count
+            updates["http_requests_made"] = step_count
 
             # Detect loops (same path requested 3+ times in a row)
             steps = conn.execute(
@@ -361,6 +383,20 @@ class RunTracker:
         finally:
             conn.close()
 
+    def get_active_run_by_session(self, session_id: str) -> Optional[Dict]:
+        """Find the active run for a specific session."""
+        conn = self._get_conn()
+        try:
+            row = conn.execute(
+                "SELECT * FROM model_benchmark_runs "
+                "WHERE session_id = ? AND status = 'running' "
+                "ORDER BY run_timestamp DESC LIMIT 1",
+                (session_id,),
+            ).fetchone()
+            return dict(row) if row else None
+        finally:
+            conn.close()
+
     def get_active_run_by_port(self, port: int) -> Optional[Dict]:
         """Find the active run using a specific port (for step logging)."""
         conn = self._get_conn()
@@ -374,3 +410,28 @@ class RunTracker:
             return dict(row) if row else None
         finally:
             conn.close()
+
+
+# ── Future: Non-HTTP Agent Action Tracking ──────────────────────────────
+#
+# Currently only HTTP requests through the nginx proxy are captured as
+# run steps.  Agents also perform non-HTTP actions (reading source code,
+# running scripts, MCP tool calls, reasoning decisions) that aren't tracked.
+#
+# Planned API:
+#   POST /api/comparison/runs/<run_id>/action
+#   {
+#       "action_type": "read_file" | "run_script" | "mcp_tool" | "reasoning",
+#       "target": "app.py",
+#       "details": "Reading source for vulns",
+#       "duration_ms": 120
+#   }
+#
+# This would go into a `run_actions` table (separate from run_steps which
+# tracks HTTP only) and surface in the run detail modal alongside the
+# HTTP timeline.
+#
+# Prerequisites:
+#   - Agent prompts with self-reporting instructions
+#   - MCP tool call logging (partially built in strike7_mcp_server.py)
+#   - An "agent report" endpoint on the orchestrator

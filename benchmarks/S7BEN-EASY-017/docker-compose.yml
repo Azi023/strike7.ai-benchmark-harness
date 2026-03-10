@@ -5,7 +5,7 @@ services:
     build: ./app
     container_name: s7ben-easy-017-app
     ports:
-      - "5017:8090"
+      - "${S7_HOST_PORT:-5017}:8090"
     networks:
       - frontend
     environment:

@@ -5,7 +5,7 @@ services:
     container_name: ssti-jinja2
     hostname: jinja2-app
     ports:
-      - "5077:5000"
+      - "${S7_HOST_PORT:-5077}:5000"
     networks:
       ssti-net:
         ipv4_address: 10.200.9.10

@@ -4,7 +4,7 @@ services:
     build: ./web-app
     container_name: ssrf-web-app
     ports:
-      - "5071:5000"
+      - "${S7_HOST_PORT:-5071}:5000"
     networks:
       - frontend-net
       - backend-net

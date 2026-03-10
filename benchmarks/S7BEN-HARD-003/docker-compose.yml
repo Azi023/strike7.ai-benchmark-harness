@@ -4,7 +4,7 @@ services:
     build: ./app
     container_name: ssrf-web-app
     ports:
-      - "5052:5000"
+      - "${S7_HOST_PORT:-5052}:5000"
     environment:
       - FLASK_ENV=development
       - INTERNAL_API_URL=http://internal-api:8080

@@ -5,7 +5,7 @@ services:
     container_name: lfi-webapp
     hostname: web-app
     ports:
-      - "5078:80"
+      - "${S7_HOST_PORT:-5078}:80"
     volumes:
       - lfi-logs:/var/log/apache2
     networks:

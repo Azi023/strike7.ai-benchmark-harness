@@ -5,7 +5,7 @@ services:
     container_name: pickle-webapp
     hostname: webapp
     ports:
-      - "5074:5000"
+      - "${S7_HOST_PORT:-5074}:5000"
     networks:
       - frontend-net
       - backend-net

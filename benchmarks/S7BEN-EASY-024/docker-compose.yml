@@ -2,7 +2,7 @@ version: '3.8'
 services:
   app:
     build: ./app
-    ports: ["5024:8103"]
+    ports: ["${S7_HOST_PORT:-5024}:8103"]
     environment:
       - WERKZEUG_DEBUG_PIN=off
     healthcheck:

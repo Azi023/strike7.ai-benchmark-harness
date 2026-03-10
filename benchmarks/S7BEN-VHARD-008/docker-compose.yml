@@ -5,7 +5,7 @@ services:
     container_name: nosql-webapp
     hostname: webapp
     ports:
-      - "5076:3000"
+      - "${S7_HOST_PORT:-5076}:3000"
     networks:
       - nosql-net
     environment:

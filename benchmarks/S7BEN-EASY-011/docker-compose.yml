@@ -2,7 +2,7 @@ version: '3.8'
 services:
   app:
     build: ./app
-    ports: ["5011:8098"]
+    ports: ["${S7_HOST_PORT:-5011}:8098"]
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8098/"]
       interval: 10s

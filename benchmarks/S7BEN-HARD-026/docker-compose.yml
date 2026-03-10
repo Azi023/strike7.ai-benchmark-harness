@@ -5,7 +5,7 @@ services:
     container_name: oauth-client-app
     hostname: client-app
     ports:
-      - "5063:5000"
+      - "${S7_HOST_PORT:-5063}:5000"
     environment:
       - FLASK_ENV=production
       - AUTH_SERVER_URL=http://auth-server:8080

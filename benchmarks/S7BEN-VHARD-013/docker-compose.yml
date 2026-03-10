@@ -4,7 +4,7 @@ services:
     container_name: contenthub-web
     hostname: contenthub-web
     ports:
-      - "5080:80"
+      - "${S7_HOST_PORT:-5080}:80"
     networks:
       - frontend-net
       - backend-net

@@ -4,7 +4,7 @@ services:
     container_name: hard01-nginx
     hostname: nginx
     ports:
-      - "5050:8080"
+      - "${S7_HOST_PORT:-5050}:8080"
     networks:
       - frontend-net
       - backend-net

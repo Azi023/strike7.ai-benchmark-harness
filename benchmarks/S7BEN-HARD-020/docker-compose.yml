@@ -5,7 +5,7 @@ services:
     container_name: gql-api
     hostname: graphql-api
     ports:
-      - "5057:4000"
+      - "${S7_HOST_PORT:-5057}:4000"
     networks:
       - gql-net
     volumes:

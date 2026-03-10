@@ -2,7 +2,7 @@ version: '3.8'
 services:
   app:
     build: ./app
-    ports: ["5019:8108"]
+    ports: ["${S7_HOST_PORT:-5019}:8108"]
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8108/dashboard.action"]
       interval: 10s

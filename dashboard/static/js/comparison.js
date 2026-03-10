@@ -39,6 +39,25 @@ document.addEventListener('DOMContentLoaded', async () => {
     loadFiltersFromURL();
     await Promise.all([fetchEnums(), fetchCampaigns()]);
     await refreshAll();
+    await fetchActiveRuns();
+
+    // Auto-refresh every 10 seconds for dashboard data
+    setInterval(async () => {
+        try {
+            await refreshAll();
+        } catch (e) {
+            console.warn('Auto-refresh failed:', e);
+        }
+    }, 10000);
+
+    // Active runs poll every 3 seconds for real-time step tracking
+    setInterval(async () => {
+        try {
+            await fetchActiveRuns();
+        } catch (e) {
+            console.warn('Active runs poll failed:', e);
+        }
+    }, 3000);
 });
 
 async function refreshAll() {
@@ -877,16 +896,20 @@ function renderRecentRuns() {
         const tokens = r.total_tokens != null ? r.total_tokens.toLocaleString() : '—';
         const cost = r.cost_usd != null ? '$' + r.cost_usd.toFixed(4) : '—';
         const providerClass = `provider-${r.provider}`;
+        const steps = r.steps_taken != null ? r.steps_taken : (r.total_steps != null ? r.total_steps : '—');
+        const loopBadge = r.loop_detected ? ' <span class="loop-badge">LOOP</span>' : '';
+        const clickable = r.run_id ? ` onclick="showRunDetail('${esc(r.run_id)}')" style="cursor:pointer;"` : '';
 
         const productTag = r.product_name && r.product_name !== r.model_name
             ? `<span class="product-label">${esc(r.product_name)}</span> `
             : '';
 
-        return `<tr>
+        return `<tr${clickable}>
             <td class="mono-val" style="font-size:0.78rem;">${ts}</td>
             <td class="mono-val">${esc(r.benchmark_id)}</td>
             <td>${productTag}<span class="provider-badge ${providerClass}">${esc(r.provider)}</span> ${esc(r.model_name)}</td>
             <td>${result}</td>
+            <td class="mono-val">${steps}${loopBadge}</td>
             <td class="mono-val">${duration}</td>
             <td class="mono-val">${tokens}</td>
             <td class="mono-val">${cost}</td>
@@ -929,3 +952,208 @@ function esc(str) {
     d.textContent = str;
     return d.innerHTML;
 }
+
+// ================================================================
+// Active Runs (Real-time)
+// ================================================================
+
+async function fetchActiveRuns() {
+    try {
+        const res = await fetch(`${API_BASE}/comparison/runs/active`);
+        const data = await res.json();
+        renderActiveRuns(data.active_runs || []);
+    } catch (e) {
+        console.warn('Failed to fetch active runs:', e);
+    }
+}
+
+function renderActiveRuns(runs) {
+    const section = document.getElementById('active-runs-section');
+    const container = document.getElementById('active-runs-container');
+    const badge = document.getElementById('active-runs-count');
+
+    if (runs.length === 0) {
+        section.style.display = 'none';
+        return;
+    }
+
+    section.style.display = 'block';
+    badge.textContent = runs.length;
+
+    container.innerHTML = runs.map(r => {
+        const elapsed = r.run_timestamp
+            ? Math.round((Date.now() - new Date(r.run_timestamp).getTime()) / 1000)
+            : 0;
+        const elapsedStr = elapsed > 60
+            ? `${Math.floor(elapsed / 60)}m ${elapsed % 60}s`
+            : `${elapsed}s`;
+        const providerClass = `provider-${r.provider || 'unknown'}`;
+        const stepsHtml = (r.live_steps || []).slice(-5).map(s =>
+            `<div class="live-step">
+                <span class="step-num">#${s.step_number}</span>
+                <span class="step-method method-${(s.method || '').toLowerCase()}">${esc(s.method)}</span>
+                <span class="step-path">${esc(s.path)}</span>
+                <span class="step-status status-${Math.floor((s.status_code || 0) / 100)}xx">${s.status_code || '?'}</span>
+                <span class="step-time">${s.duration_ms ? s.duration_ms.toFixed(0) + 'ms' : ''}</span>
+            </div>`
+        ).join('');
+
+        return `<div class="active-run-card">
+            <div class="active-run-header">
+                <div>
+                    <span class="provider-badge ${providerClass}">${esc(r.provider || 'unknown')}</span>
+                    <strong>${esc(r.model_name || 'unknown')}</strong>
+                </div>
+                <div class="active-run-bench">${esc(r.benchmark_id)}</div>
+            </div>
+            <div class="active-run-stats">
+                <span class="active-stat"><strong>${r.total_steps || 0}</strong> steps</span>
+                <span class="active-stat"><strong>${r.unique_paths || 0}</strong> unique paths</span>
+                <span class="active-stat"><strong>${elapsedStr}</strong> elapsed</span>
+            </div>
+            <div class="live-steps-list">${stepsHtml || '<div class="no-steps">Waiting for first request...</div>'}</div>
+        </div>`;
+    }).join('');
+}
+
+// ================================================================
+// Run Detail Modal
+// ================================================================
+
+async function showRunDetail(runId) {
+    const modal = document.getElementById('run-detail-modal');
+    const body = document.getElementById('modal-body');
+    const title = document.getElementById('modal-title');
+
+    modal.style.display = 'flex';
+    body.innerHTML = '<div class="modal-loading">Loading run details...</div>';
+
+    try {
+        const res = await fetch(`${API_BASE}/comparison/runs/${runId}/detail`);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        renderRunDetail(data, title, body);
+    } catch (e) {
+        body.innerHTML = `<div class="modal-error">Failed to load: ${esc(e.message)}</div>`;
+    }
+}
+
+function renderRunDetail(data, titleEl, bodyEl) {
+    const run = data.run || {};
+    const steps = data.steps || [];
+    const flags = data.flag_attempts || [];
+    const metrics = data.metrics || {};
+
+    const result = run.flag_captured ? 'CAPTURED' : 'FAILED';
+    const resultClass = run.flag_captured ? 'result-pass' : 'result-fail';
+    titleEl.textContent = `${run.benchmark_id || 'Unknown'} — ${run.model_name || 'Unknown'}`;
+
+    // Metrics summary
+    const metricsHtml = `
+        <div class="detail-metrics">
+            <div class="detail-metric">
+                <span class="dm-value">${metrics.total_steps || 0}</span>
+                <span class="dm-label">Total Steps</span>
+            </div>
+            <div class="detail-metric">
+                <span class="dm-value">${metrics.unique_paths || 0}</span>
+                <span class="dm-label">Unique Paths</span>
+            </div>
+            <div class="detail-metric">
+                <span class="dm-value">${metrics.loop_count || 0}</span>
+                <span class="dm-label">Loops</span>
+            </div>
+            <div class="detail-metric">
+                <span class="dm-value">${metrics.avg_step_duration_ms || 0}ms</span>
+                <span class="dm-label">Avg Step Time</span>
+            </div>
+            <div class="detail-metric">
+                <span class="dm-value ${resultClass}">${result}</span>
+                <span class="dm-label">Result</span>
+            </div>
+            <div class="detail-metric">
+                <span class="dm-value">${run.total_duration_s ? run.total_duration_s.toFixed(0) + 's' : '—'}</span>
+                <span class="dm-label">Duration</span>
+            </div>
+        </div>`;
+
+    // Loop warnings
+    let loopHtml = '';
+    if (metrics.loops && metrics.loops.length > 0) {
+        loopHtml = `<div class="loop-warning">
+            <strong>Loop Detected:</strong>
+            ${metrics.loops.map(l =>
+                `<span class="loop-detail">${esc(l.path)} repeated ${l.count}x starting at step #${l.start_step}</span>`
+            ).join(', ')}
+        </div>`;
+    }
+
+    // Run info bar
+    const infoHtml = `
+        <div class="detail-info">
+            <span><strong>Provider:</strong> ${esc(run.provider || '')}</span>
+            <span><strong>Model:</strong> ${esc(run.model_name || '')}</span>
+            <span><strong>Product:</strong> ${esc(run.product || run.product_name || '')}</span>
+            <span><strong>Started:</strong> ${run.run_timestamp ? new Date(run.run_timestamp).toLocaleString() : '—'}</span>
+            <span><strong>Run ID:</strong> <code>${esc(run.run_id || '')}</code></span>
+        </div>`;
+
+    // Steps timeline
+    const stepsHtml = steps.length > 0
+        ? `<div class="detail-steps">
+            <h4>Attack Timeline (${steps.length} requests)</h4>
+            <div class="steps-timeline">
+                ${steps.map(s => {
+                    const statusClass = `status-${Math.floor((s.status_code || 0) / 100)}xx`;
+                    const isLoop = metrics.loops && metrics.loops.some(l =>
+                        s.path === l.path && s.step_number >= l.start_step && s.step_number < l.start_step + l.count
+                    );
+                    const rowClass = isLoop ? 'step-row loop-step' : 'step-row';
+                    return `<div class="${rowClass}">
+                        <span class="step-num">#${s.step_number}</span>
+                        <span class="step-method method-${(s.method || '').toLowerCase()}">${esc(s.method)}</span>
+                        <span class="step-path">${esc(s.path)}${s.query_string ? '?' + esc(s.query_string) : ''}</span>
+                        <span class="step-status ${statusClass}">${s.status_code || '?'}</span>
+                        <span class="step-time">${s.duration_ms ? s.duration_ms.toFixed(0) + 'ms' : ''}</span>
+                    </div>`;
+                }).join('')}
+            </div>
+          </div>`
+        : '<div class="no-steps">No HTTP steps recorded for this run.</div>';
+
+    // Flag attempts
+    const flagsHtml = flags.length > 0
+        ? `<div class="detail-flags">
+            <h4>Flag Attempts (${flags.length})</h4>
+            ${flags.map(f => {
+                const fClass = f.result === 'correct' ? 'flag-correct' : 'flag-incorrect';
+                return `<div class="flag-row ${fClass}">
+                    <span>#${f.attempt_number}</span>
+                    <span class="flag-result">${f.result === 'correct' ? 'CORRECT' : 'INCORRECT'}</span>
+                    <code class="flag-value">${esc(f.flag_submitted || '')}</code>
+                    <span class="flag-time">${f.timestamp ? new Date(f.timestamp).toLocaleTimeString() : ''}</span>
+                </div>`;
+            }).join('')}
+          </div>`
+        : '';
+
+    bodyEl.innerHTML = infoHtml + metricsHtml + loopHtml + stepsHtml + flagsHtml;
+}
+
+function closeRunDetail() {
+    document.getElementById('run-detail-modal').style.display = 'none';
+}
+
+// Close modal on overlay click
+document.addEventListener('click', (e) => {
+    if (e.target.id === 'run-detail-modal') closeRunDetail();
+});
+
+// Close modal on Escape
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeRunDetail();
+});
+
+// Make functions globally accessible
+window.showRunDetail = showRunDetail;
+window.closeRunDetail = closeRunDetail;

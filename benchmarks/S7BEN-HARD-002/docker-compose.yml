@@ -4,7 +4,7 @@ services:
     build: ./app
     container_name: xss-node-app
     ports:
-      - "5051:3000"
+      - "${S7_HOST_PORT:-5051}:3000"
     environment:
       - NODE_ENV=development
       - CALLBACK_URL=http://callback-server:8080

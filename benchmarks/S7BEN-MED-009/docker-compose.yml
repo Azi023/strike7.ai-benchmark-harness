@@ -5,7 +5,7 @@ services:
       args:
         - FLAG_SECRET
     ports:
-      - "5038:5000"
+      - "${S7_HOST_PORT:-5038}:5000"
     environment:
       - FLAG_SECRET=${FLAG_SECRET:-strike7-csp-secret-key}
     healthcheck:

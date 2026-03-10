@@ -66,18 +66,24 @@ def provision():
 
 @orchestrator_bp.route("/api/orchestrator/deprovision", methods=["POST"])
 def deprovision():
-    """Deprovision (stop) a benchmark."""
+    """Deprovision (stop) a benchmark.
+
+    Accepts benchmark_id and/or session_id.  When both are given,
+    session_id is preferred (needed for concurrent same-benchmark instances).
+    """
     orch = get_orchestrator()
     if not orch:
         return jsonify({"error": "Orchestrator not initialized"}), 503
 
     data = request.get_json(force=True, silent=True) or {}
     benchmark_id = data.get("benchmark_id")
-    if not benchmark_id:
-        return jsonify({"error": "benchmark_id required"}), 400
+    session_id = data.get("session_id")
+    if not benchmark_id and not session_id:
+        return jsonify({"error": "benchmark_id or session_id required"}), 400
 
     result = orch.deprovision(
         benchmark_id=benchmark_id,
+        session_id=session_id,
         reason=data.get("reason", "api_request"),
     )
     return jsonify(result)
@@ -295,10 +301,10 @@ def compat_container_status():
 
 @orchestrator_bp.route("/api/comparison/runs/<run_id>/detail", methods=["GET"])
 def run_detail(run_id):
-    """Get full run details including steps and flag attempts."""
+    """Get full run detail including steps, flag attempts, and metrics."""
     orch = get_orchestrator()
-    if not orch:
-        return jsonify({"error": "Orchestrator not initialized"}), 503
+    if not orch or not hasattr(orch, 'run_tracker'):
+        return jsonify({"error": "Run tracker not available"}), 503
 
     run = orch.run_tracker.get_run(run_id)
     if not run:
@@ -307,8 +313,86 @@ def run_detail(run_id):
     steps = orch.run_tracker.get_run_steps(run_id)
     flags = orch.run_tracker.get_run_flags(run_id)
 
+    # Calculate additional metrics
+    unique_paths = len(set(s["path"] for s in steps))
+
+    # Detect loops: same path requested 3+ times consecutively
+    loop_sequences = []
+    if len(steps) >= 3:
+        for i in range(2, len(steps)):
+            if steps[i]["path"] == steps[i-1]["path"] == steps[i-2]["path"]:
+                if not loop_sequences or loop_sequences[-1]["path"] != steps[i]["path"]:
+                    loop_sequences.append({
+                        "path": steps[i]["path"],
+                        "start_step": steps[i-2]["step_number"],
+                        "count": 3
+                    })
+                else:
+                    loop_sequences[-1]["count"] += 1
+
+    # Time analysis
+    step_times = [s["duration_ms"] for s in steps if s.get("duration_ms")]
+    avg_step_time = sum(step_times) / len(step_times) if step_times else 0
+
     return jsonify({
         "run": run,
         "steps": steps,
         "flag_attempts": flags,
+        "metrics": {
+            "total_steps": len(steps),
+            "unique_paths": unique_paths,
+            "loop_count": len(loop_sequences),
+            "loops": loop_sequences,
+            "avg_step_duration_ms": round(avg_step_time, 1),
+            "total_request_time_ms": sum(step_times),
+        }
     })
+
+
+@orchestrator_bp.route("/api/comparison/runs/active", methods=["GET"])
+def active_runs_with_steps():
+    """Get all currently active runs with their latest steps — for real-time display."""
+    orch = get_orchestrator()
+    if not orch or not hasattr(orch, 'run_tracker'):
+        return jsonify({"active_runs": []}), 200
+
+    import sqlite3 as _sqlite3
+    db_path = orch.run_tracker.db_path
+    conn = _sqlite3.connect(db_path)
+    conn.row_factory = _sqlite3.Row
+
+    # Get running runs
+    runs = conn.execute(
+        "SELECT * FROM model_benchmark_runs WHERE status = 'running' ORDER BY run_timestamp DESC"
+    ).fetchall()
+
+    result = []
+    for run in runs:
+        run_dict = dict(run)
+        run_id = run_dict.get("run_id")
+
+        # Get latest 20 steps
+        steps = conn.execute(
+            "SELECT * FROM run_steps WHERE run_id = ? ORDER BY step_number DESC LIMIT 20",
+            (run_id,)
+        ).fetchall()
+        steps = [dict(s) for s in reversed(steps)]
+
+        # Step count
+        count = conn.execute(
+            "SELECT COUNT(*) as cnt FROM run_steps WHERE run_id = ?", (run_id,)
+        ).fetchone()["cnt"]
+
+        # Unique paths
+        paths = conn.execute(
+            "SELECT DISTINCT path FROM run_steps WHERE run_id = ?", (run_id,)
+        ).fetchall()
+
+        run_dict["live_steps"] = steps
+        run_dict["total_steps"] = count
+        run_dict["unique_paths"] = len(paths)
+
+        result.append(run_dict)
+
+    conn.close()
+    return jsonify({"active_runs": result})

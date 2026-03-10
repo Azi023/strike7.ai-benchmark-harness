@@ -4,7 +4,7 @@ services:
     container_name: deser-webapp
     hostname: webapp
     ports:
-      - "5073:8080"
+      - "${S7_HOST_PORT:-5073}:8080"
     networks:
       - deser-net
     environment:

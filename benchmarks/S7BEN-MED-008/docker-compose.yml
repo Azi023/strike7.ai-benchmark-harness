@@ -5,7 +5,7 @@ services:
       dockerfile: Dockerfile
     container_name: sben-700-25-n8n
     ports:
-      - "5037:5678"
+      - "${S7_HOST_PORT:-5037}:5678"
     environment:
       - N8N_USER_MANAGEMENT_DISABLED=false
       - N8N_PUBLIC_API_DISABLED=false

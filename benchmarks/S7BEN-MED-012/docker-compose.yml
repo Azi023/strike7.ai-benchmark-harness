@@ -5,7 +5,7 @@ services:
       context: ./app
       dockerfile: Dockerfile
     ports:
-      - "5041:5000"
+      - "${S7_HOST_PORT:-5041}:5000"
     environment:
       - FLAG_SECRET=strike7-supply-chain-t2-secret
       - FLASK_ENV=production

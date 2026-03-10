@@ -5,7 +5,7 @@ services:
     container_name: teamsync-graphql-app
     hostname: graphql-app
     ports:
-      - "5064:5000"
+      - "${S7_HOST_PORT:-5064}:5000"
     environment:
       - FLASK_ENV=production
       - DATA_SERVICE_URL=http://data-service:8080

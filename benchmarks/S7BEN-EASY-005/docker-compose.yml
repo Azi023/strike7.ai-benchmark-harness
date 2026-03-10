@@ -5,7 +5,7 @@ services:
       args:
         - FLAG
     ports:
-      - "5005:5000"
+      - "${S7_HOST_PORT:-5005}:5000"
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:5000/health" ]
       interval: 10s

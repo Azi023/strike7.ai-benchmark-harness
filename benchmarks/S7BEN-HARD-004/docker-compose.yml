@@ -4,7 +4,7 @@ services:
     image: nginx:alpine
     container_name: auth-nginx
     ports:
-      - "5053:80"
+      - "${S7_HOST_PORT:-5053}:80"
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
     networks:

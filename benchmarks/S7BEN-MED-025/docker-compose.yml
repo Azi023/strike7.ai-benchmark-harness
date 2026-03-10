@@ -2,7 +2,7 @@ version: '3.8'
 services:
   app:
     build: ./app
-    ports: ["5043:8107"]
+    ports: ["${S7_HOST_PORT:-5043}:8107"]
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8107/global-protect/login.esp"]
       interval: 10s
